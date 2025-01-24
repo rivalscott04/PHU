@@ -14,3 +14,15 @@
 [2025-01-24 15:30:20] local.INFO: Unauthorized access attempt by user: 1  
 [2025-01-24 15:30:25] local.INFO: AdminMiddleware executed for user: 1  
 [2025-01-24 15:30:25] local.INFO: Unauthorized access attempt by user: 1  
+[2025-01-24 15:51:24] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 15:51:24] local.INFO: showForm method executed  
+[2025-01-24 15:52:44] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 15:52:48] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 15:52:48] local.INFO: showForm method executed  
+[2025-01-24 15:53:35] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 15:53:36] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 15:53:36] local.INFO: showForm method executed  
+[2025-01-24 15:53:38] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 16:00:43] local.INFO: AdminMiddleware executed for user: 1  
+[2025-01-24 16:00:43] local.INFO: showForm method executed  
+[2025-01-24 16:00:46] local.INFO: AdminMiddleware executed for user: 1  
