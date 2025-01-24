@@ -58,3 +58,8 @@ Route::middleware(['admin'])->prefix('kanwil')->group(function () {
     Route::get('/pengajuan', [KanwilController::class, 'showPengajuan'])->name('pengajuan');
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 });
+
+Route::get('/jamaah/{jamaah}', [JamaahController::class, 'show'])->name('jamaah.detail');
+Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
+Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
+Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
