@@ -12,7 +12,6 @@
         </div>
     @endif
 
-
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
@@ -55,8 +54,11 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label for="price" class="form-label">Harga</label>
-                                    <input type="text" class="form-control" id="price" name="price" required>
+                                    <input type="text" class="form-control" id="price" name="price_display" required
+                                        oninput="formatPrice(this)">
+                                    <input type="hidden" id="price_hidden" name="price">
                                 </div>
+
                                 <div class="col-md-6 mb-3">
                                     <label for="datetime" class="form-label">Tanggal Berangkat</label>
                                     <input type="date" class="form-control" id="datetime" name="datetime" required>
@@ -84,3 +86,21 @@
 
     @include('layouts.footers.auth.footer')
 @endsection
+
+@push('js')
+    <script>
+        function formatPrice(input) {
+            // Remove non-numeric characters except dots
+            let rawValue = input.value.replace(/[^0-9]/g, '');
+
+            // Format the value for display
+            let formattedValue = rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+            // Update the visible input with the formatted value
+            input.value = formattedValue;
+
+            // Update the hidden input with the raw numeric value
+            document.getElementById('price_hidden').value = rawValue;
+        }
+    </script>
+@endpush

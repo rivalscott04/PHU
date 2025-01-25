@@ -60,8 +60,10 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 
-    Route::get('/bap', [BAPController::class, 'showBAP'])->name('bap');
+    Route::get('/bap', [BAPController::class, 'index'])->name('bap');
+    Route::get('/form-bap', [BAPController::class, 'showFormBAP'])->name('form.bap');
     Route::post('/bap', [BAPController::class, 'simpan'])->name('post.bap');
+    Route::get('/cetak-bap/{id}', [BAPController::class, 'printBAP'])->name('cetak.bap');
 
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
         Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
