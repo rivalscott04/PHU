@@ -14,6 +14,10 @@ class PageController extends Controller
      */
     public function index(string $page)
     {
+        if (view()->exists("jamaah.{$page}")) {
+            return view("jamaah.{$page}");
+        }
+
         if (view()->exists("pages.{$page}")) {
             return view("pages.{$page}");
         }

@@ -29,10 +29,12 @@ class JamaahController extends Controller
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
     public function show(Jamaah $jamaah)
     {
         return view('jamaah.show', compact('jamaah'));
     }
+
     public function export()
     {
         return Excel::download(new JamaahExport, 'template_jamaah.xlsx');

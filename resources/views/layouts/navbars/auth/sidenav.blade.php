@@ -9,8 +9,7 @@
         </a>
     </div>
     <hr class="horizontal dark mt-0">
-    <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main"
-        style="height: 100vh; overflow-y: hidden;">
+    <div class="collapse navbar-collapse w-auto" id="sidenav-collapse-main" style="height: 100vh; overflow-y: hidden;">
         <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link {{ Route::currentRouteName() == 'home' ? 'active' : '' }}"
@@ -28,24 +27,41 @@
                 </div>
                 <h6 class="ms-2 text-uppercase text-xs font-weight-bolder opacity-6 mb-0">Laravel Examples</h6>
             </li>
+
+            @if (auth()->user()->role === 'admin')
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteName() == 'form' ? 'active' : '' }}"
+                        href="{{ route('form') }}">
+                        <div
+                            class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-single-copy-04 text-dark text-sm opacity-10"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Form</span>
+                    </a>
+                </li>
+            @endif
+
+            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                <li class="nav-item">
+                    <a class="nav-link {{ Route::currentRouteName() == 'pengajuan' ? 'active' : '' }}"
+                        href="{{ route('pengajuan') }}">
+                        <div
+                            class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                            <i class="ni ni-bullet-list-67 text-dark text-sm opacity-10"></i>
+                        </div>
+                        <span class="nav-link-text ms-1">Pengajuan</span>
+                    </a>
+                </li>
+            @endif
+
             <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteName() == 'form' ? 'active' : '' }}"
-                    href="{{ route('form') }}">
+                <a class="nav-link {{ Route::currentRouteName() == 'jamaah' ? 'active' : '' }}"
+                    href="{{ route('jamaah') }}">
                     <div
                         class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="ni ni-single-copy-04 text-dark text-sm opacity-10"></i>
+                        <i class="fa-solid fa-users text-dark text-sm opacity-10"></i>
                     </div>
-                    <span class="nav-link-text ms-1">Form</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ Route::currentRouteName() == 'pengajuan' ? 'active' : '' }}"
-                    href="{{ route('pengajuan') }}">
-                    <div
-                        class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
-                        <i class="ni ni-bullet-list-67 text-dark text-sm opacity-10"></i>
-                    </div>
-                    <span class="nav-link-text ms-1">Pengajuan</span>
+                    <span class="nav-link-text ms-1">Jamaah</span>
                 </a>
             </li>
         </ul>

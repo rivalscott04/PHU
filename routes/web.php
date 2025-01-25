@@ -22,6 +22,7 @@ use App\Http\Controllers\ChangePassword;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\JamaahController;
 use App\Http\Controllers\KanwilController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\UserProfileController;
@@ -48,18 +49,19 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/profile-static', [PageController::class, 'profile'])->name('profile-static');
     Route::get('/sign-in-static', [PageController::class, 'signin'])->name('sign-in-static');
     Route::get('/sign-up-static', [PageController::class, 'signup'])->name('sign-up-static');
-    Route::get('/{page}', [PageController::class, 'index'])->name('page');
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-});
 
-Route::middleware(['admin'])->prefix('kanwil')->group(function () {
-    Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
-    Route::post('/form', [KanwilController::class, 'store'])->name('post.form');
+    Route::get('/jamaah', [JamaahController::class, 'index'])->name('jamaah');
+    Route::get('/jamaah/{jamaah}', [JamaahController::class, 'show'])->name('jamaah.detail');
+    Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
+    Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
+    Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
+
     Route::get('/pengajuan', [KanwilController::class, 'showPengajuan'])->name('pengajuan');
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
-});
 
-Route::get('/jamaah/{jamaah}', [JamaahController::class, 'show'])->name('jamaah.detail');
-Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
-Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
-Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
+    Route::middleware(['admin'])->prefix('kanwil')->group(function () {
+        Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
+        Route::post('/form', [KanwilController::class, 'store'])->name('post.form');
+    });
+});
