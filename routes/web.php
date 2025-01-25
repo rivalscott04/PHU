@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BAPController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -57,8 +58,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
     Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
 
-    Route::get('/pengajuan', [KanwilController::class, 'showPengajuan'])->name('pengajuan');
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
+
+    Route::get('/bap', [BAPController::class, 'showBAP'])->name('bap');
+    Route::post('/bap', [BAPController::class, 'simpan'])->name('post.bap');
 
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
         Route::get('/form', [KanwilController::class, 'showForm'])->name('form');

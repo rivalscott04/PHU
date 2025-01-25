@@ -9,11 +9,7 @@ use Illuminate\Http\Request;
 class KanwilController extends Controller
 {
     // Di dalam KanwilController
-    public function showForm()
-    {
-        \Log::info('showForm method executed');
-        return view('kanwil.form');
-    }
+
 
 
     public function store(Request $request)
@@ -44,7 +40,7 @@ class KanwilController extends Controller
     {
         $data = TravelCompany::all();
 
-        return view('kanwil.pengajuan', ['data' => $data]);
+        return view('kanwil.pengajuanBAP', ['data' => $data]);
     }
 
     public function updateStatus(Request $request, $id)
