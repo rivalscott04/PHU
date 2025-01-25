@@ -7,8 +7,9 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    <div class="card-header pb-0">
+                    <div class="card-header pb-0 d-flex justify-content-between align-items-center">
                         <h6>Data Pengajuan</h6>
+                        <a href="{{ route('form.travel') }}" class="btn btn-primary">Tambah</a>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                         <div class="table-responsive p-0">

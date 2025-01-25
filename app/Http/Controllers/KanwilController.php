@@ -10,7 +10,10 @@ class KanwilController extends Controller
 {
     // Di dalam KanwilController
 
-
+    public function showFormTravel()
+    {
+        return view('kanwil.formTravel');
+    }
 
     public function store(Request $request)
     {
@@ -36,11 +39,11 @@ class KanwilController extends Controller
         return redirect()->route('form')->with('success', 'Data berhasil disimpan.');
     }
 
-    public function showPengajuan()
+    public function showTravel()
     {
         $data = TravelCompany::all();
 
-        return view('kanwil.pengajuanBAP', ['data' => $data]);
+        return view('kanwil.travel', ['data' => $data]);
     }
 
     public function updateStatus(Request $request, $id)

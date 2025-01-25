@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use App\Models\BAP;
 use Illuminate\Http\Request;
 
@@ -16,10 +17,17 @@ class BAPController extends Controller
     {
         $data = BAP::findOrFail($id);
 
-        // Convert the year to words
         $yearInWords = $this->nomorKata(now()->year);
 
-        return view('travel.printBAP', ['data' => $data, 'yearInWords' => $yearInWords]);
+        $formattedDate = Carbon::parse($data->datetime)->translatedFormat('d F Y');
+        $formattedReturnDate = Carbon::parse($data->returndate)->translatedFormat('d F Y');
+
+        return view('travel.printBAP', [
+            'data' => $data,
+            'yearInWords' => $yearInWords,
+            'formattedDate' => $formattedDate,
+            'formattedReturnDate' => $formattedReturnDate
+        ]);
     }
 
     public function nomorKata($number)
@@ -78,7 +86,11 @@ class BAPController extends Controller
         return $number;
     }
 
-
+    public function tanggalDalamFormatBaru($date)
+    {
+        setlocale(LC_TIME, 'id_ID');
+        return strftime('%d %B %Y', strtotime($date));
+    }
 
     public function index()
     {
@@ -86,8 +98,6 @@ class BAPController extends Controller
 
         return view('travel.listBAP', ['data' => $data]);
     }
-
-
 
     public function simpan(Request $request)
     {

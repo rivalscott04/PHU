@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\BAPController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BAPController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +26,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\JamaahController;
 use App\Http\Controllers\KanwilController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\UserProfileController;
 
 
@@ -64,6 +65,13 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/form-bap', [BAPController::class, 'showFormBAP'])->name('form.bap');
     Route::post('/bap', [BAPController::class, 'simpan'])->name('post.bap');
     Route::get('/cetak-bap/{id}', [BAPController::class, 'printBAP'])->name('cetak.bap');
+
+    Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
+    Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');
+    Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
+
+    Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
+    Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');
 
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
         Route::get('/form', [KanwilController::class, 'showForm'])->name('form');

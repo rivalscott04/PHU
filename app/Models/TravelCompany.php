@@ -8,33 +8,44 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class TravelCompany extends Model implements ToModel, WithHeadingRow
 {
-    protected $table = 'travel';
+    protected $table = 'travels';
     protected $fillable = [
-        'penyelenggara',
-        'nomor_sk',
-        'tanggal_sk',
-        'akreditasi',
+        'No',
+        'Penyelenggara',
+        'Pusat',
+        'Tanggal',
+        'Jml_Akreditasi',
         'tanggal_akreditasi',
         'lembaga_akreditasi',
-        'pimpinan',
+        'Pimpinan',
         'alamat_kantor_lama',
         'alamat_kantor_baru',
-        'telepon',
-        'status',
+        'Telepon',
+        'Status',
         'kab_kota'
     ];
 
     protected $casts = [
-        'tanggal_sk' => 'date',
+        'Tanggal' => 'date',
         'tanggal_akreditasi' => 'date',
     ];
 
     public function model(array $row)
     {
         return new self([
-            'penyelenggara' => $row['penyelenggara'],
-            'nomor_sk' => $row['nomor_sk'],
-            'tanggal_sk' => $row['tanggal_sk'],
+            'No' => $row['No'],
+            'Penyelenggara' => $row['Penyelenggara'],
+            'Pusat' => $row['Pusat'],
+            'Tanggal' => $row['Tanggal'],
+            'Jml_Akreditasi' => $row['Jml_Akreditasi'],
+            'tanggal_akreditasi' => $row['tanggal_akreditasi'],
+            'lembaga_akreditasi' => $row['lembaga_akreditasi'],
+            'Pimpinan' => $row['Pimpinan'],
+            'alamat_kantor_lama' => $row['alamat_kantor_lama'],
+            'alamat_kantor_baru' => $row['alamat_kantor_baru'],
+            'Telepon' => $row['Telepon'],
+            'Status' => $row['Status'],
+            'kab_kota' => $row['kab_kota'],
         ]);
     }
 }
