@@ -13,17 +13,18 @@ return new class extends Migration
     {
         Schema::create('travel', function (Blueprint $table) {
             $table->id();
-            $table->string('penyelenggara');
-            $table->string('nomor_sk');
-            $table->date('tanggal_sk');
-            $table->string('akreditasi', 1);
+            $table->string('No');
+            $table->string('Penyelenggara');
+            $table->string('Pusat');
+            $table->date('Tanggal');
+            $table->string('Jml_Akreditasi', 1);
             $table->date('tanggal_akreditasi');
             $table->string('lembaga_akreditasi')->nullable();
-            $table->string('pimpinan');
+            $table->string('Pimpinan');
             $table->text('alamat_kantor_lama');
             $table->text('alamat_kantor_baru')->nullable();
-            $table->string('telepon', 20);
-            $table->enum('status', ['diajukan', 'diproses', 'diterima']);
+            $table->string('Telepon', 20);
+            $table->enum('Status', ['PIHK', 'PPIU']);
             $table->string('kab_kota');
             $table->timestamps();
         });
