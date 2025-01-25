@@ -1,72 +1,119 @@
 @extends('layouts.app', ['class' => 'g-sidenav-show bg-gray-100'])
 
 @section('content')
-    @include('layouts.navbars.auth.topnav', ['title' => 'Dashboard'])
+    @include('layouts.navbars.auth.topnav', ['title' => 'Pengajuan'])
 
     <div class="container-fluid py-4">
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header pb-0">
-                        <h5 class="mb-0">Form Data</h5>
+                        <h6>Data Pengajuan</h6>
                     </div>
-                    <div class="card-body">
-                        <form method="POST" action="{{ route('post.form') }}">
-                            @csrf
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label for="penyelenggara" class="form-label">Penyelenggara</label>
-                                    <input type="text" class="form-control" id="penyelenggara" name="penyelenggara"
-                                        required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="nomor_sk" class="form-label">Nomor SK</label>
-                                    <input type="text" class="form-control" id="nomor_sk" name="nomor_sk" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="tanggal_sk" class="form-label">Tanggal SK</label>
-                                    <input type="date" class="form-control" id="tanggal_sk" name="tanggal_sk" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="akreditasi" class="form-label">Akreditasi</label>
-                                    <input type="text" class="form-control" id="akreditasi" name="akreditasi" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="tanggal_akreditasi" class="form-label">Tanggal Akreditasi</label>
-                                    <input type="date" class="form-control" id="tanggal_akreditasi"
-                                        name="tanggal_akreditasi" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="lembaga_akreditasi" class="form-label">Lembaga Akreditasi</label>
-                                    <input type="text" class="form-control" id="lembaga_akreditasi"
-                                        name="lembaga_akreditasi" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="pimpinan" class="form-label">Pimpinan</label>
-                                    <input type="text" class="form-control" id="pimpinan" name="pimpinan" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="telepon" class="form-label">Telepon</label>
-                                    <input type="text" class="form-control" id="telepon" name="telepon" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="kab_kota" class="form-label">Kab/Kota</label>
-                                    <input type="text" class="form-control" id="kab_kota" name="kab_kota" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="alamat_kantor_lama" class="form-label">Alamat Kantor Lama</label>
-                                    <textarea class="form-control" id="alamat_kantor_lama" name="alamat_kantor_lama" rows="3" required></textarea>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label for="alamat_kantor_baru" class="form-label">Alamat Kantor Baru</label>
-                                    <textarea class="form-control" id="alamat_kantor_baru" name="alamat_kantor_baru" rows="3" required></textarea>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                        </form>
+                    <div class="card-body px-0 pt-0 pb-2">
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
+                                    <tr class="text-center">
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 5%">
+                                            <div class="vertical-text">No.</div>
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 15%">
+                                            Penyelenggara
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            colspan="6">
+                                            Nomor SK
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 10%">
+                                            Pimpinan
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 15%">
+                                            Alamat Kantor Lama
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 15%">
+                                            Alamat Kantor Baru
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 10%">
+                                            Telepon
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 5%">
+                                            Status
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                            rowspan="2" style="width: 10%">
+                                            Kab/Kota
+                                        </th>
+                                    </tr>
+                                    <tr class="text-center">
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Pusat
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Tanggal
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Jml Akre
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Tanggal Akredi
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            Lembaga Akred
+                                        </th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                            -
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($data as $item)
+                                        <tr class="text-center">
+                                            <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->penyelenggara }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->nomor_sk }}</td>
+                                            <td class="text-sm font-weight-bold">
+                                                {{ date('Y-m-d', strtotime($item->tanggal_sk)) }}</td>
+                                            <td class="text-sm font-weight-bold">test</td>
+                                            <td class="text-sm font-weight-bold">
+                                                {{ date('Y-m-d', strtotime($item->tanggal_akreditasi)) }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->lembaga_akreditasi }}</td>
+                                            <td class="text-sm font-weight-bold">-</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->pimpinan }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_lama }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_baru }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->telepon }}</td>
+                                            <td class="text-sm font-weight-bold">
+                                                <form action="{{ route('update.status', $item->id) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="status" class="form-select form-select-sm text-center"
+                                                        onchange="this.form.submit()">
+                                                        <option value="diajukan"
+                                                            {{ $item->status === 'diajukan' ? 'selected' : '' }}>Diajukan
+                                                        </option>
+                                                        <option value="diproses"
+                                                            {{ $item->status === 'diproses' ? 'selected' : '' }}>Diproses
+                                                        </option>
+                                                        <option value="diterima"
+                                                            {{ $item->status === 'diterima' ? 'selected' : '' }}>Diterima
+                                                        </option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                            <td class="text-sm font-weight-bold">{{ $item->kab_kota }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
