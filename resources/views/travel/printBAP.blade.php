@@ -30,10 +30,10 @@
         }
 
         .logo {
-            width: 70px;
+            width: 80px;
             position: absolute;
             left: 20mm;
-            top: 25mm;
+            top: 20mm;
         }
 
         .letterhead {
@@ -73,7 +73,7 @@
         }
 
         .footer {
-            margin-top: 150px;
+            margin-top: 140px;
             display: flex;
             justify-content: space-between;
             text-align: center;
