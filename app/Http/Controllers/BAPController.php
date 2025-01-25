@@ -117,13 +117,11 @@ class BAPController extends Controller
             'airlines2' => 'required|string|max:255',
         ]);
 
-        // Debugging: Tampilkan data sebelum dikirim
-        dump($request->all());
 
         // Simpan data ke dalam database
         BAP::create($request->all());
 
         // Redirect ke halaman yang diinginkan setelah data disimpan
-        return redirect()->route('form')->with('success', 'Data berhasil disimpan.');
+        return redirect()->route('bap')->with('success', 'Data berhasil disimpan.');
     }
 }
