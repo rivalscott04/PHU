@@ -73,6 +73,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');
     Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
+    Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
+    Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
+    Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
+
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');

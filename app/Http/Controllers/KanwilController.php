@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TravelCompany;
+use App\Models\CabangTravel;
 use Illuminate\Http\Request;
+use App\Models\TravelCompany;
 
 
 class KanwilController extends Controller
@@ -46,16 +47,41 @@ class KanwilController extends Controller
         return view('kanwil.travel', ['data' => $data]);
     }
 
-    public function updateStatus(Request $request, $id)
+    public function createCabangTravel()
     {
+        $travels = TravelCompany::all();
+        return view('kanwil.formCabangTravel', compact('travels'));
+    }
 
+    public function storeCabangTravel(Request $request)
+    {
+        // Validate input
         $validatedData = $request->validate([
-            'status' => 'required|string|in:diajukan,diproses,diterima',
+            'travel_pusat' => 'required|exists:travels,id',
+            'sk_ba' => 'required|string|max:255',
+            'tanggal' => 'required|date',
+            'pimpinan_cabang' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'telepon' => 'required|string|max:20',
         ]);
 
-        $item = TravelCompany::findOrFail($id);
-        $item->update(['status' => $validatedData['status']]);
+        // Store cabang travel data
+        CabangTravel::create([
+            'travel_id' => $validatedData['travel_pusat'],
+            'SK_BA' => $validatedData['sk_ba'],
+            'tanggal' => $validatedData['tanggal'],
+            'pimpinan_cabang' => $validatedData['pimpinan_cabang'],
+            'alamat' => $validatedData['alamat'],
+            'telepon' => $validatedData['telepon'],
+        ]);
 
-        return redirect()->route('pengajuan')->with('success', 'Status berhasil diperbarui.');
+        return redirect()->route('form.cabang_travel')->with('success', 'Cabang travel berhasil disimpan.');
+    }
+
+    public function showCabangTravel()
+    {
+        $data = CabangTravel::with('travel')->get();
+
+        return view('kanwil.cabangTravel', ['data' => $data]);
     }
 }

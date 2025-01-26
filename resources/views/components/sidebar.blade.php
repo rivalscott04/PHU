@@ -18,6 +18,12 @@
                         <span key="t-dashboards">Data Travel</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('cabang.travel') }}" class="waves-effect">
+                        <i class="bx bxs-plane-alt"></i>
+                        <span key="t-dashboards">Data Cabang Travel</span>
+                    </a>
+                </li>
             </ul>
             <ul class="metismenu list-unstyled" id="side-menu">
                 <li class="menu-title" key="t-menu">Travel</li>

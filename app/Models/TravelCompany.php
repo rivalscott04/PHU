@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class TravelCompany extends Model implements ToModel, WithHeadingRow
+class TravelCompany extends Model
 {
+    use HasFactory;
     protected $table = 'travels';
     protected $fillable = [
         'No',
@@ -47,5 +49,10 @@ class TravelCompany extends Model implements ToModel, WithHeadingRow
             'Status' => $row['Status'],
             'kab_kota' => $row['kab_kota'],
         ]);
+    }
+
+    public function cabangTravels()
+    {
+        return $this->hasMany(CabangTravel::class, 'travel_id');
     }
 }
