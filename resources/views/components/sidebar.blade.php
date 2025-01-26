@@ -24,6 +24,14 @@
                         <span key="t-dashboards">Data Cabang Travel</span>
                     </a>
                 </li>
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                    <li>
+                        <a href="{{ route('form.addUser') }}" class="waves-effect">
+                            <i class="bx bx-user-plus"></i>
+                            <span key="t-dashboards">Tambah Akun Travel</span>
+                        </a>
+                    </li>
+                @endif
             </ul>
             <ul class="metismenu list-unstyled" id="side-menu">
                 <li class="menu-title" key="t-menu">Travel</li>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BAPController;
 
@@ -84,5 +85,8 @@ Route::group(['middleware' => 'auth'], function () {
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
         Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
         Route::post('/form', [KanwilController::class, 'store'])->name('post.form');
+
+        Route::get('/tambah-akun-travel', [AuthController::class, 'showForm'])->name('form.addUser');
+        Route::post('/tambah-akun-travel', [AuthController::class, 'addUser'])->name('addUser');
     });
 });

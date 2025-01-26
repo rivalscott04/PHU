@@ -22,7 +22,7 @@ return new class extends Migration
 
             // Foreign key constraint to travel table
             $table->unsignedBigInteger('travel_id');
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            $table->foreign('travel_id')->references('id')->on('travel')->onDelete('cascade');
         });
     }
 

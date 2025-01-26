@@ -10,16 +10,20 @@
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                             data-bs-target="#uploadPDFModal">Upload PDF</button>
                     @endif
-                    @if ($data->pdf_file_path)
-                        <form action="{{ route('bap.ajukan', ['id' => $data->id]) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-primary">Ajukan</button>
-                        </form>
-                    @endif
+
                 </div>
                 <div class="card-body">
                     <form>
                         <div class="row">
+                            @if ($data->pdf_file_path)
+                                <div class="col-md-6 mb-3">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <h5 class="mb-3">Uploaded PDF</h5>
+                                    <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
+                                        height="500px"></iframe>
+                                </div>
+                            @endif
                             <div class="col-md-6 mb-3">
                                 <label for="name" class="form-label">Name</label>
                                 <input type="text" class="form-control" id="name" value="{{ $data->name }}"
@@ -83,11 +87,10 @@
                         </div>
                     </form>
                     @if ($data->pdf_file_path)
-                        <div class="mt-4">
-                            <h5 class="mb-3">Uploaded PDF</h5>
-                            <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
-                                height="500px"></iframe>
-                        </div>
+                        <form action="{{ route('bap.ajukan', ['id' => $data->id]) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-primary mt-2">Ajukan</button>
+                        </form>
                     @endif
                 </div>
             </div>

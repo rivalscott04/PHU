@@ -59,7 +59,7 @@
                                         <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->SK_BA }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->travel->Penyelenggara }}</td>
-                                        <td class="text-sm font-weight-bold">{{ date('Y-m-d', strtotime($item->Tanggal)) }}
+                                        <td class="text-sm font-weight-bold">{{ date('Y-m-d', strtotime($item->tanggal)) }}
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->travel->Jml_Akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->travel->lembaga_akreditasi }}</td>
