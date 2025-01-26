@@ -38,13 +38,17 @@ Route::get('/register', [RegisterController::class, 'create'])->middleware('gues
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-Route::get('/reset-password', [ResetPassword::class, 'show'])->middleware('guest')->name('reset-password');
-Route::post('/reset-password', [ResetPassword::class, 'send'])->middleware('guest')->name('reset.perform');
-Route::get('/change-password', [ChangePassword::class, 'show'])->middleware('guest')->name('change-password');
-Route::post('/change-password', [ChangePassword::class, 'update'])->middleware('guest')->name('change.perform');
-Route::get('/dashboard', [HomeController::class, 'index'])->name('home')->middleware('auth');
+Route::get('/dashboard', [HomeController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
-Route::group(['middleware' => 'auth'], function () {
+Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
+Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
+
+Route::get('/test', function () {
+    return 'Middleware test';
+})->middleware('auth', 'password.changed');
+
+
+Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/virtual-reality', [PageController::class, 'vr'])->name('virtual-reality');
     Route::get('/rtl', [PageController::class, 'rtl'])->name('rtl');
     Route::get('/profile', [UserProfileController::class, 'show'])->name('profile');
@@ -86,7 +90,10 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
         Route::post('/form', [KanwilController::class, 'store'])->name('post.form');
 
+        Route::get('/travels', [AuthController::class, 'showUsers'])->name('travels');
+
         Route::get('/tambah-akun-travel', [AuthController::class, 'showForm'])->name('form.addUser');
         Route::post('/tambah-akun-travel', [AuthController::class, 'addUser'])->name('addUser');
+        Route::put('/reset-password/{id}', [AuthController::class, 'resetPassword'])->name('resetPassword');
     });
 });

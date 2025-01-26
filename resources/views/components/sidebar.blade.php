@@ -26,9 +26,9 @@
                 </li>
                 @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                     <li>
-                        <a href="{{ route('form.addUser') }}" class="waves-effect">
+                        <a href="{{ route('travels') }}" class="waves-effect">
                             <i class="bx bx-user-plus"></i>
-                            <span key="t-dashboards">Tambah Akun Travel</span>
+                            <span key="t-dashboards">Akun Travel</span>
                         </a>
                     </li>
                 @endif

@@ -106,7 +106,7 @@
 <body class="F4">
     <section class="sheet">
         <div class="letterhead">
-            <img src="{{ asset('img/logos/kemenag.png') }}" alt="Logo" class="logo">
+            <img src="{{ asset('images/kemenag.png') }}" alt="Logo" class="logo">
             <div class="header">
                 <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
                     KANTOR WILAYAH KEMENTERIAN AGAMA<br>

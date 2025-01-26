@@ -58,6 +58,12 @@
     <!-- apexcharts -->
     <script src="{{ asset('libs/apexcharts/apexcharts.min.js') }}"></script>
 
+    <!-- Sweet Alerts js -->
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
+
+    <!-- Sweet alert init js-->
+    <script src="{{ asset('js/pages/sweet-alerts.init.js') }}"></script>
+
     <!-- dashboard init -->
     <script src="{{ asset('js/pages/dashboard.init.js') }}"></script>
 
