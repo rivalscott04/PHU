@@ -65,6 +65,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/form-bap', [BAPController::class, 'showFormBAP'])->name('form.bap');
     Route::post('/bap', [BAPController::class, 'simpan'])->name('post.bap');
     Route::get('/cetak-bap/{id}', [BAPController::class, 'printBAP'])->name('cetak.bap');
+    Route::get('/bap/detail/{id}', [BAPController::class, 'detail'])->name('detail.bap');
+    Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');
+    Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
+    Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');

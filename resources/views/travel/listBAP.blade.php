@@ -13,35 +13,26 @@
                         <table class="table align-items-center mb-0">
                             <thead>
                                 <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        No.
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No.</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Nama
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jabatan
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Jabatan
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">PPIU
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        PPIU
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Alamat &
+                                        Hp</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kab/Kota
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Alamat & Hp
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jumlah
+                                        Jamaah</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paket
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Kab/Kota
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Harga
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Jumlah Jamaah
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Paket
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Harga
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Aksi
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi
                                     </th>
                                 </tr>
                             </thead>
@@ -56,13 +47,37 @@
                                         <td class="font-weight-bold">{{ $item->kab_kota }}</td>
                                         <td class="font-weight-bold">{{ $item->people }}</td>
                                         <td class="font-weight-bold">{{ $item->package }}</td>
-                                        <td class="font-weight-bold"><span>Rp. </span>
-                                            {{ number_format($item->price, 2, ',', '.') }}</td>
+                                        <td class="font-weight-bold"><span>Rp.
+                                            </span>{{ number_format($item->price, 2, ',', '.') }}</td>
+                                        <td class="font-weight-bold">
+                                            @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                                                <form action="{{ route('bap.updateStatus', $item->id) }}" method="POST">
+                                                    @csrf
+                                                    <select name="status" class="form-select"
+                                                        onchange="this.form.submit()">
+                                                        <option value="pending"
+                                                            {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                        </option>
+                                                        <option value="diajukan"
+                                                            {{ $item->status == 'diajukan' ? 'selected' : '' }}>Diajukan
+                                                        </option>
+                                                        <option value="diproses"
+                                                            {{ $item->status == 'diproses' ? 'selected' : '' }}>Diproses
+                                                        </option>
+                                                        <option value="diterima"
+                                                            {{ $item->status == 'diterima' ? 'selected' : '' }}>Diterima
+                                                        </option>
+                                                    </select>
+                                                </form>
+                                            @else
+                                                {{ ucfirst($item->status) }}
+                                            @endif
+                                        </td>
                                         <td class="fs-4 font-weight-bold">
-                                            <a href="{{ route('cetak.bap', $item->id) }}">
-                                                <i class="bx bx-edit ms-2"></i>
-                                            </a>
-                                            <i class="bx bx-info-circle"></i>
+                                            <a href="{{ route('cetak.bap', $item->id) }}"><i
+                                                    class="bx bx-printer ms-2"></i></a>
+                                            <a href="{{ route('detail.bap', $item->id) }}"><i
+                                                    class="bx bx-info-circle"></i></a>
                                         </td>
                                     </tr>
                                 @endforeach

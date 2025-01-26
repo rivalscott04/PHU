@@ -13,6 +13,13 @@ class BAPController extends Controller
         return view('travel.pengajuanBAP');
     }
 
+    public function detail($id)
+    {
+        $data = BAP::findOrFail($id);
+
+        return view('travel.detailBAP', ['data' => $data]);
+    }
+
     public function printBAP($id)
     {
         $data = BAP::findOrFail($id);
@@ -94,10 +101,19 @@ class BAPController extends Controller
 
     public function index()
     {
-        $data = BAP::all();
+        $user = auth()->user();
+
+        if ($user->role === 'user') {
+            $data = BAP::all();
+        } else if ($user->role === 'admin' || $user->role === 'kabupaten') {
+            $data = BAP::where('status', '<>', 'pending')->get();
+        } else {
+            $data = collect();
+        }
 
         return view('travel.listBAP', ['data' => $data]);
     }
+
 
     public function simpan(Request $request)
     {
@@ -123,5 +139,47 @@ class BAPController extends Controller
 
         // Redirect ke halaman yang diinginkan setelah data disimpan
         return redirect()->route('bap')->with('success', 'Data berhasil disimpan.');
+    }
+
+    public function uploadPDF(Request $request, $id)
+    {
+        $request->validate([
+            'pdf_file' => 'required|mimes:pdf|max:2048',
+        ]);
+
+        $data = BAP::findOrFail($id);
+
+        if ($request->hasFile('pdf_file')) {
+            $pdfFile = $request->file('pdf_file');
+            $pdfFilePath = $pdfFile->store('uploads', 'public');
+            $data->pdf_file_path = $pdfFilePath;
+            $data->save();
+        }
+
+        return redirect()->route('detail.bap', ['id' => $id])->with('success', 'PDF berhasil diupload.');
+    }
+
+    public function ajukan($id)
+    {
+        $data = BAP::findOrFail($id);
+        if ($data->status === 'pending') {
+            $data->status = 'diajukan';
+            $data->save();
+        }
+
+        return redirect()->route('detail.bap', ['id' => $id])->with('success', 'Berhasil mengajukan BAP');
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,diajukan,diproses,diterima',
+        ]);
+
+        $data = BAP::findOrFail($id);
+        $data->status = $request->status;
+        $data->save();
+
+        return redirect()->route('bap')->with('success', 'Status berhasil diubah.');
     }
 }
