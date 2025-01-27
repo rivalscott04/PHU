@@ -21,6 +21,7 @@ Route::get('/', function () {
 
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\ChangePassword;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\LoginController;
@@ -38,7 +39,7 @@ Route::get('/register', [RegisterController::class, 'create'])->middleware('gues
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-Route::get('/dashboard', [HomeController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
 Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
 Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
