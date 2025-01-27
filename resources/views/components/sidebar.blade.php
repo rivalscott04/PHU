@@ -5,13 +5,15 @@
             <!-- Left Menu Start -->
             <ul class="metismenu list-unstyled" id="side-menu">
                 <li class="menu-title" key="t-menu">Menu</li>
-                <li>
-                    <a href="{{ route('home') }}" class="waves-effect">
-                        <i class="bx bx-home-circle"></i>
-                        <span class="badge rounded-pill bg-info float-end">04</span>
-                        <span key="t-dashboards">Dashboards</span>
-                    </a>
-                </li>
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                    <li>
+                        <a href="{{ route('home') }}" class="waves-effect">
+                            <i class="bx bx-home-circle"></i>
+                            <span class="badge rounded-pill bg-info float-end">04</span>
+                            <span key="t-dashboards">Dashboards</span>
+                        </a>
+                    </li>
+                @endif
                 <li>
                     <a href="{{ route('travel') }}" class="waves-effect">
                         <i class="bx bxs-plane-alt"></i>
@@ -20,7 +22,7 @@
                 </li>
                 <li>
                     <a href="{{ route('cabang.travel') }}" class="waves-effect">
-                        <i class="bx bxs-plane-alt"></i>
+                        <i class="bx bxs-business"></i>
                         <span key="t-dashboards">Data Cabang Travel</span>
                     </a>
                 </li>
