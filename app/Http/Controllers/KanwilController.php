@@ -57,7 +57,7 @@ class KanwilController extends Controller
     {
         // Validate input
         $validatedData = $request->validate([
-            'travel_pusat' => 'required|exists:travels,id',
+            'travel_pusat' => 'required|exists:travel,id',
             'sk_ba' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'pimpinan_cabang' => 'required|string|max:255',
