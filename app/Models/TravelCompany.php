@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TravelCompany extends Model
 {
     use HasFactory;
-    protected $table = 'travels';
+    protected $table = 'travel';
     protected $fillable = [
         'No',
         'Penyelenggara',
