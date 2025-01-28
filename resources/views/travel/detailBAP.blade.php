@@ -6,7 +6,7 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail BAP</h5>
-                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'travel')
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'user')
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                             data-bs-target="#uploadPDFModal">Upload PDF</button>
                     @endif
