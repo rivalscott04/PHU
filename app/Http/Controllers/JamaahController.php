@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Exports\JamaahExport;
 use App\Models\Jamaah;
 use Illuminate\Http\Request;
+use App\Exports\JamaahExport;
 use App\Imports\JamaahImport;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class JamaahController extends Controller
@@ -71,18 +72,40 @@ class JamaahController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
-            'file' => 'required|mimes:xlsx,xls'
-        ]);
-
         try {
-            Excel::import(new JamaahImport, $request->file('file'));
-            return redirect()->back()->with('success', 'Data berhasil diimport!');
+            // Validasi file
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+            ], [
+                'file.required' => 'File Excel wajib diunggah',
+                'file.mimes' => 'Format file harus xlsx, xls, atau csv',
+                'file.max' => 'Ukuran file maksimal 2MB'
+            ]);
+
+            // Proses import
+            $import = new JamaahImport();
+            Excel::import($import, $request->file('file'));
+
+            return redirect()->back()->with('success', 'Data berhasil diimpor');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            // Tangkap error validasi dan tampilkan pesan kesalahan
+            $failures = $e->failures();
+            $errors = [];
+
+            foreach ($failures as $failure) {
+                $errors[] = "Baris " . $failure->row() . ": " . implode(", ", $failure->errors());
+            }
+
+            Log::error('Import Error:', ['errors' => $errors]);
+
+            return redirect()->back()->withErrors($errors);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            // Log jika ada error umum lainnya
+            Log::error('Import Failed:', ['message' => $e->getMessage()]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mengimpor data');
         }
     }
-
     public function detail($id)
     {
         $jamaah = Jamaah::findOrFail($id);
