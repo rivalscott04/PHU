@@ -152,10 +152,31 @@
                             @endif
                         </div>
                     </form>
-                    @if ($data->pdf_file_path)
+                    @if ($data->pdf_file_path && auth()->user()->role === 'user')
                         <form action="{{ route('bap.ajukan', ['id' => $data->id]) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn btn-primary mt-2">Ajukan</button>
+                        </form>
+                    @endif
+                    @if ($data->pdf_file_path && (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten'))
+                        <form action="{{ route('bap.updateStatus', $data->id) }}" method="POST">
+                            <div class="col-md-2">
+                                @csrf
+                                <select name="status"
+                                    class="form-select mt-1 {{ $data->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
+                                                            {{ $data->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
+                                                            {{ $data->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
+                                    onchange="this.form.submit()">
+                                    <option value="pending" {{ $data->status == 'pending' ? 'selected' : '' }}>Pending
+                                    </option>
+                                    <option value="diajukan" {{ $data->status == 'diajukan' ? 'selected' : '' }}>Diajukan
+                                    </option>
+                                    <option value="diproses" {{ $data->status == 'diproses' ? 'selected' : '' }}>Diproses
+                                    </option>
+                                    <option value="diterima" {{ $data->status == 'diterima' ? 'selected' : '' }}>Diterima
+                                    </option>
+                                </select>
+                            </div>
                         </form>
                     @endif
                 </div>

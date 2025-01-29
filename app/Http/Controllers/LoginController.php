@@ -29,6 +29,12 @@ class LoginController extends Controller
 
         if ($user && Hash::check($credentials['password'], $user->password)) {
             Auth::login($user);
+
+            if ($user->role === 'user') {
+                return redirect()->route('bap');
+            }
+
+            // Default redirect untuk role lainnya
             return redirect()->intended('dashboard');
         }
 

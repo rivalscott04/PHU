@@ -2,15 +2,22 @@
 
 namespace App\Exports;
 
-use App\Models\Jamaah;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Illuminate\Support\Collection;
 
 class JamaahExport implements FromCollection, WithHeadings
 {
     public function collection()
     {
-        return Jamaah::all();
+        return new Collection([
+            [
+                'nik' => '',
+                'nama' => '',
+                'alamat' => '',
+                'nomor_hp' => ''
+            ]
+        ]);
     }
 
     public function headings(): array

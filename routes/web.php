@@ -31,6 +31,11 @@ use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\UserProfileController;
 
+Route::get('/jamaah/template-test', function () {
+    return "Route Berhasil";
+});
+
+
 
 Route::get('/', function () {
     return redirect('/dashboard');
@@ -39,7 +44,7 @@ Route::get('/register', [RegisterController::class, 'create'])->middleware('gues
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed', 'kabupaten');
 
 Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
 Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
@@ -53,10 +58,15 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/jamaah', [JamaahController::class, 'index'])->name('jamaah');
-    Route::get('/jamaah/{jamaah}', [JamaahController::class, 'show'])->name('jamaah.detail');
+    Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
+    Route::get('/jamaah/create', [JamaahController::class, 'create'])->name('jamaah.create');
+    Route::post('/jamaah', [JamaahController::class, 'store'])->name('jamaah.store');
+    Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');
+    Route::get('/jamaah/edit/{id}', [JamaahController::class, 'edit'])->name('jamaah.edit');
+    Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
-    Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
+
 
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 

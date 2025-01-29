@@ -53,7 +53,10 @@
                                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                                                 <form action="{{ route('bap.updateStatus', $item->id) }}" method="POST">
                                                     @csrf
-                                                    <select name="status" class="form-select"
+                                                    <select name="status"
+                                                        class="form-select {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
+                                                            {{ $item->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
+                                                            {{ $item->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
                                                         onchange="this.form.submit()">
                                                         <option value="pending"
                                                             {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
