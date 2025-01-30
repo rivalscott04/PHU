@@ -39,6 +39,9 @@ class BAPController extends Controller
         $formattedDate = Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = Carbon::parse($data->returndate)->translatedFormat('d F Y');
 
+        // Ambil bulan dari datetime untuk nomor surat
+        $month = Carbon::parse($data->datetime)->format('m');
+
         return view('travel.printBAP', [
             'data' => $data,
             'yearInWords' => $yearInWords,
@@ -46,7 +49,8 @@ class BAPController extends Controller
             'day' => $day,
             'monthYear' => $monthYear,
             'formattedDate' => $formattedDate,
-            'formattedReturnDate' => $formattedReturnDate
+            'formattedReturnDate' => $formattedReturnDate,
+            'month' => $month
         ]);
     }
 

@@ -120,7 +120,8 @@
         <div class="title">
             BERITA ACARA<br>
             PELAPORAN PEMBERANGKATAN JAMAAH UMROH<br>
-            Nomor : B- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ Kw. 18.04/2/Hj.00/ &nbsp;&nbsp;&nbsp;&nbsp;/{{ now()->year }}
+            Nomor : B- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ Kw.
+            18.04/2/Hj.00/{{ $month }}/{{ now()->year }}
         </div>
 
         <div class="content">
