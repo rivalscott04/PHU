@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\BAP;
+use App\Models\TravelCompany;
 use Illuminate\Http\Request;
 
 class BAPController extends Controller
 {
     public function showFormBAP()
     {
-        return view('travel.pengajuanBAP');
+        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
+        return view('travel.pengajuanBAP', compact('ppiuList'));
     }
 
     public function detail($id)

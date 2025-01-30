@@ -21,7 +21,12 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="ppiuname" class="form-label">PPIU</label>
-                                <input type="text" class="form-control" id="ppiuname" name="ppiuname" required>
+                                <select class="form-control" id="ppiuname" name="ppiuname" required>
+                                    <option value="">-- Pilih PPIU --</option>
+                                    @foreach ($ppiuList as $ppiu)
+                                        <option value="{{ $ppiu->penyelenggara }}">{{ $ppiu->penyelenggara }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="address_phone" class="form-label">Alamat & Hp</label>
