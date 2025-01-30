@@ -12,7 +12,7 @@ class Jamaah extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'jamaah';
-    
+
     protected $fillable = [
         'nik',
         'nama',
@@ -25,7 +25,7 @@ class Jamaah extends Model
     public function generateQrCode()
     {
         return QrCode::size(200)
-                    ->format('svg')
-                    ->generate(route('jamaah.detail', $this->id));
+            ->format('svg')
+            ->generate(route('jamaah.detail', $this->id));
     }
 }

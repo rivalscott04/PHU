@@ -125,10 +125,11 @@
 
         <div class="content">
 
-            <p>Pada hari ini {{ now()->translatedFormat('l') }}, tanggal {{ now()->day }}, bulan
-                {{ now()->translatedFormat('F') }}, tahun {{ $yearInWords }},
+            <p>Pada hari ini {{ $dayName }}, tanggal {{ $day }}, bulan {{ $monthYear }}, tahun
+                {{ $yearInWords }},
                 yang bertanda tangan dibawah ini :
-            <p>
+            </p>
+
             <div class="form-group">
                 <span class="label">Nama</span>: <span class="input-line">{{ $data->name }}</span>
             </div>

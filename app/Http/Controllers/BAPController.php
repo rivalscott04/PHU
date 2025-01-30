@@ -24,18 +24,33 @@ class BAPController extends Controller
     {
         $data = BAP::findOrFail($id);
 
-        $yearInWords = $this->nomorKata(now()->year);
+        // Ambil tahun dari created_at
+        $year = Carbon::parse($data->created_at)->year;
 
+        // Pastikan metode nomorKata() dapat diakses dengan benar
+        $yearInWords = method_exists($this, 'nomorKata') ? $this->nomorKata($year) : $year;
+
+        // Format tanggal dalam bahasa Indonesia
+        $dayName = Carbon::parse($data->created_at)->translatedFormat('l'); // Nama hari
+        $day = Carbon::parse($data->created_at)->translatedFormat('d'); // Tanggal
+        $monthYear = Carbon::parse($data->created_at)->translatedFormat('F Y'); // Bulan dan tahun
+
+        // Format tanggal keberangkatan dan kepulangan
         $formattedDate = Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = Carbon::parse($data->returndate)->translatedFormat('d F Y');
 
         return view('travel.printBAP', [
             'data' => $data,
             'yearInWords' => $yearInWords,
+            'dayName' => $dayName,
+            'day' => $day,
+            'monthYear' => $monthYear,
             'formattedDate' => $formattedDate,
             'formattedReturnDate' => $formattedReturnDate
         ]);
     }
+
+
 
     public function nomorKata($number)
     {

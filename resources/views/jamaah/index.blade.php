@@ -4,10 +4,13 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header pb-0 d-flex justify-content-between align-items-center">
+                <div class="card-header pb-3 d-flex justify-content-between align-items-center">
                     <h6>Data Jamaah</h6>
                     <div>
-                        <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal"
+                        <a href="{{ route('jamaah.create') }}" class="btn btn-primary btn-md me-2">
+                            <i class="bx bx-plus me-1"></i> Tambah
+                        </a>
+                        <button type="button" class="btn btn-success btn-md" data-bs-toggle="modal"
                             data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
@@ -51,13 +54,11 @@
                                             </div>
                                         </td>
                                         <td class="text-lg font-weight-bold">
-                                            <a href="" class="mt-2">
-                                                <a href="{{ route('jamaah.detail', $item->id) }}">
-                                                    <i class="bx bx-info-circle me-2"></i>
-                                                </a>
-                                                <a href="{{ route('jamaah.detail', $item->id) }}">
-                                                    <i class="bx bx-edit text-success"></i>
-                                                </a>
+                                            <a href="{{ route('jamaah.detail', $item->id) }}">
+                                                <i class="bx bx-info-circle me-2"></i>
+                                            </a>
+                                            <a href="{{ route('jamaah.edit', $item->id) }}">
+                                                <i class="bx bx-edit text-success"></i>
                                             </a>
                                         </td>
                                     </tr>

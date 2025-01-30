@@ -67,7 +67,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
 
-
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 
     Route::get('/bap', [BAPController::class, 'index'])->name('bap');
