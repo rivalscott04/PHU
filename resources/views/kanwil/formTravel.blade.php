@@ -25,20 +25,29 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="penyelenggara" class="form-label">Penyelenggara</label>
-                                <input type="text" class="form-control" id="penyelenggara" name="penyelenggara" required>
+                                <label for="Penyelenggara" class="form-label">Penyelenggara</label>
+                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nomor_sk" class="form-label">Nomor SK</label>
-                                <input type="text" class="form-control" id="nomor_sk" name="nomor_sk" required>
+                                <label for="Status" class="form-label">Status</label>
+                                <select class="form-control" id="Status" name="Status" required>
+                                    <option value="">Pilih Status</option>
+                                    <option value="PPIU">PPIU</option>
+                                    <option value="PIHK">PIHK</option>
+                                </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="tanggal_sk" class="form-label">Tanggal SK</label>
-                                <input type="date" class="form-control" id="tanggal_sk" name="tanggal_sk" required>
+                                <label for="Pusat" class="form-label">Pusat</label>
+                                <input type="text" class="form-control" id="Pusat" name="Pusat" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="akreditasi" class="form-label">Akreditasi</label>
-                                <input type="text" class="form-control" id="akreditasi" name="akreditasi" required>
+                                <label for="Tanggal" class="form-label">Tanggal</label>
+                                <input type="date" class="form-control" id="Tanggal" name="Tanggal" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="Jml_Akreditasi" class="form-label">Jumlah Akreditasi</label>
+                                <input type="text" class="form-control" id="Jml_Akreditasi" name="Jml_Akreditasi"
+                                    required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal_akreditasi" class="form-label">Tanggal Akreditasi</label>
@@ -51,12 +60,12 @@
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="pimpinan" class="form-label">Pimpinan</label>
-                                <input type="text" class="form-control" id="pimpinan" name="pimpinan" required>
+                                <label for="Pimpinan" class="form-label">Pimpinan</label>
+                                <input type="text" class="form-control" id="Pimpinan" name="Pimpinan" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="telepon" class="form-label">Telepon</label>
-                                <input type="text" class="form-control" id="telepon" name="telepon" required>
+                                <label for="Telepon" class="form-label">Telepon</label>
+                                <input type="text" class="form-control" id="Telepon" name="Telepon" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="alamat_kantor_lama" class="form-label">Alamat Kantor Lama</label>

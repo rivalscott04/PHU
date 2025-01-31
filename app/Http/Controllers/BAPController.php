@@ -4,15 +4,19 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use App\Models\BAP;
-use App\Models\TravelCompany;
+use App\Models\Jamaah;
 use Illuminate\Http\Request;
+use App\Models\TravelCompany;
 
 class BAPController extends Controller
 {
     public function showFormBAP()
     {
         $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
-        return view('travel.pengajuanBAP', compact('ppiuList'));
+        // Add this line to get jamaah count
+        $jamaahCount = Jamaah::count();
+
+        return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount'));
     }
 
     public function detail($id)
@@ -26,22 +30,17 @@ class BAPController extends Controller
     {
         $data = BAP::findOrFail($id);
 
-        // Ambil tahun dari created_at
         $year = Carbon::parse($data->created_at)->year;
 
-        // Pastikan metode nomorKata() dapat diakses dengan benar
         $yearInWords = method_exists($this, 'nomorKata') ? $this->nomorKata($year) : $year;
 
-        // Format tanggal dalam bahasa Indonesia
-        $dayName = Carbon::parse($data->created_at)->translatedFormat('l'); // Nama hari
-        $day = Carbon::parse($data->created_at)->translatedFormat('d'); // Tanggal
-        $monthYear = Carbon::parse($data->created_at)->translatedFormat('F Y'); // Bulan dan tahun
+        $dayName = Carbon::parse($data->created_at)->translatedFormat('l');
+        $day = Carbon::parse($data->created_at)->translatedFormat('d');
+        $monthYear = Carbon::parse($data->created_at)->translatedFormat('F Y');
 
-        // Format tanggal keberangkatan dan kepulangan
         $formattedDate = Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = Carbon::parse($data->returndate)->translatedFormat('d F Y');
 
-        // Ambil bulan dari datetime untuk nomor surat
         $month = Carbon::parse($data->datetime)->format('m');
 
         return view('travel.printBAP', [

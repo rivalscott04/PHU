@@ -88,23 +88,8 @@
                                         <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_lama }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_baru }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->Telepon }}</td>
-                                        <td class="text-sm font-weight-bold">
-                                            <form action="{{ route('update.status', $item->id) }}" method="POST">
-                                                @csrf
-                                                @method('PUT')
-                                                <select name="status" class="form-select form-select-sm text-center"
-                                                    onchange="this.form.submit()">
-                                                    <option value="diajukan"
-                                                        {{ $item->status === 'diajukan' ? 'selected' : '' }}>Diajukan
-                                                    </option>
-                                                    <option value="diproses"
-                                                        {{ $item->status === 'diproses' ? 'selected' : '' }}>Diproses
-                                                    </option>
-                                                    <option value="diterima"
-                                                        {{ $item->status === 'diterima' ? 'selected' : '' }}>Diterima
-                                                    </option>
-                                                </select>
-                                            </form>
+                                        <td class="text-sm font-weight-bold text-center">
+                                            {{ $item->Status }}
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->kab_kota }}</td>
                                     </tr>

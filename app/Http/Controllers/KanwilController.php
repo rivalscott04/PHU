@@ -20,20 +20,23 @@ class KanwilController extends Controller
     {
         // Validasi input
         $validatedData = $request->validate([
-            'penyelenggara' => 'required|string|max:255',
-            'nomor_sk' => 'required|string|max:255',
-            'tanggal_sk' => 'required|date',
-            'akreditasi' => 'required|string|max:255',
+            'Penyelenggara' => 'required|string|max:255',
+            'Pusat' => 'required|string|max:255',
+            'Tanggal' => 'required|date',
+            'Jml_Akreditasi' => 'required|string|max:255',
             'tanggal_akreditasi' => 'required|date',
             'lembaga_akreditasi' => 'required|string|max:255',
-            'pimpinan' => 'required|string|max:255',
+            'Pimpinan' => 'required|string|max:255',
             'alamat_kantor_lama' => 'required|string',
             'alamat_kantor_baru' => 'required|string',
-            'telepon' => 'required|string|max:20',
+            'Telepon' => 'required|string|max:20',
             'kab_kota' => 'required|string|max:255',
+            'Status' => 'required|in:PPIU,PIHK',
         ]);
 
-        $validatedData['status'] = 'diajukan';
+        // Format data sebelum disimpan
+        $validatedData['Tanggal'] = date('Y-m-d', strtotime($request->Tanggal));
+        $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
 
         TravelCompany::create($validatedData);
 

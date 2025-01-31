@@ -29,22 +29,17 @@ use App\Http\Controllers\JamaahController;
 use App\Http\Controllers\KanwilController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\ExcelImportController;
+use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\UserProfileController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
-});
-
-
-
-Route::get('/', function () {
-    return redirect('/dashboard');
-})->middleware('auth');
+});;
 Route::get('/register', [RegisterController::class, 'create'])->middleware('guest')->name('register');
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed', 'kabupaten');
+Route::get('/', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed', 'kabupaten');
 
 Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
 Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
@@ -66,6 +61,10 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
+
+    Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
+    Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+    Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 
@@ -90,7 +89,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');
 
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
-        Route::get('/form', [KanwilController::class, 'showForm'])->name('form');
+        Route::get('/form', [KanwilController::class, 'showFormTravel'])->name('form');
         Route::post('/form', [KanwilController::class, 'store'])->name('post.form');
 
         Route::get('/travels', [AuthController::class, 'showUsers'])->name('travels');

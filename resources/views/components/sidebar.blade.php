@@ -47,6 +47,12 @@
                         <span key="t-dashboards">Jamaah</span>
                     </a>
                 </li>
+                <li>
+                    <a href="{{ route('pengaduan') }}" class="waves-effect">
+                        <i class="bx bxs-group"></i>
+                        <span key="t-dashboards">Pengaduan</span>
+                    </a>
+                </li>
             </ul>
         </div>
         <!-- Sidebar -->

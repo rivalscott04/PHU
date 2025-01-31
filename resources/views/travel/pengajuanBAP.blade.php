@@ -38,7 +38,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="people" class="form-label">Jumlah Jamaah</label>
-                                <input type="number" class="form-control" id="people" name="people" required>
+                                <input type="number" class="form-control" id="people" name="people"
+                                    value="{{ $jamaahCount }}" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="package" class="form-label">Paket</label>

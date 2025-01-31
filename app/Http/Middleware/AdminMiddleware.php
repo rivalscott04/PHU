@@ -15,6 +15,9 @@ class AdminMiddleware
             return $next($request);
         }
         \Log::info('Unauthorized access attempt by user: ' . auth()->id());
-        return redirect('/')->with('error', 'Unauthorized access.');
+        // Redirect langsung ke dashboard atau gunakan abort()
+        return abort(403, 'Unauthorized access.');
+        // atau
+        // return redirect()->route('home')->with('error', 'Unauthorized access.');
     }
 }
