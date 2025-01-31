@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('travels', function (Blueprint $table) {
             $table->id();
-            $table->string('No');
             $table->string('Penyelenggara');
             $table->string('Pusat');
             $table->date('Tanggal');
