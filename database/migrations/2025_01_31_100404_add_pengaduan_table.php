@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('pengaduan', function (Blueprint $table) {
             $table->id();
             $table->string('nama_pengadu');
-            $table->foreignId('travel_id')->constrained()->onDelete('cascade');
+            $table->foreignId('travels_id')->constrained()->onDelete('cascade');
             $table->text('hal_aduan');
             $table->string('berkas_aduan')->nullable();
             $table->string('status')->default('pending');
