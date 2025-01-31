@@ -12,7 +12,6 @@ class TravelCompany extends Model
     use HasFactory;
     protected $table = 'travel';
     protected $fillable = [
-        'No',
         'Penyelenggara',
         'Pusat',
         'Tanggal',

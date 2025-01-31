@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BAP;
+use App\Models\TravelCompany;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -83,5 +85,17 @@ class AuthController extends Controller
         $user->save();
 
         return redirect()->route('home')->with('success', 'Password Anda berhasil diperbarui.');
+    }
+
+    public function showLanding()
+    {
+        $bapData = Bap::select('ppiuname', 'airlines', 'datetime', 'returndate', 'airlines2')
+            ->orderBy('datetime', 'asc')
+            ->get();
+
+        $travelData = TravelCompany::select('Penyelenggara', 'Jml_Akreditasi', 'Telepon', 'kab_kota')
+            ->get();
+
+        return view('welcome', compact('bapData', 'travelData'));
     }
 }
