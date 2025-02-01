@@ -13,11 +13,15 @@ class BAPController extends Controller
     public function showFormBAP()
     {
         $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
-        // Add this line to get jamaah count
         $jamaahCount = Jamaah::count();
+
+        if ($jamaahCount == 0) {
+            return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+        }
 
         return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount'));
     }
+
 
     public function detail($id)
     {
@@ -131,7 +135,9 @@ class BAPController extends Controller
             $data = collect();
         }
 
-        return view('travel.listBAP', ['data' => $data]);
+        $jamaahCount = Jamaah::count();
+
+        return view('travel.listBAP', compact('data', 'jamaahCount'));
     }
 
 
@@ -201,5 +207,15 @@ class BAPController extends Controller
         $data->save();
 
         return redirect()->route('bap')->with('success', 'Status berhasil diubah.');
+    }
+
+    public function showKeberangkatan()
+    { {
+            $schedules = Bap::select('id', 'ppiuname', 'datetime', 'returndate', 'people', 'airlines')
+                ->orderBy('datetime')
+                ->get();
+
+            return view('travel.keberangkatan', compact('schedules'));
+        }
     }
 }

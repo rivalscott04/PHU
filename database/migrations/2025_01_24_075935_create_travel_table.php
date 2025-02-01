@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('Penyelenggara');
             $table->string('Pusat');
             $table->date('Tanggal');
-            $table->string('Jml_Akreditasi', 1);
-            $table->date('tanggal_akreditasi');
+            $table->string('Jml_Akreditasi', 1)->nullable();
+            $table->date('tanggal_akreditasi')->nullable();
             $table->string('lembaga_akreditasi')->nullable();
             $table->string('Pimpinan');
             $table->text('alamat_kantor_lama');

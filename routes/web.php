@@ -1,8 +1,8 @@
 <?php
 
-use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BAPController;
+use App\Http\Controllers\ResetPassword;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,17 +19,18 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-use App\Http\Controllers\ResetPassword;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangePassword;
-use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\JamaahController;
 use App\Http\Controllers\KanwilController;
 use App\Http\Controllers\RegisterController;
-use App\Http\Controllers\ExcelImportController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PengaduanController;
+use App\Http\Controllers\ExcelImportController;
+use App\Http\Controllers\PengunduranController;
 use App\Http\Controllers\UserProfileController;
 
 Route::get('/jamaah/template-test', function () {
@@ -70,6 +71,9 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
+    Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
+    Route::post('/pengunduran', [PengunduranController::class, 'store'])->name('pengunduran.store');
+
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 
     Route::get('/bap', [BAPController::class, 'index'])->name('bap');
@@ -80,6 +84,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
+    Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');
@@ -87,7 +92,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
     Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
     Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
-
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');

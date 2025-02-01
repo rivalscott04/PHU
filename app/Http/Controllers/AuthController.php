@@ -39,8 +39,9 @@ class AuthController extends Controller
         $user = User::create([
             'username' => $request->username,
             'email' => $request->email,
-            'password' => Hash::make($this->defaultPassword), // Gunakan defaultPassword
+            'password' => $this->defaultPassword,
         ]);
+
 
         // Kembalikan response sukses
         return redirect()->route('form.addUser')->with('success', 'Akun berhasil dibuat.');

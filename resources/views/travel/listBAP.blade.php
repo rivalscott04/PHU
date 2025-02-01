@@ -6,50 +6,45 @@
             <div class="card">
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
                     <h6>Data Pengajuan</h6>
-                    <a href="{{ route('form.bap') }}" class="btn btn-primary">Tambah</a>
+                    <a href="{{ route('form.bap') }}" onclick="return checkJamaah({{ $jamaahCount }});"
+                        class="btn btn-primary">
+                        Tambah
+                    </a>
+
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
                         <table class="table align-items-center mb-0">
                             <thead>
                                 <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No.</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jabatan
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">PPIU
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Alamat &
-                                        Hp</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kab/Kota
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jumlah
-                                        Jamaah</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Paket
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Harga
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Status
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi
-                                    </th>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>Jabatan</th>
+                                    <th>PPIU</th>
+                                    <th>Alamat & Hp</th>
+                                    <th>Kab/Kota</th>
+                                    <th>Jumlah Jamaah</th>
+                                    <th>Paket</th>
+                                    <th>Harga</th>
+                                    <th>Status</th>
+                                    <th>Aksi</th>
+
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($data as $item)
                                     <tr class="text-center">
-                                        <td class="font-weight-bold">{{ $loop->iteration }}</td>
-                                        <td class="font-weight-bold">{{ $item->name }}</td>
-                                        <td class="font-weight-bold">{{ $item->jabatan }}</td>
-                                        <td class="font-weight-bold">{{ $item->ppiuname }}</td>
-                                        <td class="font-weight-bold">{{ $item->address_phone }}</td>
-                                        <td class="font-weight-bold">{{ $item->kab_kota }}</td>
-                                        <td class="font-weight-bold">{{ $item->people }}</td>
-                                        <td class="font-weight-bold">{{ $item->package }}</td>
-                                        <td class="font-weight-bold"><span>Rp.
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $item->name }}</td>
+                                        <td>{{ $item->jabatan }}</td>
+                                        <td>{{ $item->ppiuname }}</td>
+                                        <td>{{ $item->address_phone }}</td>
+                                        <td>{{ $item->kab_kota }}</td>
+                                        <td>{{ $item->people }}</td>
+                                        <td>{{ $item->package }}</td>
+                                        <td><span>Rp.
                                             </span>{{ number_format($item->price, 2, ',', '.') }}</td>
-                                        <td class="font-weight-bold">
+                                        <td>
                                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                                                 <form action="{{ route('bap.updateStatus', $item->id) }}" method="POST">
                                                     @csrf
@@ -92,3 +87,21 @@
         </div>
     </div>
 @endsection
+
+@push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function checkJamaah(jamaahCount) {
+            if (jamaahCount == 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Tidak bisa menambahkan pengajuan, karena data Jamaah masih kosong.',
+                    confirmButtonText: 'Tutup'
+                });
+                return false;
+            }
+            return true;
+        }
+    </script>
+@endpush

@@ -18,7 +18,7 @@ class PengaduanController extends Controller
     {
         $request->validate([
             'nama_pengadu' => 'required',
-            'travel_id' => 'required|exists:travels,id',
+            'travels_id' => 'required|exists:travels,id',
             'hal_aduan' => 'required',
             'berkas_aduan' => 'nullable|file|max:2048',
         ]);
@@ -30,7 +30,7 @@ class PengaduanController extends Controller
 
         Pengaduan::create([
             'nama_pengadu' => $request->nama_pengadu,
-            'travel_id' => $request->travel_id,
+            'travels_id' => $request->travels_id,
             'hal_aduan' => $request->hal_aduan,
             'berkas_aduan' => $berkasPath,
         ]);
@@ -40,7 +40,7 @@ class PengaduanController extends Controller
 
     public function index()
     {
-        $pengaduan = Pengaduan::with('travel')->get();
+        $pengaduan = Pengaduan::with('travel')->get();  /
         return view('pengaduan.index', compact('pengaduan'));
     }
 }

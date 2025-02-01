@@ -54,4 +54,9 @@ class TravelCompany extends Model
     {
         return $this->hasMany(CabangTravel::class, 'travel_id');
     }
+
+    public function pengaduan()
+    {
+        return $this->hasMany(Pengaduan::class, 'travels_id');
+    }
 }

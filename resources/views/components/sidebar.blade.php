@@ -49,8 +49,20 @@
                 </li>
                 <li>
                     <a href="{{ route('pengaduan') }}" class="waves-effect">
-                        <i class="bx bxs-group"></i>
+                        <i class="bx bx-envelope"></i>
                         <span key="t-dashboards">Pengaduan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('keberangkatan') }}" class="waves-effect">
+                        <i class="bx bx-calendar"></i>
+                        <span key="t-dashboards">Keberangkatan</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('pengunduran.create') }}" class="waves-effect">
+                        <i class="bx bx-send"></i>
+                        <span key="t-dashboards">Pengunduran</span>
                     </a>
                 </li>
             </ul>

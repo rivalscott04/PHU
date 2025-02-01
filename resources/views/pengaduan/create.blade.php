@@ -11,12 +11,6 @@
         </div>
     @endif
 
-    @if (session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
-        </div>
-    @endif
-
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -34,16 +28,14 @@
                             </div>
 
                             <div class="col-md-6 mb-3">
-                                <label for="travel_id" class="form-label">Travel</label>
-                                <select class="form-control" id="travel_id" name="travel_id" required>
+                                <label for="travels_id" class="form-label">Travel</label>
+                                <select class="form-control" id="travels_id" name="travels_id" required>
                                     <option value="">-- Pilih Travel --</option>
                                     @foreach ($travels as $travel)
-                                        <option value="{{ $travel->id }}"
-                                            {{ old('travel_id') == $travel->id ? 'selected' : '' }}>
-                                            {{ $travel->Penyelenggara }}
-                                        </option>
+                                        <option value="{{ $travel->id }}">{{ $travel->Penyelenggara }}</option>
                                     @endforeach
                                 </select>
+
                             </div>
 
                             <div class="col-12 mb-3">

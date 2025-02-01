@@ -20,15 +20,6 @@
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
                             <div class="col-12 mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label for="password_confirmation" class="form-label">Konfirmasi Password</label>
-                                <input type="password" class="form-control" id="password_confirmation"
-                                    name="password_confirmation" required>
-                            </div>
-                            <div class="col-12 mb-3">
                                 <label for="role" class="form-label">Role</label>
                                 <input type="text" class="form-control" id="role" name="role" value="user"
                                     readonly>

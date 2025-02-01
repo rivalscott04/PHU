@@ -32,7 +32,7 @@
                                     <tr class="text-center">
                                         <td>{{ $key + 1 }}</td>
                                         <td>{{ $item->nama_pengadu }}</td>
-                                        <td>{{ $item->travel->penyelenggara }}</td>
+                                        <td>{{ $item->travel->Penyelenggara }}</td>
                                         <td>{{ Str::limit($item->hal_aduan, 50) }}</td>
                                         <td>
                                             @if ($item->berkas_aduan)

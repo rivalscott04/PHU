@@ -12,9 +12,14 @@ class Pengaduan extends Model
 
     protected $fillable = [
         'nama_pengadu',
-        'travel_id',
+        'travels_id',
         'hal_aduan',
-        'berlas_aduan',
+        'berkas_aduan',
         'status'
     ];
+
+    public function travel()  // Note: singular form, not 'travels'
+    {
+        return $this->belongsTo(TravelCompany::class, 'travels_id');
+    }
 }
