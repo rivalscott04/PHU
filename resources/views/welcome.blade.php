@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Index - Bootslander Bootstrap Template</title>
+    <title>UHK KANWIL</title>
     <meta name="description" content="" />
     <meta name="keywords" content="" />
 
@@ -153,15 +153,15 @@
             <a href="index.html" class="logo d-flex align-items-center">
                 <!-- Uncomment the line below if you also wish to use an image logo -->
                 <!-- <img src="assets/img/logo.png" alt=""> -->
-                <h1 class="sitename">Bootslander</h1>
+                <h1 class="sitename">UHK Kanwil NTB</h1>
             </a>
 
             <nav id="navmenu" class="navmenu">
                 <ul>
-                    <li><a href="#hero" class="active">Home</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#details">Details</a></li>
+                    <li><a href="#beranda" class="active">Beranda</a></li>
+                    <li><a href="#about">Tentang</a></li>
+                    <li><a href="#travel">Travel</a></li>
+                    <li><a href="#details">Jadwal Keberangkatan</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -171,25 +171,25 @@
 
     <main class="main">
         <!-- Hero Section -->
-        <section id="hero" class="hero section dark-background">
-            <img src="{{ asset('img/hero-bg-2.jpg') }}" alt="" class="hero-bg" />
+        <section id="beranda" class="hero section dark-background">
+            <img src="{{ asset('img/hero-2.jpg') }}" alt="" class="hero-bg" />
 
             <div class="container">
                 <div class="row gy-4 justify-content-between">
                     <div class="col-lg-4 order-lg-last hero-img" data-aos="zoom-out" data-aos-delay="100">
-                        <img src="{{ asset('img/hero-img.png') }}" class="img-fluid animated" alt="" />
+                        <img src="{{ asset('img/hero-1.png') }}" class="img-fluid animated" alt="" />
                     </div>
 
                     <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-in">
                         <h1>
-                            Lorem ipsum dolor sit amet
-                            <span>Haji</span>
+                            Sistem Informasi Haji dan Umroh Khusus
+                            <span>Kanwil Kemenag NTB</span>
                         </h1>
                         <p>
-                            Lorem ipsum dolor sit amet consectetur, adipisicing elit.
+                            Informasi Keberangkatan dan List Travel.
                         </p>
                         <div class="d-flex">
-                            <a href="#about" class="btn-get-started">Get Started</a>
+                            <a href="#about" class="btn-get-started">Masuk</a>
                         </div>
                     </div>
                 </div>
@@ -292,7 +292,7 @@
         </section>
         <!-- /About Section -->
 
-        <section class="travel-companies py-5" id="features">
+        <section class="travel-companies py-5" id="travel">
             <div class="container">
                 <div class="container section-title" data-aos="fade-up">
                     <h2>Travel</h2>
@@ -393,7 +393,7 @@
             <div class="container">
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
-                        <img src="{{ asset('img/details-1.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-2.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7" data-aos="fade-up" data-aos-delay="100">
                         <h3>
@@ -429,7 +429,7 @@
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 order-1 order-md-2 d-flex align-items-center" data-aos="zoom-out"
                         data-aos-delay="200">
-                        <img src="{{ asset('img/details-2.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-3.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up" data-aos-delay="200">
                         <h3>Corporis temporibus maiores provident</h3>
@@ -452,7 +452,7 @@
 
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 d-flex align-items-center" data-aos="zoom-out">
-                        <img src="{{ asset('img/details-3.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-4.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7" data-aos="fade-up">
                         <h3>
@@ -488,7 +488,7 @@
 
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 order-1 order-md-2 d-flex align-items-center" data-aos="zoom-out">
-                        <img src="{{ asset('img/details-4.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-5.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up">
                         <h3>
@@ -544,7 +544,7 @@
                             <i class="bi bi-geo-alt flex-shrink-0"></i>
                             <div>
                                 <h3>Alamat Kantor</h3>
-                                <p>Jl. Pejanggik No.12, Cakranegara, Mataram</p>
+                                <p>Jl. Udayana No.6, Mataram</p>
                             </div>
                         </div>
 
@@ -560,7 +560,7 @@
                             <i class="bi bi-envelope flex-shrink-0"></i>
                             <div>
                                 <h3>Email</h3>
-                                <p>info@example.com</p>
+                                <p>ntb.kemenag@go.id</p>
                             </div>
                         </div>
                     </div>
@@ -619,18 +619,18 @@
             <div class="row gy-4">
                 <div class="col-lg-4 col-md-6 footer-about">
                     <a href="index.html" class="logo d-flex align-items-center">
-                        <span class="sitename">Bootslander</span>
+                        <span class="sitename">UHK Kanwil NTB</span>
                     </a>
                     <div class="footer-contact pt-3">
-                        <p>A108 Adam Street</p>
-                        <p>New York, NY 535022</p>
+                        <p>Jl Udayana No 6</p>
+                        <p>Mataram. NTB</p>
                         <p class="mt-3">
                             <strong>Phone:</strong>
-                            <span>+1 5589 55488 55</span>
+                            <span>12345678</span>
                         </p>
                         <p>
                             <strong>Email:</strong>
-                            <span>info@example.com</span>
+                            <span>ntb.kemenag@kemenag.go.id</span>
                         </p>
                     </div>
                     <div class="social-links d-flex mt-4">
@@ -642,7 +642,7 @@
                 </div>
 
                 <div class="col-lg-2 col-md-3 footer-links">
-                    <h4>Useful Links</h4>
+                    <h4>Tautan</h4>
                     <ul>
                         <li><a href="#">Home</a></li>
                         <li><a href="#">About us</a></li>
@@ -687,7 +687,7 @@
         <div class="container copyright text-center mt-4">
             <p>
                 © <span>Copyright</span>
-                <strong class="px-1 sitename">Bootslander</strong>
+                <strong class="px-1 sitename">UHK Kanwil NTB</strong>
                 <span>All Rights Reserved</span>
             </p>
             <div class="credits">
@@ -695,8 +695,7 @@
                 <!-- You can delete the links only if you've purchased the pro version. -->
                 <!-- Licensing information: https://bootstrapmade.com/license/ -->
                 <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-                Designed by
-                <a href="https://bootstrapmade.com/">BootstrapMade</a>
+                Designed with Love
             </div>
         </div>
     </footer>
