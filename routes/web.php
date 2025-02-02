@@ -60,6 +60,7 @@ Route::get('/logout-redirect', function () {
     return redirect()->route('login');
 })->name('logout.redirect');
 
+Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -93,7 +94,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
-    Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');
