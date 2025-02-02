@@ -6,11 +6,6 @@
             <div class="card">
                 <div class="card-header pb-3 d-flex justify-content-between align-items-center">
                     <h6>Data Pengunduran</h6>
-                    <div>
-                        <a href="{{ route('pengunduran.create') }}" class="btn btn-primary btn-md">
-                            <i class="bx bx-plus me-1"></i> Tambah Pengunduran
-                        </a>
-                    </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">

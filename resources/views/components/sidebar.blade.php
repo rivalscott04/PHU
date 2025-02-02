@@ -66,13 +66,14 @@
                             <span key="t-dashboards">Pengunduran</span>
                         </a>
                     </li>
+                @else
+                    <li>
+                        <a href="{{ route('pengunduran.create') }}" class="waves-effect">
+                            <i class="bx bx-send"></i>
+                            <span key="t-dashboards">Pengunduran</span>
+                        </a>
+                    </li>
                 @endif
-                <li>
-                    <a href="{{ route('pengunduran.create') }}" class="waves-effect">
-                        <i class="bx bx-send"></i>
-                        <span key="t-dashboards">Pengunduran</span>
-                    </a>
-                </li>
             </ul>
         </div>
         <!-- Sidebar -->

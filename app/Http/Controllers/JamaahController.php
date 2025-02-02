@@ -29,7 +29,7 @@ class JamaahController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nik' => 'required|unique:jamaahs,nik|max:16',
+            'nik' => 'required|unique:jamaah,nik|max:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15',
