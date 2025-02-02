@@ -87,4 +87,15 @@ class KanwilController extends Controller
 
         return view('kanwil.cabangTravel', ['data' => $data]);
     }
+
+    public function downloadTemplate()
+    {
+        $filePath = public_path('template/template-travel.xlsx');
+
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'Template file tidak ditemukan.');
+        }
+
+        return response()->download($filePath, 'template-travel.xlsx');
+    }
 }

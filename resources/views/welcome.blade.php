@@ -401,7 +401,7 @@
                             Informasi Keberangkatan dan List Travel.
                         </p>
                         <div class="d-flex">
-                            <a href="#about" class="btn-get-started">Masuk</a>
+                            <a href="{{ route('login') }}" class="btn-get-started">Masuk</a>
                         </div>
                     </div>
                 </div>

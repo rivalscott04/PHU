@@ -5,8 +5,13 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
-                    <h6>Data Pengajuan</h6>
-                    <a href="{{ route('form.travel') }}" class="btn btn-primary">Tambah</a>
+                    <h6>Data Travel</h6>
+                    <div>
+                        <a href="{{ route('form.travel') }}" class="btn btn-primary me-2">Tambah</a>
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                            <i class="bx bx-upload me-1"></i> Upload Excel
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
@@ -98,6 +103,36 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Upload Data User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('import.data') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Excel</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls"
+                                required>
+                        </div>
+                        <div class="mb-3">
+                            <a href="{{ route('travel.template') }}" class="text-sm">
+                                <i class="bx bx-download"></i> Download Template Excel
+                            </a>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

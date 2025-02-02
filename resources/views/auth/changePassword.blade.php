@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+<!-- Head section remains unchanged -->
 
 <head>
     <meta charset="utf-8" />
@@ -97,9 +98,15 @@
                                     </div>
 
                                     <div class="mt-3 d-grid">
-                                        <button class="btn btn-primary waves-effect waves-light" type="submit">
-                                            Change Password
-                                        </button>
+                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Change
+                                            Password</button>
+                                    </div>
+
+                                    <div class="mt-2 d-grid">
+                                        <a href="{{ route('logout.redirect') }}"
+                                            class="btn btn-secondary waves-effect waves-light">
+                                            <i class="mdi mdi-arrow-left me-1"></i> Back to Login
+                                        </a>
                                     </div>
                                 </form>
                             </div>
@@ -117,7 +124,6 @@
             </div>
         </div>
     </div>
-    <!-- end account-pages -->
 
     <!-- JAVASCRIPT -->
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>

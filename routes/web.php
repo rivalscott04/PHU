@@ -1,8 +1,8 @@
 <?php
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BAPController;
-use App\Http\Controllers\ResetPassword;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,6 +19,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangePassword;
 use App\Http\Controllers\HomeController;
@@ -52,6 +53,12 @@ Route::post('/change-password', [AuthController::class, 'changePassword'])->name
 Route::get('/test', function () {
     return 'Middleware test';
 })->middleware('auth', 'password.changed');
+
+// Tambahkan route baru di web.php
+Route::get('/logout-redirect', function () {
+    Auth::logout();
+    return redirect()->route('login');
+})->name('logout.redirect');
 
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
@@ -97,6 +104,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');
+    Route::get('users/template', [KanwilController::class, 'downloadTemplate'])->name('travel.template');
 
     Route::middleware(['admin'])->prefix('kanwil')->group(function () {
         Route::get('/form', [KanwilController::class, 'showFormTravel'])->name('form');

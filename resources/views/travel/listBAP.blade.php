@@ -95,8 +95,8 @@
             if (jamaahCount == 0) {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Oops...',
-                    text: 'Tidak bisa menambahkan pengajuan, karena data Jamaah masih kosong.',
+                    title: 'Maaf terjadi Kesalahan',
+                    text: 'Silahkan mengisi menu jamaah terlebih dahulu.',
                     confirmButtonText: 'Tutup'
                 });
                 return false;
