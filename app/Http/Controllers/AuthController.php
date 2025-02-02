@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\BAP;
-use App\Models\TravelCompany;
 use App\Models\User;
+use App\Models\Jamaah;
 use Illuminate\Http\Request;
+use App\Models\TravelCompany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -97,6 +98,15 @@ class AuthController extends Controller
         $travelData = TravelCompany::select('Penyelenggara', 'Jml_Akreditasi', 'Telepon', 'kab_kota')
             ->get();
 
-        return view('welcome', compact('bapData', 'travelData'));
+        // Add these counts
+        $stats = [
+            'travelCount' => TravelCompany::count(),
+            'jamaahCount' => Jamaah::count(),
+            'airlineCount' => Bap::distinct('airlines')->count()
+        ];
+
+        $travels = TravelCompany::all();
+
+        return view('welcome', compact('bapData', 'travelData', 'stats', 'travels'));
     }
 }

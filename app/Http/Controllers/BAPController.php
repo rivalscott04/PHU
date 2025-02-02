@@ -210,12 +210,33 @@ class BAPController extends Controller
     }
 
     public function showKeberangkatan()
-    { {
-            $schedules = Bap::select('id', 'ppiuname', 'datetime', 'returndate', 'people', 'airlines')
-                ->orderBy('datetime')
-                ->get();
+    {
+        return view('travel.keberangkatan');
+    }
 
-            return view('travel.keberangkatan', compact('schedules'));
-        }
+    public function getEvents()
+    {
+        $events = BAP::all()->map(function ($event) {
+            return [
+                'title' => $event->ppiuname,
+                'start' => $event->datetime,
+                'color' => '#2563eb', // Bisa disesuaikan berdasarkan package
+                'extendedProps' => [
+                    'name' => $event->name,
+                    'jabatan' => $event->jabatan,
+                    'ppiuname' => $event->ppiuname,
+                    'address_phone' => $event->address_phone,
+                    'kab_kota' => $event->kab_kota,
+                    'people' => $event->people,
+                    'package' => $event->package,
+                    'price' => $event->price,
+                    'airlines' => $event->airlines,
+                    'returndate' => $event->returndate,
+                    'airlines2' => $event->airlines2
+                ]
+            ];
+        });
+
+        return response()->json($events);
     }
 }

@@ -10,9 +10,9 @@ class Pengunduran extends Model
     use HasFactory;
 
     protected $table = 'pengunduran';
-    protected $fillable = ['user_id', 'berkas_pengunduran'];
+    protected $fillable = ['user_id', 'berkas_pengunduran', 'status'];
 
-    public function travel()
+    public function user()
     {
         return $this->belongsTo(User::class);
     }

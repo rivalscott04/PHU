@@ -1,181 +1,510 @@
 @extends('layouts.app')
 
+
+
 @section('content')
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <div id="menu" class="mb-3">
-                        <span class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-primary move-day" data-action="move-prev">
-                                    <i class="fas fa-chevron-left"></i>
-                                </button>
-                                <button type="button" class="btn btn-primary move-today">Hari Ini</button>
-                                <button type="button" class="btn btn-primary move-day" data-action="move-next">
-                                    <i class="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            <h4 id="renderRange" class="render-range fw-bold pt-1 mx-3"></h4>
-                            <div class="dropdown">
-                                <button type="button" class="btn btn-primary" data-action="toggle-monthly">
-                                    Tampilan Bulanan
-                                </button>
-                            </div>
-                        </span>
-                    </div>
-                    <div id="calendar" style="height: 800px;"></div>
-                </div>
-            </div>
-        </div>
+    <div class="container">
+
+        <div id='calendar'></div>
+
+    </div>
+
+
+
+    <div class="event-popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
+
+    <div id="eventPopup" class="event-popup">
+
+        <button class="close-btn" onclick="closePopup()">
+
+            <i class="fas fa-times"></i>
+
+        </button>
+
+        <div id="popupContent" class="event-details"></div>
+
     </div>
 @endsection
 
+
+
 @push('styles')
-    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
-        .toastui-calendar-popup-detail .travel-info {
-            margin-top: 8px;
-            padding: 12px;
-            background-color: #f8f9fa;
-            border-radius: 6px;
-            border-left: 4px solid #0066cc;
+        :root {
+
+            --primary-color: #2563eb;
+
+            --secondary-color: #1e40af;
+
+            --success-color: #059669;
+
+            --background-color: #f8fafc;
+
+            --card-background: #ffffff;
+
+            --text-primary: #1e293b;
+
+            --text-secondary: #64748b;
+
+            --border-radius: 12px;
+
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+
+            --transition: all 0.3s ease;
+
         }
 
-        .travel-title {
-            font-weight: 700;
-            color: #0066cc;
-            margin-bottom: 8px;
+
+
+        #calendar {
+
+            background: var(--card-background);
+
+            border-radius: var(--border-radius);
+
+            box-shadow: var(--shadow-md);
+
+            padding: 20px;
+
+            min-height: 700px;
+
+            margin-bottom: 20px;
+
         }
 
-        .travel-detail {
-            color: #555;
-            margin: 4px 0;
+
+
+        .fc .fc-toolbar-title {
+
+            font-size: 1.5em;
+
+            margin: 0;
+
+            padding: 0;
+
         }
 
-        .jamaah-count {
-            color: #28a745;
-            font-weight: 500;
+
+
+        .fc .fc-button-primary {
+
+            background-color: var(--primary-color);
+
+            border-color: var(--primary-color);
+
         }
 
-        .airlines-info {
-            color: #dc3545;
-            font-weight: 500;
+
+
+        .fc .fc-button-primary:hover {
+
+            background-color: var(--secondary-color);
+
+            border-color: var(--secondary-color);
+
+        }
+
+
+
+        .event-popup {
+
+            display: none;
+
+            position: fixed;
+
+            top: 50%;
+
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            background: white;
+
+            padding: 20px;
+
+            border-radius: 12px;
+
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+
+            z-index: 1000;
+
+            width: 90%;
+
+            max-width: 500px;
+
+        }
+
+
+
+        .event-popup-overlay {
+
+            display: none;
+
+            position: fixed;
+
+            top: 0;
+
+            left: 0;
+
+            right: 0;
+
+            bottom: 0;
+
+            background: rgba(0, 0, 0, 0.5);
+
+            z-index: 999;
+
+        }
+
+
+
+        .detail-item {
+
+            margin-bottom: 15px;
+
+            padding-bottom: 15px;
+
+            border-bottom: 1px solid #eee;
+
+        }
+
+
+
+        .detail-label {
+
+            font-weight: 600;
+
+            color: var(--text-secondary);
+
+            margin-bottom: 5px;
+
+        }
+
+
+
+        .detail-value {
+
+            color: var(--text-primary);
+
+        }
+
+
+
+        .close-btn {
+
+            position: absolute;
+
+            right: 15px;
+
+            top: 15px;
+
+            background: none;
+
+            border: none;
+
+            font-size: 20px;
+
+            cursor: pointer;
+
+            color: var(--text-secondary);
+
+        }
+
+
+
+        @media (max-width: 768px) {
+
+            .fc .fc-toolbar {
+
+                flex-direction: column;
+
+                gap: 10px;
+
+            }
+
+
+
+            .fc-header-toolbar {
+
+                margin-bottom: 1.5em !important;
+
+            }
+
+
+
+            .fc .fc-button {
+
+                padding: 0.4em 0.65em;
+
+            }
+
+
+
+            .event-popup {
+
+                width: 95%;
+
+                padding: 15px;
+
+            }
+
         }
     </style>
 @endpush
 
+
+
 @push('js')
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
+
+
+
     <script>
-        $(document).ready(function() {
-            // Bootstrap colors for events
-            const colors = [{
-                    color: '#ffffff',
-                    bgColor: '#556ee6',
-                    borderColor: '#556ee6'
-                }, // primary
-                {
-                    color: '#ffffff',
-                    bgColor: '#34c38f',
-                    borderColor: '#34c38f'
-                }, // success
-                {
-                    color: '#ffffff',
-                    bgColor: '#f46a6a',
-                    borderColor: '#f46a6a'
-                }, // danger
-                {
-                    color: '#000000',
-                    bgColor: '#f1b44c',
-                    borderColor: '#f1b44c'
-                }, // warning
-                {
-                    color: '#ffffff',
-                    bgColor: '#50a5f1',
-                    borderColor: '#50a5f1'
-                }, // info
-                {
-                    color: '#ffffff',
-                    bgColor: '#74788d',
-                    borderColor: '#74788d'
-                }, // secondary
-            ];
+        document.addEventListener('DOMContentLoaded', function() {
 
-            // Data dari controller
-            const scheduleData = @json($schedules);
+            var calendarEl = document.getElementById('calendar');
 
-            // Format data untuk calendar
-            const calendarEvents = scheduleData.map((item, index) => {
-                const colorSet = colors[index % colors.length];
-                return {
-                    id: item.id,
-                    title: item.ppiuname,
-                    start: item.datetime,
-                    end: item.returndate,
-                    jamaahCount: item.people,
-                    airlines: item.airline,
-                    category: 'allday',
-                    backgroundColor: colorSet.bgColor,
-                    borderColor: colorSet.borderColor,
-                    color: colorSet.color
-                };
-            });
+            var calendar = new FullCalendar.Calendar(calendarEl, {
 
-            // Inisialisasi kalender
-            const cal = new tui.Calendar('#calendar', {
-                defaultView: 'month',
-                isReadOnly: true,
-                useDetailPopup: true,
-                template: {
-                    popupDetailBody: function(schedule) {
-                        return `
-                        <div class="travel-info">
-                            <div class="travel-title">${schedule.title}</div>
-                            <div class="travel-detail">
-                                <span class="jamaah-count">${schedule.jamaahCount} Jamaah</span> |
-                                <span class="airlines-info">${schedule.airlines}</span>
-                            </div>
-                            <div class="travel-detail">
-                                <i class="fas fa-plane-departure"></i> ${moment(schedule.start.toDate()).format('DD MMM YYYY')}
-                            </div>
-                            <div class="travel-detail">
-                                <i class="fas fa-plane-arrival"></i> ${moment(schedule.end.toDate()).format('DD MMM YYYY')}
-                            </div>
-                        </div>
-                    `;
+                initialView: 'dayGridMonth',
+
+                headerToolbar: {
+
+                    left: 'prev,next today',
+
+                    center: 'title',
+
+                    right: 'dayGridMonth'
+
+                },
+
+                buttonText: {
+
+                    today: 'Hari Ini',
+
+                    month: 'Bulan'
+
+                },
+
+                events: {
+
+                    url: '{{ route('calendar.events') }}',
+
+                    method: 'GET',
+
+                    failure: function() {
+
+                        alert('Error mengambil data keberangkatan!');
+
                     }
+
+                },
+
+                eventClick: function(info) {
+
+                    showPopup(info.event);
+
+                },
+
+                eventContent: function(arg) {
+
+                    return {
+
+                        html: `<div class="fc-content">
+
+                    <div class="fc-title">${arg.event.title}</div>
+
+                    <div class="fc-description" style="font-size: 0.8em;">
+
+                        ${arg.event.extendedProps.package} hari
+
+                    </div>
+
+                </div>`
+
+                    };
+
                 }
+
             });
 
-            // Fungsi update tanggal
-            function updateRenderRange() {
-                const dateRange = cal.getDateRange();
-                $('#renderRange').text(moment(dateRange.start.toDate()).format('MMMM YYYY'));
+
+
+            calendar.render();
+
+        });
+
+
+
+        function showPopup(event) {
+
+            const popup = document.getElementById('eventPopup');
+
+            const overlay = document.getElementById('popupOverlay');
+
+            const content = document.getElementById('popupContent');
+
+
+
+            const departureDate = new Date(event.start).toLocaleDateString('id-ID', {
+
+                weekday: 'long',
+
+                year: 'numeric',
+
+                month: 'long',
+
+                day: 'numeric'
+
+            });
+
+
+
+            content.innerHTML = `
+
+        <h3 style="margin-bottom: 20px; color: var(--primary-color);">
+
+            ${event.title}
+
+        </h3>
+
+        <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-user"></i> Penanggung Jawab
+
+            </div>
+
+            <div class="detail-value">
+
+                ${event.extendedProps.name} (${event.extendedProps.jabatan})
+
+            </div>
+
+        </div>
+
+        <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-map-marker-alt"></i> Durasi
+
+            </div>
+
+            <div class="detail-value">
+
+                ${event.start}<br>
+
+                <small>${event.extendedProps.returndate}</small>
+
+            </div>
+
+        </div>
+
+        <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-users"></i> Jumlah Jamaah
+
+            </div>
+
+            <div class="detail-value">
+
+                ${event.extendedProps.people} orang
+
+            </div>
+
+        </div>
+
+           <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-people"></i> Hari
+
+            </div>
+
+            <div class="detail-value">
+
+                ${event.extendedProps.package} Hari
+
+            </div>
+
+        </div>
+
+        <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-plane"></i> Maskapai
+
+            </div>
+
+            <div class="detail-value">
+
+                ${event.extendedProps.airlines}
+
+            </div>
+
+        </div>
+
+
+        <div class="detail-item">
+
+            <div class="detail-label">
+
+                <i class="fas fa-tag"></i> Harga
+
+            </div>
+
+            <div class="detail-value">
+
+                Rp ${new Intl.NumberFormat('id-ID').format(event.extendedProps.price)}
+
+            </div>
+
+        </div>
+
+    `;
+
+
+
+            overlay.style.display = 'block';
+
+            popup.style.display = 'block';
+
+        }
+
+
+
+        function closePopup() {
+
+            document.getElementById('eventPopup').style.display = 'none';
+
+            document.getElementById('popupOverlay').style.display = 'none';
+
+        }
+
+
+
+        document.addEventListener('keydown', function(e) {
+
+            if (e.key === 'Escape') {
+
+                closePopup();
+
             }
 
-            // Navigasi kalender
-            $('.move-today').click(() => {
-                cal.today();
-                updateRenderRange();
-            });
-
-            $('[data-action="move-prev"]').click(() => {
-                cal.prev();
-                updateRenderRange();
-            });
-
-            $('[data-action="move-next"]').click(() => {
-                cal.next();
-                updateRenderRange();
-            });
-
-            // Load events
-            cal.createEvents(calendarEvents);
-            updateRenderRange();
         });
     </script>
 @endpush

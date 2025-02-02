@@ -71,6 +71,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
     Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
+    Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
     Route::post('/pengunduran', [PengunduranController::class, 'store'])->name('pengunduran.store');
 
@@ -85,6 +86,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
+    Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');

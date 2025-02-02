@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pengaduan;
 use App\Models\Pengunduran;
 use App\Models\Travel;
 use Illuminate\Http\Request;
@@ -11,6 +12,13 @@ use Illuminate\Support\Facades\Auth;
 
 class PengunduranController extends Controller
 {
+
+    public function index()
+    {
+        $pengunduran = Pengunduran::with('user')->get();
+        return view('kanwil.listPengunduran', compact('pengunduran'));
+    }
+
     public function create()
     {
         // Check if user has role 'user' (travel)
@@ -23,7 +31,6 @@ class PengunduranController extends Controller
 
     public function store(Request $request)
     {
-        // Validate that the user has role 'user' (travel)
         if (Auth::user()->role !== 'user') {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk melakukan pengunduran diri');
         }
@@ -38,7 +45,8 @@ class PengunduranController extends Controller
 
         Pengunduran::create([
             'user_id' => Auth::id(),
-            'berkas_pengunduran' => $fileName
+            'berkas_pengunduran' => $fileName,
+            'status' => 'pending'  // Set default status
         ]);
 
         return redirect()->route('pengunduran.create')

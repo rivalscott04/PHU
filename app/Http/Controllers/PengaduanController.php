@@ -40,7 +40,7 @@ class PengaduanController extends Controller
 
     public function index()
     {
-        $pengaduan = Pengaduan::with('travel')->get();  /
+        $pengaduan = Pengaduan::with('travel')->get();
         return view('pengaduan.index', compact('pengaduan'));
     }
 }

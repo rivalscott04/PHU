@@ -59,6 +59,14 @@
                         <span key="t-dashboards">Keberangkatan</span>
                     </a>
                 </li>
+                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                    <li>
+                        <a href="{{ route('pengunduran') }}" class="waves-effect">
+                            <i class="bx bx-send"></i>
+                            <span key="t-dashboards">Pengunduran</span>
+                        </a>
+                    </li>
+                @endif
                 <li>
                     <a href="{{ route('pengunduran.create') }}" class="waves-effect">
                         <i class="bx bx-send"></i>
