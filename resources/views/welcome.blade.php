@@ -231,11 +231,11 @@
 
         .close-btn {
             position: absolute;
-            right: 15px;
-            top: 15px;
+            right: 8px;
+            top: -5px;
             background: none;
             border: none;
-            font-size: 20px;
+            font-size: 45px;
             cursor: pointer;
             color: var(--text-secondary);
         }
@@ -522,9 +522,6 @@
 
             <!-- Event Popup -->
             <div id="eventPopup" class="event-popup">
-                <button class="close-btn" onclick="closePopup()">
-                    <i class="fas fa-times"></i>
-                </button>
                 <div id="popupContent" class="event-details"></div>
             </div>
 
@@ -1136,7 +1133,6 @@
                 </div>
                 <div class="detail-value pl-6">
                     <div class="text-gray-700">${departureDate}</div>
-                    <div class="text-sm text-gray-500">${formattedRawDate}</div>
                 </div>
             </div>
 

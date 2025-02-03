@@ -378,7 +378,6 @@
                 </div>
                 <div class="detail-value">
                     ${departureDate}<br>
-                    <small>${event.extendedProps.returndate}</small>
                 </div>
             </div>
             <div class="detail-item">
