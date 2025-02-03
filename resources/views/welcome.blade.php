@@ -26,6 +26,7 @@
     <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet" />
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
@@ -355,6 +356,10 @@
             .year-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .close-btn {
+                right: 4px;
+            }
         }
     </style>
 </head>
@@ -387,6 +392,25 @@
             <img src="{{ asset('img/hero-2.jpg') }}" alt="" class="hero-bg" />
 
             <div class="container">
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="row gy-4 justify-content-between">
                     <div class="col-lg-4 order-lg-last hero-img" data-aos="zoom-out" data-aos-delay="100">
                         <img src="{{ asset('img/hero-1.png') }}" class="img-fluid animated" alt="" />
@@ -807,8 +831,9 @@
                     </div>
 
                     <div class="col-lg-8">
-                        <form action="{{ route('pengaduan.store') }}" method="post" class="php-email-form"
-                            data-aos="fade-up" data-aos-delay="200" enctype="multipart/form-data">
+                        <form id="pengaduanForm" action="{{ route('pengaduan.store') }}" method="post"
+                            class="php-email-form" data-aos="fade-up" data-aos-delay="200"
+                            enctype="multipart/form-data">
                             @csrf
                             <div class="row gy-4">
                                 <div class="col-md-6">
@@ -842,7 +867,10 @@
                                     <div class="error-message"></div>
                                     <div class="sent-message">Pengaduan Anda telah terkirim. Terima kasih!</div>
                                     <div class="mt-3">
-                                        <button type="submit">Kirim Pengaduan</button>
+                                        <button type="button"
+                                            class="btn btn-success rounded-pill px-3 py-2 border border-0"
+                                            style="background-color: #1acc8d" onclick="confirmSubmit()">Kirim
+                                            Pengaduan</button>
                                     </div>
                                 </div>
                             </div>
@@ -1189,6 +1217,22 @@
         function closePopup() {
             document.getElementById('eventPopup').style.display = 'none';
             document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        function confirmSubmit() {
+            Swal.fire({
+                title: 'Apakah anda yakin mengirim aduan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, kirim!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('pengaduanForm').submit();
+                }
+            })
         }
     </script>
 </body>
