@@ -130,7 +130,7 @@ class BAPController extends Controller
         if ($user->role === 'user') {
             $data = BAP::all();
         } else if ($user->role === 'admin' || $user->role === 'kabupaten') {
-            $data = BAP::all();
+            $data = BAP::where('status', '<>', 'pending')->get();
         } else {
             $data = collect();
         }
