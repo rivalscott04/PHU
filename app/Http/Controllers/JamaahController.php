@@ -37,7 +37,7 @@ class JamaahController extends Controller
 
         try {
             Jamaah::create($request->all());
-            return redirect()->route('jamaah.index')->with('success', 'Data jamaah berhasil ditambahkan!');
+            return redirect()->route('jamaah')->with('success', 'Data jamaah berhasil ditambahkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
