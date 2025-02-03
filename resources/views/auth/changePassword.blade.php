@@ -4,7 +4,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Change Password | Skote - Admin & Dashboard Template</title>
+    <title>Ganti Password | UHK Kanwil</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -43,8 +43,8 @@
                             <div class="row">
                                 <div class="col-7">
                                     <div class="text-primary p-4">
-                                        <h5 class="text-primary">Change Your Password</h5>
-                                        <p>Update your default password to continue.</p>
+                                        <h5 class="text-primary">Ganti Password Anda</h5>
+                                        <p>Update password default anda.</p>
                                     </div>
                                 </div>
                                 <div class="col-5 align-self-end">
@@ -77,7 +77,7 @@
                                     method="POST">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="new-password" class="form-label">New Password</label>
+                                        <label for="new-password" class="form-label">Password Baru</label>
                                         <div class="input-group auth-pass-inputgroup">
                                             <input type="password" class="form-control" id="new-password"
                                                 name="password" placeholder="Enter new password" required>
@@ -87,7 +87,7 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="confirm-password" class="form-label">Confirm Password</label>
+                                        <label for="confirm-password" class="form-label">Konfirmasi Password</label>
                                         <div class="input-group auth-pass-inputgroup">
                                             <input type="password" class="form-control" id="confirm-password"
                                                 name="password_confirmation" placeholder="Confirm new password"

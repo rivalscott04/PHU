@@ -5,11 +5,11 @@
                 <script>
                     document.write(new Date().getFullYear());
                 </script>
-                © Skote.
+                © Kanwil Kemenag NTB.
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end d-none d-sm-block">
-                    Design & Develop by Themesbrand
+                    Didesain dan dibuat dengan <i class="mdi mdi-heart text-danger"></i>
                 </div>
             </div>
         </div>

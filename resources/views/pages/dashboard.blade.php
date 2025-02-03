@@ -21,9 +21,9 @@
                         <div class="col-7">
                             <div class="text-primary p-3">
                                 <h5 class="text-primary">
-                                    Welcome Back !
+                                    Selamat Datang Kembali !
                                 </h5>
-                                <p>Skote Dashboard</p>
+                                <p>KANWIL Dashboard</p>
                             </div>
                         </div>
                         <div class="col-5 align-self-end">
@@ -68,7 +68,7 @@
                                 </div>
                                 <div class="mt-4">
                                     <a href="javascript:void(0);" class="btn btn-primary waves-effect waves-light btn-sm">
-                                        View Profile
+                                        Lihat Profil
                                         <i class="mdi mdi-arrow-right ms-1"></i>
                                     </a>
                                 </div>
@@ -77,37 +77,6 @@
                     </div>
                 </div>
             </div>
-            <div class="card">
-                <div class="card-body">
-                    @if (auth()->user()->role === 'admin')
-                        <h4 class="card-title mb-4">Pendapatan</h4>
-                        <div class="row">
-                            <div class="col-sm-12">
-                                <p class="text-muted">Pendapatan</p>
-                                <h3>Rp {{ number_format($pendapatan, 2, ',', '.') }}</h3>
-                                <p class="text-muted">
-                                    <span class="text-success me-2">
-                                        12%
-                                        <i class="mdi mdi-arrow-up"></i>
-                                    </span>
-                                    Dari periode sebelumnya
-                                </p>
-
-                                <div class="mt-2 mb-2">
-                                    <a href="javascript:void(0);" class="btn btn-primary waves-effect waves-light btn-sm">
-                                        Lihat Detail
-                                        <i class="mdi mdi-arrow-right ms-1"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <p class="text-muted mb-0">
-                            Kami merancang solusi digital, grafis, dan dimensional untuk mendukung bisnis Anda.
-                        </p>
-                    @endif
-                </div>
-            </div>
-
         </div>
         <div class="col-xl-8">
             <div class="row">
@@ -116,7 +85,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">Jamaah Haji</p>
+                                    <p class="text-muted fw-medium">Jumlah Jamaah</p>
                                     <h4 class="mb-0">{{ $jamaahHaji }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
