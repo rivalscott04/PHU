@@ -167,9 +167,5 @@
         </div>
     </div>
     <!-- end row -->
-
-
-
-
     <!-- end modal -->
 @endsection

@@ -37,7 +37,7 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Pusat" class="form-label">Pusat</label>
+                                <label for="Pusat" class="form-label">No SK/NIB Pusat</label>
                                 <input type="text" class="form-control" id="Pusat" name="Pusat" required>
                             </div>
                             <div class="col-md-6 mb-3">
