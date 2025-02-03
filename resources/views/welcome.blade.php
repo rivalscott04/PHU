@@ -98,8 +98,8 @@
 
         .detail-item {
             display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            align-items: start;
+            flex-direction: column;
         }
 
         .detail-item i {
@@ -190,7 +190,7 @@
         .event-popup {
             display: none;
             position: fixed;
-            top: 55%;
+            top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             background: white;
@@ -214,8 +214,8 @@
         }
 
         .detail-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #eee;
         }
 
@@ -1110,63 +1110,84 @@
                 day: 'numeric'
             });
 
+            // Format the raw date
+            const rawDate = event.extendedProps.returndate;
+            const formattedRawDate = rawDate.split('T')[0]; // Extract YYYY-MM-DD
+
             content.innerHTML = `
-            <h3 style="margin-bottom: 20px; color: var(--primary-color);">
-                ${event.title}
-            </h3>
+        <h3 class="text-primary text-xl font-semibold mb-6">
+            ${event.title}
+            <button class="close-btn" onclick="closePopup()">×</button>
+        </h3>
+
+        <div class="space-y-4">
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-user"></i> Penanggung Jawab
+                <div class="detail-label mb-2">
+                    <i class="fas fa-user text-gray-500"></i> Penanggung Jawab
                 </div>
-                <div class="detail-value">
+                <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.name} (${event.extendedProps.jabatan})
                 </div>
             </div>
+
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane-arrival"></i> Tanggal Kepulangan
+                <div class="detail-label mb-2">
+                    <i class="fas fa-plane-arrival text-gray-500"></i> Tanggal Kepulangan
                 </div>
-                <div class="detail-value">
-                    ${departureDate}<br>
-                    <small>${event.extendedProps.returndate}</small>
+                <div class="detail-value pl-6">
+                    <div class="text-gray-700">${departureDate}</div>
+                    <div class="text-sm text-gray-500">${formattedRawDate}</div>
                 </div>
             </div>
+
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-users"></i> Jumlah Jamaah
+                <div class="detail-label mb-2">
+                    <i class="fas fa-users text-gray-500"></i> Jumlah Jamaah
                 </div>
-                <div class="detail-value">
+                <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.people} orang
                 </div>
             </div>
+
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-clock"></i> Hari
+                <div class="detail-label mb-2">
+                    <i class="fas fa-clock text-gray-500"></i> Hari
                 </div>
-                <div class="detail-value">
+                <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.package} Hari
                 </div>
             </div>
+
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane"></i> Maskapai Keberangkatan
+                <div class="detail-label mb-2">
+                    <i class="fas fa-plane text-gray-500"></i> Maskapai Keberangkatan
                 </div>
-                <div class="detail-value">
+                <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.airlines}
                 </div>
             </div>
+
             <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane"></i> Maskapai Kepulangan
+                <div class="detail-label mb-2">
+                    <i class="fas fa-plane text-gray-500"></i> Maskapai Kepulangan
                 </div>
-                <div class="detail-value">
+                <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.airlines2}
                 </div>
             </div>
-        `;
+        </div>
+    `;
 
             overlay.style.display = 'block';
             popup.style.display = 'block';
+        }
+
+        function closePopup() {
+            const popup = document.getElementById('eventPopup');
+            const overlay = document.getElementById('popupOverlay');
+
+            overlay.style.display = 'none';
+            popup.style.display = 'none';
         }
 
         function closePopup() {
