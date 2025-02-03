@@ -45,7 +45,7 @@
                                 <input type="date" class="form-control" id="Tanggal" name="Tanggal" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Jml_Akreditasi" class="form-label">Jumlah Akreditasi</label>
+                                <label for="Jml_Akreditasi" class="form-label">Nilai Akreditasi</label>
                                 <input type="text" class="form-control" id="Jml_Akreditasi" name="Jml_Akreditasi"
                                     required>
                             </div>
