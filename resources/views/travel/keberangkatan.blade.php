@@ -289,7 +289,7 @@
                     multiMonth: 'Tahun'
                 },
                 events: {
-                    url: '{{ route('calendar.events') }}',
+                    url: window.location.protocol + '//' + window.location.host + '/keberangkatan/events',
                     method: 'GET',
                     failure: function() {
                         alert('Error mengambil data keberangkatan!');
