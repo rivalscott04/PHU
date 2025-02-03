@@ -1151,7 +1151,7 @@
 
             <div class="detail-item">
                 <div class="detail-label mb-2">
-                    <i class="fas fa-clock text-gray-500"></i> Hari
+                    <i class="fas fa-clock text-gray-500"></i> Durasi
                 </div>
                 <div class="detail-value text-gray-700 pl-6">
                     ${event.extendedProps.package} Hari

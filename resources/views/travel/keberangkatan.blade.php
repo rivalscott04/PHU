@@ -391,7 +391,7 @@
             </div>
             <div class="detail-item">
                 <div class="detail-label">
-                    <i class="fas fa-clock"></i> Hari
+                    <i class="fas fa-clock"></i> Durasi
                 </div>
                 <div class="detail-value">
                     ${event.extendedProps.package} Hari
