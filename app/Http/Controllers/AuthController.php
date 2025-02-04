@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Jamaah;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -17,7 +18,8 @@ class AuthController extends Controller
 
     public function showForm()
     {
-        return view('kanwil.addTravelAkun');
+        $travels = TravelCompany::all();
+        return view('kanwil.addTravelAkun', compact('travels'));
     }
 
     // Method untuk menambah user baru
@@ -25,7 +27,7 @@ class AuthController extends Controller
     {
         // Validasi input dari request
         $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:255',
+            'travel_id' => 'required|exists:travels,id',
             'email' => 'required|string|email|max:255|unique:users',
             'role' => 'required|string|in:user'
         ]);
@@ -37,12 +39,20 @@ class AuthController extends Controller
                 ->withInput();
         }
 
+        // Ambil data travel untuk mendapatkan Penyelenggara
+        $travel = TravelCompany::find($request->travel_id);
+        if (!$travel) {
+            return redirect()->back()
+                ->withErrors(['travel_id' => 'Travel tidak ditemukan'])
+                ->withInput();
+        }
+
         $user = User::create([
-            'username' => $request->username,
+            'username' => $travel->Penyelenggara,
             'email' => $request->email,
             'password' => $this->defaultPassword,
+            'travel_id' => $travel->id
         ]);
-
 
         // Kembalikan response sukses
         return redirect()->route('form.addUser')->with('success', 'Akun berhasil dibuat.');
@@ -86,7 +96,7 @@ class AuthController extends Controller
         $user->is_password_changed = true;
         $user->save();
 
-        return redirect()->route('home')->with('success', 'Password Anda berhasil diperbarui.');
+        return redirect()->route('bap')->with('success', 'Password Anda berhasil diperbarui.');
     }
 
     public function showLanding()
@@ -95,18 +105,33 @@ class AuthController extends Controller
             ->orderBy('datetime', 'asc')
             ->get();
 
-        $travelData = TravelCompany::select('Penyelenggara', 'Jml_Akreditasi', 'Telepon', 'kab_kota')
-            ->get();
+        $travelData = TravelCompany::all();
+
+        $jamaahHaji = DB::table('jamaah')
+            ->where('jenis_jamaah', 'haji')
+            ->count();
+
+        // Menghitung jumlah jamaah umrah
+        $jamaahUmrah = DB::table('jamaah')
+            ->where('jenis_jamaah', 'umrah')
+            ->count();
 
         // Add these counts
         $stats = [
             'travelCount' => TravelCompany::count(),
-            'jamaahCount' => Jamaah::count(),
+            'jamaahHajiCount' =>  $jamaahHaji,
+            'jamaahUmrahCount' =>  $jamaahUmrah,
             'airlineCount' => Bap::distinct('airlines')->count()
         ];
 
         $travels = TravelCompany::all();
 
         return view('welcome', compact('bapData', 'travelData', 'stats', 'travels'));
+    }
+
+    public function showListTravel()
+    {
+        $data = TravelCompany::all();
+        return view('travel-list', compact('data'));
     }
 }

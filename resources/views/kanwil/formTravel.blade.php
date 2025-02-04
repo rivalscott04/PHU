@@ -29,6 +29,10 @@
                                 <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label for="Status" class="form-label">Status</label>
                                 <select class="form-control" id="Status" name="Status" required>
                                     <option value="">Pilih Status</option>

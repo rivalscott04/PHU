@@ -59,4 +59,9 @@ class TravelCompany extends Model
     {
         return $this->hasMany(Pengaduan::class, 'travels_id');
     }
+
+    public function user()
+    {
+        return $this->hasOne(User::class, 'travel_id');
+    }
 }

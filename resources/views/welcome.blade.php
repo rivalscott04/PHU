@@ -32,22 +32,37 @@
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
 
     <style>
-        .travel-companies {
-            background-color: #f8f9fa;
+        .travel-stats-card {
+            transition: all 0.3s ease-in-out;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        .travel-card {
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 1.5rem;
-            height: 100%;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .travel-stats-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            cursor: pointer;
         }
 
-        .travel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        .travel-stats-card .card-body {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .travel-stats-card:hover .bi {
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .company-header {
@@ -562,46 +577,26 @@
                 <div class="container section-title" data-aos="fade-up">
                     <h2>Travel</h2>
                     <div>
-                        <span>Travel Tersedia</span>
-                        <span class="description-title"></span>
+                        <span>Jumlah Travel Tersedia</span>
                     </div>
                 </div>
-                <div class="row g-4">
-                    @foreach ($travelData as $index => $travel)
-                        <div class="col-lg-3 col-md-6 travel-item {{ $index >= 4 ? 'hidden-item' : '' }}">
-                            <div class="travel-card">
-                                <div class="company-header">
-                                    <div class="company-icon">
-                                        <i class="bi bi-building-fill"></i>
-                                    </div>
-                                </div>
 
-                                <h3 class="company-name">{{ $travel->Penyelenggara }}</h3>
-
-                                <div class="company-details">
-                                    <div class="accreditation">
-                                        <i class="bi bi-award-fill"></i>
-                                        <span>Akreditasi: {{ $travel->Jml_Akreditasi ?: '-' }}</span>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <a href="{{ route('list.travel') }}" class="text-decoration-none">
+                            <div class="card travel-stats-card shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <div class="display-1 mb-3">
+                                        <i class="bi bi-building text-primary"></i>
                                     </div>
-                                    <div class="detail-item">
-                                        <i class="bi bi-telephone-fill"></i>
-                                        <span>{{ $travel->Telepon }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        <span>{{ $travel->kab_kota }}</span>
-                                    </div>
+                                    <h3 class="card-title mb-2">Total Travel</h3>
+                                    <p class="display-4 mb-0 fw-bold text-primary">{{ $stats['travelCount'] }}</p>
+                                    <p class="text-muted mt-2 mb-0">Travel Terdaftar</p>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                @if (count($travelData) > 4)
-                    <div class="text-center mt-4">
-                        <button id="showMoreBtn" class="btn btn-outline-primary">Show More</button>
+                        </a>
                     </div>
-                @endif
+                </div>
             </div>
         </section>
 
@@ -609,7 +604,7 @@
         <section id="stats" class="stats section light-background">
             <div class="container" data-aos="fade-up" data-aos-delay="100">
                 <div class="row gy-4">
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-building-fill"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['travelCount'] }}"
@@ -619,17 +614,27 @@
                     </div>
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-people"></i>
                         <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahCount'] }}"
+                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahHajiCount'] }}"
                                 data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Jamaah</p>
+                            <p>Jumlah Jamaah Haji</p>
                         </div>
                     </div>
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                        <i class="bi bi-people"></i>
+                        <div class="stats-item">
+                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahUmrahCount'] }}"
+                                data-purecounter-duration="1" class="purecounter"></span>
+                            <p>Jumlah Jamaah Umrah</p>
+                        </div>
+                    </div>
+                    <!-- End Stats Item -->
+
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-airplane"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['airlineCount'] }}"

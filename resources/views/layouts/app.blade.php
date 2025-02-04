@@ -71,7 +71,7 @@
     <script src="{{ asset('js/pages/sweet-alerts.init.js') }}"></script>
 
     <!-- dashboard init -->
-    <script src="{{ asset('js/pages/dashboard.init.js') }}"></script>
+    {{-- <script src="{{ asset('js/pages/dashboard.init.js') }}"></script> --}}
 
     <!-- App js -->
     <script src="{{ asset('js/app.js') }}"></script>

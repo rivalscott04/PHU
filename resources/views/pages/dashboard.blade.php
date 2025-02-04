@@ -86,7 +86,7 @@
                             <div class="d-flex">
                                 <div class="flex-grow-1">
                                     <p class="text-muted fw-medium">Jumlah Jamaah</p>
-                                    <h4 class="mb-0">{{ $jamaahHaji }}</h4>
+                                    <h4 class="mb-0">{{ $jamaah }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
                                     <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
@@ -144,21 +144,8 @@
                 <div class="card-body">
                     <div class="d-sm-flex flex-wrap">
                         <h4 class="card-title mb-4">
-                            Email Sent
+                            Jumlah Jamaah
                         </h4>
-                        <div class="ms-auto">
-                            <ul class="nav nav-pills">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">Week</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#">Month</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link active" href="#">Year</a>
-                                </li>
-                            </ul>
-                        </div>
                     </div>
 
                     <div id="stacked-column-chart" class="apex-charts" dir="ltr"></div>
@@ -169,3 +156,126 @@
     <!-- end row -->
     <!-- end modal -->
 @endsection
+
+@push('js')
+    <script>
+        // Get the data passed from PHP
+        const monthlyData = {!! json_encode($monthlyData) !!};
+
+        // Stacked Column Chart
+        // Stacked Column Chart
+        const stackedOptions = {
+            chart: {
+                height: 360,
+                type: "bar",
+                stacked: true,
+                toolbar: {
+                    show: false
+                },
+                zoom: {
+                    enabled: true
+                },
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: "15%",
+                    endingShape: "rounded"
+                },
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function(val) {
+                    return Math.round(val); // Membulatkan angka
+                }
+            },
+            series: [{
+                name: "Total Jamaah",
+                data: monthlyData.map(item => item.total)
+            }],
+            xaxis: {
+                categories: monthlyData.map(item => item.month)
+            },
+            yaxis: {
+                labels: {
+                    formatter: function(val) {
+                        return Math.round(val); // Membulatkan angka pada sumbu Y
+                    }
+                }
+            },
+            colors: ["#556ee6"],
+            legend: {
+                position: "bottom"
+            },
+            fill: {
+                opacity: 1
+            },
+            tooltip: {
+                y: {
+                    formatter: function(val) {
+                        return Math.round(val); // Membulatkan angka pada tooltip
+                    }
+                }
+            }
+        };
+
+        const stackedChart = new ApexCharts(
+            document.querySelector("#stacked-column-chart"),
+            stackedOptions
+        );
+        stackedChart.render();
+
+        // Radial Bar Chart
+        const radialOptions = {
+            chart: {
+                height: 200,
+                type: "radialBar",
+                offsetY: -10
+            },
+            plotOptions: {
+                radialBar: {
+                    startAngle: -135,
+                    endAngle: 135,
+                    dataLabels: {
+                        name: {
+                            fontSize: "13px",
+                            color: undefined,
+                            offsetY: 60
+                        },
+                        value: {
+                            offsetY: 22,
+                            fontSize: "16px",
+                            color: undefined,
+                            formatter: function(val) {
+                                return Math.round(val) + "%"; // Membulatkan persentase
+                            },
+                        },
+                    },
+                },
+            },
+            colors: ["#556ee6"],
+            fill: {
+                type: "gradient",
+                gradient: {
+                    shade: "dark",
+                    shadeIntensity: 0.15,
+                    inverseColors: false,
+                    opacityFrom: 1,
+                    opacityTo: 1,
+                    stops: [0, 50, 65, 91],
+                },
+            },
+            stroke: {
+                dashArray: 4
+            },
+            series: [{{ $growthPercentage }}],
+            labels: ["Pertumbuhan Bulanan"]
+        };
+
+        const radialChart = new ApexCharts(
+            document.querySelector("#radialBar-chart"),
+            radialOptions
+        );
+        radialChart.render();
+    </script>
+@endpush
