@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'admin',
             'firstname' => 'Admin',
             'lastname' => 'Admin',
+            'role' => 'admin',
             'email' => 'admin@argon.com',
             'password' => bcrypt('secret')
         ]);
