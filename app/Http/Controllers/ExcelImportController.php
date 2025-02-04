@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\DataImport;
-use App\Models\Data;
 
 class ExcelImportController extends Controller
 {
@@ -16,12 +15,16 @@ class ExcelImportController extends Controller
 
     public function import(Request $request)
     {
+        // Validasi file
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 
-        Excel::import(new DataImport, $request->file('file'));
-
-        return redirect()->back()->with('success', 'Data Imported Successfully');
+        try {
+            Excel::import(new DataImport, $request->file('file'));
+            return redirect()->back()->with('success', 'Data dan akun user berhasil diimport.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }

@@ -35,7 +35,7 @@ class PengaduanController extends Controller
             'berkas_aduan' => $berkasPath,
         ]);
 
-        return redirect()->route('pengaduan.create')->with('success', 'Pengaduan berhasil dikirim!');
+        return redirect()->back()->with('success', 'Pengaduan berhasil dikirim!');
     }
 
     public function index()

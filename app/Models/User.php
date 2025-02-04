@@ -18,6 +18,7 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'travel_id',
         'username',
         'firstname',
         'lastname',
@@ -59,5 +60,10 @@ class User extends Authenticatable
     public function setPasswordAttribute($value)
     {
         $this->attributes['password'] = bcrypt($value);
+    }
+
+    public function travel()
+    {
+        return $this->belongsTo(TravelCompany::class, 'travel_id');
     }
 }

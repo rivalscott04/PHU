@@ -40,7 +40,7 @@ Route::get('/jamaah/template-test', function () {
 
 Route::get('/', [AuthController::class, 'showLanding']);
 
-
+Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('list.travel');
 
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
@@ -61,6 +61,7 @@ Route::get('/logout-redirect', function () {
 })->name('logout.redirect');
 
 Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
+Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -77,7 +78,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
-    Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');

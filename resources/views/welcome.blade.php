@@ -26,27 +26,43 @@
     <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet" />
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
 
     <style>
-        .travel-companies {
-            background-color: #f8f9fa;
+        .travel-stats-card {
+            transition: all 0.3s ease-in-out;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        .travel-card {
-            background: #ffffff;
-            border-radius: 10px;
-            padding: 1.5rem;
-            height: 100%;
-            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
+        .travel-stats-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
+            cursor: pointer;
         }
 
-        .travel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+        .travel-stats-card .card-body {
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .travel-stats-card:hover .bi {
+            animation: bounce 0.5s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
         }
 
         .company-header {
@@ -355,6 +371,10 @@
             .year-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+
+            .close-btn {
+                right: 4px;
+            }
         }
     </style>
 </head>
@@ -387,6 +407,25 @@
             <img src="{{ asset('img/hero-2.jpg') }}" alt="" class="hero-bg" />
 
             <div class="container">
+                @if (session('success'))
+                    <div class="alert alert-success">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="alert alert-danger">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul>
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <div class="row gy-4 justify-content-between">
                     <div class="col-lg-4 order-lg-last hero-img" data-aos="zoom-out" data-aos-delay="100">
                         <img src="{{ asset('img/hero-1.png') }}" class="img-fluid animated" alt="" />
@@ -538,46 +577,26 @@
                 <div class="container section-title" data-aos="fade-up">
                     <h2>Travel</h2>
                     <div>
-                        <span>Travel Tersedia</span>
-                        <span class="description-title"></span>
+                        <span>Jumlah Travel Tersedia</span>
                     </div>
                 </div>
-                <div class="row g-4">
-                    @foreach ($travelData as $index => $travel)
-                        <div class="col-lg-3 col-md-6 travel-item {{ $index >= 4 ? 'hidden-item' : '' }}">
-                            <div class="travel-card">
-                                <div class="company-header">
-                                    <div class="company-icon">
-                                        <i class="bi bi-building-fill"></i>
-                                    </div>
-                                </div>
 
-                                <h3 class="company-name">{{ $travel->Penyelenggara }}</h3>
-
-                                <div class="company-details">
-                                    <div class="accreditation">
-                                        <i class="bi bi-award-fill"></i>
-                                        <span>Akreditasi: {{ $travel->Jml_Akreditasi ?: '-' }}</span>
+                <div class="row justify-content-center">
+                    <div class="col-md-4">
+                        <a href="{{ route('list.travel') }}" class="text-decoration-none">
+                            <div class="card travel-stats-card shadow-sm">
+                                <div class="card-body text-center p-4">
+                                    <div class="display-1 mb-3">
+                                        <i class="bi bi-building text-primary"></i>
                                     </div>
-                                    <div class="detail-item">
-                                        <i class="bi bi-telephone-fill"></i>
-                                        <span>{{ $travel->Telepon }}</span>
-                                    </div>
-                                    <div class="detail-item">
-                                        <i class="bi bi-geo-alt-fill"></i>
-                                        <span>{{ $travel->kab_kota }}</span>
-                                    </div>
+                                    <h3 class="card-title mb-2">Total Travel</h3>
+                                    <p class="display-4 mb-0 fw-bold text-primary">{{ $stats['travelCount'] }}</p>
+                                    <p class="text-muted mt-2 mb-0">Travel Terdaftar</p>
                                 </div>
                             </div>
-                        </div>
-                    @endforeach
-                </div>
-
-                @if (count($travelData) > 4)
-                    <div class="text-center mt-4">
-                        <button id="showMoreBtn" class="btn btn-outline-primary">Show More</button>
+                        </a>
                     </div>
-                @endif
+                </div>
             </div>
         </section>
 
@@ -585,7 +604,7 @@
         <section id="stats" class="stats section light-background">
             <div class="container" data-aos="fade-up" data-aos-delay="100">
                 <div class="row gy-4">
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-building-fill"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['travelCount'] }}"
@@ -595,17 +614,27 @@
                     </div>
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-people"></i>
                         <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahCount'] }}"
+                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahHajiCount'] }}"
                                 data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Jamaah</p>
+                            <p>Jumlah Jamaah Haji</p>
                         </div>
                     </div>
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                        <i class="bi bi-people"></i>
+                        <div class="stats-item">
+                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahUmrahCount'] }}"
+                                data-purecounter-duration="1" class="purecounter"></span>
+                            <p>Jumlah Jamaah Umrah</p>
+                        </div>
+                    </div>
+                    <!-- End Stats Item -->
+
+                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-airplane"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['airlineCount'] }}"
@@ -807,8 +836,9 @@
                     </div>
 
                     <div class="col-lg-8">
-                        <form action="{{ route('pengaduan.store') }}" method="post" class="php-email-form"
-                            data-aos="fade-up" data-aos-delay="200" enctype="multipart/form-data">
+                        <form id="pengaduanForm" action="{{ route('pengaduan.store') }}" method="post"
+                            class="php-email-form" data-aos="fade-up" data-aos-delay="200"
+                            enctype="multipart/form-data">
                             @csrf
                             <div class="row gy-4">
                                 <div class="col-md-6">
@@ -842,7 +872,10 @@
                                     <div class="error-message"></div>
                                     <div class="sent-message">Pengaduan Anda telah terkirim. Terima kasih!</div>
                                     <div class="mt-3">
-                                        <button type="submit">Kirim Pengaduan</button>
+                                        <button type="button"
+                                            class="btn btn-success rounded-pill px-3 py-2 border border-0"
+                                            style="background-color: #1acc8d" onclick="confirmSubmit()">Kirim
+                                            Pengaduan</button>
                                     </div>
                                 </div>
                             </div>
@@ -1189,6 +1222,22 @@
         function closePopup() {
             document.getElementById('eventPopup').style.display = 'none';
             document.getElementById('popupOverlay').style.display = 'none';
+        }
+
+        function confirmSubmit() {
+            Swal.fire({
+                title: 'Apakah anda yakin mengirim aduan?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, kirim!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('pengaduanForm').submit();
+                }
+            })
         }
     </script>
 </body>

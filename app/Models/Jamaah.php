@@ -17,7 +17,8 @@ class Jamaah extends Model
         'nik',
         'nama',
         'alamat',
-        'nomor_hp'
+        'nomor_hp',
+        'jenis_jamaah',
     ];
 
     protected $dates = ['deleted_at'];

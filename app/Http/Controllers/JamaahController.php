@@ -36,7 +36,15 @@ class JamaahController extends Controller
         ]);
 
         try {
-            Jamaah::create($request->all());
+            // Ambil data travel dari user yang sedang login
+            $user = auth()->user();
+            $travel = $user->travel;
+
+            // Siapkan data yang akan disimpan
+            $jamaahData = $request->all();
+            $jamaahData['jenis_jamaah'] = $travel->Status === 'PPIU' ? 'umrah' : 'haji';
+
+            Jamaah::create($jamaahData);
             return redirect()->route('jamaah')->with('success', 'Data jamaah berhasil ditambahkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

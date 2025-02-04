@@ -8,16 +8,38 @@
                     <h5 class="mb-0">Form Tambah User</h5>
                 </div>
                 <div class="card-body">
+                    @if ($errors->any())
+                        <div class="alert alert-danger">
+                            <ul class="mb-0">
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    @if (session('success'))
+                        <div class="alert alert-success">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
                     <form method="POST" action="{{ route('addUser') }}">
                         @csrf
                         <div class="row">
                             <div class="col-12 mb-3">
-                                <label for="username" class="form-label">Nama</label>
-                                <input type="text" class="form-control" id="username" name="username" required>
+                                <label for="travel_id" class="form-label">Pilih Travel</label>
+                                <select class="form-select" id="travel_id" name="travel_id" required>
+                                    <option value="">Pilih Travel</option>
+                                    @foreach ($travels as $travel)
+                                        <option value="{{ $travel->id }}">{{ $travel->Penyelenggara }}</option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="{{ old('email') }}" required>
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="role" class="form-label">Role</label>
