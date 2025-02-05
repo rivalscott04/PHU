@@ -37,11 +37,19 @@ class DashboardController extends Controller
         $growthPercentage = $previousMonthCount > 0
             ? round(($currentMonthCount - $previousMonthCount) / $previousMonthCount * 100)
             : 0;
+
         // Mengambil bulan saat ini
         $currentMonth = Carbon::now()->month;
 
-        // Menghitung total jamaah pada bulan ini
-        $jamaah = DB::table('jamaah')
+        // Menghitung jumlah jamaah haji
+        $jamaahHaji = DB::table('jamaah')
+            ->where('jenis_jamaah', 'haji')
+            ->whereMonth('created_at', $currentMonth)
+            ->count();
+
+        // Menghitung jumlah jamaah umrah
+        $jamaahUmrah = DB::table('jamaah')
+            ->where('jenis_jamaah', 'umrah')
             ->whereMonth('created_at', $currentMonth)
             ->count();
 
@@ -74,7 +82,8 @@ class DashboardController extends Controller
 
         // Mengirim data ke view
         return view('pages.dashboard', [
-            'jamaah' => $jamaah,
+            'jamaahHaji' => $jamaahHaji,
+            'jamaahUmrah' => $jamaahUmrah,
             'jumlahAirlines' => $jumlahAirlines,
             'pendapatan' => $pendapatan,
             'username' => $user->username,

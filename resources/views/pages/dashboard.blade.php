@@ -85,8 +85,8 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">Jumlah Jamaah</p>
-                                    <h4 class="mb-0">{{ $jamaah }}</h4>
+                                    <p class="text-muted fw-medium">Jamaah Haji</p>
+                                    <h4 class="mb-0">{{ $jamaahHaji }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
                                     <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
@@ -104,13 +104,13 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">Jumlah Airlines</p>
-                                    <h4 class="mb-0">{{ $jumlahAirlines }}</h4>
+                                    <p class="text-muted fw-medium">Jamaah Umrah</p>
+                                    <h4 class="mb-0">{{ $jamaahUmrah }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
-                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-primary">
+                                    <div class="mini-stat-icon avatar-sm rounded-circle bg-success">
                                         <span class="avatar-title">
-                                            <i class="bx bxs-plane-alt font-size-24"></i>
+                                            <i class="bx bx-group font-size-24"></i>
                                         </span>
                                     </div>
                                 </div>
