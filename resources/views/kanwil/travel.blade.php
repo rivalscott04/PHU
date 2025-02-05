@@ -83,10 +83,12 @@
                                         <td class="text-sm font-weight-bold">{{ $item->Penyelenggara }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->Pusat }}</td>
                                         <td class="text-sm font-weight-bold">
-                                            {{ date('Y-m-d', strtotime($item->tanggal_sk)) }}</td>
+                                            {{ date('d-m-Y', strtotime($item->tanggal_sk)) }}
+                                        </td>
                                         <td class="text-sm font-weight-bold">{{ $item->Jml_Akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">
-                                            {{ date('Y-m-d', strtotime($item->tanggal_akreditasi)) }}</td>
+                                            {{ date('d-m-Y', strtotime($item->tanggal_akreditasi)) }}
+                                        </td>
                                         <td class="text-sm font-weight-bold">{{ $item->lembaga_akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">-</td>
                                         <td class="text-sm font-weight-bold">{{ $item->Pimpinan }}</td>

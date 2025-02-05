@@ -53,6 +53,30 @@
             animation: bounce 0.5s;
         }
 
+        .stats-item {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stats-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        i.bi {
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .stats-item:hover i.bi {
+            transform: scale(1.2);
+            color: #007bff;
+            /* Warna biru Bootstrap, bisa diganti */
+        }
+
+
         @keyframes bounce {
 
             0%,
@@ -572,49 +596,24 @@
             </div>
         </section>
 
-        <section class="travel-companies py-5" id="travel">
-            <div class="container">
-                <div class="container section-title" data-aos="fade-up">
-                    <h2>Travel</h2>
-                    <div>
-                        <span>Jumlah Travel Tersedia</span>
-                    </div>
-                </div>
-
-                <div class="row justify-content-center">
-                    <div class="col-md-4">
-                        <a href="{{ route('list.travel') }}" class="text-decoration-none">
-                            <div class="card travel-stats-card shadow-sm">
-                                <div class="card-body text-center p-4">
-                                    <div class="display-1 mb-3">
-                                        <i class="bi bi-building text-primary"></i>
-                                    </div>
-                                    <h3 class="card-title mb-2">Total Travel</h3>
-                                    <p class="display-4 mb-0 fw-bold text-primary">{{ $stats['travelCount'] }}</p>
-                                    <p class="text-muted mt-2 mb-0">Travel Terdaftar</p>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Stats Section -->
         <section id="stats" class="stats section light-background">
             <div class="container" data-aos="fade-up" data-aos-delay="100">
                 <div class="row gy-4">
-                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
-                        <i class="bi bi-building-fill"></i>
-                        <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['travelCount'] }}"
-                                data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Travel</p>
-                        </div>
+                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
+                        <a href="{{ route('list.travel') }}" class="text-decoration-none w-100 text-center">
+                            <i class="bi bi-building-fill"></i>
+                            <div class="stats-item">
+                                <span data-purecounter-start="0" data-purecounter-end="{{ $stats['travelCount'] }}"
+                                    data-purecounter-duration="1" class="purecounter"></span>
+                                <p>Jumlah Travel</p>
+                            </div>
+                        </a>
                     </div>
+
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-people"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahHajiCount'] }}"
@@ -624,22 +623,12 @@
                     </div>
                     <!-- End Stats Item -->
 
-                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
                         <i class="bi bi-people"></i>
                         <div class="stats-item">
                             <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahUmrahCount'] }}"
                                 data-purecounter-duration="1" class="purecounter"></span>
                             <p>Jumlah Jamaah Umrah</p>
-                        </div>
-                    </div>
-                    <!-- End Stats Item -->
-
-                    <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
-                        <i class="bi bi-airplane"></i>
-                        <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['airlineCount'] }}"
-                                data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Airline</p>
                         </div>
                     </div>
                     <!-- End Stats Item -->
