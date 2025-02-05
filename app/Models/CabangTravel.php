@@ -13,10 +13,14 @@ class CabangTravel extends Model
 
     protected $fillable = [
         'travel_id',
+        'kabupaten',
+        'pusat',
+        'pimpinan_pusat',
+        'alamat_pusat',
         'SK_BA',
         'tanggal',
         'pimpinan_cabang',
-        'alamat',
+        'alamat_cabang',
         'telepon',
     ];
 

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\CabangTravel;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use App\Imports\CabangTravelImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 
 class KanwilController extends Controller
@@ -60,23 +62,20 @@ class KanwilController extends Controller
     {
         // Validate input
         $validatedData = $request->validate([
-            'travel_pusat' => 'required|exists:travel,id',
-            'sk_ba' => 'required|string|max:255',
+            'travel_id' => 'required|exists:travels,id',
+            'kabupaten' => 'required|string|max:255',
+            'pusat' => 'required|string|max:255',
+            'pimpinan_pusat' => 'required|string|max:255',
+            'alamat_pusat' => 'required|string',
+            'SK_BA' => 'required|string|max:255',
             'tanggal' => 'required|date',
             'pimpinan_cabang' => 'required|string|max:255',
-            'alamat' => 'required|string',
+            'alamat_cabang' => 'required|string',
             'telepon' => 'required|string|max:20',
         ]);
 
         // Store cabang travel data
-        CabangTravel::create([
-            'travel_id' => $validatedData['travel_pusat'],
-            'SK_BA' => $validatedData['sk_ba'],
-            'tanggal' => $validatedData['tanggal'],
-            'pimpinan_cabang' => $validatedData['pimpinan_cabang'],
-            'alamat' => $validatedData['alamat'],
-            'telepon' => $validatedData['telepon'],
-        ]);
+        CabangTravel::create($validatedData);
 
         return redirect()->route('form.cabang_travel')->with('success', 'Cabang travel berhasil disimpan.');
     }
@@ -97,5 +96,30 @@ class KanwilController extends Controller
         }
 
         return response()->download($filePath, 'template-travel.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            Excel::import(new CabangTravelImport, $request->file('file'));
+            return redirect()->back()->with('success', 'Data berhasil diimport');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplateCabang()
+    {
+        $templatePath = public_path('template/template-cabang.xlsx');
+
+        if (!file_exists($templatePath)) {
+            return redirect()->back()->with('error', 'Template file tidak ditemukan');
+        }
+
+        return response()->download($templatePath, 'template-cabang.xlsx');
     }
 }

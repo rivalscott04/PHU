@@ -101,6 +101,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
     Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
     Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
+    Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
+    Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');

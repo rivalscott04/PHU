@@ -14,42 +14,38 @@
                             <thead>
                                 <tr class="text-center">
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 5%">
-                                        <div class="vertical-text">No.</div>
+                                        style="width: 5%">
+                                        No.
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 15%">
-                                        No SK / BA
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Travel
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        colspan="4">
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Kabupaten
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                         Pusat
                                     </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Pimpinan Cabang
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 15%">
-                                        Alamat Kantor Cabang
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Telepon
-                                    </th>
-                                </tr>
-                                <tr class="text-center">
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Penyelenggara
+                                        Pimpinan Pusat
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Alamat Pusat
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        No SK / BA
                                     </th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
                                         Tanggal
                                     </th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Jml Akre
+                                        Pimpinan Cabang
                                     </th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Lembaga Akred
+                                        Alamat Cabang
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
+                                        Telepon
                                     </th>
                                 </tr>
                             </thead>
@@ -57,14 +53,16 @@
                                 @foreach ($data as $item)
                                     <tr class="text-center">
                                         <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->SK_BA }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->travel->Penyelenggara }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->kabupaten }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->pusat }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->pimpinan_pusat }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->alamat_pusat }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->SK_BA }}</td>
                                         <td class="text-sm font-weight-bold">{{ date('Y-m-d', strtotime($item->tanggal)) }}
                                         </td>
-                                        <td class="text-sm font-weight-bold">{{ $item->travel->Jml_Akreditasi }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->travel->lembaga_akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->pimpinan_cabang }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->alamat }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->alamat_cabang }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->telepon }}</td>
                                     </tr>
                                 @endforeach
