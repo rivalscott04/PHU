@@ -98,6 +98,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
     Route::get('/travel/form', [KanwilController::class, 'showFormTravel'])->name('form.travel');
     Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
+    Route::get('/travel/{id}/edit', [KanwilController::class, 'edit'])->name('travel.edit');
+    Route::put('/travel/{id}', [KanwilController::class, 'update'])->name('travel.update');
     Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
     Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
     Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');

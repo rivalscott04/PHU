@@ -54,6 +54,10 @@
                                         rowspan="2" style="width: 10%">
                                         Kab/Kota
                                     </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                        rowspan="2" style="width: 10%">
+                                        Aksi
+                                    </th>
                                 </tr>
                                 <tr class="text-center">
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
@@ -83,11 +87,11 @@
                                         <td class="text-sm font-weight-bold">{{ $item->Penyelenggara }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->Pusat }}</td>
                                         <td class="text-sm font-weight-bold">
-                                            {{ date('d-m-Y', strtotime($item->tanggal_sk)) }}
+                                            {{ date('d/m/Y', strtotime($item->tanggal_sk)) }}
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->Jml_Akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">
-                                            {{ date('d-m-Y', strtotime($item->tanggal_akreditasi)) }}
+                                            {{ date('d/m/Y', strtotime($item->tanggal_akreditasi)) }}
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->lembaga_akreditasi }}</td>
                                         <td class="text-sm font-weight-bold">-</td>
@@ -99,6 +103,12 @@
                                             {{ $item->Status }}
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->kab_kota }}</td>
+                                        <td class="text-sm font-weight-bold">
+                                            <a href="{{ route('travel.edit', $item->id) }}" class="btn btn-sm btn-warning"
+                                                title="Edit">
+                                                <i class="bx bx-edit"></i>
+                                            </a>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

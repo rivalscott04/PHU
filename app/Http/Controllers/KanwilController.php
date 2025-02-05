@@ -45,6 +45,45 @@ class KanwilController extends Controller
         return redirect()->route('form')->with('success', 'Data berhasil disimpan.');
     }
 
+    public function edit($id)
+    {
+        // Temukan data berdasarkan id
+        $travelCompany = TravelCompany::findOrFail($id);
+
+        // Tampilkan view edit dengan data yang ditemukan
+        return view('kanwil.editTravel', compact('travelCompany'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        // Validasi input
+        $validatedData = $request->validate([
+            'Penyelenggara' => 'required|string|max:255',
+            'Pusat' => 'required|string|max:255',
+
+            'Jml_Akreditasi' => 'required|string|max:255',
+
+            'lembaga_akreditasi' => 'required|string|max:255',
+            'Pimpinan' => 'required|string|max:255',
+            'alamat_kantor_lama' => 'required|string',
+            'alamat_kantor_baru' => 'required|string',
+            'Telepon' => 'required|string|max:20',
+            'kab_kota' => 'required|string|max:255',
+            'Status' => 'required|in:PPIU,PIHK',
+        ]);
+
+        // Format data sebelum disimpan
+        $validatedData['Tanggal'] = date('Y-m-d', strtotime($request->Tanggal));
+        $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
+
+        // Temukan data dan update
+        $travelCompany = TravelCompany::findOrFail($id);
+        $travelCompany->update($validatedData);
+
+        return redirect()->route('travel')->with('success', 'Data berhasil diperbarui.');
+    }
+
+
     public function showTravel()
     {
         $data = TravelCompany::all();
