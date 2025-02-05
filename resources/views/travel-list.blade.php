@@ -30,6 +30,10 @@
         .main-content {
             margin: 0px;
         }
+
+        .dataTables_wrapper {
+            overflow-x: auto;
+        }
     </style>
 </head>
 
@@ -57,12 +61,11 @@
                                         <th>Jumlah Akreditasi</th>
                                         <th>Tanggal Akreditasi</th>
                                         <th>Lembaga Akreditasi</th>
-                                        <th>Info</th>
+                                        <th>Status</th>
                                         <th>Pimpinan</th>
                                         <th>Alamat Lama</th>
                                         <th>Alamat Baru</th>
                                         <th>Telepon</th>
-                                        <th>Status</th>
                                         <th>Kab/Kota</th>
                                     </tr>
                                 </thead>
@@ -76,12 +79,11 @@
                                             <td>{{ $item->Jml_Akreditasi }}</td>
                                             <td>{{ date('d-m-Y', strtotime($item->tanggal_akreditasi)) }}</td>
                                             <td>{{ $item->lembaga_akreditasi }}</td>
-                                            <td>-</td>
+                                            <td>{{ $item->Status }}</td>
                                             <td>{{ $item->Pimpinan }}</td>
                                             <td>{{ $item->alamat_kantor_lama }}</td>
                                             <td>{{ $item->alamat_kantor_baru }}</td>
                                             <td>{{ $item->Telepon }}</td>
-                                            <td>{{ $item->Status }}</td>
                                             <td>{{ $item->kab_kota }}</td>
                                         </tr>
                                     @endforeach
@@ -123,6 +125,7 @@
     <!-- Datatable init js -->
     <script src="{{ asset('js/pages/datatables.init.js') }}"></script>
     <script src="{{ asset('js/app.js') }}"></script>
+
 </body>
 
 </html>
