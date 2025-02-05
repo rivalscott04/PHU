@@ -494,15 +494,10 @@
             <div class="container" data-aos="fade-up" data-aos-delay="100">
                 <div class="row align-items-xl-center gy-5">
                     <div class="col-xl-5 content">
-                        <h3>About Us</h3>
-                        <h2>Ducimus rerum libero reprehenderit cumque</h2>
+                        <h3>5 Pasti Umroh</h3>
+                        <h2>PASTIKAN Travel Umrah Berizin Kemenag.</h2>
                         <p>
-                            Ipsa sint sit. Quis ducimus tempore dolores
-                            impedit et dolor cumque alias maxime. Enim
-                            reiciendis minus et rerum hic non. Dicta quas
-                            cum quia maiores iure. Quidem nulla qui
-                            assumenda incidunt voluptatem tempora deleniti
-                            soluta.
+                            Travel harus memiliki izin umrah agar terjamin perlindungan, pelayanan, dan bimbingan selama di Tanah Suci.
                         </p>
                         <a href="#" class="read-more"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
                     </div>
@@ -511,12 +506,10 @@
                         <div class="row gy-4 icon-boxes">
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
                                 <div class="icon-box">
-                                    <i class="bi bi-buildings"></i>
-                                    <h3>Eius provident</h3>
+                                    <i class="bi bi-airplane"></i>
+                                    <h3>PASTIKAN Tiket Pesawat dan Jadwal Penerbangan.</h3>
                                     <p>
-                                        Magni repellendus vel ullam hic
-                                        officia accusantium ipsa dolor omnis
-                                        dolor voluptatem
+                                        Maskapai penerbangannya harus jelas, jadwal berangkatnya pasti, tiketnya harus pulang-pergi, dan hanya satu kali transit dengan maskapai penerbangan yang sama.
                                     </p>
                                 </div>
                             </div>
@@ -525,11 +518,9 @@
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
                                 <div class="icon-box">
                                     <i class="bi bi-clipboard-pulse"></i>
-                                    <h3>Rerum aperiam</h3>
+                                    <h3>PASTIKAN Harga dan Paket Layanannya.</h3>
                                     <p>
-                                        Autem saepe animi et aut aspernatur
-                                        culpa facere. Rerum saepe rerum
-                                        voluptates quia
+                                        Jangan tergiur harga murah, cek rincian harga paket yang ditawarkan. Paket layanan terdiri dari konsumsi, transportasi, manasik, petugas yang mendampingi, dan asuransi perjalanan.
                                     </p>
                                 </div>
                             </div>
@@ -537,12 +528,10 @@
 
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
                                 <div class="icon-box">
-                                    <i class="bi bi-command"></i>
-                                    <h3>Veniam omnis</h3>
+                                    <i class="bi bi-buildings"></i>
+                                    <h3>PASTIKAN Akomodasi (Hotel) selama berada di Arab Saudi.</h3>
                                     <p>
-                                        Omnis perferendis molestias culpa
-                                        sed. Recusandae quas possimus. Quod
-                                        consequatur corrupti
+                                        Hotel tempat menginap minimal hotel bintang 3 dan jarak dari tempat ibadah maksimal 1 km.
                                     </p>
                                 </div>
                             </div>
@@ -551,11 +540,9 @@
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
                                 <div class="icon-box">
                                     <i class="bi bi-graph-up-arrow"></i>
-                                    <h3>Delares sapiente</h3>
+                                    <h3>PASTIKAN Visanya</h3>
                                     <p>
-                                        Sint et dolor voluptas minus
-                                        possimus nostrum. Reiciendis commodi
-                                        eligendi omnis quideme lorenda
+                                        Visa harus selesai minimal 3 hari sebelum keberangkatan.
                                     </p>
                                 </div>
                             </div>
