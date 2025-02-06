@@ -12,7 +12,7 @@ class CabangTravel extends Model
     protected $table = 'travel_cabang';
 
     protected $fillable = [
-        'travel_id',
+        'Penyelenggara',
         'kabupaten',
         'pusat',
         'pimpinan_pusat',
@@ -23,9 +23,4 @@ class CabangTravel extends Model
         'alamat_cabang',
         'telepon',
     ];
-
-    public function travel()
-    {
-        return $this->belongsTo(TravelCompany::class, 'travel_id');
-    }
 }

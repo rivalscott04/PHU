@@ -13,28 +13,31 @@
                             <span key="t-dashboards">Dashboards</span>
                         </a>
                     </li>
-                    @if (auth()->user()->role === 'admin')
-                        <li>
-                            <a href="{{ route('travel') }}" class="waves-effect">
-                                <i class="bx bxs-plane-alt"></i>
-                                <span key="t-dashboards">Data Travel</span>
-                            </a>
-                        </li>
-                    @endif
+            </ul>
+            <ul class="metismenu list-unstyled" id="side-menu">
+                <li class="menu-title" key="t-menu">Master Travel</li>
+                @if (auth()->user()->role === 'admin')
                     <li>
-                        <a href="{{ route('cabang.travel') }}" class="waves-effect">
-                            <i class="bx bxs-business"></i>
-                            <span key="t-dashboards">Data Cabang Travel</span>
+                        <a href="{{ route('travel') }}" class="waves-effect">
+                            <i class="bx bxs-plane-alt"></i>
+                            <span key="t-dashboards">Data Travel</span>
                         </a>
                     </li>
-                    @if (auth()->user()->role === 'admin')
-                        <li>
-                            <a href="{{ route('travels') }}" class="waves-effect">
-                                <i class="bx bx-user-plus"></i>
-                                <span key="t-dashboards">Akun Travel</span>
-                            </a>
-                        </li>
-                    @endif
+                @endif
+                <li>
+                    <a href="{{ route('cabang.travel') }}" class="waves-effect">
+                        <i class="bx bxs-business"></i>
+                        <span key="t-dashboards">Data Cabang Travel</span>
+                    </a>
+                </li>
+                @if (auth()->user()->role === 'admin')
+                    <li>
+                        <a href="{{ route('travels') }}" class="waves-effect">
+                            <i class="bx bx-user-plus"></i>
+                            <span key="t-dashboards">Akun Travel</span>
+                        </a>
+                    </li>
+                @endif
                 @endif
             </ul>
             <ul class="metismenu list-unstyled" id="side-menu">

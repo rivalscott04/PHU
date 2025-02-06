@@ -13,29 +13,14 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-                    @if (session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
 
                     <!-- Existing Manual Input Form -->
                     <form method="POST" action="{{ route('post.cabang_travel') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="travel_id" class="form-label">Travel Pusat</label>
-                                <select class="form-control" id="travel_id" name="travel_id" required>
-                                    <option value="">Pilih Travel</option>
-                                    @foreach ($travels as $travel)
-                                        <option value="{{ $travel->id }}">{{ $travel->Penyelenggara }}</option>
-                                    @endforeach
-                                </select>
+                                <label for="Penyelenggara" class="form-label">Penyelenggara</label>
+                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="kabupaten" class="form-label">Kabupaten</label>

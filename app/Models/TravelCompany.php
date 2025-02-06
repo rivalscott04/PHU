@@ -15,7 +15,7 @@ class TravelCompany extends Model
         'Penyelenggara',
         'Pusat',
         'Tanggal',
-        'Jml_Akreditasi',
+        'nilai_akreditasi',
         'tanggal_akreditasi',
         'lembaga_akreditasi',
         'Pimpinan',
@@ -38,7 +38,7 @@ class TravelCompany extends Model
             'Penyelenggara' => $row['Penyelenggara'],
             'Pusat' => $row['Pusat'],
             'Tanggal' => $row['Tanggal'],
-            'Jml_Akreditasi' => $row['Jml_Akreditasi'],
+            'nilai_akreditasi' => $row['nilai_akreditasi'],
             'tanggal_akreditasi' => $row['tanggal_akreditasi'],
             'lembaga_akreditasi' => $row['lembaga_akreditasi'],
             'Pimpinan' => $row['Pimpinan'],
@@ -48,11 +48,6 @@ class TravelCompany extends Model
             'Status' => $row['Status'],
             'kab_kota' => $row['kab_kota'],
         ]);
-    }
-
-    public function cabangTravels()
-    {
-        return $this->hasMany(CabangTravel::class, 'travel_id');
     }
 
     public function pengaduan()

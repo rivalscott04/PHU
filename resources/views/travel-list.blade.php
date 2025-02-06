@@ -75,9 +75,9 @@
                                             <td>{{ $loop->iteration }}</td>
                                             <td>{{ $item->Penyelenggara }}</td>
                                             <td>{{ $item->Pusat }}</td>
-                                            <td>{{ date('d-m-Y', strtotime($item->tanggal_sk)) }}</td>
+                                            <td>{{ date('d/m/Y', strtotime($item->tanggal_sk)) }}</td>
                                             <td>{{ $item->Jml_Akreditasi }}</td>
-                                            <td>{{ date('d-m-Y', strtotime($item->tanggal_akreditasi)) }}</td>
+                                            <td>{{ date('d/m/Y', strtotime($item->tanggal_akreditasi)) }}</td>
                                             <td>{{ $item->lembaga_akreditasi }}</td>
                                             <td>{{ $item->Status }}</td>
                                             <td>{{ $item->Pimpinan }}</td>

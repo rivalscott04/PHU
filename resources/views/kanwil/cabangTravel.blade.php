@@ -53,7 +53,7 @@
                                 @foreach ($data as $item)
                                     <tr class="text-center">
                                         <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->travel->Penyelenggara }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $item->Penyelenggara }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->kabupaten }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->pusat }}</td>
                                         <td class="text-sm font-weight-bold">{{ $item->pimpinan_pusat }}</td>

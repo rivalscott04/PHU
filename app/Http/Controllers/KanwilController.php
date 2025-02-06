@@ -25,7 +25,7 @@ class KanwilController extends Controller
             'Penyelenggara' => 'required|string|max:255',
             'Pusat' => 'required|string|max:255',
             'Tanggal' => 'required|date',
-            'Jml_Akreditasi' => 'required|string|max:255',
+            'nilai_akreditasi' => 'required|string|max:255',
             'tanggal_akreditasi' => 'required|date',
             'lembaga_akreditasi' => 'required|string|max:255',
             'Pimpinan' => 'required|string|max:255',
@@ -60,9 +60,7 @@ class KanwilController extends Controller
         $validatedData = $request->validate([
             'Penyelenggara' => 'required|string|max:255',
             'Pusat' => 'required|string|max:255',
-
-            'Jml_Akreditasi' => 'required|string|max:255',
-
+            'nilai_akreditasi' => 'required|string|max:255',
             'lembaga_akreditasi' => 'required|string|max:255',
             'Pimpinan' => 'required|string|max:255',
             'alamat_kantor_lama' => 'required|string',
@@ -101,7 +99,7 @@ class KanwilController extends Controller
     {
         // Validate input
         $validatedData = $request->validate([
-            'travel_id' => 'required|exists:travels,id',
+            'Penyelenggara' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
             'pusat' => 'required|string|max:255',
             'pimpinan_pusat' => 'required|string|max:255',
@@ -121,7 +119,7 @@ class KanwilController extends Controller
 
     public function showCabangTravel()
     {
-        $data = CabangTravel::with('travel')->get();
+        $data = CabangTravel::all();
 
         return view('kanwil.cabangTravel', ['data' => $data]);
     }

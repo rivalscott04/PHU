@@ -46,9 +46,9 @@
                             </div>
                             <!-- Nilai Akreditasi -->
                             <div class="col-md-6 mb-3">
-                                <label for="Jml_Akreditasi" class="form-label">Nilai Akreditasi</label>
-                                <input type="text" class="form-control" id="Jml_Akreditasi" name="Jml_Akreditasi"
-                                    value="{{ $travelCompany->Jml_Akreditasi }}" required>
+                                <label for="nilai_akreditasi" class="form-label">Nilai Akreditasi</label>
+                                <input type="text" class="form-control" id="nilai_akreditasi" name="nilai_akreditasi"
+                                    value="{{ $travelCompany->nilai_akreditasi }}" required>
                             </div>
                             <!-- Tanggal Akreditasi -->
                             <div class="col-md-6 mb-3">
