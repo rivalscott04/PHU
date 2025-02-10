@@ -3,6 +3,8 @@
 namespace App\Imports;
 
 use App\Models\Jamaah;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -11,6 +13,18 @@ use Maatwebsite\Excel\Concerns\Importable;
 class JamaahImport implements ToModel, WithHeadingRow, WithValidation
 {
     use Importable;
+
+    protected $jenisJamaah;
+
+    public function __construct()
+    {
+        $user = Auth::user(); // Ambil user yang sedang login
+        if ($user && $user->travel) {
+            $this->jenisJamaah = $user->travel->status === 'PIHK' ? 'haji' : 'umrah';
+        } else {
+            $this->jenisJamaah = null; // Jika tidak ada user/travel, bisa diberi default atau error handling
+        }
+    }
 
     public function model(array $row)
     {
@@ -22,6 +36,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
             'nama' => $row['nama'],
             'alamat' => $row['alamat'],
             'nomor_hp' => strval($row['nomor_hp']), // Convert to string to handle Excel number formatting
+            'jenis_jamaah' => $this->jenisJamaah, // Set jenis jamaah berdasarkan user login
         ]);
     }
 

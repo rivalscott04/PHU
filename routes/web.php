@@ -78,6 +78,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
     Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+    Route::get('/pengaduan/{id}', [PengaduanController::class, 'detail'])->name('pengaduan.show');
 
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');

@@ -51,7 +51,7 @@
                                         </td>
                                         <td>{{ $item->created_at->format('d/m/Y') }}</td>
                                         <td>
-                                            <a href="">
+                                            <a href="{{ route('pengaduan.show', $item->id) }}">
                                                 <i class="bx bx-info-circle me-2"></i>
                                             </a>
                                             @if ($item->status == 'pending')

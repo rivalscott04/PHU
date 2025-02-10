@@ -43,4 +43,10 @@ class PengaduanController extends Controller
         $pengaduan = Pengaduan::with('travel')->get();
         return view('pengaduan.index', compact('pengaduan'));
     }
+
+    public function detail($id)
+    {
+        $pengaduan = Pengaduan::with('travel')->findOrFail($id);
+        return view('pengaduan.detail', compact('pengaduan'));
+    }
 }
