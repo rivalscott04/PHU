@@ -6,17 +6,18 @@ use App\Models\TravelCompany;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DataImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
+        \Log::info("Importing row: ", $row);
         try {
             // Tentukan unique identifier untuk mencari data yang sama
             $uniqueColumns = [
                 'Penyelenggara' => $row['penyelenggara'],
                 'Pusat' => $row['pusat'],
-                // Tambahkan kolom lain jika diperlukan untuk identifikasi unik
             ];
 
             // Data yang akan diupdate/insert
@@ -36,59 +37,56 @@ class DataImport implements ToModel, WithHeadingRow
                 'updated_at' => now()
             ];
 
-            // Coba update dulu, kalau tidak ada baru insert
-            $updated = TravelCompany::where($uniqueColumns)
-                ->update($data);
+            // Cari record yang existing
+            $existing = TravelCompany::where($uniqueColumns)->first();
 
-            // Jika tidak ada yang diupdate (data belum ada), maka insert baru
-            if (!$updated) {
+            if ($existing) {
+                // Update record yang ada
+                $existing->update($data);
+                return null; // Return null karena sudah di-update
+            } else {
+                // Buat record baru
                 $data['created_at'] = now();
                 return new TravelCompany($data);
             }
-
-            return null; // Return null karena data sudah diupdate
-
         } catch (\Exception $e) {
-            error_log("Error importing row: " . json_encode($row) . ". Error: " . $e->getMessage());
-            return null;
+            \Log::error("Error importing row: " . json_encode($row) . ". Error: " . $e->getMessage());
+            throw $e; // Re-throw exception agar bisa ditangkap di controller
         }
     }
 
     private function parseDate($date)
     {
-        $months = [
-            'Januari' => 'January',
-            'Februari' => 'February',
-            'Maret' => 'March',
-            'April' => 'April',
-            'Mei' => 'May',
-            'Juni' => 'June',
-            'Juli' => 'July',
-            'Agustus' => 'August',
-            'September' => 'September',
-            'Oktober' => 'October',
-            'November' => 'November',
-            'Desember' => 'December'
-        ];
+        if (!$date) return null;
 
-        foreach ($months as $indonesian => $english) {
-            if (strpos($date, $indonesian) !== false) {
-                $date = str_replace($indonesian, $english, $date);
-                break;
+        // Jika input adalah angka (Excel Serial Number)
+        if (is_numeric($date)) {
+            try {
+                // Konversi Excel Serial Number ke tanggal PHP
+                // Excel menggunakan 1 Januari 1900 sebagai hari ke-1
+                $unix_date = ($date - 25569) * 86400;
+                return Carbon::createFromTimestamp($unix_date);
+            } catch (\Exception $e) {
+                \Log::error("Failed to parse Excel serial date: {$date} - " . $e->getMessage());
+                return null;
             }
         }
 
-        try {
-            return \Carbon\Carbon::parse($date);
-        } catch (\Exception $e) {
-            error_log("Failed to parse date: " . $e->getMessage());
-
+        // Untuk format DD/MM/YYYY
+        if (strpos($date, '/') !== false) {
             try {
-                return \Carbon\Carbon::createFromFormat('d F Y', $date);
+                return Carbon::createFromFormat('d/m/Y', $date);
             } catch (\Exception $e) {
-                error_log("Failed to create date from format: " . $e->getMessage());
-                return null;
+                \Log::error("Failed to parse date with slash: {$date} - " . $e->getMessage());
             }
+        }
+
+        // Coba format lainnya jika diperlukan
+        try {
+            return Carbon::parse($date);
+        } catch (\Exception $e) {
+            \Log::error("Failed to parse date: {$date} - " . $e->getMessage());
+            return null;
         }
     }
 }
