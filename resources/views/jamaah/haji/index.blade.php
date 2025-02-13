@@ -7,7 +7,7 @@
                 <div class="card-header pb-3 d-flex justify-content-between align-items-center">
                     <h6>Data Jamaah</h6>
                     <div>
-                        <a href="{{ route('jamaah.create') }}" class="btn btn-primary btn-md me-2">
+                        <a href="{{ route('jamaah.haji.create') }}" class="btn btn-primary btn-md me-2">
                             <i class="bx bx-plus me-1"></i> Tambah
                         </a>
                         <button type="button" class="btn btn-success btn-md" data-bs-toggle="modal"

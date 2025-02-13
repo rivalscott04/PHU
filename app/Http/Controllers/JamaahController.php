@@ -15,37 +15,63 @@ class JamaahController extends Controller
         return Excel::download(new JamaahExport, 'template_jamaah.xlsx');
     }
 
-    public function index()
+    public function indexHaji()
     {
-        $jamaah = Jamaah::all();
-        return view('jamaah.index', compact('jamaah'));
+        $jamaah = Jamaah::where('jenis_jamaah', 'haji')->get();
+        return view('jamaah.haji.index', compact('jamaah'));
     }
 
-    public function create()
+    public function indexUmrah()
     {
-        return view('jamaah.create');
+        $jamaah = Jamaah::where('jenis_jamaah', 'umrah')->get();
+        return view('jamaah.umrah.index', compact('jamaah'));
     }
 
-    public function store(Request $request)
+    public function createHaji()
+    {
+        return view('jamaah.haji.create');
+    }
+
+    public function createUmrah()
+    {
+        return view('jamaah.umrah.create');
+    }
+
+    public function storeHaji(Request $request)
     {
         $request->validate([
-            'nik' => 'required|unique:jamaah,nik|max:16',
+            'nik' => 'required|max:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15',
         ]);
 
         try {
-            // Ambil data travel dari user yang sedang login
-            $user = auth()->user();
-            $travel = $user->travel;
-
-            // Siapkan data yang akan disimpan
             $jamaahData = $request->all();
-            $jamaahData['jenis_jamaah'] = $travel->Status === 'PPIU' ? 'umrah' : 'haji';
+            $jamaahData['jenis_jamaah'] = 'haji';
 
             Jamaah::create($jamaahData);
-            return redirect()->route('jamaah')->with('success', 'Data jamaah berhasil ditambahkan!');
+            return redirect()->route('jamaah.haji')->with('success', 'Data jamaah haji berhasil ditambahkan!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function storeUmrah(Request $request)
+    {
+        $request->validate([
+            'nik' => 'required|max:16',
+            'nama' => 'required|string|max:255',
+            'alamat' => 'required|string|max:255',
+            'nomor_hp' => 'required|string|max:15',
+        ]);
+
+        try {
+            $jamaahData = $request->all();
+            $jamaahData['jenis_jamaah'] = 'umrah';
+
+            Jamaah::create($jamaahData);
+            return redirect()->route('jamaah.umrah')->with('success', 'Data jamaah umrah berhasil ditambahkan!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }

@@ -48,12 +48,51 @@
                         <span key="t-dashboards">Data BAP</span>
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('jamaah') }}" class="waves-effect">
-                        <i class="bx bxs-group"></i>
-                        <span key="t-dashboards">Jamaah</span>
-                    </a>
-                </li>
+
+                @php
+                    $user = auth()->user();
+                    $isAdminOrKabupaten = in_array($user->role, ['admin', 'kabupaten']);
+                @endphp
+
+                @if ($isAdminOrKabupaten)
+                    <li>
+                        <a href="{{ route('jamaah.haji') }}" class="waves-effect">
+                            <i class="bx bxs-group"></i>
+                            <span key="t-dashboards">Jamaah Haji</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
+                            <i class="bx bxs-group"></i>
+                            <span key="t-dashboards">Jamaah Umrah</span>
+                        </a>
+                    </li>
+                @else
+                    @php
+                        $travel = $user->travel;
+                    @endphp
+                    @if ($travel && $travel->Status === 'PIHK')
+                        <li>
+                            <a href="{{ route('jamaah.haji') }}" class="waves-effect">
+                                <i class="bx bxs-group"></i>
+                                <span key="t-dashboards">Jamaah Haji</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
+                                <i class="bx bxs-group"></i>
+                                <span key="t-dashboards">Jamaah Umrah</span>
+                            </a>
+                        </li>
+                    @else
+                        <li>
+                            <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
+                                <i class="bx bxs-group"></i>
+                                <span key="t-dashboards">Jamaah Umrah</span>
+                            </a>
+                        </li>
+                    @endif
+                @endif
                 <li>
                     <a href="{{ route('pengaduan') }}" class="waves-effect">
                         <i class="bx bx-envelope"></i>

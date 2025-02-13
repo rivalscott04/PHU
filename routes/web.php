@@ -66,10 +66,15 @@ Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengadua
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 
-    Route::get('/jamaah', [JamaahController::class, 'index'])->name('jamaah');
+    Route::get('/jamaah/haji', [JamaahController::class, 'indexHaji'])->name('jamaah.haji');
+    Route::get('/jamaah/haji/create', [JamaahController::class, 'createHaji'])->name('jamaah.haji.create');
+    Route::post('/jamaah/haji', [JamaahController::class, 'storeHaji'])->name('jamaah.haji.store');
+
+    Route::get('/jamaah/umrah', [JamaahController::class, 'indexUmrah'])->name('jamaah.umrah');
+    Route::get('/jamaah/umrah/create', [JamaahController::class, 'createUmrah'])->name('jamaah.umrah.create');
+    Route::post('/jamaah/umrah', [JamaahController::class, 'storeUmrah'])->name('jamaah.umrah.store');
+
     Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
-    Route::get('/jamaah/create', [JamaahController::class, 'create'])->name('jamaah.create');
-    Route::post('/jamaah', [JamaahController::class, 'store'])->name('jamaah.store');
     Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');
     Route::get('/jamaah/edit/{id}', [JamaahController::class, 'edit'])->name('jamaah.edit');
     Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');

@@ -21,7 +21,7 @@
                         XLSX</button>
                 </div>
                 <div class="card-body">
-                    <form method="POST" action="{{ route('jamaah.store') }}">
+                    <form method="POST" action="{{ route('jamaah.haji.store') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
