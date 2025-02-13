@@ -17,6 +17,13 @@ class JamaahController extends Controller
 
     public function indexHaji()
     {
+        $user = auth()->user();
+        $travel = $user->travel;
+
+        if ($travel->Status !== 'PIHK') {
+            return redirect()->route('jamaah.umrah')
+                ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
+        }
         $jamaah = Jamaah::where('jenis_jamaah', 'haji')->get();
         return view('jamaah.haji.index', compact('jamaah'));
     }
@@ -29,6 +36,13 @@ class JamaahController extends Controller
 
     public function createHaji()
     {
+        $user = auth()->user();
+        $travel = $user->travel;
+
+        if ($travel->Status !== 'PIHK') {
+            return redirect()->route('jamaah.umrah')
+                ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
+        }
         return view('jamaah.haji.create');
     }
 

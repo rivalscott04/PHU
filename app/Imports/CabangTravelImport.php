@@ -12,13 +12,8 @@ class CabangTravelImport implements ToModel, WithHeadingRow
 {
     public function model(array $row)
     {
-        $travel = TravelCompany::where('Penyelenggara', $row['penyelenggara'])->first();
-
-        if (!$travel) {
-            throw new \Exception("Travel dengan nama {$row['penyelenggara']} tidak ditemukan");
-        }
-
         return new CabangTravel([
+            'Penyelenggara' => $row['penyelenggara'],
             'kabupaten' => $row['kabupaten'],
             'pusat' => $row['pusat'],
             'pimpinan_pusat' => $row['pimpinan_pusat'],
