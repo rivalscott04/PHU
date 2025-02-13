@@ -12,14 +12,28 @@ class BAPController extends Controller
 {
     public function showFormBAP()
     {
-        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
-        $jamaahCount = Jamaah::count();
+        // Get the authenticated user's travel data
+        $user = auth()->user();
+        $travelData = TravelCompany::find($user->travel_id);
+
+        if (!$travelData) {
+            return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
+        }
+        if ($travelData->Status === 'PPIU') {
+            $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')->count();
+        } else if ($travelData->Status === 'PIHK') {
+            $jamaahCount = Jamaah::count();
+        } else {
+            $jamaahCount = 0;
+        }
 
         if ($jamaahCount == 0) {
             return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
         }
 
-        return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount'));
+        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
+
+        return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount', 'travelData'));
     }
 
 
