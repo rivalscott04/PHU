@@ -128,8 +128,10 @@ class BAPController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'user') {
-            $data = BAP::all();
+            // User hanya bisa melihat BAP yang mereka buat
+            $data = BAP::where('user_id', $user->id)->get();
         } else if ($user->role === 'admin' || $user->role === 'kabupaten') {
+            // Admin dan kabupaten bisa melihat semua BAP yang tidak pending
             $data = BAP::where('status', '<>', 'pending')->get();
         } else {
             $data = collect();
@@ -159,9 +161,12 @@ class BAPController extends Controller
             'airlines2' => 'required|string|max:255',
         ]);
 
+        // Ambil semua data dari request dan tambahkan user_id
+        $data = $request->all();
+        $data['user_id'] = auth()->id();
 
         // Simpan data ke dalam database
-        BAP::create($request->all());
+        BAP::create($data);
 
         // Redirect ke halaman yang diinginkan setelah data disimpan
         return redirect()->route('bap')->with('success', 'Data berhasil disimpan.');

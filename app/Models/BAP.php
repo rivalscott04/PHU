@@ -30,5 +30,6 @@ class BAP extends Model
         'airlines',
         'returndate',
         'airlines2',
+        'user_id',
     ];
 }
