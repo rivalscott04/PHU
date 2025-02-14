@@ -12,30 +12,40 @@ class BAPController extends Controller
 {
     public function showFormBAP()
     {
-        // Get the authenticated user's travel data
         $user = auth()->user();
-        $travelData = TravelCompany::find($user->travel_id);
+        $jamaahCount = 0;
+        $travelData = null;
 
-        if (!$travelData) {
-            return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
-        }
-        if ($travelData->Status === 'PPIU') {
-            $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')->count();
-        } else if ($travelData->Status === 'PIHK') {
+        // Handle admin role
+        if ($user->role === 'admin') {
             $jamaahCount = Jamaah::count();
-        } else {
-            $jamaahCount = 0;
+            if ($jamaahCount == 0) {
+                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+            }
         }
+        // Handle non-admin/kabupaten users
+        else if ($user->role !== 'kabupaten') {
+            $travelData = TravelCompany::find($user->travel_id);
 
-        if ($jamaahCount == 0) {
-            return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+            if (!$travelData) {
+                return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
+            }
+
+            if ($travelData->Status === 'PPIU') {
+                $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')->count();
+            } else if ($travelData->Status === 'PIHK') {
+                $jamaahCount = Jamaah::count();
+            }
+
+            if ($jamaahCount == 0) {
+                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+            }
         }
 
         $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
 
         return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount', 'travelData'));
     }
-
 
     public function detail($id)
     {

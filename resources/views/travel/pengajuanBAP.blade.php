@@ -14,27 +14,40 @@
                             <div class="col-md-6 mb-3">
                                 <label for="name" class="form-label">Nama</label>
                                 <input type="text" class="form-control" id="name" name="name"
-                                    value="{{ $travelData->Pimpinan }}" readonly>
+                                    value="{{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? $travelData->Pimpinan : '' }}"
+                                    {{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'readonly' : '' }}>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="jabatan" class="form-label">Jabatan</label>
-                                <input type="text" class="form-control" id="jabatan" name="jabatan" value="Direktur"
-                                    readonly>
+                                <input type="text" class="form-control" id="jabatan" name="jabatan"
+                                    value="{{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'Direktur' : '' }}"
+                                    {{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'readonly' : '' }}>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="ppiuname" class="form-label">PPIU</label>
-                                <input type="text" class="form-control" id="ppiuname" name="ppiuname"
-                                    value="{{ $travelData->Penyelenggara }}" readonly>
+                                @if (in_array(auth()->user()->role, ['admin', 'kabupaten']))
+                                    <select class="form-control" id="ppiuname" name="ppiuname">
+                                        <option value="">Pilih PPIU</option>
+                                        @foreach ($ppiuList as $ppiu)
+                                            <option value="{{ $ppiu->penyelenggara }}">{{ $ppiu->penyelenggara }}</option>
+                                        @endforeach
+                                    </select>
+                                @else
+                                    <input type="text" class="form-control" id="ppiuname" name="ppiuname"
+                                        value="{{ $travelData->Penyelenggara }}" readonly>
+                                @endif
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="address_phone" class="form-label">Alamat & Hp</label>
+                                <label for="address_phone" class="form-label">Nomor HP</label>
                                 <input type="text" class="form-control" id="address_phone" name="address_phone"
-                                    value="{{ $travelData->Telepon }}" readonly>
+                                    value="{{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? $travelData->Telepon : '' }}"
+                                    {{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'readonly' : '' }}>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="kab_kota" class="form-label">Kab/Kota</label>
                                 <input type="text" class="form-control" id="kab_kota" name="kab_kota"
-                                    value="{{ $travelData->kab_kota }}" readonly>
+                                    value="{{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? $travelData->kab_kota : '' }}"
+                                    {{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'readonly' : '' }}>
                             </div>
 
                             <!-- Rest of the form remains the same -->
