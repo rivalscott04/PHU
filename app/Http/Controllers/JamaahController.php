@@ -41,11 +41,14 @@ class JamaahController extends Controller
     public function createHaji()
     {
         $user = auth()->user();
-        $travel = $user->travel;
+        $isAdminOrKabupaten = in_array($user->role, ['admin', 'kabupaten']);
 
-        if ($travel->Status !== 'PIHK') {
-            return redirect()->route('jamaah.umrah')
-                ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
+        if (!$isAdminOrKabupaten) {
+            $travel = $user->travel;
+            if (!$travel || $travel->Status !== 'PIHK') {
+                return redirect()->route('jamaah.umrah')
+                    ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
+            }
         }
         return view('jamaah.haji.create');
     }
