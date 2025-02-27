@@ -23,12 +23,7 @@
             <button type="button" class="btn btn-sm px-3 font-size-16 header-item waves-effect" id="vertical-menu-btn">
                 <i class="fa fa-fw fa-bars"></i>
             </button>
-            <form class="app-search d-none d-lg-block">
-                <div class="position-relative">
-                    <input type="text" class="form-control" placeholder="Search..." />
-                    <span class="bx bx-search-alt"></span>
-                </div>
-            </form>
+
         </div>
         <div class="d-flex">
             <div class="dropdown d-inline-block d-lg-none ms-2">

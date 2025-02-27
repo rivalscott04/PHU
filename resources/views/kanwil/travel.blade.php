@@ -15,7 +15,26 @@
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
+                        <!-- DataTables length and search controls -->
+                        <div class="d-flex justify-content-between align-items-center px-4 py-3">
+                            <div class="d-flex align-items-center">
+                                <label class="me-2 text-sm">Tampilkan</label>
+                                <select id="dataTable_length" class="form-select form-select-sm me-2" style="width: 70px">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option value="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <span class="text-sm">data per halaman</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <label class="me-2 text-sm">Cari:</label>
+                                <input type="search" id="dataTable_search" class="form-control form-control-sm"
+                                    style="width: 200px">
+                            </div>
+                        </div>
+
+                        <table id="dataTable" class="table align-items-center mb-0">
                             <thead>
                                 <tr class="text-center">
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
@@ -113,6 +132,12 @@
                                 @endforeach
                             </tbody>
                         </table>
+
+                        <!-- DataTables pagination -->
+                        <div class="d-flex justify-content-between align-items-center px-4 py-3">
+                            <div id="dataTable_info" class="text-sm text-secondary"></div>
+                            <div id="dataTable_paginate" class="pagination"></div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,8 +156,8 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="file" class="form-label">Pilih File Excel</label>
-                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls"
-                                required>
+                            <input type="file" class="form-control" id="file" name="file"
+                                accept=".xlsx, .xls" required>
                         </div>
                         <div class="mb-3">
                             <a href="{{ route('travel.template') }}" class="text-sm">
@@ -149,3 +174,104 @@
         </div>
     </div>
 @endsection
+
+@push('js')
+    <!-- Initialize DataTables -->
+    <script>
+        $(document).ready(function() {
+            // Initialize DataTable with custom DOM and scrolling
+            var table = $('#dataTable').DataTable({
+                // Change responsive to false and use scrollX instead
+                responsive: false,
+                scrollX: true, // Enable horizontal scrolling
+                scrollCollapse: true,
+                dom: 't', // Only show table
+                language: {
+                    paginate: {
+                        previous: "<i class='fa fa-angle-left'></i>",
+                        next: "<i class='fa fa-angle-right'></i>"
+                    },
+                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 hingga 0 dari 0 data",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    search: "Cari:",
+                    zeroRecords: "Tidak ada data yang ditemukan",
+                    infoFiltered: "(disaring dari _MAX_ total data)"
+                },
+                columnDefs: [{
+                    orderable: false,
+                    targets: -1
+                }], // Disable sorting on action column
+                "drawCallback": function(settings) {
+                    // Update info text
+                    var info = this.api().page.info();
+                    $('#dataTable_info').html('Menampilkan ' + (info.start + 1) + ' hingga ' + info
+                        .end + ' dari ' + info.recordsTotal + ' data');
+
+                    // Build custom pagination
+                    var paginationHtml = '';
+                    var pages = this.api().page.info().pages;
+                    var currentPage = this.api().page.info().page;
+
+                    paginationHtml += '<ul class="pagination pagination-sm mb-0">';
+
+                    // Previous button
+                    paginationHtml += '<li class="page-item' + (currentPage === 0 ? ' disabled' : '') +
+                        '">';
+                    paginationHtml +=
+                        '<a class="page-link" href="#" data-page="prev"><i class="fas fa-chevron-left"></i></a></li>';
+
+                    // Page numbers
+                    var startPage = Math.max(0, currentPage - 2);
+                    var endPage = Math.min(pages - 1, currentPage + 2);
+
+                    for (var i = startPage; i <= endPage; i++) {
+                        paginationHtml += '<li class="page-item' + (i === currentPage ? ' active' :
+                            '') + '">';
+                        paginationHtml += '<a class="page-link" href="#" data-page="' + i + '">' + (i +
+                            1) + '</a></li>';
+                    }
+
+                    // Next button
+                    paginationHtml += '<li class="page-item' + (currentPage === pages - 1 ?
+                        ' disabled' : '') + '">';
+                    paginationHtml +=
+                        '<a class="page-link" href="#" data-page="next"><i class="fas fa-chevron-right"></i></a></li>';
+
+                    paginationHtml += '</ul>';
+
+                    $('#dataTable_paginate').html(paginationHtml);
+
+                    // Add event listeners to pagination
+                    $('#dataTable_paginate .page-link').on('click', function(e) {
+                        e.preventDefault();
+                        var page = $(this).data('page');
+
+                        if (page === 'prev') {
+                            table.page('previous').draw('page');
+                        } else if (page === 'next') {
+                            table.page('next').draw('page');
+                        } else {
+                            table.page(page).draw('page');
+                        }
+                    });
+                }
+            });
+
+            // Make sure the table redraws properly when window resizes
+            $(window).on('resize', function() {
+                table.columns.adjust().draw();
+            });
+
+            // Custom length change
+            $('#dataTable_length').on('change', function() {
+                table.page.len($(this).val()).draw();
+            });
+
+            // Custom search
+            $('#dataTable_search').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+        });
+    </script>
+@endpush
