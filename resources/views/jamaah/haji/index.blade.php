@@ -51,8 +51,18 @@
                                                 <i class="bx bx-info-circle me-2"></i>
                                             </a>
                                             <a href="{{ route('jamaah.edit', $item->id) }}">
-                                                <i class="bx bx-edit text-success"></i>
+                                                <i class="bx bx-edit text-success me-2"></i>
                                             </a>
+                                            <a href="javascript:void(0)"
+                                                onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
+                                                <i class="bx bx-trash text-danger"></i>
+                                            </a>
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -96,6 +106,7 @@
 @endsection
 
 @push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
             // Initialize DataTable with custom pagination
@@ -157,6 +168,23 @@
                 iconElement.classList.remove('bxs-hide');
                 iconElement.classList.add('bxs-show');
             }
+        }
+
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda akan menghapus data jamaah '" + name + "'",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
         }
     </script>
 @endpush

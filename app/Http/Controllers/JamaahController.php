@@ -124,6 +124,22 @@ class JamaahController extends Controller
         }
     }
 
+    public function destroy($id)
+    {
+        try {
+            $jamaah = Jamaah::findOrFail($id);
+            $jenisJamaah = $jamaah->jenis_jamaah;
+            $jamaah->delete();
+
+            $redirectRoute = ($jenisJamaah === 'haji') ? 'jamaah.haji' : 'jamaah.umrah';
+            return redirect()->route($redirectRoute)
+                ->with('success', 'Data jamaah ' . $jenisJamaah . ' berhasil dihapus!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
     public function import(Request $request)
     {
         $request->validate([
