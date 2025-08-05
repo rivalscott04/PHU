@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
+            KabupatenSeeder::class,
             TravelSeeder::class,
         ]);
     }

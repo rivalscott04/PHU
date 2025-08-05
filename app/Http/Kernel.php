@@ -56,6 +56,7 @@ class Kernel extends HttpKernel
         'auth' => \App\Http\Middleware\Authenticate::class,
         'admin' => \App\Http\Middleware\AdminMiddleware::class,
         'kabupaten' => \App\Http\Middleware\KabupatenMiddleware::class,
+        'kabupaten.access' => \App\Http\Middleware\KabupatenAccessMiddleware::class,
         'password.changed' => \App\Http\Middleware\CheckPasswordChanged::class,
         'auth.basic' => \Illuminate\Auth\Middleware\AuthenticateWithBasicAuth::class,
         'auth.session' => \Illuminate\Session\Middleware\AuthenticateSession::class,

@@ -208,16 +208,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="nama_ibu" class="form-label">Nama Ibu <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('nama_ibu') is-invalid @enderror" 
-                                       id="nama_ibu" name="nama_ibu" value="{{ old('nama_ibu', $jamaahHajiKhusus->nama_ibu) }}" required>
-                                @error('nama_ibu')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
+
                     </div>
 
                     <!-- Personal Details -->

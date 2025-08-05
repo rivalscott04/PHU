@@ -104,9 +104,17 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
 
-    Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
-    Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
-    Route::get('/pengaduan/{id}', [PengaduanController::class, 'detail'])->name('pengaduan.show');
+    // Pengaduan routes - accessible by admin and kabupaten only
+    Route::middleware(['kabupaten.access'])->group(function () {
+        Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
+        Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+        Route::get('/pengaduan/{id}', [PengaduanController::class, 'detail'])->name('pengaduan.show');
+        Route::post('/pengaduan/{id}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.update-status');
+        Route::get('/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDF'])->name('pengaduan.download-pdf');
+    });
+
+    // Public pengaduan routes (no authentication required)
+    Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
 
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
@@ -135,11 +143,14 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         ->name('travel.update-status')
         ->middleware('auth', 'password.changed');
     
-    Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
-    Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
-    Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
-    Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
-    Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
+    // Cabang Travel routes - accessible by admin and kabupaten only
+    Route::middleware(['kabupaten.access'])->group(function () {
+        Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
+        Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
+        Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
+        Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
+        Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
+    });
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
     Route::post('import-data', [ExcelImportController::class, 'import'])->name('import.data');

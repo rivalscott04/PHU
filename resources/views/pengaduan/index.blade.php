@@ -44,19 +44,25 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <span
-                                                class="badge bg-{{ $item->status == 'pending' ? 'warning' : ($item->status == 'proses' ? 'info' : 'success') }}">
-                                                {{ ucfirst($item->status) }}
+                                            <span class="badge {{ $item->getStatusBadgeClass() }}">
+                                                {{ $item->getStatusLabel() }}
                                             </span>
                                         </td>
                                         <td>{{ $item->created_at->format('d/m/Y') }}</td>
                                         <td>
-                                            <a href="{{ route('pengaduan.show', $item->id) }}">
-                                                <i class="bx bx-info-circle me-2"></i>
+                                            <a href="{{ route('pengaduan.show', $item->id) }}" class="btn btn-sm btn-info rounded-pill"
+                                               style="background: linear-gradient(135deg, #17a2b8 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);">
+                                                <i class="bx bx-info-circle me-1"></i> Detail
                                             </a>
-                                            @if ($item->status == 'pending')
-                                                <a href="">
-                                                    <i class="bx bx-edit text-success"></i>
+                                                                                    <button type="button" class="btn btn-sm btn-warning rounded-pill" 
+                                                onclick="openStatusModal({{ $item->id }}, '{{ $item->status }}', '{{ $item->admin_notes }}')"
+                                                style="background: linear-gradient(135deg, #ffc107 0%, #ffca2c 100%); border: none; box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);">
+                                            <i class="bx bx-edit me-1"></i> Update Status
+                                        </button>
+                                            @if($item->status === 'completed' && $item->pdf_output)
+                                                <a href="{{ route('pengaduan.download-pdf', $item->id) }}" class="btn btn-sm btn-success rounded-pill"
+                                                   style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); border: none; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);">
+                                                    <i class="bx bx-download me-1"></i> PDF
                                                 </a>
                                             @endif
                                         </td>
@@ -69,4 +75,86 @@
             </div>
         </div>
     </div>
+
+    <!-- Status Update Modal -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="border-radius: 15px; border: none; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);">
+                <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 15px 15px 0 0;">
+                    <h5 class="modal-title" id="statusModalLabel">
+                        <i class="bx bx-edit me-2"></i>Update Status Pengaduan
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="statusForm" method="POST">
+                    @csrf
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="status" class="form-label fw-bold">
+                                <i class="bx bx-shield me-2"></i>Status
+                            </label>
+                            <select class="form-select rounded-pill" id="status" name="status" required style="border: 2px solid #e9ecef;">
+                                <option value="pending">Menunggu</option>
+                                <option value="in_progress">Sedang Diproses</option>
+                                <option value="completed">Selesai</option>
+                                <option value="rejected">Ditolak</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="admin_notes" class="form-label fw-bold">
+                                <i class="bx bx-note me-2"></i>Catatan Admin
+                            </label>
+                            <textarea class="form-control rounded" id="admin_notes" name="admin_notes" rows="3" 
+                                      placeholder="Tambahkan catatan jika diperlukan" style="border: 2px solid #e9ecef;"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top: 1px solid #e9ecef;">
+                        <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">
+                            <i class="bx bx-x me-1"></i>Batal
+                        </button>
+                        <button type="submit" class="btn btn-primary rounded-pill" 
+                                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);">
+                            <i class="bx bx-check me-1"></i>Update Status
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
+
+<script>
+function openStatusModal(id, currentStatus, adminNotes) {
+    document.getElementById('statusForm').action = `/pengaduan/${id}/status`;
+    document.getElementById('status').value = currentStatus;
+    document.getElementById('admin_notes').value = adminNotes || '';
+    
+    var modal = new bootstrap.Modal(document.getElementById('statusModal'));
+    modal.show();
+}
+
+// Auto refresh after status update
+document.getElementById('statusForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Terjadi kesalahan saat update status');
+    });
+});
+</script>

@@ -770,6 +770,12 @@
                     <span>Form</span>
                     <span class="description-title">Pengaduan</span>
                 </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-success rounded-pill px-3 py-2 border border-0" 
+                            onclick="openPengaduanModal()">
+                        <i class="bi bi-eye me-2"></i>Lihat Pengaduan yang Sudah Selesai
+                    </button>
+                </div>
             </div>
             <!-- End Section Title -->
 
@@ -819,11 +825,12 @@
                             <div class="row gy-4">
                                 <div class="col-md-6">
                                     <input type="text" name="nama_pengadu" class="form-control"
-                                        placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" />
+                                        placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" 
+                                        style="background-color: white;" />
                                 </div>
 
                                 <div class="col-md-6">
-                                    <select class="form-control" name="travels_id" required>
+                                    <select class="form-control" name="travels_id" required style="background-color: white;">
                                         <option value="">-- Pilih Travel --</option>
                                         @foreach ($travels as $travel)
                                             <option value="{{ $travel->id }}"
@@ -835,11 +842,12 @@
                                 </div>
 
                                 <div class="col-md-12">
-                                    <textarea class="form-control" name="hal_aduan" rows="6" placeholder="Hal yang Diadukan" required>{{ old('hal_aduan') }}</textarea>
+                                    <textarea class="form-control" name="hal_aduan" rows="6" placeholder="Hal yang Diadukan" required 
+                                              style="background-color: white;">{{ old('hal_aduan') }}</textarea>
                                 </div>
 
                                 <div class="col-md-12">
-                                    <input type="file" class="form-control" name="berkas_aduan" />
+                                    <input type="file" class="form-control" name="berkas_aduan" style="background-color: white;" />
                                     <small class="text-muted mt-1">File maksimal 2MB</small>
                                 </div>
 
@@ -1215,7 +1223,80 @@
                 }
             })
         }
+
+        function openPengaduanModal() {
+            // Fetch completed pengaduan data
+            fetch('/api/pengaduan-completed')
+                .then(response => response.json())
+                .then(data => {
+                    const modalBody = document.getElementById('pengaduanModalBody');
+                    if (data.length > 0) {
+                        let html = '<div class="table-responsive"><table class="table table-hover">';
+                        html += '<thead class="table-dark"><tr><th>No</th><th>Nama Pengadu</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
+                        
+                        data.forEach((item, index) => {
+                            html += `<tr>
+                                <td>${index + 1}</td>
+                                <td><strong>${item.nama_pengadu}</strong></td>
+                                <td><span class="text-primary">${item.travel.Penyelenggara}</span></td>
+                                <td><span class="text-muted">${item.hal_aduan.substring(0, 50)}${item.hal_aduan.length > 50 ? '...' : ''}</span></td>
+                                <td><small class="text-muted">${new Date(item.completed_at).toLocaleDateString('id-ID')}</small></td>
+                                <td>
+                                    <button type="button" class="btn btn-success btn-sm rounded-pill" 
+                                            onclick="downloadPDF(${item.id})">
+                                        <i class="bi bi-download me-1"></i> PDF
+                                    </button>
+                                </td>
+                            </tr>`;
+                        });
+                        
+                        html += '</tbody></table></div>';
+                        modalBody.innerHTML = html;
+                    } else {
+                        modalBody.innerHTML = `
+                            <div class="text-center py-4">
+                                <i class="bi bi-info-circle text-muted" style="font-size: 3rem;"></i>
+                                <h5 class="text-muted mt-3">Belum ada pengaduan yang selesai diproses</h5>
+                                <p class="text-muted">Pengaduan yang sudah selesai akan ditampilkan di sini</p>
+                            </div>
+                        `;
+                    }
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('pengaduanModal'));
+                    modal.show();
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan saat mengambil data pengaduan');
+                });
+        }
+
+        function downloadPDF(id) {
+            window.open(`/pengaduan/${id}/download-pdf`, '_blank');
+        }
     </script>
+
+    <!-- Pengaduan Modal -->
+    <div class="modal fade" id="pengaduanModal" tabindex="-1" aria-labelledby="pengaduanModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pengaduanModalLabel">
+                        <i class="bi bi-shield-check me-2"></i>Pengaduan yang Sudah Selesai
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="pengaduanModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Memuat data pengaduan...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

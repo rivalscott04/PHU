@@ -26,7 +26,6 @@ class JamaahHajiKhusus extends Model
         'no_hp',
         'email',
         'nama_ayah',
-        'nama_ibu',
         'pekerjaan',
         'pendidikan_terakhir',
         'status_pernikahan',

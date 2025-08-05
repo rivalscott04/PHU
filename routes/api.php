@@ -23,3 +23,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/provinces', [ApiController::class, 'getProvinces']);
 Route::get('/cities', [ApiController::class, 'getCities']);
 Route::get('/districts', [ApiController::class, 'getDistricts']);
+
+// Pengaduan API routes
+Route::get('/pengaduan-completed', [App\Http\Controllers\PengaduanController::class, 'getCompletedPengaduan']);
