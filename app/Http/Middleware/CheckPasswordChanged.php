@@ -20,6 +20,11 @@ class CheckPasswordChanged
         Log::info('CheckPasswordChanged middleware hit');
         $user = Auth::user();
 
+        // Skip password check if impersonating
+        if (app('impersonate')->isImpersonating()) {
+            return $next($request);
+        }
+
         if ($user && $user->role === 'user' && !$user->is_password_changed) {
             return redirect()->route('user.changePassword')->with('warning', 'Anda harus mengganti password default Anda.');
         }

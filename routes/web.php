@@ -33,6 +33,7 @@ use App\Http\Controllers\PengaduanController;
 use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\PengunduranController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\ImpersonateController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -65,6 +66,11 @@ Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengadua
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Impersonate routes
+    Route::get('/impersonate', [ImpersonateController::class, 'index'])->name('impersonate.index');
+    Route::get('/impersonate/{id}', [ImpersonateController::class, 'impersonate'])->name('impersonate.take');
+    Route::get('/impersonate-leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
 
     Route::get('/jamaah/haji', [JamaahController::class, 'indexHaji'])->name('jamaah.haji');
     Route::get('/jamaah/haji/create', [JamaahController::class, 'createHaji'])->name('jamaah.haji.create');

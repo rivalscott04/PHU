@@ -11,13 +11,29 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         \Log::info('AdminMiddleware executed for user: ' . auth()->id());
-        if (auth()->check() && auth()->user()->role === 'admin') {
+        
+        // Check if user is authenticated
+        if (!auth()->check()) {
+            return abort(403, 'Unauthorized access.');
+        }
+
+        $user = auth()->user();
+        
+        // Allow access if user is admin
+        if ($user->role === 'admin') {
             return $next($request);
         }
+        
+        // Allow access if impersonating and the original user was admin
+        if (app('impersonate')->isImpersonating()) {
+            $originalUser = app('impersonate')->getImpersonator();
+            if ($originalUser && $originalUser->role === 'admin') {
+                return $next($request);
+            }
+        }
+        
         \Log::info('Unauthorized access attempt by user: ' . auth()->id());
-        // Redirect langsung ke dashboard atau gunakan abort()
         return abort(403, 'Unauthorized access.');
-        // atau
-        // return redirect()->route('home')->with('error', 'Unauthorized access.');
     }
 }
+

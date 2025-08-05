@@ -18,11 +18,11 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 20%">Nama</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 25%">Email</th>
+                                        style="width: 20%">Email</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 25%">Role</th>
+                                        style="width: 15%">Role</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 25%">Aksi</th>
+                                        style="width: 40%">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -32,11 +32,28 @@
                                             <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
                                             <td class="text-sm font-weight-bold">{{ $user->username }}</td>
                                             <td class="text-sm font-weight-bold">{{ $user->email }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $user->role }}</td>
                                             <td class="text-sm font-weight-bold">
-                                                <button type="button" class="btn btn-danger waves-effect waves-light"
-                                                    onclick="confirmResetPassword({{ $user->id }})">Reset
-                                                    Password</button>
+                                                @if ($user->role === 'user')
+                                                    <span class="badge bg-info">Travel</span>
+                                                @else
+                                                    <span class="badge bg-secondary">{{ $user->role }}</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-sm font-weight-bold">
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <a href="{{ route('impersonate.take', $user->id) }}" 
+                                                       class="btn btn-success btn-sm waves-effect waves-light"
+                                                       onclick="return confirmImpersonate('{{ $user->username }}')"
+                                                       title="Impersonate User">
+                                                        <i class="bx bx-user-check me-1"></i>
+                                                        Impersonate
+                                                    </a>
+                                                    <button type="button" class="btn btn-danger btn-sm waves-effect waves-light"
+                                                        onclick="confirmResetPassword({{ $user->id }})" title="Reset Password">
+                                                        <i class="bx bx-refresh me-1"></i>
+                                                        Reset Password
+                                                    </button>
+                                                </div>
                                                 <form id="reset-password-form-{{ $user->id }}"
                                                     action="{{ route('resetPassword', $user->id) }}" method="POST"
                                                     style="display: none;">
@@ -73,6 +90,21 @@
                 if (result.isConfirmed) {
                     document.getElementById(`reset-password-form-${userId}`).submit();
                 }
+            });
+        }
+
+        function confirmImpersonate(username) {
+            return Swal.fire({
+                title: "Impersonate User?",
+                text: `Anda akan masuk sebagai ${username}. Anda dapat melihat sistem dari perspektif user ini.`,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#6c757d",
+                confirmButtonText: "Ya, Impersonate!",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                return result.isConfirmed;
             });
         }
     </script>

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use Lab404\Impersonate\Models\Impersonate;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, Impersonate;
 
     /**
      * The attributes that are mass assignable.
@@ -65,5 +66,21 @@ class User extends Authenticatable
     public function travel()
     {
         return $this->belongsTo(TravelCompany::class, 'travel_id');
+    }
+
+    /**
+     * Check if user can impersonate
+     */
+    public function canImpersonate()
+    {
+        return in_array($this->role, ['admin', 'kabupaten']);
+    }
+
+    /**
+     * Check if user can be impersonated
+     */
+    public function canBeImpersonated()
+    {
+        return $this->role === 'user';
     }
 }
