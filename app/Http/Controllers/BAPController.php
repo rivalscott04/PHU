@@ -199,7 +199,7 @@ class BAPController extends Controller
     public function uploadPDF(Request $request, $id)
     {
         $request->validate([
-            'pdf_file' => 'required|mimes:pdf|max:2048',
+            'pdf_file' => 'required|mimes:pdf|max:500',
         ]);
 
         $data = BAP::findOrFail($id);

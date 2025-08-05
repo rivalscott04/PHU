@@ -34,6 +34,8 @@ use App\Http\Controllers\ExcelImportController;
 use App\Http\Controllers\PengunduranController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\JamaahHajiKhususController;
+use App\Http\Controllers\ApiController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -80,11 +82,25 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/jamaah/umrah/create', [JamaahController::class, 'createUmrah'])->name('jamaah.umrah.create');
     Route::post('/jamaah/umrah', [JamaahController::class, 'storeUmrah'])->name('jamaah.umrah.store');
 
+    // Jamaah Haji Khusus routes - MUST BE BEFORE generic jamaah routes
+    Route::resource('jamaah/haji-khusus', JamaahHajiKhususController::class)->names([
+        'index' => 'jamaah.haji-khusus.index',
+        'create' => 'jamaah.haji-khusus.create',
+        'store' => 'jamaah.haji-khusus.store',
+        'show' => 'jamaah.haji-khusus.show',
+        'edit' => 'jamaah.haji-khusus.edit',
+        'update' => 'jamaah.haji-khusus.update',
+        'destroy' => 'jamaah.haji-khusus.destroy',
+    ]);
+    Route::put('/jamaah/haji-khusus/{jamaahHajiKhusus}/status', [JamaahHajiKhususController::class, 'updateStatus'])->name('jamaah.haji-khusus.update-status');
+    Route::post('/jamaah/haji-khusus/{jamaahHajiKhusus}/verify-bukti-setor', [JamaahHajiKhususController::class, 'verifyBuktiSetor'])->name('jamaah.haji-khusus.verify-bukti-setor');
+    Route::post('/jamaah/haji-khusus/{jamaahHajiKhusus}/assign-porsi', [JamaahHajiKhususController::class, 'assignPorsiNumber'])->name('jamaah.haji-khusus.assign-porsi');
+    Route::get('/jamaah/haji-khusus/export', [JamaahHajiKhususController::class, 'export'])->name('jamaah.haji-khusus.export');
+
     Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
     Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');
     Route::get('/jamaah/edit/{id}', [JamaahController::class, 'edit'])->name('jamaah.edit');
     Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');
-    Route::delete('/jamaah/{id}', [JamaahController::class, 'destroy'])->name('jamaah.destroy');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
 
@@ -113,6 +129,12 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
     Route::get('/travel/{id}/edit', [KanwilController::class, 'edit'])->name('travel.edit');
     Route::put('/travel/{id}', [KanwilController::class, 'update'])->name('travel.update');
+    
+    // Update travel status route - using POST method to avoid method override issues
+    Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
+        ->name('travel.update-status')
+        ->middleware('auth', 'password.changed');
+    
     Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
     Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
     Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
@@ -134,3 +156,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::put('/reset-password/{id}', [AuthController::class, 'resetPassword'])->name('resetPassword');
     });
 });
+
+// API routes for province, city, and district selection
+Route::get('/api/provinces', [ApiController::class, 'getProvinces'])->name('api.provinces');
+Route::get('/api/cities', [ApiController::class, 'getCities'])->name('api.cities');
+Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.districts');

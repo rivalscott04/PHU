@@ -20,7 +20,7 @@ class PengaduanController extends Controller
             'nama_pengadu' => 'required',
             'travels_id' => 'required|exists:travels,id',
             'hal_aduan' => 'required',
-            'berkas_aduan' => 'nullable|file|max:2048',
+            'berkas_aduan' => 'nullable|file|max:500',
         ]);
 
         $berkasPath = null;

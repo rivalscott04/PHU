@@ -36,7 +36,7 @@ class PengunduranController extends Controller
         }
 
         $request->validate([
-            'berkas_pengunduran' => 'required|file|max:2048'
+            'berkas_pengunduran' => 'required|file|max:500'
         ]);
 
         $file = $request->file('berkas_pengunduran');

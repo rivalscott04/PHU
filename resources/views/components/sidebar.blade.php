@@ -1,125 +1,46 @@
+@php
+    use App\Services\TravelCapabilityService;
+    $menus = TravelCapabilityService::getSidebarMenus();
+@endphp
+
 <div class="vertical-menu">
     <div data-simplebar class="h-100">
         <!--- Sidemenu -->
         <div id="sidebar-menu">
             <!-- Left Menu Start -->
             <ul class="metismenu list-unstyled" id="side-menu">
-                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
-                    <li class="menu-title" key="t-menu">Menu</li>
-                    <li>
-                        <a href="{{ route('home') }}" class="waves-effect">
-                            <i class="bx bx-home-circle"></i>
-                            <span class="badge rounded-pill bg-info float-end">04</span>
-                            <span key="t-dashboards">Dashboards</span>
-                        </a>
-                    </li>
-            </ul>
-            <ul class="metismenu list-unstyled" id="side-menu">
-                <li class="menu-title" key="t-menu">Master Travel</li>
-                @if (auth()->user()->role === 'admin')
-                    <li>
-                        <a href="{{ route('travel') }}" class="waves-effect">
-                            <i class="bx bxs-plane-alt"></i>
-                            <span key="t-dashboards">Data Travel</span>
-                        </a>
-                    </li>
-                @endif
-                <li>
-                    <a href="{{ route('cabang.travel') }}" class="waves-effect">
-                        <i class="bx bxs-business"></i>
-                        <span key="t-dashboards">Data Cabang Travel</span>
-                    </a>
-                </li>
-                @if (auth()->user()->role === 'admin')
-                    <li>
-                        <a href="{{ route('travels') }}" class="waves-effect">
-                            <i class="bx bx-user-plus"></i>
-                            <span key="t-dashboards">Akun Travel</span>
-                        </a>
-                    </li>
-                @endif
-                @endif
-            </ul>
-            <ul class="metismenu list-unstyled" id="side-menu">
-                <li class="menu-title" key="t-menu">Travel</li>
-                <li>
-                    <a href="{{ route('bap') }}" class="waves-effect">
-                        <i class="bx bx-list-ul"></i>
-                        <span key="t-dashboards">Data BAP</span>
-                    </a>
-                </li>
-
-                @php
-                    $user = auth()->user();
-                    $isAdminOrKabupaten = in_array($user->role, ['admin', 'kabupaten']);
-                @endphp
-
-                @if ($isAdminOrKabupaten)
-                    <li>
-                        <a href="{{ route('jamaah.haji') }}" class="waves-effect">
-                            <i class="bx bxs-group"></i>
-                            <span key="t-dashboards">Jamaah Haji</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
-                            <i class="bx bxs-group"></i>
-                            <span key="t-dashboards">Jamaah Umrah</span>
-                        </a>
-                    </li>
-                @else
-                    @php
-                        $travel = $user->travel;
-                    @endphp
-                    @if ($travel && $travel->Status === 'PIHK')
-                        <li>
-                            <a href="{{ route('jamaah.haji') }}" class="waves-effect">
-                                <i class="bx bxs-group"></i>
-                                <span key="t-dashboards">Jamaah Haji</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
-                                <i class="bx bxs-group"></i>
-                                <span key="t-dashboards">Jamaah Umrah</span>
-                            </a>
-                        </li>
+                @foreach($menus as $menu)
+                    @if(isset($menu['items']))
+                        <!-- Menu Group -->
+                        <li class="menu-title" key="t-menu">{{ $menu['name'] }}</li>
+                        @foreach($menu['items'] as $item)
+                            @if($item['visible'])
+                                <li>
+                                    <a href="{{ route($item['route']) }}" class="waves-effect">
+                                        <i class="{{ $item['icon'] }}"></i>
+                                        @if(isset($item['badge']))
+                                            <span class="badge rounded-pill bg-info float-end">{{ $item['badge'] }}</span>
+                                        @endif
+                                        <span key="t-dashboards">{{ $item['name'] }}</span>
+                                    </a>
+                                </li>
+                            @endif
+                        @endforeach
                     @else
-                        <li>
-                            <a href="{{ route('jamaah.umrah') }}" class="waves-effect">
-                                <i class="bx bxs-group"></i>
-                                <span key="t-dashboards">Jamaah Umrah</span>
-                            </a>
-                        </li>
+                        <!-- Single Menu Item -->
+                        @if($menu['visible'])
+                            <li>
+                                <a href="{{ route($menu['route']) }}" class="waves-effect">
+                                    <i class="{{ $menu['icon'] }}"></i>
+                                    @if(isset($menu['badge']))
+                                        <span class="badge rounded-pill bg-info float-end">{{ $menu['badge'] }}</span>
+                                    @endif
+                                    <span key="t-dashboards">{{ $menu['name'] }}</span>
+                                </a>
+                            </li>
+                        @endif
                     @endif
-                @endif
-                <li>
-                    <a href="{{ route('pengaduan') }}" class="waves-effect">
-                        <i class="bx bx-envelope"></i>
-                        <span key="t-dashboards">Pengaduan</span>
-                    </a>
-                </li>
-                <li>
-                    <a href="{{ route('keberangkatan') }}" class="waves-effect">
-                        <i class="bx bx-calendar"></i>
-                        <span key="t-dashboards">Keberangkatan</span>
-                    </a>
-                </li>
-                @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
-                    <li>
-                        <a href="{{ route('pengunduran') }}" class="waves-effect">
-                            <i class="bx bx-send"></i>
-                            <span key="t-dashboards">Pengunduran</span>
-                        </a>
-                    </li>
-                @else
-                    <li>
-                        <a href="{{ route('pengunduran.create') }}" class="waves-effect">
-                            <i class="bx bx-send"></i>
-                            <span key="t-dashboards">Pengunduran</span>
-                        </a>
-                    </li>
-                @endif
+                @endforeach
             </ul>
         </div>
         <!-- Sidebar -->
