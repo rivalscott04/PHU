@@ -53,13 +53,23 @@
                                                 </button>
                                             </div>
                                         </td>
-                                        <td class="text-lg font-weight-bold">
+                                        <td>
                                             <a href="{{ route('jamaah.detail', $item->id) }}">
                                                 <i class="bx bx-info-circle me-2"></i>
                                             </a>
                                             <a href="{{ route('jamaah.edit', $item->id) }}">
-                                                <i class="bx bx-edit text-success"></i>
+                                                <i class="bx bx-edit text-success me-2"></i>
                                             </a>
+                                            <a href="javascript:void(0)"
+                                                onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
+                                                <i class="bx bx-trash text-danger"></i>
+                                            </a>
+                                            <form id="delete-form-{{ $item->id }}"
+                                                action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
+                                                style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -103,7 +113,53 @@
 @endsection
 
 @push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
+        $(document).ready(function() {
+            // Initialize DataTable with custom pagination
+            var table = $('.table').DataTable({
+                scrollX: true,
+                scrollCollapse: true,
+                autoWidth: false,
+                dom: '<"d-flex justify-content-between align-items-center px-4 py-3"<"d-flex align-items-center"<"me-2 text-sm">l<"text-sm">>f>t<"d-flex justify-content-between align-items-center px-4 py-3 mt-3"ip>',
+                language: {
+                    paginate: {
+                        previous: "<i class='fas fa-chevron-left'></i>",
+                        next: "<i class='fas fa-chevron-right'></i>"
+                    },
+                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
+                    infoEmpty: "Menampilkan 0 hingga 0 dari 0 data",
+                    lengthMenu: "Tampilkan _MENU_ data per halaman",
+                    search: "Cari:",
+                    zeroRecords: "Tidak ada data yang ditemukan",
+                    infoFiltered: "(disaring dari _MAX_ total entri)"
+                },
+                lengthMenu: [
+                    [10, 25, 50, 100],
+                    [10, 25, 50, 100]
+                ],
+                // Add some custom styling after initialization
+                initComplete: function() {
+                    // Add margin to pagination container
+                    $('.dataTables_paginate').addClass('mt-3');
+
+                    // Style the pagination buttons
+                    $('.paginate_button').addClass('mx-1');
+
+                    // Ensure proper vertical spacing
+                    $('.dataTables_wrapper').css('margin-bottom', '20px');
+                }
+            });
+
+            // Make sure the table redraws properly when window resizes
+            $(window).on('resize', function() {
+                table.columns.adjust().draw();
+            });
+
+            // Initial column adjustment
+            table.columns.adjust().draw();
+        });
+
         function toggleNik(id) {
             const nikElement = document.getElementById(`nik_${id}`);
             const iconElement = document.getElementById(`icon_${id}`);
@@ -119,6 +175,23 @@
                 iconElement.classList.remove('bxs-hide');
                 iconElement.classList.add('bxs-show');
             }
+        }
+
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Apakah Anda yakin?',
+                text: "Anda akan menghapus data jamaah '" + name + "'",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('delete-form-' + id).submit();
+                }
+            });
         }
     </script>
 @endpush

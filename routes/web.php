@@ -84,6 +84,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');
     Route::get('/jamaah/edit/{id}', [JamaahController::class, 'edit'])->name('jamaah.edit');
     Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');
+    Route::delete('/jamaah/{id}', [JamaahController::class, 'destroy'])->name('jamaah.destroy');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
 

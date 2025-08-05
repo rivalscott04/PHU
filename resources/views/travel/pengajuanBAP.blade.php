@@ -57,8 +57,8 @@
                                     value="{{ $jamaahCount }}" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="package" class="form-label">Paket</label>
-                                <input type="text" class="form-control" id="package" name="package" required>
+                                <label for="package" class="form-label">Paket (Jumlah Hari)</label>
+                                <input type="number" class="form-control" id="package" name="package" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="price" class="form-label">Harga</label>
@@ -106,5 +106,29 @@
             // Update the hidden input with the raw numeric value
             document.getElementById('price_hidden').value = rawValue;
         }
+
+        function calculateReturnDate() {
+            const departureDate = document.getElementById('datetime').value;
+            const packageDays = parseInt(document.getElementById('package').value) || 0;
+
+            if (departureDate && packageDays > 0) {
+                // Buat objek Date dari tanggal keberangkatan
+                const returnDate = new Date(departureDate);
+                // Tambahkan jumlah hari paket
+                returnDate.setDate(returnDate.getDate() + packageDays);
+
+                // Format tanggal untuk input date (YYYY-MM-DD)
+                const year = returnDate.getFullYear();
+                const month = String(returnDate.getMonth() + 1).padStart(2, '0');
+                const day = String(returnDate.getDate()).padStart(2, '0');
+
+                // Atur nilai tanggal kepulangan
+                document.getElementById('returndate').value = `${year}-${month}-${day}`;
+            }
+        }
+
+        // Tambahkan event listener untuk tanggal berangkat dan paket
+        document.getElementById('datetime').addEventListener('change', calculateReturnDate);
+        document.getElementById('package').addEventListener('input', calculateReturnDate);
     </script>
 @endpush

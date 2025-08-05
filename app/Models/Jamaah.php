@@ -9,7 +9,7 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class Jamaah extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $table = 'jamaah';
 
@@ -20,8 +20,6 @@ class Jamaah extends Model
         'nomor_hp',
         'jenis_jamaah',
     ];
-
-    protected $dates = ['deleted_at'];
 
     public function generateQrCode()
     {
