@@ -36,6 +36,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\JamaahHajiKhususController;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\SertifikatController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -142,6 +143,18 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
         ->name('travel.update-status')
         ->middleware('auth', 'password.changed');
+
+    // Sertifikat routes
+    Route::resource('sertifikat', SertifikatController::class)->except(['show', 'edit', 'update']);
+Route::get('/sertifikat/{id}/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
+Route::get('/sertifikat/{id}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
+Route::get('/sertifikat/travel-data/{id}', [SertifikatController::class, 'getTravelData'])->name('sertifikat.travel-data');
+Route::get('/sertifikat/cabang-data/{id}', [SertifikatController::class, 'getCabangData'])->name('sertifikat.cabang-data');
+Route::get('/sertifikat/settings', [SertifikatController::class, 'getSettings'])->name('sertifikat.settings');
+Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
+
+// Travel certificates (for travel companies to view their own certificates)
+Route::get('/travel/certificates', [SertifikatController::class, 'travelCertificates'])->name('travel.certificates');
     
     // Cabang Travel routes - accessible by admin and kabupaten only
     Route::middleware(['kabupaten.access'])->group(function () {
@@ -172,3 +185,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 Route::get('/api/provinces', [ApiController::class, 'getProvinces'])->name('api.provinces');
 Route::get('/api/cities', [ApiController::class, 'getCities'])->name('api.cities');
 Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.districts');
+
+// Public verification route (no authentication required)
+Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi');

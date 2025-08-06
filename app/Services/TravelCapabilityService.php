@@ -226,6 +226,18 @@ class TravelCapabilityService
             'name' => 'Other Services',
             'items' => [
                 [
+                    'name' => 'Sertifikat PPIU',
+                    'route' => 'sertifikat.index',
+                    'icon' => 'bx bx-certificate',
+                    'visible' => in_array($user->role, ['admin', 'kabupaten']),
+                ],
+                [
+                    'name' => 'Sertifikat Saya',
+                    'route' => 'travel.certificates',
+                    'icon' => 'bx bx-download',
+                    'visible' => !in_array($user->role, ['admin', 'kabupaten']),
+                ],
+                [
                     'name' => 'Pengaduan',
                     'route' => 'pengaduan',
                     'icon' => 'bx bx-envelope',

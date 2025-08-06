@@ -6,7 +6,9 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
+        "endroid/qr-code": "^5.0",
         "guzzlehttp/guzzle": "^7.2",
+        "intervention/image": "^3.11",
         "lab404/laravel-impersonate": "^1.7",
         "laravel-frontend-presets/argon": "^2.0",
         "laravel/framework": "^10.0",
@@ -14,7 +16,9 @@
         "laravel/tinker": "^2.8",
         "laravel/ui": "^4.6",
         "maatwebsite/excel": "^3.1",
-        "simplesoftwareio/simple-qrcode": "^4.2"
+        "phpoffice/phpword": "^1.4",
+        "simplesoftwareio/simple-qrcode": "^4.2",
+        "tecnickcom/tcpdf": "^6.10"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
