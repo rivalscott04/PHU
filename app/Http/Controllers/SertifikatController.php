@@ -207,25 +207,36 @@ class SertifikatController extends Controller
         try {
             \Log::info('Creating TemplateProcessor...');
             $template = new TemplateProcessor($templatePath);
-
+            
             \Log::info('Setting template values...');
-            $template->setValue('nama_ppiu', $sertifikat->nama_ppiu);
+            
+            // Set nama PPIU dengan placeholder yang benar
+            $template->setValue('namappiu', $sertifikat->nama_ppiu);
+            
             $template->setValue('namakepala', $sertifikat->nama_kepala);
             $template->setValue('alamatkantor', $sertifikat->alamat);
-            $template->setValue('nosert', $sertifikat->nomor_surat);
             $template->setValue('nodoc', $sertifikat->nomor_dokumen);
             
-            // Extract bulan and tahun from nomor_surat
-            preg_match('/\/(\d{2})\/(\d{4})$/', $sertifikat->nomor_surat, $matches);
-            $bulan = $matches[1] ?? Carbon::now()->format('m');
-            $tahun = $matches[2] ?? Carbon::now()->format('Y');
+            // Extract nomor urut, bulan, dan tahun dari nomor_surat
+            // Format: B-987/Kw.18.01/HJ.00/2/08/2025
+            preg_match('/B-(\d+)\/Kw\.18\.01\/HJ\.00\/2\/(\d{2})\/(\d{4})$/', $sertifikat->nomor_surat, $matches);
             
-            \Log::info('Extracted bulan and tahun:', ['bulan' => $bulan, 'tahun' => $tahun]);
+            $nomor_urut = $matches[1] ?? '1';
+            $bulan = $matches[2] ?? Carbon::now()->format('m');
+            $tahun = $matches[3] ?? Carbon::now()->format('Y');
             
+            \Log::info('Extracted nomor components:', [
+                'nomor_urut' => $nomor_urut,
+                'bulan' => $bulan, 
+                'tahun' => $tahun
+            ]);
+            
+            // Set placeholder untuk nomor surat yang terpisah
+            $template->setValue('nosert', $nomor_urut);
             $template->setValue('blnno', $bulan);
             $template->setValue('thnno', $tahun);
-            $template->setValue('dd-mm-yyyy', DateHelper::formatIndonesia($sertifikat->tanggal_tandatangan, 'd-m-Y'));
-            $template->setValue('tglterbit', DateHelper::formatIndonesia($sertifikat->tanggal_tandatangan, 'd-m-Y'));
+            $template->setValue('dd-mm-yyyy', DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_tandatangan));
+            $template->setValue('tglterbit', DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_tandatangan));
             
             // Get signatory settings from database
             $settings = SertifikatSetting::first();
@@ -468,6 +479,8 @@ class SertifikatController extends Controller
             'message' => 'Pengaturan penandatangan berhasil disimpan'
         ]);
     }
+    
+
     
     /**
      * Find LibreOffice executable path
