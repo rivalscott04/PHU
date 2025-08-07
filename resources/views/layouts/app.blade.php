@@ -25,6 +25,9 @@
     <!-- Responsive datatable examples -->
     <link href="{{ asset('libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
+    <!-- SweetAlert2 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.css" rel="stylesheet">
+
     @stack('styles')
 </head>
 
@@ -32,27 +35,29 @@
     <!-- <body data-layout="horizontal" data-topbar="dark"> -->
     <!-- Begin page -->
     <div id="layout-wrapper">
-        
+
         <!-- Impersonate Banner -->
-        @if(app('impersonate')->isImpersonating())
-        <div class="impersonate-banner" style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 10px; text-align: center; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-            <div class="container-fluid">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <strong><i class="bx bx-user-check me-2"></i>You are currently impersonating: {{ auth()->user()->username }}</strong>
-                        <small class="d-block">You can see the system from this user's perspective</small>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <a href="{{ route('impersonate.leave') }}" class="btn btn-light btn-sm">
-                            <i class="bx bx-log-out me-1"></i>
-                            Stop Impersonating
-                        </a>
+        @if (app('impersonate')->isImpersonating())
+            <div class="impersonate-banner"
+                style="position: fixed; top: 0; left: 0; right: 0; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 10px; text-align: center; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <div class="container-fluid">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <strong><i class="bx bx-user-check me-2"></i>You are currently impersonating:
+                                {{ auth()->user()->username }}</strong>
+                            <small class="d-block">You can see the system from this user's perspective</small>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ route('impersonate.leave') }}" class="btn btn-light btn-sm">
+                                <i class="bx bx-log-out me-1"></i>
+                                Stop Impersonating
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         @endif
-        
+
         @include('components.navbar')
         @include('components.sidebar')
         <div class="main-content">
@@ -125,26 +130,27 @@
     <!-- App js -->
     <script src="{{ asset('js/app.js') }}"></script>
     @stack('js')
-    
+
     <style>
         .impersonate-banner {
             animation: slideDown 0.3s ease-out;
         }
-        
+
         @keyframes slideDown {
             from {
                 transform: translateY(-100%);
             }
+
             to {
                 transform: translateY(0);
             }
         }
-        
+
         /* Adjust main content when banner is present */
-        @if(app('impersonate')->isImpersonating())
-        .main-content {
-            margin-top: 60px;
-        }
+        @if (app('impersonate')->isImpersonating())
+            .main-content {
+                margin-top: 60px;
+            }
         @endif
     </style>
 </body>
