@@ -111,10 +111,14 @@ class SertifikatController extends Controller
         if ($data['jenis_lokasi'] === 'pusat') {
             $data['travel_id'] = $request->travel_id;
             $data['cabang_id'] = null;
+            // Hapus cabang_id dari data jika ada
+            unset($data['cabang_id']);
             \Log::info('Set travel_id for PUSAT:', ['travel_id' => $request->travel_id]);
         } else {
             $data['cabang_id'] = $request->cabang_id;
             $data['travel_id'] = null;
+            // Hapus travel_id dari data jika ada
+            unset($data['travel_id']);
             \Log::info('Set cabang_id for CABANG:', ['cabang_id' => $request->cabang_id]);
         }
 
