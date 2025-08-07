@@ -150,7 +150,7 @@
                 yang bertanda tangan dibawah ini :
             </p>
 
-            <p style="margin-bottom: 8mm;"></p>
+            <p style="margin-bottom: 2mm;"></p>
 
             <div class="form-group">
                 <span class="label">Nama</span>: <span class="input-line">{{ $data->name }}</span>
@@ -192,7 +192,7 @@
                     class="input-line">{{ $data->airlines2 }}</span>
             </div>
 
-            <p style="margin-bottom: 8mm;"></p>
+            <p style="margin-bottom: 2mm;"></p>
 
             <p>Menerangkan bahwa kami memberangkatkan jamaah umroh sesuai dengan 5 PASTI
                 UMROH
