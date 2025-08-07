@@ -233,7 +233,7 @@ return new class extends Migration
                 $table->string('qrcode_path')->nullable();
                 $table->string('sertifikat_path')->nullable();
                 $table->string('pdf_path')->nullable();
-                $table->enum('jenis', ['haji', 'umrah'])->default('umrah');
+                $table->enum('jenis', ['PPIU'])->default('PPIU');
                 $table->enum('jenis_lokasi', ['pusat', 'cabang'])->default('pusat');
                 $table->enum('status', ['active', 'revoked'])->default('active');
                 $table->timestamps();
@@ -308,32 +308,59 @@ return new class extends Migration
         // STEP 2: Add foreign keys and constraints after all tables are created
         
         // Add foreign key constraints
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('users', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            });
+        }
 
-        Schema::table('bap', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('bap', 'user_id') || !Schema::hasTable('users')) {
+            Schema::table('bap', function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        }
 
-        Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-            $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
-        });
+        if (!Schema::hasColumn('jamaah_haji_khusus', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
+                $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            });
+        }
 
-        Schema::table('jamaah_umrah', function (Blueprint $table) {
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-            $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
-        });
+        if (!Schema::hasColumn('jamaah_haji_khusus', 'verified_by') || !Schema::hasTable('users')) {
+            Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
+                $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
+            });
+        }
 
-        Schema::table('pengunduran', function (Blueprint $table) {
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('jamaah_umrah', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('jamaah_umrah', function (Blueprint $table) {
+                $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            });
+        }
 
-        Schema::table('sertifikat', function (Blueprint $table) {
-            $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-            $table->foreign('cabang_id')->references('id_cabang')->on('travel_cabang')->onDelete('cascade');
-        });
+        if (!Schema::hasColumn('jamaah_umrah', 'processed_by') || !Schema::hasTable('users')) {
+            Schema::table('jamaah_umrah', function (Blueprint $table) {
+                $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
+            });
+        }
+
+        if (!Schema::hasColumn('pengunduran', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('pengunduran', function (Blueprint $table) {
+                $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            });
+        }
+
+        if (!Schema::hasColumn('sertifikat', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('sertifikat', function (Blueprint $table) {
+                $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+            });
+        }
+
+        if (!Schema::hasColumn('sertifikat', 'cabang_id') || !Schema::hasTable('travel_cabang')) {
+            Schema::table('sertifikat', function (Blueprint $table) {
+                $table->foreign('cabang_id')->references('id_cabang')->on('travel_cabang')->onDelete('cascade');
+            });
+        }
 
         // STEP 3: Add indexes for better performance
         Schema::table('users', function (Blueprint $table) {
