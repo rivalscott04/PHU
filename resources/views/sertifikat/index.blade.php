@@ -13,9 +13,9 @@
                             data-bs-target="#settingsModal">
                             <i class="bx bx-cog"></i> Pengaturan Penandatangan
                         </button>
-                        <a href="{{ route('sertifikat.create') }}" class="btn btn-primary">
+                        <button type="button" class="btn btn-primary" onclick="checkPenandatangan()">
                             <i class="fas fa-plus"></i> Buat Sertifikat
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -164,105 +164,138 @@
 @push('js')
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        $(document).ready(function() {
-            // Auto-hide success alerts
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                setTimeout(() => {
-                    alert.remove();
-                }, 5000);
+        // Load settings when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSettings();
+            
+            // Add event listener for save settings button
+            document.getElementById('saveSettings').addEventListener('click', function(e) {
+                e.preventDefault();
+                saveSettings();
             });
-
-            // Settings functionality
+            
+            // Add event listener for modal show
             const settingsModal = document.getElementById('settingsModal');
             if (settingsModal) {
                 settingsModal.addEventListener('show.bs.modal', function() {
                     loadSettings();
                 });
             }
+        });
 
-            // Save settings button
-            const saveSettingsBtn = document.getElementById('saveSettings');
-            if (saveSettingsBtn) {
-                saveSettingsBtn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    saveSettings();
-                });
-            }
-
-            // Settings functions
-            function loadSettings() {
-                fetch('/sertifikat/settings')
-                    .then(response => response.json())
-                    .then(data => {
-                        document.getElementById('nama_penandatangan').value = data.nama_penandatangan || '';
-                        document.getElementById('nip_penandatangan').value = data.nip_penandatangan || '';
-                    })
-                    .catch(error => {
-                        console.error('Error loading settings:', error);
-                    });
-            }
-
-            function saveSettings() {
-                const namaPenandatangan = document.getElementById('nama_penandatangan').value;
-                const nipPenandatangan = document.getElementById('nip_penandatangan').value;
-
-                if (!namaPenandatangan || !nipPenandatangan) {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: 'Nama dan NIP penandatangan harus diisi',
-                        icon: 'error',
-                        confirmButtonText: 'OK'
-                    });
-                    return;
-                }
-
-                const form = document.getElementById('settingsForm');
-                const formData = new FormData(form);
-
-                fetch('/sertifikat/settings', {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Hide modal first
-                            const modal = bootstrap.Modal.getInstance(document.getElementById('settingsModal'));
-                            if (modal) {
-                                modal.hide();
+        function checkPenandatangan() {
+            // Check if penandatangan is set
+            fetch('/sertifikat/settings')
+                .then(response => response.json())
+                .then(data => {
+                    if (!data || !data.nama_penandatangan || data.nama_penandatangan.trim() === '') {
+                        // Show SweetAlert if penandatangan is not set
+                        Swal.fire({
+                            title: 'Nama Penandatangan Kosong!',
+                            text: 'Silahkan isi penandatangan terlebih dahulu sebelum membuat sertifikat.',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Isi Penandatangan',
+                            cancelButtonText: 'Batal'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Open settings modal
+                                $('#settingsModal').modal('show');
                             }
-
-                            // Show success SweetAlert
-                            Swal.fire({
-                                title: 'Berhasil!',
-                                text: data.message,
-                                icon: 'success',
-                                confirmButtonText: 'OK'
-                            });
-                        } else {
-                            Swal.fire({
-                                title: 'Error!',
-                                text: data.message || 'Terjadi kesalahan saat menyimpan pengaturan',
-                                icon: 'error',
-                                confirmButtonText: 'OK'
-                            });
+                        });
+                    } else {
+                        // If penandatangan is set, proceed to create certificate
+                        window.location.href = '{{ route("sertifikat.create") }}';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking penandatangan:', error);
+                    // If there's an error, show warning and proceed
+                    Swal.fire({
+                        title: 'Peringatan!',
+                        text: 'Tidak dapat memverifikasi penandatangan. Lanjutkan membuat sertifikat?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Lanjutkan',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '{{ route("sertifikat.create") }}';
                         }
-                    })
-                    .catch(error => {
-                        console.error('Error saving settings:', error);
+                    });
+                });
+        }
+
+        function loadSettings() {
+            fetch('/sertifikat/settings')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('nama_penandatangan').value = data.nama_penandatangan || '';
+                    document.getElementById('nip_penandatangan').value = data.nip_penandatangan || '';
+                })
+                .catch(error => {
+                    console.error('Error loading settings:', error);
+                });
+        }
+
+        function saveSettings() {
+            const namaPenandatangan = document.getElementById('nama_penandatangan').value;
+            const nipPenandatangan = document.getElementById('nip_penandatangan').value;
+
+            if (!namaPenandatangan || !nipPenandatangan) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Nama dan NIP penandatangan harus diisi',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const form = document.getElementById('settingsForm');
+            const formData = new FormData(form);
+
+            fetch('/sertifikat/settings', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Berhasil!',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            $('#settingsModal').modal('hide');
+                        });
+                    } else {
                         Swal.fire({
                             title: 'Error!',
-                            text: 'Terjadi kesalahan saat menyimpan pengaturan',
+                            text: 'Gagal menyimpan pengaturan',
                             icon: 'error',
                             confirmButtonText: 'OK'
                         });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error saving settings:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat menyimpan pengaturan',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
                     });
-            }
-        });
+                });
+        }
 
         function generatePdf(id, namaPpiu) {
             // Show loading SweetAlert
@@ -324,8 +357,8 @@
                     }
                 })
                 .catch(error => {
-                    Swal.close();
                     console.error('Error generating PDF:', error);
+                    Swal.close();
                     Swal.fire({
                         title: 'Error!',
                         text: 'Terjadi kesalahan saat membuat sertifikat',
@@ -335,10 +368,10 @@
                 });
         }
 
-        function confirmDelete(id, name) {
+        function confirmDelete(id, namaPpiu) {
             Swal.fire({
                 title: 'Apakah Anda yakin?',
-                text: "Anda akan menghapus sertifikat '" + name + "'",
+                text: `Sertifikat untuk ${namaPpiu} akan dihapus secara permanen!`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
@@ -347,7 +380,16 @@
                 cancelButtonText: 'Batal'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    document.getElementById('delete-form-' + id).submit();
+                    // Submit delete form
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/sertifikat/${id}`;
+                    form.innerHTML = `
+                        @csrf
+                        @method('DELETE')
+                    `;
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             });
         }
