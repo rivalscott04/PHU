@@ -216,11 +216,11 @@ class KanwilController extends Controller
         
         // Admin can see all cabang travel
         if ($user->role === 'admin') {
-            $data = CabangTravel::with('travel')->get();
+            $data = CabangTravel::all();
         } else {
             // Kabupaten users can see cabang travel in their area
             // For now, show all data but this can be filtered by area later
-            $data = CabangTravel::with('travel')->get();
+            $data = CabangTravel::all();
         }
 
         return view('kanwil.cabangTravel', ['data' => $data]);

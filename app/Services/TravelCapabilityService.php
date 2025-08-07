@@ -28,6 +28,7 @@ class TravelCapabilityService
                 'travel_management' => true,
                 'cabang_travel' => true,
                 'user_management' => true,
+                'sertifikat' => true, // Admin can create certificates
             ];
         } else if ($user->role === 'kabupaten') {
             // Kabupaten has limited access
@@ -42,6 +43,7 @@ class TravelCapabilityService
                 'travel_management' => false,
                 'cabang_travel' => true,
                 'user_management' => false,
+                'sertifikat' => false, // Kabupaten cannot create certificates
             ];
         } else {
             // Travel user - check based on travel company capabilities
@@ -59,6 +61,7 @@ class TravelCapabilityService
                     'travel_management' => false,
                     'cabang_travel' => false,
                     'user_management' => false,
+                    'sertifikat' => false, // Travel users cannot create certificates
                 ];
             }
         }
@@ -281,13 +284,13 @@ class TravelCapabilityService
                     'name' => 'Sertifikat PPIU',
                     'route' => 'sertifikat.index',
                     'icon' => 'bx bx-award',
-                    'visible' => true,
+                    'visible' => $user->role === 'admin', // Only admin can create certificates
                 ],
                 [
                     'name' => 'Sertifikat Saya',
                     'route' => 'travel.certificates',
                     'icon' => 'bx bx-award',
-                    'visible' => !in_array($user->role, ['admin', 'kabupaten']),
+                    'visible' => $user->role === 'user', // Only travel users can see their certificates
                 ],
                 [
                     'name' => 'Pengaduan',
