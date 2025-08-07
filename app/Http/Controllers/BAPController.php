@@ -59,27 +59,29 @@ class BAPController extends Controller
         $data = BAP::findOrFail($id);
 
         $year = Carbon::parse($data->created_at)->year;
-
-        $yearInWords = method_exists($this, 'nomorKata') ? $this->nomorKata($year) : $year;
+        $yearInWords = $this->nomorKata($year);
 
         $dayName = Carbon::parse($data->created_at)->translatedFormat('l');
-        $day = Carbon::parse($data->created_at)->translatedFormat('d');
-        $monthYear = Carbon::parse($data->created_at)->translatedFormat('F Y');
+        $day = Carbon::parse($data->created_at)->day;
+        $dayInWords = $this->nomorKata($day);
+        
+        // Get month name in Indonesian (without year)
+        $month = Carbon::parse($data->created_at)->translatedFormat('F');
 
         $formattedDate = Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = Carbon::parse($data->returndate)->translatedFormat('d F Y');
 
-        $month = Carbon::parse($data->datetime)->format('m');
+        $monthNumber = Carbon::parse($data->datetime)->format('m');
 
         return view('travel.printBAP', [
             'data' => $data,
             'yearInWords' => $yearInWords,
             'dayName' => $dayName,
-            'day' => $day,
-            'monthYear' => $monthYear,
+            'day' => $dayInWords,
+            'monthYear' => $month,
             'formattedDate' => $formattedDate,
             'formattedReturnDate' => $formattedReturnDate,
-            'month' => $month
+            'month' => $monthNumber
         ]);
     }
 
@@ -131,11 +133,23 @@ class BAPController extends Controller
         if ($number < 21) {
             return $words[$number];
         } elseif ($number < 100) {
-            return $words[floor($number / 10) * 10] . ' ' . $words[$number % 10];
+            if ($number % 10 == 0) {
+                return $words[$number];
+            } else {
+                return $words[floor($number / 10) * 10] . ' ' . $words[$number % 10];
+            }
         } elseif ($number < 1000) {
-            return $words[floor($number / 100) * 100] . ' ' . $this->nomorKata($number % 100);
+            if ($number % 100 == 0) {
+                return $words[floor($number / 100) * 100];
+            } else {
+                return $words[floor($number / 100) * 100] . ' ' . $this->nomorKata($number % 100);
+            }
         } elseif ($number < 1000000) {
-            return $this->nomorKata(floor($number / 1000)) . ' ribu ' . $this->nomorKata($number % 1000);
+            if ($number % 1000 == 0) {
+                return $this->nomorKata(floor($number / 1000)) . ' Ribu';
+            } else {
+                return $this->nomorKata(floor($number / 1000)) . ' Ribu ' . $this->nomorKata($number % 1000);
+            }
         }
 
         return $number;
