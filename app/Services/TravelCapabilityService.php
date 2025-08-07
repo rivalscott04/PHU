@@ -45,25 +45,23 @@ class TravelCapabilityService
                 'user_management' => false, // Kabupaten cannot manage users
                 'sertifikat' => true, // Kabupaten can access certificates for impersonation testing
             ];
-        } else {
+        } else if ($user->role === 'user') {
             // Travel user - check based on travel company capabilities
             $travel = $user->travel;
             
-            if ($travel) {
-                $menus = [
-                    'dashboard' => true,
-                    'jamaah_umrah' => $travel->canHandleUmrah(),
-                    'jamaah_haji_khusus' => $travel->canHandleHajiKhusus(),
-                    'bap' => true,
-                    'pengaduan' => false, // Travel users cannot access pengaduan
-                    'keberangkatan' => true,
-                    'pengunduran' => true,
-                    'travel_management' => false,
-                    'cabang_travel' => false,
-                    'user_management' => false,
-                    'sertifikat' => false, // Travel users cannot create certificates
-                ];
-            }
+            $menus = [
+                'dashboard' => true,
+                'jamaah_umrah' => $travel ? $travel->canHandleUmrah() : false,
+                'jamaah_haji_khusus' => $travel ? $travel->canHandleHajiKhusus() : false,
+                'bap' => true, // Travel users always have access to BAP
+                'pengaduan' => false, // Travel users cannot access pengaduan
+                'keberangkatan' => true,
+                'pengunduran' => true,
+                'travel_management' => false,
+                'cabang_travel' => false,
+                'user_management' => false,
+                'sertifikat' => false, // Travel users cannot create certificates
+            ];
         }
 
         return $menus;
@@ -227,8 +225,8 @@ class TravelCapabilityService
         // Travel Services
         $travelServices = [];
         
-        // Add Data BAP for admin and kabupaten
-        if (in_array($user->role, ['admin', 'kabupaten'])) {
+        // Add Data BAP for admin, kabupaten, and travel users
+        if (in_array($user->role, ['admin', 'kabupaten', 'user'])) {
             $travelServices[] = [
                 'name' => 'Data BAP',
                 'route' => 'bap',
