@@ -193,19 +193,18 @@ Route::get('/travel/certificates', [SertifikatController::class, 'travelCertific
         Route::get('/kabupaten/create', [UserManagementController::class, 'createKabupaten'])->name('kabupaten.create');
         Route::post('/kabupaten', [UserManagementController::class, 'storeKabupaten'])->name('kabupaten.store');
         
+        // Travel User Management
+        Route::get('/travel-users', [UserManagementController::class, 'indexTravel'])->name('travels.index');
+        Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
+        Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
+        
         // General User Management
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     });
 
-    // Travel User Management routes - Admin and Kabupaten
-    Route::middleware(['kabupaten.access'])->group(function () {
-        // Travel User Management
-        Route::get('/travel-users', [UserManagementController::class, 'indexTravel'])->name('travels.index');
-        Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
-        Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
-    });
+
 });
 
 // API routes for province, city, and district selection

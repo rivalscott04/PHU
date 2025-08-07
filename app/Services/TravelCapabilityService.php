@@ -36,14 +36,14 @@ class TravelCapabilityService
                 'dashboard' => true,
                 'jamaah_umrah' => false,
                 'jamaah_haji_khusus' => false,
-                'bap' => false,
+                'bap' => true, // Kabupaten can access BAP
                 'pengaduan' => false,
                 'keberangkatan' => true,
                 'pengunduran' => true,
                 'travel_management' => false,
                 'cabang_travel' => true,
-                'user_management' => false,
-                'sertifikat' => false, // Kabupaten cannot create certificates
+                'user_management' => false, // Kabupaten cannot manage users
+                'sertifikat' => true, // Kabupaten can access certificates for impersonation testing
             ];
         } else {
             // Travel user - check based on travel company capabilities
@@ -212,12 +212,14 @@ class TravelCapabilityService
             ];
         }
 
-        // User Travel (Kabupaten only)
+
+
+        // Sertifikat (Kabupaten only - for impersonation testing)
         if ($user->role === 'kabupaten') {
             $menus[] = [
-                'name' => 'User Travel',
-                'route' => 'travels.index',
-                'icon' => 'bx bx-user-plus',
+                'name' => 'Sertifikat',
+                'route' => 'sertifikat.index',
+                'icon' => 'bx bx-award',
                 'visible' => true,
             ];
         }
@@ -225,8 +227,8 @@ class TravelCapabilityService
         // Travel Services
         $travelServices = [];
         
-        // Add Data BAP for admin only
-        if ($user->role === 'admin') {
+        // Add Data BAP for admin and kabupaten
+        if (in_array($user->role, ['admin', 'kabupaten'])) {
             $travelServices[] = [
                 'name' => 'Data BAP',
                 'route' => 'bap',
