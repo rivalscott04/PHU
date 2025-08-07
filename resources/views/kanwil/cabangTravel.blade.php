@@ -24,6 +24,7 @@
                                     <th>Pimpinan Cabang</th>
                                     <th>Alamat Cabang</th>
                                     <th>Telepon</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -41,6 +42,24 @@
                                         <td>{{ $item->pimpinan_cabang }}</td>
                                         <td>{{ $item->alamat_cabang }}</td>
                                         <td>{{ $item->telepon }}</td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" 
+                                                   class="btn btn-sm btn-warning">
+                                                    <i class="bx bx-edit"></i>
+                                                </a>
+                                                <form action="{{ route('cabang.travel.destroy', $item->id_cabang) }}" 
+                                                      method="POST" 
+                                                      style="display: inline;"
+                                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

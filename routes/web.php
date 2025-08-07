@@ -37,6 +37,7 @@ use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\JamaahHajiKhususController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SertifikatController;
+use App\Http\Controllers\UserManagementController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -65,7 +66,6 @@ Route::get('/logout-redirect', function () {
 })->name('logout.redirect');
 
 Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
-Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
@@ -102,13 +102,15 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');
     Route::get('/jamaah/edit/{id}', [JamaahController::class, 'edit'])->name('jamaah.edit');
     Route::put('/jamaah/{id}', [JamaahController::class, 'update'])->name('jamaah.update');
+    Route::delete('/jamaah/{id}', [JamaahController::class, 'destroy'])->name('jamaah.destroy');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
 
-    // Pengaduan routes - accessible by admin and kabupaten only
-    Route::middleware(['kabupaten.access'])->group(function () {
+    // Pengaduan routes - accessible by admin only
+    Route::middleware(['admin'])->group(function () {
         Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
         Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
+        Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
         Route::get('/pengaduan/{id}', [PengaduanController::class, 'detail'])->name('pengaduan.show');
         Route::post('/pengaduan/{id}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.update-status');
         Route::get('/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDF'])->name('pengaduan.download-pdf');
@@ -116,6 +118,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     // Public pengaduan routes (no authentication required)
     Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
+    Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');
 
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
@@ -161,6 +164,9 @@ Route::get('/travel/certificates', [SertifikatController::class, 'travelCertific
         Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
         Route::get('/cabang-travel/form', [KanwilController::class, 'createCabangTravel'])->name('form.cabang_travel');
         Route::post('/cabang-travel/form', [KanwilController::class, 'storeCabangTravel'])->name('post.cabang_travel');
+        Route::get('/cabang-travel/{id}/edit', [KanwilController::class, 'editCabangTravel'])->name('cabang.travel.edit');
+        Route::put('/cabang-travel/{id}', [KanwilController::class, 'updateCabangTravel'])->name('cabang.travel.update');
+        Route::delete('/cabang-travel/{id}', [KanwilController::class, 'destroyCabangTravel'])->name('cabang.travel.destroy');
         Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
         Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
     });
@@ -178,6 +184,27 @@ Route::get('/travel/certificates', [SertifikatController::class, 'travelCertific
         Route::get('/tambah-akun-travel', [AuthController::class, 'showForm'])->name('form.addUser');
         Route::post('/tambah-akun-travel', [AuthController::class, 'addUser'])->name('addUser');
         Route::put('/reset-password/{id}', [AuthController::class, 'resetPassword'])->name('resetPassword');
+    });
+
+    // User Management routes - Admin only
+    Route::middleware(['admin'])->group(function () {
+        // Kabupaten User Management
+        Route::get('/kabupaten', [UserManagementController::class, 'indexKabupaten'])->name('kabupaten.index');
+        Route::get('/kabupaten/create', [UserManagementController::class, 'createKabupaten'])->name('kabupaten.create');
+        Route::post('/kabupaten', [UserManagementController::class, 'storeKabupaten'])->name('kabupaten.store');
+        
+        // General User Management
+        Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
+        Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
+        Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+    });
+
+    // Travel User Management routes - Admin and Kabupaten
+    Route::middleware(['kabupaten.access'])->group(function () {
+        // Travel User Management
+        Route::get('/travel-users', [UserManagementController::class, 'indexTravel'])->name('travels.index');
+        Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
+        Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
     });
 });
 

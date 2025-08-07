@@ -16,7 +16,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             AdminSeeder::class,
             KabupatenSeeder::class,
-            TravelSeeder::class,
+            TravelCompanySeeder::class,
+            CabangTravelSeeder::class,
+            TravelUserSeeder::class,
         ]);
     }
 }

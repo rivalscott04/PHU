@@ -11,6 +11,29 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Create users table FIRST (before other tables that reference it)
+        if (!Schema::hasTable('users')) {
+            Schema::create('users', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('travel_id')->nullable()->constrained()->onDelete('cascade');
+                $table->string('username');
+                $table->string('firstname')->nullable();
+                $table->string('lastname')->nullable();
+                $table->string('email')->unique();
+                $table->timestamp('email_verified_at')->nullable();
+                $table->string('password');
+                $table->enum('role', ['admin', 'kabupaten', 'user'])->default('user');
+                $table->string('address')->nullable();
+                $table->string('city')->nullable();
+                $table->string('country')->nullable();
+                $table->string('postal')->nullable();
+                $table->text('about')->nullable();
+                $table->boolean('is_password_changed')->default(0);
+                $table->rememberToken();
+                $table->timestamps();
+            });
+        }
+
         // Create bap table
         if (!Schema::hasTable('bap')) {
             Schema::create('bap', function (Blueprint $table) {
@@ -98,9 +121,47 @@ return new class extends Migration
                 $table->string('surat_keterangan')->nullable();
                 $table->string('bukti_setor_bank')->nullable();
                 $table->enum('status_verifikasi_bukti', ['pending', 'verified', 'rejected'])->default('pending');
-                $table->text('catatan_verifikasi')->nullable();
-                $table->timestamp('tanggal_verifikasi')->nullable();
                 $table->foreignId('verified_by')->nullable()->constrained('users')->onDelete('set null');
+                $table->timestamps();
+            });
+        }
+
+        // Create jamaah_umrah table
+        if (!Schema::hasTable('jamaah_umrah')) {
+            Schema::create('jamaah_umrah', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('travel_id')->constrained()->onDelete('cascade');
+                $table->string('nama_lengkap');
+                $table->string('no_ktp', 16)->unique();
+                $table->string('tempat_lahir');
+                $table->date('tanggal_lahir');
+                $table->enum('jenis_kelamin', ['L', 'P']);
+                $table->string('alamat');
+                $table->string('kota');
+                $table->string('kecamatan')->nullable();
+                $table->string('provinsi');
+                $table->string('kode_pos', 5);
+                $table->string('no_hp', 15);
+                $table->string('email')->nullable();
+                $table->string('nama_ayah');
+                $table->string('pekerjaan');
+                $table->string('pendidikan_terakhir');
+                $table->enum('status_pernikahan', ['Belum Menikah', 'Menikah', 'Cerai']);
+                $table->string('golongan_darah');
+                $table->string('alergi')->nullable();
+                $table->string('no_paspor')->nullable();
+                $table->date('tanggal_berlaku_paspor')->nullable();
+                $table->string('tempat_terbit_paspor')->nullable();
+                $table->enum('status_pendaftaran', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
+                $table->text('catatan_khusus')->nullable();
+                $table->string('dokumen_ktp')->nullable();
+                $table->string('dokumen_kk')->nullable();
+                $table->string('dokumen_paspor')->nullable();
+                $table->string('dokumen_foto')->nullable();
+                $table->string('surat_keterangan')->nullable();
+                $table->string('bukti_setor_bank')->nullable();
+                $table->enum('status_verifikasi_bukti', ['pending', 'verified', 'rejected'])->default('pending');
+                $table->foreignId('processed_by')->nullable()->constrained('users')->onDelete('set null');
                 $table->timestamps();
             });
         }
@@ -111,34 +172,6 @@ return new class extends Migration
                 $table->string('email')->primary();
                 $table->string('token');
                 $table->timestamp('created_at')->nullable();
-            });
-        }
-
-        // Create pengaduan table
-        if (!Schema::hasTable('pengaduan')) {
-            Schema::create('pengaduan', function (Blueprint $table) {
-                $table->id();
-                $table->string('nama_pengadu');
-                $table->foreignId('travels_id')->constrained()->onDelete('cascade');
-                $table->text('hal_aduan');
-                $table->string('berkas_aduan')->nullable();
-                $table->string('status')->default('pending');
-                $table->string('pdf_output')->nullable();
-                $table->text('admin_notes')->nullable();
-                $table->timestamp('completed_at')->nullable();
-                $table->foreignId('processed_by')->nullable()->constrained('users')->onDelete('set null');
-                $table->timestamps();
-            });
-        }
-
-        // Create pengunduran table
-        if (!Schema::hasTable('pengunduran')) {
-            Schema::create('pengunduran', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('user_id')->constrained()->onDelete('cascade');
-                $table->string('berkas_pengunduran');
-                $table->enum('status', ['pending', 'diajukan', 'diterima'])->default('pending');
-                $table->timestamps();
             });
         }
 
@@ -156,27 +189,62 @@ return new class extends Migration
             });
         }
 
-        // Create sertifikat table (if not exists)
+        // Create pengaduan table
+        if (!Schema::hasTable('pengaduan')) {
+            Schema::create('pengaduan', function (Blueprint $table) {
+                $table->id();
+                $table->string('nama_pelapor');
+                $table->string('email_pelapor');
+                $table->string('telepon_pelapor');
+                $table->string('kabupaten_pelapor');
+                $table->string('judul_pengaduan');
+                $table->text('deskripsi_pengaduan');
+                $table->string('kategori_pengaduan');
+                $table->string('nama_travel')->nullable();
+                $table->string('status_pengaduan')->default('pending');
+                $table->text('tanggapan_pengaduan')->nullable();
+                $table->string('file_lampiran')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Create pengunduran table
+        if (!Schema::hasTable('pengunduran')) {
+            Schema::create('pengunduran', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('travel_id')->constrained()->onDelete('cascade');
+                $table->string('nama_jamaah');
+                $table->string('no_ktp', 16);
+                $table->string('no_paspor')->nullable();
+                $table->string('jenis_pengunduran');
+                $table->text('alasan_pengunduran');
+                $table->string('dokumen_pendukung')->nullable();
+                $table->enum('status_pengunduran', ['pending', 'approved', 'rejected'])->default('pending');
+                $table->text('catatan_admin')->nullable();
+                $table->timestamps();
+            });
+        }
+
+        // Create sertifikat table
         if (!Schema::hasTable('sertifikat')) {
             Schema::create('sertifikat', function (Blueprint $table) {
                 $table->id();
                 $table->uuid('uuid')->unique();
-                $table->foreignId('travel_id')->nullable()->constrained()->onDelete('cascade');
-                $table->foreignId('cabang_id')->nullable()->constrained('travel_cabang', 'id_cabang')->onDelete('cascade');
+                $table->foreignId('travel_id')->constrained()->onDelete('cascade');
+                $table->foreignId('cabang_id')->nullable()->constrained('travel_cabang')->onDelete('cascade');
                 $table->string('nama_ppiu');
                 $table->string('nama_kepala');
                 $table->text('alamat');
-                $table->date('tanggal_diterbitkan')->nullable();
-                $table->date('tanggal_tandatangan')->nullable();
-                $table->string('nomor_surat')->nullable();
-                $table->string('nomor_dokumen')->nullable();
+                $table->date('tanggal_diterbitkan');
+                $table->date('tanggal_tandatangan');
+                $table->string('nomor_surat');
+                $table->string('nomor_dokumen');
                 $table->string('qrcode_path')->nullable();
                 $table->string('sertifikat_path')->nullable();
                 $table->string('pdf_path')->nullable();
-                $table->enum('jenis', ['PPIU', 'PIHK'])->default('PPIU');
+                $table->enum('jenis', ['haji', 'umrah'])->default('umrah');
                 $table->enum('jenis_lokasi', ['pusat', 'cabang'])->default('pusat');
-                $table->enum('status', ['active', 'expired', 'revoked'])->default('active');
-                $table->text('notes')->nullable();
+                $table->enum('status', ['active', 'revoked'])->default('active');
                 $table->timestamps();
             });
         }
@@ -231,29 +299,6 @@ return new class extends Migration
                 $table->string('pusat')->nullable();
                 $table->string('pimpinan_pusat');
                 $table->text('alamat_pusat');
-                $table->timestamps();
-            });
-        }
-
-        // Create users table
-        if (!Schema::hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
-                $table->id();
-                $table->foreignId('travel_id')->nullable()->constrained()->onDelete('cascade');
-                $table->string('username');
-                $table->string('firstname')->nullable();
-                $table->string('lastname')->nullable();
-                $table->string('email')->unique();
-                $table->timestamp('email_verified_at')->nullable();
-                $table->string('password');
-                $table->enum('role', ['admin', 'kabupaten', 'user'])->default('user');
-                $table->string('address')->nullable();
-                $table->string('city')->nullable();
-                $table->string('country')->nullable();
-                $table->string('postal')->nullable();
-                $table->text('about')->nullable();
-                $table->boolean('is_password_changed')->default(0);
-                $table->rememberToken();
                 $table->timestamps();
             });
         }

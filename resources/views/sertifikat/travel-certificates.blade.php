@@ -64,14 +64,14 @@
                                                 @if($cert->pdf_path)
                                                     <a href="{{ route('sertifikat.download', $cert->id) }}" 
                                                        class="btn btn-sm btn-primary" 
-                                                       title="Unduh PDF">
-                                                        <i class="bx bx-download"></i> PDF
+                                                       title="Download PDF">
+                                                        <i class="fas fa-file-pdf"></i> PDF
                                                     </a>
                                                 @else
                                                     <a href="{{ route('sertifikat.generate', $cert->id) }}" 
                                                        class="btn btn-sm btn-success" 
                                                        title="Generate PDF">
-                                                        <i class="bx bx-file-plus"></i> Generate
+                                                        <i class="fas fa-file-pdf"></i> Generate
                                                     </a>
                                                 @endif
                                                 

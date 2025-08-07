@@ -21,7 +21,7 @@ class ImpersonateController extends Controller
      */
     public function index()
     {
-        $users = User::where('role', 'user')->get();
+        $users = User::whereIn('role', ['user', 'kabupaten'])->get();
         return view('impersonate.index', compact('users'));
     }
 

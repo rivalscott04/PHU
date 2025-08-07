@@ -39,6 +39,34 @@ class PengaduanController extends Controller
         return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
     }
 
+    /**
+     * Store pengaduan from public form (no authentication required)
+     */
+    public function storePublic(Request $request)
+    {
+        $request->validate([
+            'nama_pengadu' => 'required|string|max:255',
+            'travels_id' => 'required|exists:travels,id',
+            'hal_aduan' => 'required|string',
+            'berkas_aduan' => 'nullable|file|max:500',
+        ]);
+
+        $berkasPath = null;
+        if ($request->hasFile('berkas_aduan')) {
+            $berkasPath = $request->file('berkas_aduan')->store('berkas_aduan', 'public');
+        }
+
+        Pengaduan::create([
+            'nama_pengadu' => $request->nama_pengadu,
+            'travels_id' => $request->travels_id,
+            'hal_aduan' => $request->hal_aduan,
+            'berkas_aduan' => $berkasPath,
+            'status' => 'pending',
+        ]);
+
+        return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
+    }
+
     public function index()
     {
         $user = auth()->user();

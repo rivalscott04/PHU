@@ -25,7 +25,8 @@ class CheckPasswordChanged
             return $next($request);
         }
 
-        if ($user && $user->role === 'user' && !$user->is_password_changed) {
+        // Check password change for both 'user' and 'kabupaten' roles
+        if ($user && in_array($user->role, ['user', 'kabupaten']) && !$user->is_password_changed) {
             return redirect()->route('user.changePassword')->with('warning', 'Anda harus mengganti password default Anda.');
         }
 

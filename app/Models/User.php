@@ -73,7 +73,7 @@ class User extends Authenticatable
      */
     public function canImpersonate()
     {
-        return in_array($this->role, ['admin', 'kabupaten']);
+        return $this->role === 'admin';
     }
 
     /**
@@ -81,6 +81,6 @@ class User extends Authenticatable
      */
     public function canBeImpersonated()
     {
-        return $this->role === 'user';
+        return in_array($this->role, ['user', 'kabupaten']);
     }
 }

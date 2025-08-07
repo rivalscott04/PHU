@@ -14,6 +14,7 @@ use Endroid\QrCode\Writer\PngWriter;
 use Carbon\Carbon;
 use App\Helpers\DateHelper;
 use Symfony\Component\Process\Process;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SertifikatController extends Controller
 {
@@ -195,7 +196,9 @@ class SertifikatController extends Controller
         }
         \Log::info('Template file exists');
 
-        $outputPath = storage_path("app/public/sertifikat/sertifikat_{$sertifikat->id}.docx");
+        // Create filename with travel name
+        $travelName = str_replace([' ', '/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $sertifikat->nama_ppiu);
+        $outputPath = storage_path("app/public/sertifikat/sertifikat_{$travelName}.docx");
         \Log::info('Output path:', ['outputPath' => $outputPath]);
         
         // Ensure directory exists
@@ -268,27 +271,33 @@ class SertifikatController extends Controller
         }
 
         // Convert Word to PDF using LibreOffice with Symfony Process
-        $pdfPath = storage_path("app/public/sertifikat/sertifikat_{$sertifikat->id}.pdf");
+        $pdfPath = storage_path("app/public/sertifikat/pdf/sertifikat_{$travelName}.pdf");
         \Log::info('PDF path:', ['pdfPath' => $pdfPath]);
         
+        // Ensure PDF directory exists
+        if (!file_exists(dirname($pdfPath))) {
+            mkdir(dirname($pdfPath), 0755, true);
+            \Log::info('Created PDF directory');
+        }
+        
         try {
-            \Log::info('Converting Word to PDF using LibreOffice...');
+            \Log::info('Converting Word to PDF...');
             
             // Check if LibreOffice is available
             $libreofficePath = $this->findLibreOffice();
             
             if (!$libreofficePath) {
-                \Log::warning('LibreOffice not found, using development fallback');
+                \Log::warning('LibreOffice not found, using TCPDF fallback');
                 
-                // Development fallback: Copy Word file as PDF for testing
-                if (app()->environment('local')) {
-                    \Log::info('Using development fallback - copying Word file as PDF');
-                    copy($outputPath, $pdfPath);
-                    \Log::info('Development fallback: Word file copied as PDF');
+                // Use TCPDF fallback
+                if ($this->createSimplePdfFromWord($outputPath, $pdfPath)) {
+                    \Log::info('PDF created using TCPDF fallback');
                 } else {
-                    return back()->with('error', 'LibreOffice tidak ditemukan. Silakan install LibreOffice terlebih dahulu.');
+                    return back()->with('error', 'LibreOffice tidak ditemukan dan konversi TCPDF gagal. Silakan install LibreOffice terlebih dahulu.');
                 }
             } else {
+                \Log::info('LibreOffice found at: ' . $libreofficePath);
+                
                 // Use Symfony Process for better security and error handling
                 $process = new Process([
                     $libreofficePath,
@@ -310,12 +319,15 @@ class SertifikatController extends Controller
                 ]);
                 
                 if (!$process->isSuccessful()) {
-                    throw new \Exception('LibreOffice conversion failed: ' . $process->getErrorOutput());
+                    \Log::warning('LibreOffice conversion failed, trying TCPDF fallback');
+                    if (!$this->createSimplePdfFromWord($outputPath, $pdfPath)) {
+                        throw new \Exception('LibreOffice conversion failed: ' . $process->getErrorOutput());
+                    }
                 }
                 
                 // Check if PDF was created
                 if (!file_exists($pdfPath)) {
-                    throw new \Exception('PDF file was not created by LibreOffice');
+                    throw new \Exception('PDF file was not created');
                 }
                 
                 \Log::info('PDF file created successfully');
@@ -328,8 +340,8 @@ class SertifikatController extends Controller
         try {
             // Update sertifikat with document path
             $sertifikat->update([
-                'sertifikat_path' => "sertifikat/sertifikat_{$sertifikat->id}.docx",
-                'pdf_path' => "sertifikat/sertifikat_{$sertifikat->id}.pdf"
+                'sertifikat_path' => "sertifikat/sertifikat_{$travelName}.docx",
+                'pdf_path' => "sertifikat/pdf/sertifikat_{$travelName}.pdf"
             ]);
             \Log::info('Updated sertifikat with document paths');
         } catch (\Exception $e) {
@@ -338,7 +350,7 @@ class SertifikatController extends Controller
         }
 
         \Log::info('=== GENERATE PDF SUCCESS ===');
-        return response()->download($pdfPath)->deleteFileAfterSend(true);
+        return response()->download($pdfPath);
     }
 
     public function verifikasi($uuid)
@@ -518,5 +530,39 @@ class SertifikatController extends Controller
         }
         
         return null;
+    }
+
+    /**
+     * Create a simple PDF from Word document content
+     */
+    private function createSimplePdfFromWord($wordPath, $pdfPath)
+    {
+        try {
+            // Extract travel name from filename
+            $filename = basename($wordPath, '.docx');
+            $travelName = str_replace('sertifikat_', '', $filename);
+            
+            // Get sertifikat data by travel name
+            $sertifikat = Sertifikat::where('nama_ppiu', 'LIKE', '%' . str_replace('_', ' ', $travelName) . '%')->first();
+            if (!$sertifikat) {
+                \Log::error('Sertifikat not found for travel name: ' . $travelName);
+                return false;
+            }
+            
+            // Create HTML content for PDF using the new template
+            $html = view('sertifikat.pdf-template', compact('sertifikat'))->render();
+            
+            // Generate PDF using DomPDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+            $pdf->setPaper('A4', 'landscape');
+            
+            // Save PDF
+            $pdf->save($pdfPath);
+            
+            return file_exists($pdfPath);
+        } catch (\Exception $e) {
+            \Log::error('Simple PDF creation failed:', ['error' => $e->getMessage()]);
+            return false;
+        }
     }
 } 

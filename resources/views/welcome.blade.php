@@ -818,7 +818,7 @@
                     </div>
 
                     <div class="col-lg-8">
-                        <form id="pengaduanForm" action="{{ route('pengaduan.store') }}" method="post"
+                        <form id="pengaduanForm" action="{{ route('pengaduan.store-public') }}" method="post"
                             class="php-email-form" data-aos="fade-up" data-aos-delay="200"
                             enctype="multipart/form-data">
                             @csrf

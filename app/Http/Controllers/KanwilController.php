@@ -193,11 +193,16 @@ class KanwilController extends Controller
     {
         // Validate input
         $validatedData = $request->validate([
-            'nama_cabang' => 'required|string|max:255',
-            'alamat' => 'required|string',
+            'Penyelenggara' => 'required|string|max:255',
+            'kabupaten' => 'required|string|max:255',
+            'pusat' => 'nullable|string|max:255',
+            'pimpinan_pusat' => 'required|string|max:255',
+            'alamat_pusat' => 'required|string',
+            'SK_BA' => 'nullable|string|max:255',
+            'tanggal' => 'nullable|date',
+            'pimpinan_cabang' => 'required|string|max:255',
+            'alamat_cabang' => 'required|string',
             'telepon' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
-            'travel_id' => 'required|exists:travels,id',
         ]);
 
         CabangTravel::create($validatedData);
@@ -265,6 +270,42 @@ class KanwilController extends Controller
         }
     }
 
+    public function editCabangTravel($id)
+    {
+        $cabangTravel = CabangTravel::findOrFail($id);
+        $travels = TravelCompany::all();
+        return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
+    }
+
+    public function updateCabangTravel(Request $request, $id)
+    {
+        $request->validate([
+            'Penyelenggara' => 'required|string|max:255',
+            'kabupaten' => 'required|string|max:255',
+            'pusat' => 'nullable|string|max:255',
+            'pimpinan_pusat' => 'required|string|max:255',
+            'alamat_pusat' => 'required|string',
+            'SK_BA' => 'nullable|string|max:255',
+            'tanggal' => 'nullable|date',
+            'pimpinan_cabang' => 'required|string|max:255',
+            'alamat_cabang' => 'required|string',
+            'telepon' => 'required|string|max:20',
+        ]);
+
+        $cabangTravel = CabangTravel::findOrFail($id);
+        $cabangTravel->update($request->all());
+
+        return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil diperbarui.');
+    }
+
+    public function destroyCabangTravel($id)
+    {
+        $cabangTravel = CabangTravel::findOrFail($id);
+        $cabangTravel->delete();
+
+        return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil dihapus.');
+    }
+
     public function downloadTemplateCabang()
     {
         $headers = [
@@ -275,11 +316,16 @@ class KanwilController extends Controller
         $callback = function() {
             $file = fopen('php://output', 'w');
             fputcsv($file, [
-                'nama_cabang',
-                'alamat',
-                'telepon',
-                'email',
-                'travel_id'
+                'penyelenggara',
+                'kabupaten',
+                'pusat',
+                'pimpinan_pusat',
+                'alamat_pusat',
+                'sk_ba',
+                'tanggal',
+                'pimpinan_cabang',
+                'alamat_cabang',
+                'telepon'
             ]);
 
             fclose($file);

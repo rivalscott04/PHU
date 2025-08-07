@@ -15,8 +15,8 @@ class TravelCapabilityService
         $user = Auth::user();
         $menus = [];
 
-        // Admin and Kabupaten always have access to all menus
-        if (in_array($user->role, ['admin', 'kabupaten'])) {
+        // Admin has access to all menus
+        if ($user->role === 'admin') {
             $menus = [
                 'dashboard' => true,
                 'jamaah_umrah' => true,
@@ -25,9 +25,23 @@ class TravelCapabilityService
                 'pengaduan' => true,
                 'keberangkatan' => true,
                 'pengunduran' => true,
-                'travel_management' => $user->role === 'admin',
+                'travel_management' => true,
                 'cabang_travel' => true,
-                'user_management' => $user->role === 'admin',
+                'user_management' => true,
+            ];
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten has limited access
+            $menus = [
+                'dashboard' => true,
+                'jamaah_umrah' => false,
+                'jamaah_haji_khusus' => false,
+                'bap' => false,
+                'pengaduan' => false,
+                'keberangkatan' => true,
+                'pengunduran' => true,
+                'travel_management' => false,
+                'cabang_travel' => true,
+                'user_management' => false,
             ];
         } else {
             // Travel user - check based on travel company capabilities
@@ -39,7 +53,7 @@ class TravelCapabilityService
                     'jamaah_umrah' => $travel->canHandleUmrah(),
                     'jamaah_haji_khusus' => $travel->canHandleHajiKhusus(),
                     'bap' => true,
-                    'pengaduan' => true,
+                    'pengaduan' => false, // Travel users cannot access pengaduan
                     'keberangkatan' => true,
                     'pengunduran' => true,
                     'travel_management' => false,
@@ -149,20 +163,45 @@ class TravelCapabilityService
                 'name' => 'Master Travel',
                 'items' => [
                     [
-                        'name' => 'Data Travel',
+                        'name' => 'Data Travel Pusat',
                         'route' => 'travel',
                         'icon' => 'bx bxs-plane-alt',
                         'visible' => true,
                     ],
                     [
-                        'name' => 'Data Cabang Travel',
+                        'name' => 'Data Travel Cabang',
                         'route' => 'cabang.travel',
                         'icon' => 'bx bxs-business',
                         'visible' => true,
                     ],
+                ],
+            ];
+        }
+
+        // Data Cabang Travel (Kabupaten only - separate menu)
+        if ($user->role === 'kabupaten') {
+            $menus[] = [
+                'name' => 'Data Cabang Travel',
+                'route' => 'cabang.travel',
+                'icon' => 'bx bxs-business',
+                'visible' => true,
+            ];
+        }
+
+        // Master Akun (Admin only)
+        if ($user->role === 'admin') {
+            $menus[] = [
+                'name' => 'Master Akun',
+                'items' => [
                     [
-                        'name' => 'Akun Travel',
-                        'route' => 'travels',
+                        'name' => 'User Kabupaten',
+                        'route' => 'kabupaten.index',
+                        'icon' => 'bx bx-user-circle',
+                        'visible' => true,
+                    ],
+                    [
+                        'name' => 'User Travel',
+                        'route' => 'travels.index',
                         'icon' => 'bx bx-user-plus',
                         'visible' => true,
                     ],
@@ -170,18 +209,31 @@ class TravelCapabilityService
             ];
         }
 
+        // User Travel (Kabupaten only)
+        if ($user->role === 'kabupaten') {
+            $menus[] = [
+                'name' => 'User Travel',
+                'route' => 'travels.index',
+                'icon' => 'bx bx-user-plus',
+                'visible' => true,
+            ];
+        }
+
         // Travel Services
-        $travelServices = [
-            [
+        $travelServices = [];
+        
+        // Add Data BAP for admin only
+        if ($user->role === 'admin') {
+            $travelServices[] = [
                 'name' => 'Data BAP',
                 'route' => 'bap',
                 'icon' => 'bx bx-list-ul',
                 'visible' => true,
-            ],
-        ];
+            ];
+        }
 
         // Add Jamaah menus based on capabilities
-        if (in_array($user->role, ['admin', 'kabupaten'])) {
+        if ($user->role === 'admin') {
             $travelServices[] = [
                 'name' => 'Jamaah Umrah',
                 'route' => 'jamaah.umrah',
@@ -194,7 +246,7 @@ class TravelCapabilityService
                 'icon' => 'bx bxs-star',
                 'visible' => true,
             ];
-        } else {
+        } else if ($user->role === 'user') {
             $travel = $user->travel;
             if ($travel) {
                 if ($travel->canHandleUmrah()) {
@@ -228,20 +280,20 @@ class TravelCapabilityService
                 [
                     'name' => 'Sertifikat PPIU',
                     'route' => 'sertifikat.index',
-                    'icon' => 'bx bx-certificate',
-                    'visible' => in_array($user->role, ['admin', 'kabupaten']),
+                    'icon' => 'bx bx-award',
+                    'visible' => true,
                 ],
                 [
                     'name' => 'Sertifikat Saya',
                     'route' => 'travel.certificates',
-                    'icon' => 'bx bx-download',
+                    'icon' => 'bx bx-award',
                     'visible' => !in_array($user->role, ['admin', 'kabupaten']),
                 ],
                 [
                     'name' => 'Pengaduan',
                     'route' => 'pengaduan',
                     'icon' => 'bx bx-envelope',
-                    'visible' => true,
+                    'visible' => $user->role === 'admin', // Only admin can see pengaduan menu
                 ],
                 [
                     'name' => 'Keberangkatan',

@@ -32,6 +32,10 @@ class LoginController extends Controller
 
             if ($user->role === 'user') {
                 return redirect()->route('bap');
+            } elseif ($user->role === 'kabupaten') {
+                return redirect()->route('home');
+            } elseif ($user->role === 'admin') {
+                return redirect()->route('home');
             }
 
             // Default redirect untuk role lainnya

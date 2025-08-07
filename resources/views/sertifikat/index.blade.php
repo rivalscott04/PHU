@@ -68,13 +68,13 @@
                                                 <div class="btn-group" role="group">
                                                     @if ($item->sertifikat_path)
                                                         <a href="{{ route('sertifikat.download', $item->id) }}"
-                                                            class="btn btn-sm btn-success" title="Download">
-                                                            <i class="fas fa-download"></i>
+                                                            class="btn btn-sm btn-success" title="Download PDF">
+                                                            <i class="fas fa-file-pdf"></i>
                                                         </a>
                                                     @else
                                                         <a href="{{ route('sertifikat.generate', $item->id) }}"
-                                                            class="btn btn-sm btn-primary" title="Generate">
-                                                            <i class="fas fa-file-word"></i>
+                                                            class="btn btn-sm btn-primary" title="Generate PDF">
+                                                            <i class="fas fa-file-pdf"></i>
                                                         </a>
                                                     @endif
 
