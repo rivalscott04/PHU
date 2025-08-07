@@ -64,9 +64,10 @@
         }
 
         .form-group {
-            margin: 0.3mm 0;
+            margin: 1mm 0;
             display: flex;
             align-items: center;
+            line-height: 1.3;
             font-family: Arial, sans-serif;
         }
 
@@ -107,13 +108,15 @@
 
         li {
             text-align: justify;
-            margin-bottom: 1mm;
+            margin-bottom: 2mm;
+            line-height: 1.3;
             font-family: Arial, sans-serif;
         }
 
         p {
             text-align: justify;
-            margin: 1mm 0;
+            margin: 3mm 0;
+            line-height: 1.4;
             font-family: Arial, sans-serif;
         }
     </style>
@@ -146,6 +149,8 @@
                 <b>{{ $yearInWords }}</b>,
                 yang bertanda tangan dibawah ini :
             </p>
+
+            <p style="margin-bottom: 8mm;"></p>
 
             <div class="form-group">
                 <span class="label">Nama</span>: <span class="input-line">{{ $data->name }}</span>
@@ -186,6 +191,8 @@
                 <span class="label">Nama Airline Kepulangan</span>: <span
                     class="input-line">{{ $data->airlines2 }}</span>
             </div>
+
+            <p style="margin-bottom: 8mm;"></p>
 
             <p>Menerangkan bahwa kami memberangkatkan jamaah umroh sesuai dengan 5 PASTI
                 UMROH
