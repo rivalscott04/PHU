@@ -51,31 +51,36 @@
             font-weight: bold;
             margin-top: 2mm;
             margin-bottom: 3mm;
-            font-size: 12pt;
+            font-size: 11pt;
             line-height: 1.2;
+            font-family: Arial, sans-serif;
         }
 
         .content {
             margin: 2mm 0;
             font-size: 11pt;
             line-height: 1.2;
+            font-family: Arial, sans-serif;
         }
 
         .form-group {
             margin: 0.3mm 0;
             display: flex;
             align-items: center;
+            font-family: Arial, sans-serif;
         }
 
         .label {
             width: 180px;
             flex-shrink: 0;
+            font-family: Arial, sans-serif;
         }
 
         .input-line {
             flex-grow: 1;
             margin: 0 2mm;
             min-height: 11pt;
+            font-family: Arial, sans-serif;
         }
 
         .footer {
@@ -86,25 +91,30 @@
             font-size: 11pt;
             line-height: 1.2;
             margin-inline: -35px;
+            font-family: Arial, sans-serif;
         }
 
         .signature {
             width: 40%;
+            font-family: Arial, sans-serif;
         }
 
         ol {
             padding-left: 5mm;
             margin: 1mm 0;
+            font-family: Arial, sans-serif;
         }
 
         li {
             text-align: justify;
             margin-bottom: 1mm;
+            font-family: Arial, sans-serif;
         }
 
         p {
             text-align: justify;
             margin: 1mm 0;
+            font-family: Arial, sans-serif;
         }
     </style>
 </head>
@@ -177,13 +187,13 @@
                     class="input-line">{{ $data->airlines2 }}</span>
             </div>
 
-            <p style="font-size:11pt">Menerangkan bahwa kami memberangkatkan jamaah umroh sesuai dengan 5 PASTI
+            <p>Menerangkan bahwa kami memberangkatkan jamaah umroh sesuai dengan 5 PASTI
                 UMROH
                 dan sudah terdaftar di Siskopatuh Kementerian Agama RI. Kami mengetahui Regulasi dan sanksi
                 terkait
                 penyelenggaraan Umroh dan haji Khusus sesuai :</p>
 
-            <ol type="A" style="font-size:10pt">
+            <ol type="A">
                 <li>Undang-Undang Nomor 8 Tahun 2019 Tentang Penyelenggaran Ibadah haji dan Umrah Bab XI tentang
                     Larangan pasal 113 s.d 119 dan Bab XII tentang Ketentuan Pidana pasal 120 s.s 126.</li>
                 <li>Undang-Undang Nomor 11 Tahun 2020 Tentang Cipta Kerja pada Paragraf 14 (keagamaan) Pasal 126
@@ -198,7 +208,7 @@
                 </li>
             </ol>
 
-            <p style="font-size:11pt">Demikian Berita Acara pelaporan keberangkatan jamaah umroh.</p>
+            <p>Demikian Berita Acara pelaporan keberangkatan jamaah umroh.</p>
         </div>
 
         <div class="footer">

@@ -8,7 +8,7 @@
                     <h5 class="mb-0">Detail BAP</h5>
                     @if (auth()->user()->role === 'admin' || auth()->user()->role === 'user')
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
-                            data-bs-target="#uploadPDFModal">Upload PDF</button>
+                            data-bs-target="#uploadPDFModal">Upload Surat Pernytaan PDF</button>
                     @endif
                 </div>
                 <div class="card-body">
@@ -77,10 +77,10 @@
                                             <input type="text" class="form-control" id="airlines2"
                                                 value="{{ $data->airlines2 }}" disabled>
                                         </div>
-                                    </div>
+                                    </div>  
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <h5 class="mb-3">Uploaded PDF</h5>
+                                    <h5 class="mb-3">Pernyataan yang diupload</h5>
                                     <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
                                         height="500px"></iframe>
                                 </div>
