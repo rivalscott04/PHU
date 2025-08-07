@@ -233,7 +233,7 @@ return new class extends Migration
                 $table->string('qrcode_path')->nullable();
                 $table->string('sertifikat_path')->nullable();
                 $table->string('pdf_path')->nullable();
-                $table->enum('jenis', ['PPIU'])->default('PPIU');
+                $table->string('jenis')->default('PPIU');
                 $table->enum('jenis_lokasi', ['pusat', 'cabang'])->default('pusat');
                 $table->enum('status', ['active', 'revoked'])->default('active');
                 $table->timestamps();

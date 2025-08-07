@@ -104,8 +104,8 @@ class SertifikatController extends Controller
         $data = $request->all();
 
         // Set jenis ke PPIU karena hanya PPIU yang diakomodir
-        $data['jenis'] = 'PPIU';
-        \Log::info('Set jenis to PPIU');
+        $data['jenis'] = trim('PPIU'); // Pastikan tidak ada whitespace
+        \Log::info('Set jenis to PPIU:', ['jenis' => $data['jenis'], 'length' => strlen($data['jenis'])]);
 
         // Set travel_id atau cabang_id berdasarkan jenis lokasi
         if ($data['jenis_lokasi'] === 'pusat') {
