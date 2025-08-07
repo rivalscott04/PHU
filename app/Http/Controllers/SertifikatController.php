@@ -213,8 +213,11 @@ class SertifikatController extends Controller
             // Render PDF
             $dompdf->render();
 
-            // Save PDF to file
-            $pdfPath = storage_path("app/public/sertifikat/sertifikat_{$sertifikat->id}.pdf");
+            // Generate clean filename from travel name
+            $cleanTravelName = $this->cleanTravelName($sertifikat->nama_ppiu);
+            
+            // Save PDF to file with travel name
+            $pdfPath = storage_path("app/public/sertifikat/sertifikat_{$cleanTravelName}.pdf");
 
             // Ensure directory exists
             if (!file_exists(dirname($pdfPath))) {
@@ -223,7 +226,7 @@ class SertifikatController extends Controller
             }
 
             file_put_contents($pdfPath, $dompdf->output());
-            \Log::info('PDF file created successfully');
+            \Log::info('PDF file created successfully with name: sertifikat_' . $cleanTravelName . '.pdf');
         } catch (\Exception $e) {
             \Log::error('PDF generation failed:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -233,11 +236,14 @@ class SertifikatController extends Controller
         }
 
         try {
+            // Generate clean filename from travel name for database
+            $cleanTravelName = $this->cleanTravelName($sertifikat->nama_ppiu);
+            
             // Update sertifikat with document path
             $sertifikat->update([
-                'pdf_path' => "sertifikat/sertifikat_{$sertifikat->id}.pdf"
+                'pdf_path' => "sertifikat/sertifikat_{$cleanTravelName}.pdf"
             ]);
-            \Log::info('Updated sertifikat with PDF path');
+            \Log::info('Updated sertifikat with PDF path: sertifikat_' . $cleanTravelName . '.pdf');
         } catch (\Exception $e) {
             \Log::error('Database update failed:', ['error' => $e->getMessage()]);
             return response()->json([
@@ -292,11 +298,25 @@ class SertifikatController extends Controller
 
         \Log::info('=== VIEW PDF SUCCESS ===');
 
-        // Return PDF for inline viewing
+        // Generate clean filename for browser display
+        $cleanTravelName = $this->cleanTravelName($sertifikat->nama_ppiu);
+
+        // Return PDF for inline viewing with proper filename
         return response()->file($path, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="sertifikat_' . $sertifikat->nama_ppiu . '.pdf"'
+            'Content-Disposition' => 'inline; filename="sertifikat_' . $cleanTravelName . '.pdf"'
         ]);
+    }
+
+    /**
+     * Clean travel name for filename
+     */
+    private function cleanTravelName($travelName)
+    {
+        $cleanName = preg_replace('/[^a-zA-Z0-9\s]/', '', $travelName);
+        $cleanName = str_replace(' ', '_', trim($cleanName));
+        $cleanName = preg_replace('/_+/', '_', $cleanName);
+        return $cleanName;
     }
 
     /**
@@ -584,7 +604,13 @@ class SertifikatController extends Controller
         }
 
         \Log::info('=== DOWNLOAD PDF SUCCESS ===');
-        return response()->download($path);
+        
+        // Generate clean filename for download
+        $cleanTravelName = preg_replace('/[^a-zA-Z0-9\s]/', '', $sertifikat->nama_ppiu);
+        $cleanTravelName = str_replace(' ', '_', trim($cleanTravelName));
+        $cleanTravelName = preg_replace('/_+/', '_', $cleanTravelName);
+        
+        return response()->download($path, "sertifikat_{$cleanTravelName}.pdf");
     }
 
     public function travelCertificates()

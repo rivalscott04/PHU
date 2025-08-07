@@ -30,7 +30,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lombokbarat.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Lombok Barat')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -49,7 +49,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lomboktengah.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Lombok Tengah')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -68,7 +68,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lomboktimur.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Lombok Timur')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -87,7 +87,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'sumbawa.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Sumbawa')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -106,7 +106,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'sumbawabarat.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Sumbawa Barat')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -125,7 +125,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'dompu.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Dompu')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -144,7 +144,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'bima.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Bima')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -163,7 +163,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'mataram.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Kota Mataram')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -182,7 +182,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'kotabima.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
-                'travel_id' => $travelCompanies->where('kab_kota', 'Kota Bima')->first()->id ?? null,
+                'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
                 'remember_token' => null,
@@ -197,17 +197,45 @@ class TravelUserSeeder extends Seeder
         ];
 
         $createdCount = 0;
+        $skippedCount = 0;
+        
         foreach ($travelUsers as $userData) {
-            // Skip if travel_id is null (travel company not found)
-            if ($userData['travel_id'] === null) {
-                $this->command->warn("Travel company not found for: " . $userData['username']);
+            // Find matching travel company
+            $travelCompany = null;
+            
+            // Map username to kab_kota for matching
+            $kabKotaMap = [
+                'lombokbarat.travel' => 'Lombok Barat',
+                'lomboktengah.travel' => 'Lombok Tengah',
+                'lomboktimur.travel' => 'Lombok Timur',
+                'sumbawa.travel' => 'Sumbawa',
+                'sumbawabarat.travel' => 'Sumbawa Barat',
+                'dompu.travel' => 'Dompu',
+                'bima.travel' => 'Bima',
+                'mataram.travel' => 'Kota Mataram',
+                'kotabima.travel' => 'Kota Bima',
+            ];
+            
+            $kabKota = $kabKotaMap[$userData['username']] ?? null;
+            
+            if ($kabKota) {
+                $travelCompany = $travelCompanies->where('kab_kota', $kabKota)->first();
+            }
+            
+            if (!$travelCompany) {
+                $this->command->warn("Travel company not found for: " . $userData['username'] . " (kab_kota: " . $kabKota . ")");
+                $skippedCount++;
                 continue;
             }
-
+            
+            // Set travel_id
+            $userData['travel_id'] = $travelCompany->id;
+            
             // Check if user already exists
             $existingUser = User::where('email', $userData['email'])->first();
             if ($existingUser) {
                 $this->command->info("User already exists: " . $userData['email']);
+                $skippedCount++;
                 continue;
             }
 
@@ -217,6 +245,8 @@ class TravelUserSeeder extends Seeder
 
         $this->command->info('NTB Travel Users seeded successfully!');
         $this->command->info('Total travel users created: ' . $createdCount);
+        $this->command->info('Total travel users skipped: ' . $skippedCount);
+        $this->command->info('');
         $this->command->info('Travel users correspond to NTB kabupaten/kota:');
         $this->command->info('- Lombok Barat: lombokbarat.travel@phu.com');
         $this->command->info('- Lombok Tengah: lomboktengah.travel@phu.com');

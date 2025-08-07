@@ -35,44 +35,6 @@ class AdminSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'username' => 'admin2',
-                'firstname' => 'Admin',
-                'lastname' => 'Kedua',
-                'email' => 'admin2@phu.com',
-                'password' => Hash::make('admin123'),
-                'role' => 'admin',
-                'travel_id' => null,
-                'address' => 'Jl. Admin No. 2',
-                'city' => 'Bandung',
-                'country' => 'Indonesia',
-                'postal' => '54321',
-                'about' => 'Administrator kedua untuk sistem PHU',
-                'is_password_changed' => 0,
-                'email_verified_at' => null,
-                'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'username' => 'kabupaten',
-                'firstname' => 'Admin',
-                'lastname' => 'Kabupaten',
-                'email' => 'kabupaten@phu.com',
-                'password' => Hash::make('kabupaten123'),
-                'role' => 'kabupaten',
-                'travel_id' => null,
-                'address' => 'Jl. Kabupaten No. 1',
-                'city' => 'Surabaya',
-                'country' => 'Indonesia',
-                'postal' => '67890',
-                'about' => 'Administrator Kabupaten untuk sistem PHU',
-                'is_password_changed' => 0,
-                'email_verified_at' => null,
-                'remember_token' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
         ];
 
         foreach ($admins as $admin) {
@@ -82,7 +44,5 @@ class AdminSeeder extends Seeder
         $this->command->info('Admin users seeded successfully!');
         $this->command->info('Default admin credentials:');
         $this->command->info('- Username: admin, Email: admin@phu.com, Password: admin123');
-        $this->command->info('- Username: admin2, Email: admin2@phu.com, Password: admin123');
-        $this->command->info('- Username: kabupaten, Email: kabupaten@phu.com, Password: kabupaten123');
     }
 } 
