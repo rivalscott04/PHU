@@ -175,7 +175,10 @@ class SertifikatController extends Controller
             \Log::info('QR Code saved successfully');
         } catch (\Exception $e) {
             \Log::error('QR Code generation failed:', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Gagal generate QR Code: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate QR Code: ' . $e->getMessage()
+            ], 500);
         }
 
         // Update sertifikat with QR code path
@@ -219,7 +222,10 @@ class SertifikatController extends Controller
             \Log::info('PDF file created successfully');
         } catch (\Exception $e) {
             \Log::error('PDF generation failed:', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal generate PDF: ' . $e->getMessage()
+            ], 500);
         }
 
         try {
@@ -230,11 +236,63 @@ class SertifikatController extends Controller
             \Log::info('Updated sertifikat with PDF path');
         } catch (\Exception $e) {
             \Log::error('Database update failed:', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Gagal update database: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal update database: ' . $e->getMessage()
+            ], 500);
         }
 
         \Log::info('=== GENERATE PDF SUCCESS ===');
+
+        // Check if request is AJAX
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Sertifikat berhasil dibuat',
+                'download_url' => route('sertifikat.download', $sertifikat->id),
+                'view_url' => route('sertifikat.view', $sertifikat->id)
+            ]);
+        }
+
+        // Fallback for non-AJAX requests (direct download)
         return response()->download($pdfPath);
+    }
+
+    /**
+     * View PDF in browser
+     */
+    public function view($id)
+    {
+        \Log::info('=== VIEW PDF START ===');
+        \Log::info('Viewing PDF for sertifikat ID:', ['id' => $id]);
+
+        $sertifikat = Sertifikat::findOrFail($id);
+        \Log::info('Sertifikat found:', [
+            'id' => $sertifikat->id,
+            'nama_ppiu' => $sertifikat->nama_ppiu,
+            'pdf_path' => $sertifikat->pdf_path
+        ]);
+
+        if (!$sertifikat->pdf_path) {
+            \Log::error('PDF path not found in database, redirecting to generate');
+            return redirect()->route('sertifikat.generate', $id);
+        }
+
+        $path = storage_path("app/public/{$sertifikat->pdf_path}");
+        \Log::info('Full PDF path:', ['path' => $path]);
+
+        if (!file_exists($path)) {
+            \Log::error('PDF file not found on server, redirecting to generate');
+            return redirect()->route('sertifikat.generate', $id);
+        }
+
+        \Log::info('=== VIEW PDF SUCCESS ===');
+
+        // Return PDF for inline viewing
+        return response()->file($path, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="sertifikat_' . $sertifikat->nama_ppiu . '.pdf"'
+        ]);
     }
 
     /**

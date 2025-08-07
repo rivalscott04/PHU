@@ -141,7 +141,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
     Route::get('/travel/{id}/edit', [KanwilController::class, 'edit'])->name('travel.edit');
     Route::put('/travel/{id}', [KanwilController::class, 'update'])->name('travel.update');
-    
+
     // Update travel status route - using POST method to avoid method override issues
     Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
         ->name('travel.update-status')
@@ -149,16 +149,17 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     // Sertifikat routes
     Route::resource('sertifikat', SertifikatController::class)->except(['show', 'edit', 'update']);
-Route::get('/sertifikat/{id}/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
-Route::get('/sertifikat/{id}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
-Route::get('/sertifikat/travel-data/{id}', [SertifikatController::class, 'getTravelData'])->name('sertifikat.travel-data');
-Route::get('/sertifikat/cabang-data/{id}', [SertifikatController::class, 'getCabangData'])->name('sertifikat.cabang-data');
-Route::get('/sertifikat/settings', [SertifikatController::class, 'getSettings'])->name('sertifikat.settings');
-Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
+    Route::get('/sertifikat/{id}/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
+    Route::get('/sertifikat/{id}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
+    Route::get('/sertifikat/travel-data/{id}', [SertifikatController::class, 'getTravelData'])->name('sertifikat.travel-data');
+    Route::get('/sertifikat/cabang-data/{id}', [SertifikatController::class, 'getCabangData'])->name('sertifikat.cabang-data');
+    Route::get('/sertifikat/{id}/view', [SertifikatController::class, 'view'])->name('sertifikat.view');
+    Route::get('/sertifikat/settings', [SertifikatController::class, 'getSettings'])->name('sertifikat.settings');
+    Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
 
-// Travel certificates (for travel companies to view their own certificates)
-Route::get('/travel/certificates', [SertifikatController::class, 'travelCertificates'])->name('travel.certificates');
-    
+    // Travel certificates (for travel companies to view their own certificates)
+    Route::get('/travel/certificates', [SertifikatController::class, 'travelCertificates'])->name('travel.certificates');
+
     // Cabang Travel routes - accessible by admin and kabupaten only
     Route::middleware(['kabupaten.access'])->group(function () {
         Route::get('/cabang-travel', [KanwilController::class, 'showCabangTravel'])->name('cabang.travel');
@@ -192,19 +193,17 @@ Route::get('/travel/certificates', [SertifikatController::class, 'travelCertific
         Route::get('/kabupaten', [UserManagementController::class, 'indexKabupaten'])->name('kabupaten.index');
         Route::get('/kabupaten/create', [UserManagementController::class, 'createKabupaten'])->name('kabupaten.create');
         Route::post('/kabupaten', [UserManagementController::class, 'storeKabupaten'])->name('kabupaten.store');
-        
+
         // Travel User Management
         Route::get('/travel-users', [UserManagementController::class, 'indexTravel'])->name('travels.index');
         Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
         Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
-        
+
         // General User Management
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
     });
-
-
 });
 
 // API routes for province, city, and district selection

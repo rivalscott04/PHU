@@ -66,20 +66,25 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group" role="group">
-                                                    @if ($item->sertifikat_path)
+                                                    @if ($item->pdf_path)
                                                         <a href="{{ route('sertifikat.download', $item->id) }}"
                                                             class="btn btn-sm btn-success" title="Download PDF">
                                                             <i class="fas fa-file-pdf"></i>
                                                         </a>
-                                                    @else
-                                                        <a href="{{ route('sertifikat.generate', $item->id) }}"
-                                                            class="btn btn-sm btn-primary" title="Generate PDF">
-                                                            <i class="fas fa-file-pdf"></i>
+                                                        <a href="{{ route('sertifikat.view', $item->id) }}"
+                                                            class="btn btn-sm btn-info" title="Lihat PDF" target="_blank">
+                                                            <i class="fas fa-eye"></i>
                                                         </a>
+                                                    @else
+                                                        <button type="button" class="btn btn-sm btn-primary"
+                                                            onclick="generatePdf('{{ $item->id }}', '{{ $item->nama_ppiu }}')"
+                                                            title="Generate PDF">
+                                                            <i class="fas fa-file-pdf"></i>
+                                                        </button>
                                                     @endif
 
                                                     <a href="{{ route('sertifikat.verifikasi', $item->uuid) }}"
-                                                        class="btn btn-sm btn-info" title="Verifikasi" target="_blank">
+                                                        class="btn btn-sm btn-warning" title="Verifikasi" target="_blank">
                                                         <i class="fas fa-qrcode"></i>
                                                     </a>
 
@@ -258,6 +263,77 @@
                     });
             }
         });
+
+        function generatePdf(id, namaPpiu) {
+            // Show loading SweetAlert
+            Swal.fire({
+                title: 'Membuat Sertifikat PDF...',
+                text: 'Mohon tunggu, sedang memproses sertifikat untuk ' + namaPpiu,
+                icon: 'info',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // Make AJAX request to generate PDF
+            fetch('/sertifikat/' + id + '/generate', {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.close();
+
+                    if (data.success) {
+                        // Show success SweetAlert with options
+                        Swal.fire({
+                            title: 'Sertifikat Berhasil Dibuat!',
+                            text: 'Sertifikat untuk ' + namaPpiu + ' telah berhasil dibuat.',
+                            icon: 'success',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#28a745',
+                            confirmButtonText: '<i class="fas fa-download"></i> Download',
+                            cancelButtonText: '<i class="fas fa-eye"></i> Buka',
+                            reverseButtons: true
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                // Download PDF
+                                window.location.href = data.download_url;
+                            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                                // Open PDF in new tab
+                                window.open(data.view_url, '_blank');
+                            }
+
+                            // Reload the page to update the UI
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: data.message || 'Terjadi kesalahan saat membuat sertifikat',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.close();
+                    console.error('Error generating PDF:', error);
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Terjadi kesalahan saat membuat sertifikat',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
 
         function confirmDelete(id, name) {
             Swal.fire({
