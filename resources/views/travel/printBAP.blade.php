@@ -85,7 +85,7 @@
         }
 
         .footer {
-            margin-top: 80px;
+            margin-top: 10px;
             display: flex;
             justify-content: space-between;
             text-align: center;
