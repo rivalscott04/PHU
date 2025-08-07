@@ -8,13 +8,12 @@ use App\Models\CabangTravel;
 use App\Models\SertifikatSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use PhpOffice\PhpWord\TemplateProcessor;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Carbon\Carbon;
 use App\Helpers\DateHelper;
-use Symfony\Component\Process\Process;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class SertifikatController extends Controller
 {
@@ -23,7 +22,7 @@ class SertifikatController extends Controller
         $sertifikat = Sertifikat::with(['travel', 'cabang'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-            
+
         return view('sertifikat.index', compact('sertifikat'));
     }
 
@@ -31,21 +30,21 @@ class SertifikatController extends Controller
     {
         // Hanya ambil travel company yang Status-nya PPIU
         $travels = TravelCompany::where('Status', 'PPIU')->get();
-        
+
         // Untuk cabang, ambil semua dulu (karena tidak ada kolom Status)
         // Nanti bisa difilter di view atau ditambahkan kolom Status di database
         $cabangs = CabangTravel::all();
-        
+
         return view('sertifikat.create', compact('travels', 'cabangs'));
     }
 
     public function getTravelData($id)
     {
         $travel = TravelCompany::findOrFail($id);
-        
+
         // Gunakan alamat kantor baru jika ada, jika tidak gunakan alamat lama
         $alamat = $travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama;
-        
+
         return response()->json([
             'nama_ppiu' => $travel->Penyelenggara,
             'nama_kepala' => $travel->Pimpinan ?: ($travel->Penyelenggara . ' - Kepala'),
@@ -67,7 +66,7 @@ class SertifikatController extends Controller
     {
         \Log::info('=== STORE SERTIFIKAT START ===');
         \Log::info('Request data:', $request->all());
-        
+
         // Validasi berdasarkan jenis lokasi
         if ($request->jenis_lokasi === 'pusat') {
             \Log::info('Validating PUSAT data');
@@ -103,11 +102,11 @@ class SertifikatController extends Controller
 
         \Log::info('Validation passed');
         $data = $request->all();
-        
+
         // Set jenis ke PPIU karena hanya PPIU yang diakomodir
         $data['jenis'] = 'PPIU';
         \Log::info('Set jenis to PPIU');
-        
+
         // Set travel_id atau cabang_id berdasarkan jenis lokasi
         if ($data['jenis_lokasi'] === 'pusat') {
             $data['travel_id'] = $request->travel_id;
@@ -118,14 +117,12 @@ class SertifikatController extends Controller
             $data['travel_id'] = null;
             \Log::info('Set cabang_id for CABANG:', ['cabang_id' => $request->cabang_id]);
         }
-        
 
-        
         // Format nomor surat sesuai template
-        $data['nomor_surat'] = "B-{$data['nomor_surat']}/Kw.18.01/HJ.00/2/" . 
-                               str_pad($data['bulan_surat'], 2, '0', STR_PAD_LEFT) . "/{$data['tahun_surat']}";
+        $data['nomor_surat'] = "B-{$data['nomor_surat']}/Kw.18.01/HJ.00/2/" .
+            str_pad($data['bulan_surat'], 2, '0', STR_PAD_LEFT) . "/{$data['tahun_surat']}";
         \Log::info('Formatted nomor_surat:', ['nomor_surat' => $data['nomor_surat']]);
-        
+
         // Format nomor dokumen menjadi 3 digit
         $data['nomor_dokumen'] = str_pad($data['nomor_dokumen'], 3, '0', STR_PAD_LEFT);
         \Log::info('Formatted nomor_dokumen:', ['nomor_dokumen' => $data['nomor_dokumen']]);
@@ -142,7 +139,7 @@ class SertifikatController extends Controller
     {
         \Log::info('=== GENERATE PDF START ===');
         \Log::info('Generating PDF for sertifikat ID:', ['id' => $id]);
-        
+
         $sertifikat = Sertifikat::findOrFail($id);
         \Log::info('Sertifikat found:', [
             'id' => $sertifikat->id,
@@ -154,27 +151,27 @@ class SertifikatController extends Controller
         // Generate QR Code
         \Log::info('Generating QR Code...');
         $qrPath = storage_path("app/public/qrcodes/qrcode_{$sertifikat->id}.png");
-        
+
         \Log::info('QR Code path:', ['qrPath' => $qrPath]);
-        
+
         // Ensure directory exists
         if (!file_exists(dirname($qrPath))) {
             mkdir(dirname($qrPath), 0755, true);
             \Log::info('Created QR code directory');
         }
-        
+
         try {
-            // Generate QR Code using Endroid QR Code library with PNG format (no imagick needed)
+            // Generate QR Code using Endroid QR Code library with PNG format
             $qrCode = QrCode::create($sertifikat->getVerificationUrl())
                 ->setSize(300)
                 ->setMargin(10);
-                
+
             $writer = new PngWriter();
             $result = $writer->write($qrCode);
-            
+
             // Save the QR code
             $result->saveToFile($qrPath);
-                
+
             \Log::info('QR Code saved successfully');
         } catch (\Exception $e) {
             \Log::error('QR Code generation failed:', ['error' => $e->getMessage()]);
@@ -185,165 +182,52 @@ class SertifikatController extends Controller
         $sertifikat->update(['qrcode_path' => "qrcodes/qrcode_{$sertifikat->id}.png"]);
         \Log::info('Updated sertifikat with QR code path');
 
-        // Generate Word document
-        $templatePath = storage_path('app/templates/sertifhaji.docx');
-        \Log::info('Template path:', ['templatePath' => $templatePath]);
-        
-        // Check if template exists
-        if (!file_exists($templatePath)) {
-            \Log::error('Template file not found');
-            return back()->with('error', 'Template sertifikat tidak ditemukan');
-        }
-        \Log::info('Template file exists');
-
-        // Create filename with travel name
-        $travelName = str_replace([' ', '/', '\\', ':', '*', '?', '"', '<', '>', '|'], '_', $sertifikat->nama_ppiu);
-        $outputPath = storage_path("app/public/sertifikat/sertifikat_{$travelName}.docx");
-        \Log::info('Output path:', ['outputPath' => $outputPath]);
-        
-        // Ensure directory exists
-        if (!file_exists(dirname($outputPath))) {
-            mkdir(dirname($outputPath), 0755, true);
-            \Log::info('Created sertifikat directory');
-        }
-
         try {
-            \Log::info('Creating TemplateProcessor...');
-            $template = new TemplateProcessor($templatePath);
-            
-            \Log::info('Setting template values...');
-            
-            // Set nama PPIU dengan placeholder yang benar
-            $template->setValue('namappiu', $sertifikat->nama_ppiu);
-            
-            $template->setValue('namakepala', $sertifikat->nama_kepala);
-            $template->setValue('alamatkantor', $sertifikat->alamat);
-            $template->setValue('nodoc', $sertifikat->nomor_dokumen);
-            
-            // Extract nomor urut, bulan, dan tahun dari nomor_surat
-            // Format: B-987/Kw.18.01/HJ.00/2/08/2025
-            preg_match('/B-(\d+)\/Kw\.18\.01\/HJ\.00\/2\/(\d{2})\/(\d{4})$/', $sertifikat->nomor_surat, $matches);
-            
-            $nomor_urut = $matches[1] ?? '1';
-            $bulan = $matches[2] ?? Carbon::now()->format('m');
-            $tahun = $matches[3] ?? Carbon::now()->format('Y');
-            
-            \Log::info('Extracted nomor components:', [
-                'nomor_urut' => $nomor_urut,
-                'bulan' => $bulan, 
-                'tahun' => $tahun
-            ]);
-            
-            // Set placeholder untuk nomor surat yang terpisah
-            $template->setValue('nosert', $nomor_urut);
-            $template->setValue('blnno', $bulan);
-            $template->setValue('thnno', $tahun);
-            $template->setValue('dd-mm-yyyy', DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_tandatangan));
-            $template->setValue('tglterbit', DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_tandatangan));
-            
-            // Get signatory settings from database
-            $settings = SertifikatSetting::first();
-            $nama_penandatangan = $settings ? $settings->nama_penandatangan : 'Drs. H. Ahmad Hidayat, M.Pd';
-            $nip_penandatangan = $settings ? $settings->nip_penandatangan : '196501011990031001';
-            
-            \Log::info('Signatory settings:', [
-                'nama_penandatangan' => $nama_penandatangan,
-                'nip_penandatangan' => $nip_penandatangan
-            ]);
-            
-            $template->setValue('namakanwil', $nama_penandatangan);
-            $template->setValue('nipkanwil', $nip_penandatangan);
+            // Generate PDF directly using DomPDF
+            \Log::info('Generating PDF using DomPDF...');
 
-            // Add QR code image
-            \Log::info('Adding QR code image to template...');
-            $template->setImageValue('qrcode', [
-                'path' => $qrPath,
-                'width' => 100,
-                'height' => 100,
-            ]);
+            $pdfContent = $this->generatePdfContent($sertifikat, $qrPath);
 
-            \Log::info('Saving template as Word document...');
-            $template->saveAs($outputPath);
-            \Log::info('Word document saved successfully');
-        } catch (\Exception $e) {
-            \Log::error('Word document generation failed:', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Gagal generate dokumen Word: ' . $e->getMessage());
-        }
+            // Configure DomPDF
+            $options = new Options();
+            $options->set('defaultFont', 'Times');
+            $options->set('isRemoteEnabled', true);
+            $options->set('isHtml5ParserEnabled', true);
+            $options->set('chroot', [storage_path('app/public')]);
 
-        // Convert Word to PDF using LibreOffice with Symfony Process
-        $pdfPath = storage_path("app/public/sertifikat/pdf/sertifikat_{$travelName}.pdf");
-        \Log::info('PDF path:', ['pdfPath' => $pdfPath]);
-        
-        // Ensure PDF directory exists
-        if (!file_exists(dirname($pdfPath))) {
-            mkdir(dirname($pdfPath), 0755, true);
-            \Log::info('Created PDF directory');
-        }
-        
-        try {
-            \Log::info('Converting Word to PDF...');
-            
-            // Check if LibreOffice is available
-            $libreofficePath = $this->findLibreOffice();
-            
-            if (!$libreofficePath) {
-                \Log::warning('LibreOffice not found, using TCPDF fallback');
-                
-                // Use TCPDF fallback
-                if ($this->createSimplePdfFromWord($outputPath, $pdfPath)) {
-                    \Log::info('PDF created using TCPDF fallback');
-                } else {
-                    return back()->with('error', 'LibreOffice tidak ditemukan dan konversi TCPDF gagal. Silakan install LibreOffice terlebih dahulu.');
-                }
-            } else {
-                \Log::info('LibreOffice found at: ' . $libreofficePath);
-                
-                // Use Symfony Process for better security and error handling
-                $process = new Process([
-                    $libreofficePath,
-                    '--headless',
-                    '--convert-to', 'pdf',
-                    $outputPath,
-                    '--outdir', dirname($pdfPath)
-                ]);
-                
-                \Log::info('Executing LibreOffice process...');
-                
-                $process->setTimeout(60); // 60 seconds timeout
-                $process->run();
-                
-                \Log::info('Process output:', [
-                    'output' => $process->getOutput(),
-                    'errorOutput' => $process->getErrorOutput(),
-                    'exitCode' => $process->getExitCode()
-                ]);
-                
-                if (!$process->isSuccessful()) {
-                    \Log::warning('LibreOffice conversion failed, trying TCPDF fallback');
-                    if (!$this->createSimplePdfFromWord($outputPath, $pdfPath)) {
-                        throw new \Exception('LibreOffice conversion failed: ' . $process->getErrorOutput());
-                    }
-                }
-                
-                // Check if PDF was created
-                if (!file_exists($pdfPath)) {
-                    throw new \Exception('PDF file was not created');
-                }
-                
-                \Log::info('PDF file created successfully');
+            $dompdf = new Dompdf($options);
+
+            // Load HTML content
+            $dompdf->loadHtml($pdfContent);
+
+            // Set paper size to A4 landscape
+            $dompdf->setPaper('A4', 'landscape');
+
+            // Render PDF
+            $dompdf->render();
+
+            // Save PDF to file
+            $pdfPath = storage_path("app/public/sertifikat/sertifikat_{$sertifikat->id}.pdf");
+
+            // Ensure directory exists
+            if (!file_exists(dirname($pdfPath))) {
+                mkdir(dirname($pdfPath), 0755, true);
+                \Log::info('Created sertifikat directory');
             }
+
+            file_put_contents($pdfPath, $dompdf->output());
+            \Log::info('PDF file created successfully');
         } catch (\Exception $e) {
-            \Log::error('PDF conversion failed:', ['error' => $e->getMessage()]);
-            return back()->with('error', 'Gagal convert ke PDF: ' . $e->getMessage());
+            \Log::error('PDF generation failed:', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
         }
 
         try {
             // Update sertifikat with document path
             $sertifikat->update([
-                'sertifikat_path' => "sertifikat/sertifikat_{$travelName}.docx",
-                'pdf_path' => "sertifikat/pdf/sertifikat_{$travelName}.pdf"
+                'pdf_path' => "sertifikat/sertifikat_{$sertifikat->id}.pdf"
             ]);
-            \Log::info('Updated sertifikat with document paths');
+            \Log::info('Updated sertifikat with PDF path');
         } catch (\Exception $e) {
             \Log::error('Database update failed:', ['error' => $e->getMessage()]);
             return back()->with('error', 'Gagal update database: ' . $e->getMessage());
@@ -353,10 +237,262 @@ class SertifikatController extends Controller
         return response()->download($pdfPath);
     }
 
+    /**
+     * Generate PDF content HTML
+     */
+    private function generatePdfContent($sertifikat, $qrPath)
+    {
+        \Log::info('Generating PDF content HTML...');
+
+        // Extract nomor urut, bulan, dan tahun dari nomor_surat
+        preg_match('/B-(\d+)\/Kw\.18\.01\/HJ\.00\/2\/(\d{2})\/(\d{4})$/', $sertifikat->nomor_surat, $matches);
+
+        $nomor_urut = $matches[1] ?? '1';
+        $bulan = $matches[2] ?? Carbon::now()->format('m');
+        $tahun = $matches[3] ?? Carbon::now()->format('Y');
+
+        // Get signatory settings from database
+        $settings = SertifikatSetting::first();
+        $nama_penandatangan = $settings ? $settings->nama_penandatangan : 'Drs. H. Ahmad Hidayat, M.Pd';
+        $nip_penandatangan = $settings ? $settings->nip_penandatangan : '196501011990031001';
+
+        // Convert QR code to base64
+        $qrBase64 = '';
+        if (file_exists($qrPath)) {
+            $qrData = file_get_contents($qrPath);
+            $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
+        }
+
+        // Get background image path
+        $backgroundPath = public_path('images/Picture1.png');
+        $backgroundBase64 = '';
+        if (file_exists($backgroundPath)) {
+            $backgroundData = file_get_contents($backgroundPath);
+            $backgroundBase64 = 'data:image/png;base64,' . base64_encode($backgroundData);
+        }
+
+        $html = '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: A4 landscape;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Times, serif;
+            font-size: 14px;
+            background: white url("' . $backgroundBase64 . '") no-repeat center center;
+            background-size: cover;
+            width: 297mm;
+            height: 210mm;
+            position: relative;
+        }
+
+        .container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .doc-number-top {
+            position: absolute;
+            top: 20mm;
+            right: 15mm;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .center-number {
+            position: absolute;
+            top: 85mm;
+            width: 100%;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            font-style: italic;
+        }
+
+        .main-content {
+            position: absolute;
+            top: 95mm;
+            left: 15mm;
+            right: 15mm;
+            width: calc(100% - 30mm);
+        }
+
+        .left-content {
+            width: 100%;
+            margin-bottom: 20mm;
+        }
+
+        .keputusan {
+            font-weight: bold;
+            font-size: 15px;
+            margin-bottom: 5mm;
+            line-height: 1.4;
+            text-align: justify;
+        }
+
+        .detail-table {
+            width: 100%;
+            margin-bottom: 5mm;
+        }
+
+        .detail-table td {
+            vertical-align: top;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 1mm 0;
+        }
+
+        .label-col {
+            width: 45mm;
+        }
+
+        .colon-col {
+            width: 5mm;
+        }
+
+        .purpose {
+            font-weight: bold;
+            font-size: 15px;
+            margin-top: 5mm;
+        }
+
+        .signature-section {
+            position: absolute;
+            bottom: 10mm;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80mm;
+            text-align: center;
+        }
+
+        .signature {
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .location-date {
+            text-align: left;
+            margin-bottom: 2mm;
+        }
+
+        .signature-title {
+            text-align: left;
+            margin-bottom: 5mm;
+            line-height: 1.3;
+        }
+
+        .qr-container {
+            text-align: center;
+        }
+
+        .qr-img {
+            width: 20mm;
+            height: 20mm;
+        }
+
+        .name-signature {
+            text-align: center;
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .nip {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="doc-number-top">
+            No. ' . $sertifikat->nomor_dokumen . '
+        </div>
+
+        <div class="center-number">
+            NOMOR: B-' . $nomor_urut . '/Kw.18.01/HJ.00/2/' . $bulan . '/' . $tahun . '
+        </div>
+
+        <div class="main-content">
+            <div class="left-content">
+                <div class="keputusan">
+                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Agama Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
+                </div>
+
+                <table class="detail-table">
+                    <tr>
+                        <td class="label-col">Nama PPIU</td>
+                        <td class="colon-col">:</td>
+                        <td>' . htmlspecialchars($sertifikat->nama_ppiu) . '</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Nama Kepala Cabang</td>
+                        <td class="colon-col">:</td>
+                        <td>' . htmlspecialchars($sertifikat->nama_kepala) . '</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Alamat Kantor</td>
+                        <td class="colon-col">:</td>
+                        <td>' . htmlspecialchars($sertifikat->alamat) . '</td>
+                    </tr>
+                    <tr>
+                        <td class="label-col">Tanggal diterbitkannya</td>
+                        <td class="colon-col">:</td>
+                        <td>' . DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_diterbitkan) . '</td>
+                    </tr>
+                </table>
+
+                <div class="purpose">
+                    sebagai Penyelenggara Perjalanan Ibadah Umrah
+                </div>
+            </div>
+        </div>
+
+        <div class="signature-section">
+            <div class="signature">
+                <div class="location-date">
+                    Mataram, ' . DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_tandatangan) . '
+                </div>
+
+                <div class="signature-title">
+                    Kepala Kantor Wilayah Kementerian Agama<br>
+                    Provinsi Nusa Tenggara Barat,
+                </div>
+
+                <div class="qr-container">
+                    <img src="' . $qrBase64 . '" class="qr-img" alt="QR">
+                </div>
+
+                <div class="name-signature">
+                    ' . htmlspecialchars($nama_penandatangan) . '
+                </div>
+
+                <div class="nip">
+                    NIP. ' . htmlspecialchars($nip_penandatangan) . '
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>';
+
+        return $html;
+    }
+
     public function verifikasi($uuid)
     {
         $sertifikat = Sertifikat::where('uuid', $uuid)->firstOrFail();
-        
+
         return view('sertifikat.verifikasi', compact('sertifikat'));
     }
 
@@ -364,27 +500,27 @@ class SertifikatController extends Controller
     {
         \Log::info('=== DOWNLOAD PDF START ===');
         \Log::info('Downloading PDF for sertifikat ID:', ['id' => $id]);
-        
+
         $sertifikat = Sertifikat::findOrFail($id);
         \Log::info('Sertifikat found:', [
             'id' => $sertifikat->id,
             'nama_ppiu' => $sertifikat->nama_ppiu,
             'pdf_path' => $sertifikat->pdf_path
         ]);
-        
+
         if (!$sertifikat->pdf_path) {
             \Log::error('PDF path not found in database, redirecting to generate');
             return redirect()->route('sertifikat.generate', $id);
         }
-        
+
         $path = storage_path("app/public/{$sertifikat->pdf_path}");
         \Log::info('Full PDF path:', ['path' => $path]);
-        
+
         if (!file_exists($path)) {
             \Log::error('PDF file not found on server, redirecting to generate');
             return redirect()->route('sertifikat.generate', $id);
         }
-        
+
         \Log::info('=== DOWNLOAD PDF SUCCESS ===');
         return response()->download($path);
     }
@@ -393,15 +529,15 @@ class SertifikatController extends Controller
     {
         // Get certificates for the authenticated travel company
         $user = auth()->user();
-        
+
         if (!$user || !$user->travel_id) {
             return redirect()->route('home')->with('error', 'Akses ditolak');
         }
-        
+
         $sertifikat = Sertifikat::where('travel_id', $user->travel_id)
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-            
+
         return view('sertifikat.travel-certificates', compact('sertifikat'));
     }
 
@@ -410,16 +546,15 @@ class SertifikatController extends Controller
         try {
             \Log::info('=== DELETE SERTIFIKAT START ===');
             \Log::info('Deleting sertifikat ID:', ['id' => $id]);
-            
+
             $sertifikat = Sertifikat::findOrFail($id);
             \Log::info('Sertifikat found:', [
                 'id' => $sertifikat->id,
                 'nama_ppiu' => $sertifikat->nama_ppiu,
                 'qrcode_path' => $sertifikat->qrcode_path,
-                'sertifikat_path' => $sertifikat->sertifikat_path,
                 'pdf_path' => $sertifikat->pdf_path
             ]);
-            
+
             // Delete associated files
             if ($sertifikat->qrcode_path) {
                 try {
@@ -429,16 +564,7 @@ class SertifikatController extends Controller
                     \Log::warning('Failed to delete QR code file:', ['error' => $e->getMessage()]);
                 }
             }
-            
-            if ($sertifikat->sertifikat_path) {
-                try {
-                    Storage::disk('public')->delete($sertifikat->sertifikat_path);
-                    \Log::info('Word file deleted:', ['path' => $sertifikat->sertifikat_path]);
-                } catch (\Exception $e) {
-                    \Log::warning('Failed to delete Word file:', ['error' => $e->getMessage()]);
-                }
-            }
-            
+
             if ($sertifikat->pdf_path) {
                 try {
                     Storage::disk('public')->delete($sertifikat->pdf_path);
@@ -447,15 +573,14 @@ class SertifikatController extends Controller
                     \Log::warning('Failed to delete PDF file:', ['error' => $e->getMessage()]);
                 }
             }
-            
+
             // Delete the database record
             $sertifikat->delete();
             \Log::info('Sertifikat record deleted from database');
-            
+
             \Log::info('=== DELETE SERTIFIKAT SUCCESS ===');
             return redirect()->route('sertifikat.index')
                 ->with('success', 'Sertifikat berhasil dihapus');
-                
         } catch (\Exception $e) {
             \Log::error('Delete sertifikat failed:', ['error' => $e->getMessage()]);
             return redirect()->route('sertifikat.index')
@@ -477,11 +602,11 @@ class SertifikatController extends Controller
         ]);
 
         $settings = SertifikatSetting::first();
-        
+
         if (!$settings) {
             $settings = new SertifikatSetting();
         }
-        
+
         $settings->nama_penandatangan = $request->nama_penandatangan;
         $settings->nip_penandatangan = $request->nip_penandatangan;
         $settings->save();
@@ -491,78 +616,4 @@ class SertifikatController extends Controller
             'message' => 'Pengaturan penandatangan berhasil disimpan'
         ]);
     }
-    
-
-    
-    /**
-     * Find LibreOffice executable path
-     */
-    private function findLibreOffice()
-    {
-        $possiblePaths = [
-            // Windows paths
-            'C:\Program Files\LibreOffice\program\soffice.exe',
-            'C:\Program Files (x86)\LibreOffice\program\soffice.exe',
-            // Linux paths
-            '/usr/bin/libreoffice',
-            '/usr/bin/soffice',
-            '/opt/libreoffice/program/soffice',
-            // macOS paths
-            '/Applications/LibreOffice.app/Contents/MacOS/soffice',
-        ];
-        
-        foreach ($possiblePaths as $path) {
-            if (file_exists($path)) {
-                return $path;
-            }
-        }
-        
-        // Try to find using which command (Linux/macOS)
-        $output = [];
-        exec('which libreoffice 2>/dev/null', $output);
-        if (!empty($output[0])) {
-            return $output[0];
-        }
-        
-        exec('which soffice 2>/dev/null', $output);
-        if (!empty($output[0])) {
-            return $output[0];
-        }
-        
-        return null;
-    }
-
-    /**
-     * Create a simple PDF from Word document content
-     */
-    private function createSimplePdfFromWord($wordPath, $pdfPath)
-    {
-        try {
-            // Extract travel name from filename
-            $filename = basename($wordPath, '.docx');
-            $travelName = str_replace('sertifikat_', '', $filename);
-            
-            // Get sertifikat data by travel name
-            $sertifikat = Sertifikat::where('nama_ppiu', 'LIKE', '%' . str_replace('_', ' ', $travelName) . '%')->first();
-            if (!$sertifikat) {
-                \Log::error('Sertifikat not found for travel name: ' . $travelName);
-                return false;
-            }
-            
-            // Create HTML content for PDF using the new template
-            $html = view('sertifikat.pdf-template', compact('sertifikat'))->render();
-            
-            // Generate PDF using DomPDF
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
-            $pdf->setPaper('A4', 'landscape');
-            
-            // Save PDF
-            $pdf->save($pdfPath);
-            
-            return file_exists($pdfPath);
-        } catch (\Exception $e) {
-            \Log::error('Simple PDF creation failed:', ['error' => $e->getMessage()]);
-            return false;
-        }
-    }
-} 
+}
