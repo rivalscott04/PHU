@@ -24,7 +24,7 @@ class RedirectIfAuthenticated
                     case 'kabupaten':
                         return redirect()->route('home');
                     case 'user':
-                        return redirect()->route('bap');
+                        return redirect()->route('home');
                     default:
                         return redirect('/');
                 }

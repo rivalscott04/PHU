@@ -31,7 +31,7 @@ class LoginController extends Controller
             Auth::login($user);
 
             if ($user->role === 'user') {
-                return redirect()->route('bap');
+                return redirect()->route('home');
             } elseif ($user->role === 'kabupaten') {
                 return redirect()->route('home');
             } elseif ($user->role === 'admin') {

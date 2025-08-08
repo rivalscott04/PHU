@@ -50,7 +50,7 @@ Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('lis
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed', 'kabupaten');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
 Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
 Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
