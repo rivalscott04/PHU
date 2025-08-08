@@ -32,9 +32,15 @@ class BAPController extends Controller
             }
 
             if ($travelData->Status === 'PPIU') {
-                $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')->count();
+                // Hanya ambil jamaah umrah dari travel company ini
+                $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')
+                                    ->where('travel_id', $user->travel_id)
+                                    ->count();
             } else if ($travelData->Status === 'PIHK') {
-                $jamaahCount = Jamaah::count();
+                // Hanya ambil jamaah haji dari travel company ini
+                $jamaahCount = Jamaah::where('jenis_jamaah', 'haji')
+                                    ->where('travel_id', $user->travel_id)
+                                    ->count();
             }
 
             if ($jamaahCount == 0) {

@@ -31,12 +31,16 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
         // Convert keys to lowercase
         $row = array_change_key_case($row, CASE_LOWER);
 
+        $user = Auth::user();
+
         return new Jamaah([
             'nik' => strval($row['nik']), // Convert to string to handle Excel number formatting
             'nama' => $row['nama'],
             'alamat' => $row['alamat'],
             'nomor_hp' => strval($row['nomor_hp']), // Convert to string to handle Excel number formatting
             'jenis_jamaah' => $this->jenisJamaah, // Set jenis jamaah berdasarkan user login
+            'user_id' => $user->id, // Set user_id dari user yang sedang login
+            'travel_id' => $user->travel_id, // Set travel_id dari user yang sedang login
         ]);
     }
 

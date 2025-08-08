@@ -19,7 +19,19 @@ class Jamaah extends Model
         'alamat',
         'nomor_hp',
         'jenis_jamaah',
+        'travel_id',
+        'user_id',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function travel()
+    {
+        return $this->belongsTo(TravelCompany::class, 'travel_id');
+    }
 
     public function generateQrCode()
     {

@@ -116,8 +116,11 @@ class JamaahController extends Controller
         ]);
 
         try {
+            $user = auth()->user();
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'haji';
+            $jamaahData['user_id'] = $user->id;
+            $jamaahData['travel_id'] = $user->travel_id;
 
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.haji')->with('success', 'Data jamaah haji berhasil ditambahkan!');
@@ -136,8 +139,11 @@ class JamaahController extends Controller
         ]);
 
         try {
+            $user = auth()->user();
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'umrah';
+            $jamaahData['user_id'] = $user->id;
+            $jamaahData['travel_id'] = $user->travel_id;
 
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.umrah')->with('success', 'Data jamaah umrah berhasil ditambahkan!');

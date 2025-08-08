@@ -107,6 +107,8 @@ return new class extends Migration
         if (!Schema::hasTable('jamaah')) {
             Schema::create('jamaah', function (Blueprint $table) {
                 $table->id();
+                $table->unsignedBigInteger('travel_id');
+                $table->unsignedBigInteger('user_id');
                 $table->string('nik', 16);
                 $table->string('nama');
                 $table->text('alamat');
@@ -159,45 +161,7 @@ return new class extends Migration
             });
         }
 
-        // Create jamaah_umrah table
-        if (!Schema::hasTable('jamaah_umrah')) {
-            Schema::create('jamaah_umrah', function (Blueprint $table) {
-                $table->id();
-                $table->unsignedBigInteger('travel_id');
-                $table->string('nama_lengkap');
-                $table->string('no_ktp', 16)->unique();
-                $table->string('tempat_lahir');
-                $table->date('tanggal_lahir');
-                $table->enum('jenis_kelamin', ['L', 'P']);
-                $table->string('alamat');
-                $table->string('kota');
-                $table->string('kecamatan')->nullable();
-                $table->string('provinsi');
-                $table->string('kode_pos', 5);
-                $table->string('no_hp', 15);
-                $table->string('email')->nullable();
-                $table->string('nama_ayah');
-                $table->string('pekerjaan');
-                $table->string('pendidikan_terakhir');
-                $table->enum('status_pernikahan', ['Belum Menikah', 'Menikah', 'Cerai']);
-                $table->string('golongan_darah');
-                $table->string('alergi')->nullable();
-                $table->string('no_paspor')->nullable();
-                $table->date('tanggal_berlaku_paspor')->nullable();
-                $table->string('tempat_terbit_paspor')->nullable();
-                $table->enum('status_pendaftaran', ['pending', 'approved', 'rejected', 'completed'])->default('pending');
-                $table->text('catatan_khusus')->nullable();
-                $table->string('dokumen_ktp')->nullable();
-                $table->string('dokumen_kk')->nullable();
-                $table->string('dokumen_paspor')->nullable();
-                $table->string('dokumen_foto')->nullable();
-                $table->string('surat_keterangan')->nullable();
-                $table->string('bukti_setor_bank')->nullable();
-                $table->enum('status_verifikasi_bukti', ['pending', 'verified', 'rejected'])->default('pending');
-                $table->unsignedBigInteger('processed_by')->nullable();
-                $table->timestamps();
-            });
-        }
+
 
         // Create pengunduran table
         if (!Schema::hasTable('pengunduran')) {
@@ -332,17 +296,19 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasColumn('jamaah_umrah', 'travel_id') || !Schema::hasTable('travels')) {
-            Schema::table('jamaah_umrah', function (Blueprint $table) {
+        if (!Schema::hasColumn('jamaah', 'travel_id') || !Schema::hasTable('travels')) {
+            Schema::table('jamaah', function (Blueprint $table) {
                 $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
             });
         }
 
-        if (!Schema::hasColumn('jamaah_umrah', 'processed_by') || !Schema::hasTable('users')) {
-            Schema::table('jamaah_umrah', function (Blueprint $table) {
-                $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
+        if (!Schema::hasColumn('jamaah', 'user_id') || !Schema::hasTable('users')) {
+            Schema::table('jamaah', function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             });
         }
+
+
 
         if (!Schema::hasColumn('pengunduran', 'travel_id') || !Schema::hasTable('travels')) {
             Schema::table('pengunduran', function (Blueprint $table) {
@@ -381,12 +347,13 @@ return new class extends Migration
             $table->index('verified_by');
         });
 
-        Schema::table('jamaah_umrah', function (Blueprint $table) {
+        Schema::table('jamaah', function (Blueprint $table) {
             $table->index('travel_id');
-            $table->index('status_pendaftaran');
-            $table->index('status_verifikasi_bukti');
-            $table->index('processed_by');
+            $table->index('user_id');
+            $table->index('jenis_jamaah');
         });
+
+
 
         Schema::table('pengunduran', function (Blueprint $table) {
             $table->index('travel_id');
@@ -420,12 +387,14 @@ return new class extends Migration
             $table->dropForeign(['travel_id']);
         });
 
-        Schema::table('jamaah_umrah', function (Blueprint $table) {
-            $table->dropForeign(['travel_id', 'processed_by']);
-        });
+
 
         Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
             $table->dropForeign(['travel_id', 'verified_by']);
+        });
+
+        Schema::table('jamaah', function (Blueprint $table) {
+            $table->dropForeign(['travel_id', 'user_id']);
         });
 
         Schema::table('bap', function (Blueprint $table) {
@@ -440,7 +409,7 @@ return new class extends Migration
         Schema::dropIfExists('pengunduran');
         Schema::dropIfExists('pengaduan');
         Schema::dropIfExists('jamaah_haji_khusus');
-        Schema::dropIfExists('jamaah_umrah');
+
         Schema::dropIfExists('jamaah');
         Schema::dropIfExists('bap');
         Schema::dropIfExists('sertifikat');
