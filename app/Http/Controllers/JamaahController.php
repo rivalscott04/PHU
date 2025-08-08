@@ -18,24 +18,72 @@ class JamaahController extends Controller
     public function indexHaji()
     {
         $user = auth()->user();
-        $isAdminOrKabupaten = in_array($user->role, ['admin', 'kabupaten']);
-
-        if (!$isAdminOrKabupaten) {
+        
+        if ($user->role === 'user') {
+            // User (travel) hanya bisa melihat jamaah dari kabupatennya
             $travel = $user->travel;
             if (!$travel || $travel->Status !== 'PIHK') {
                 return redirect()->route('jamaah.umrah')
                     ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
             }
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                             ->whereHas('travel', function($query) use ($user) {
+                                 $query->where('kab_kota', $user->kabupaten);
+                             })->get();
+            $groupedJamaah = null;
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten hanya bisa melihat jamaah dari kabupatennya
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                             ->whereHas('travel', function($query) use ($user) {
+                                 $query->where('kab_kota', $user->kabupaten);
+                             })->get();
+            $groupedJamaah = null;
+        } else if ($user->role === 'admin') {
+            // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
+            $jamaah = collect(); // Empty for admin view
+            $groupedJamaah = Jamaah::where('jenis_jamaah', 'haji')
+                                   ->with('travel')
+                                   ->get()
+                                   ->groupBy('travel_id');
+        } else {
+            $jamaah = collect();
+            $groupedJamaah = null;
         }
-
-        $jamaah = Jamaah::where('jenis_jamaah', 'haji')->get();
-        return view('jamaah.haji.index', compact('jamaah'));
+        
+        return view('jamaah.haji.index', compact('jamaah', 'groupedJamaah'));
     }
 
     public function indexUmrah()
     {
-        $jamaah = Jamaah::where('jenis_jamaah', 'umrah')->get();
-        return view('jamaah.umrah.index', compact('jamaah'));
+        $user = auth()->user();
+        
+        if ($user->role === 'user') {
+            // User (travel) hanya bisa melihat jamaah dari kabupatennya
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                             ->whereHas('travel', function($query) use ($user) {
+                                 $query->where('kab_kota', $user->kabupaten);
+                             })->get();
+            $groupedJamaah = null;
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten hanya bisa melihat jamaah dari kabupatennya
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                             ->whereHas('travel', function($query) use ($user) {
+                                 $query->where('kab_kota', $user->kabupaten);
+                             })->get();
+            $groupedJamaah = null;
+        } else if ($user->role === 'admin') {
+            // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
+            $jamaah = collect(); // Empty for admin view
+            $groupedJamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                                   ->with('travel')
+                                   ->get()
+                                   ->groupBy('travel_id');
+        } else {
+            $jamaah = collect();
+            $groupedJamaah = null;
+        }
+        
+        return view('jamaah.umrah.index', compact('jamaah', 'groupedJamaah'));
     }
 
     public function createHaji()

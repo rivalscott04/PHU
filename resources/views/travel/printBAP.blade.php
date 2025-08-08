@@ -6,6 +6,15 @@
     <title>Berita Acara</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.4.1/paper.css">
     <style>
+        @media print {
+            img {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+    </style>
+    <style>
         @page {
             size: F4;
             margin: 0;
@@ -144,8 +153,7 @@
 
         <div class="content">
 
-            <p>Pada hari ini <b>{{ \Carbon\Carbon::now()->translatedFormat('l') }}</b>, tanggal <b>{{ \Carbon\Carbon::now()->day }}</b>, bulan <b>{{ \Carbon\Carbon::now()->translatedFormat('F') }}</b>, tahun
-                <b>{{ \Carbon\Carbon::now()->year }}</b>,
+            <p><b>{{ app('App\Http\Controllers\BAPController')->tanggalDalamFormatBaru(now()) }}</b>,
                 yang bertanda tangan dibawah ini :
             </p>
 
@@ -222,10 +230,10 @@
                 Petugas Satgas Umrah<br>
                 Kanwil Kementerian Agama Prov. NTB<br><br>
                             @if($data->status === 'diterima' && $qrCodeData)
-                <div style="width: 80px; height: 80px; margin: 0 auto; border: 2px solid #000; background-image: url('data:image/png;base64,{{ $qrCodeData }}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
-                <small style="font-size: 8pt; display: block; margin-top: 5px;">Tanda Tangan Digital</small>
+                <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital" style="width: 80px; height: 80px; margin: 0 auto; display: block;">
+                <small style="font-size: 8pt; display: block; margin-top: 5px; text-align: center;">Token: {{ $token ?? 'N/A' }}</small>
             @else
-                <span class="input-line" style="width:100px;display:inline-block"></span>
+                <span class="input-line" style="width:80px;display:inline-block"></span>
             @endif
             </div>
             <div class="signature" style="margin-left: 50px;">

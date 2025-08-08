@@ -66,18 +66,27 @@ class BAPController extends Controller
         $qrPath = null;
         if ($data->status === 'diterima') {
             try {
-                // Generate QR Code menggunakan Endroid QR Code library
-                $qrCode = \Endroid\QrCode\QrCode::create(json_encode([
+                // Generate token untuk verifikasi manual
+                $token = strtoupper(substr(hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname), 0, 8));
+                
+                // Generate QR Code dengan data verifikasi yang mengarah ke halaman verifikasi
+                $qrData = [
+                    'type' => 'bap_verification',
+                    'bap_id' => $data->id,
                     'nomor_surat' => $data->nomor_surat,
-                    'nama_petugas' => auth()->user()->firstname . ' ' . auth()->user()->lastname,
-                    'jabatan_petugas' => 'Petugas Satgas Umrah',
-                    'tanggal_tanda_tangan' => now()->format('Y-m-d H:i:s'),
+                    'nama_travel' => $data->ppiuname,
+                    'nama_petugas' => 'Bidang PHU Kanwil NTB',
+                    'jabatan_petugas' => 'Verifikator',
+                    'tanggal_dibuat' => now()->format('Y-m-d H:i:s'),
                     'status_dokumen' => $data->status,
-                    'verifikasi_digital' => true,
-                    'hash_verifikasi' => hash('sha256', $data->id . $data->nomor_surat . auth()->id())
-                ]))
-                ->setSize(200)
-                ->setMargin(10);
+                    'verifikasi_url' => '/verify-e-sign',
+                    'token' => $token,
+                    'hash_verifikasi' => hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname)
+                ];
+                
+                $qrCode = \Endroid\QrCode\QrCode::create(json_encode($qrData))
+                ->setSize(120)
+                ->setMargin(0);
 
                 $writer = new \Endroid\QrCode\Writer\PngWriter();
                 $result = $writer->write($qrCode);
@@ -92,8 +101,8 @@ class BAPController extends Controller
 
                 $result->saveToFile($qrPath);
                 
-                // Convert to base64 for display
-                $qrCodeData = base64_encode(file_get_contents($qrPath));
+                // Get the public URL for the QR code
+                $qrCodeData = asset('storage/BAP_Sign/bap_qrcode_' . $data->id . '.png');
                 
             } catch (\Exception $e) {
                 \Log::error('QR Code generation failed:', ['error' => $e->getMessage()]);
@@ -103,7 +112,7 @@ class BAPController extends Controller
             $qrCodeData = null;
         }
         
-        return view('travel.printBAP', compact('data', 'qrCodeData', 'formattedDate', 'formattedReturnDate'));
+        return view('travel.printBAP', compact('data', 'qrCodeData', 'formattedDate', 'formattedReturnDate', 'token'));
     }
 
 
@@ -178,8 +187,45 @@ class BAPController extends Controller
 
     public function tanggalDalamFormatBaru($date)
     {
-        setlocale(LC_TIME, 'id_ID');
-        return strftime('%d %B %Y', strtotime($date));
+        $timestamp = strtotime($date);
+        $hari = date('l', $timestamp);
+        $tanggal = date('j', $timestamp);
+        $bulan = date('F', $timestamp);
+        $tahun = date('Y', $timestamp);
+        
+        // Konversi hari ke bahasa Indonesia
+        $hariIndonesia = [
+            'Sunday' => 'Minggu',
+            'Monday' => 'Senin',
+            'Tuesday' => 'Selasa',
+            'Wednesday' => 'Rabu',
+            'Thursday' => 'Kamis',
+            'Friday' => 'Jumat',
+            'Saturday' => 'Sabtu'
+        ];
+        
+        // Konversi bulan ke bahasa Indonesia
+        $bulanIndonesia = [
+            'January' => 'Januari',
+            'February' => 'Februari',
+            'March' => 'Maret',
+            'April' => 'April',
+            'May' => 'Mei',
+            'June' => 'Juni',
+            'July' => 'Juli',
+            'August' => 'Agustus',
+            'September' => 'September',
+            'October' => 'Oktober',
+            'November' => 'November',
+            'December' => 'Desember'
+        ];
+        
+        $hariText = $hariIndonesia[$hari] ?? $hari;
+        $bulanText = $bulanIndonesia[$bulan] ?? $bulan;
+        $tanggalText = $this->nomorKata($tanggal);
+        $tahunText = $this->nomorKata($tahun);
+        
+        return "Pada hari ini {$hariText}, tanggal {$tanggalText}, bulan {$bulanText}, tahun {$tahunText}";
     }
 
     public function index()
@@ -187,10 +233,15 @@ class BAPController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'user') {
-            // User hanya bisa melihat BAP yang mereka buat
-            $data = BAP::where('user_id', $user->id)->get();
-        } else if ($user->role === 'admin' || $user->role === 'kabupaten') {
-            // Admin dan kabupaten bisa melihat semua BAP
+            // User (travel) hanya bisa melihat BAP yang mereka buat dan sesuai kabupatennya
+            $data = BAP::where('user_id', $user->id)
+                       ->where('kab_kota', $user->kabupaten)
+                       ->get();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten hanya bisa melihat BAP dari kabupatennya
+            $data = BAP::where('kab_kota', $user->kabupaten)->get();
+        } else if ($user->role === 'admin') {
+            // Admin bisa melihat semua BAP
             $data = BAP::all();
         } else {
             $data = collect();
@@ -246,7 +297,7 @@ class BAPController extends Controller
             $data->save();
         }
 
-        return redirect()->route('detail.bap', ['id' => $id])->with('success', 'PDF berhasil diupload.');
+        return redirect()->route('bap')->with('success', 'PDF berhasil diupload.');
     }
 
     public function ajukan($id)
@@ -257,7 +308,7 @@ class BAPController extends Controller
             $data->save();
         }
 
-        return redirect()->route('detail.bap', ['id' => $id])->with('success', 'Berhasil mengajukan BAP');
+        return redirect()->route('bap')->with('success', 'Berhasil mengajukan BAP');
     }
 
     public function updateStatus(Request $request, $id)
@@ -345,52 +396,41 @@ class BAPController extends Controller
     public function verifyQRCode(Request $request)
     {
         $request->validate([
-            'qr_data' => 'required|string'
+            'qr_data' => 'nullable|string',
+            'token' => 'nullable|string'
         ]);
 
         try {
-            $qrData = json_decode($request->qr_data, true);
-            
-            if (!$qrData) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Data QR Code tidak valid'
-                ]);
+            // Jika ada QR data, proses QR Code
+            if ($request->filled('qr_data')) {
+                $qrData = json_decode($request->qr_data, true);
+                
+                if (!$qrData) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Data QR Code tidak valid'
+                    ]);
+                }
+
+                // Cek apakah ini QR Code BAP
+                if (isset($qrData['type']) && $qrData['type'] === 'bap_verification') {
+                    return $this->verifyBAPData($qrData);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Jenis QR Code tidak dikenali'
+                    ]);
+                }
             }
-
-            // Verifikasi data
-            $verificationResult = [
-                'nomor_surat' => $qrData['nomor_surat'] ?? 'Tidak ditemukan',
-                'nama_petugas' => $qrData['nama_petugas'] ?? 'Tidak ditemukan',
-                'nip_petugas' => $qrData['nip_petugas'] ?? 'Tidak ditemukan',
-                'jabatan_petugas' => $qrData['jabatan_petugas'] ?? 'Tidak ditemukan',
-                'tanggal_tanda_tangan' => $qrData['tanggal_tanda_tangan'] ?? 'Tidak ditemukan',
-                'status_dokumen' => $qrData['status_dokumen'] ?? 'Tidak ditemukan',
-                'verifikasi_digital' => $qrData['verifikasi_digital'] ?? false,
-                'hash_verifikasi' => $qrData['hash_verifikasi'] ?? 'Tidak ditemukan'
-            ];
-
-            // Cek apakah dokumen masih valid
-            $bap = BAP::where('nomor_surat', $qrData['nomor_surat'])->first();
             
-            if (!$bap) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Dokumen tidak ditemukan dalam database',
-                    'data' => $verificationResult
-                ]);
+            // Jika ada token, proses token
+            if ($request->filled('token')) {
+                return $this->verifyBAPByToken($request->token);
             }
-
-            // Verifikasi hash
-            $expectedHash = hash('sha256', $bap->id . $bap->nomor_surat . $bap->user_id);
-            $hashValid = ($qrData['hash_verifikasi'] === $expectedHash);
 
             return response()->json([
-                'success' => true,
-                'message' => $hashValid ? 'Tanda tangan digital valid' : 'Tanda tangan digital tidak valid',
-                'data' => $verificationResult,
-                'hash_valid' => $hashValid,
-                'dokumen_valid' => $bap->status === 'diterima'
+                'success' => false,
+                'message' => 'Data QR Code atau Token diperlukan'
             ]);
 
         } catch (\Exception $e) {
@@ -401,8 +441,90 @@ class BAPController extends Controller
         }
     }
 
+    private function verifyBAPData($qrData)
+    {
+                        // Verifikasi data BAP
+                $verificationResult = [
+                    'jenis_dokumen' => 'Berita Acara Pelaporan (BAP)',
+                    'nomor_surat' => $qrData['nomor_surat'] ?? 'Tidak ditemukan',
+                    'nama_travel' => $qrData['nama_travel'] ?? 'Tidak ditemukan',
+                    'nama_petugas' => $qrData['nama_petugas'] ?? 'Bidang PHU Kanwil NTB',
+                    'jabatan_petugas' => $qrData['jabatan_petugas'] ?? 'Verifikator',
+                    'tanggal_dibuat' => $qrData['tanggal_dibuat'] ?? 'Tidak ditemukan',
+                    'status_dokumen' => $qrData['status_dokumen'] ?? 'Tidak ditemukan',
+                    'token' => $qrData['token'] ?? 'Tidak ditemukan'
+                ];
+
+        // Cek apakah dokumen masih valid di database
+        $bap = BAP::where('id', $qrData['bap_id'])->where('nomor_surat', $qrData['nomor_surat'])->first();
+        
+        if (!$bap) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Dokumen BAP tidak ditemukan dalam database',
+                'data' => $verificationResult
+            ]);
+        }
+
+        // Verifikasi hash dengan data yang sama seperti saat generate
+        $expectedHash = hash('sha256', $bap->id . $bap->nomor_surat . $bap->user_id . $bap->ppiuname);
+        $hashValid = ($qrData['hash_verifikasi'] === $expectedHash);
+
+        return response()->json([
+            'success' => true,
+            'message' => $hashValid ? 'Tanda tangan digital BAP valid' : 'Tanda tangan digital BAP tidak valid',
+            'data' => $verificationResult,
+            'hash_valid' => $hashValid,
+            'dokumen_valid' => $bap->status === 'diterima',
+            'dokumen_aktif' => $bap->status !== 'pending'
+        ]);
+    }
+
+    private function verifyBAPByToken($token)
+    {
+        // Cari BAP berdasarkan token
+        $baps = BAP::where('status', 'diterima')->get();
+        $foundBap = null;
+        
+        foreach ($baps as $bap) {
+            $expectedToken = strtoupper(substr(hash('sha256', $bap->id . $bap->nomor_surat . $bap->user_id . $bap->ppiuname), 0, 8));
+            if ($token === $expectedToken) {
+                $foundBap = $bap;
+                break;
+            }
+        }
+
+        if (!$foundBap) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak valid atau dokumen tidak ditemukan'
+            ]);
+        }
+
+                        // Verifikasi data BAP
+                $verificationResult = [
+                    'jenis_dokumen' => 'Berita Acara Pelaporan (BAP)',
+                    'nomor_surat' => $foundBap->nomor_surat,
+                    'nama_travel' => $foundBap->ppiuname,
+                    'nama_petugas' => 'Bidang PHU Kanwil NTB',
+                    'jabatan_petugas' => 'Verifikator',
+                    'tanggal_dibuat' => $foundBap->created_at->format('Y-m-d H:i:s'),
+                    'status_dokumen' => $foundBap->status,
+                    'token' => $token
+                ];
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Token valid - Dokumen BAP ditemukan',
+            'data' => $verificationResult,
+            'hash_valid' => true,
+            'dokumen_valid' => $foundBap->status === 'diterima',
+            'dokumen_aktif' => $foundBap->status !== 'pending'
+        ]);
+    }
+
     public function showVerifyQR()
     {
-        return view('travel.verifyQR');
+        return view('travel.verifyESign');
     }
 }

@@ -18,7 +18,19 @@ class AuthController extends Controller
 
     public function showForm()
     {
-        $travels = TravelCompany::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $travels = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see travel companies in their area
+            $travels = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travels = collect();
+        }
+        
         return view('kanwil.addTravelAkun', compact('travels'));
     }
 
@@ -105,7 +117,18 @@ class AuthController extends Controller
             ->orderBy('datetime', 'asc')
             ->get();
 
-        $travelData = TravelCompany::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $travelData = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see travel companies in their area
+            $travelData = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travelData = collect();
+        }
 
         $jamaahHaji = DB::table('jamaah')
             ->where('jenis_jamaah', 'haji')
@@ -131,7 +154,19 @@ class AuthController extends Controller
 
     public function showListTravel()
     {
-        $data = TravelCompany::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $data = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see travel companies in their area
+            $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $data = collect();
+        }
+        
         return view('travel-list', compact('data'));
     }
 }

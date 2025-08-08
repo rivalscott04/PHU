@@ -10,7 +10,19 @@ class PengaduanController extends Controller
 {
     public function create()
     {
-        $travels = TravelCompany::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $travels = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see travel companies in their area
+            $travels = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travels = collect();
+        }
+        
         return view('pengaduan.create', compact('travels'));
     }
 
@@ -71,13 +83,18 @@ class PengaduanController extends Controller
     {
         $user = auth()->user();
         
-        // Admin can see all pengaduan
         if ($user->role === 'admin') {
+            // Admin can see all pengaduan
             $pengaduan = Pengaduan::with('travel')->get();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see pengaduan from travel in their area
+            $pengaduan = Pengaduan::with('travel')
+                ->whereHas('travel', function($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
         } else {
-            // Kabupaten users can see pengaduan in their area
-            // For now, show all data but this can be filtered by area later
-            $pengaduan = Pengaduan::with('travel')->get();
+            // Other roles see empty data
+            $pengaduan = collect();
         }
         
         return view('pengaduan.index', compact('pengaduan'));

@@ -30,6 +30,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lombokbarat.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
+                'kabupaten' => 'Lombok Barat',
                 'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
@@ -49,6 +50,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lomboktengah.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
+                'kabupaten' => 'Lombok Tengah',
                 'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
@@ -68,6 +70,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'lomboktimur.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
+                'kabupaten' => 'Lombok Timur',
                 'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,
@@ -87,6 +90,7 @@ class TravelUserSeeder extends Seeder
                 'email' => 'sumbawa.travel@phu.com',
                 'password' => Hash::make('password123'),
                 'role' => 'user',
+                'kabupaten' => 'Sumbawa',
                 'travel_id' => null, // Will be set dynamically
                 'is_password_changed' => 0,
                 'email_verified_at' => null,

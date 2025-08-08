@@ -16,26 +16,58 @@ class JamaahHajiKhususController extends Controller
     public function index()
     {
         $user = Auth::user();
-        $query = JamaahHajiKhusus::with('travel');
+        
+        if ($user->role === 'admin') {
+            // Admin melihat data dikelompokkan berdasarkan travel
+            $query = JamaahHajiKhusus::with('travel');
+            
+            // Search functionality
+            if (request()->has('search') && !empty(request('search'))) {
+                $query->search(request('search'));
+            }
 
-        // Filter based on user role
-        if ($user->role === 'user' && $user->travel) {
-            $query->where('travel_id', $user->travel->id);
+            // Filter by status
+            if (request()->has('status') && !empty(request('status'))) {
+                $query->byStatus(request('status'));
+            }
+
+            $jamaahHajiKhusus = collect(); // Empty for admin view
+            $groupedJamaahHajiKhusus = $query->latest()->get()->groupBy('travel_id');
+        } else {
+            // User dan Kabupaten melihat data seperti biasa
+            $query = JamaahHajiKhusus::with('travel');
+
+            // Filter based on user role and kabupaten
+            if ($user->role === 'user') {
+                // User (travel) hanya bisa melihat jamaah dari kabupatennya
+                if ($user->travel) {
+                    $query->where('travel_id', $user->travel->id);
+                }
+                $query->whereHas('travel', function($q) use ($user) {
+                    $q->where('kab_kota', $user->kabupaten);
+                });
+            } else if ($user->role === 'kabupaten') {
+                // Kabupaten hanya bisa melihat jamaah dari kabupatennya
+                $query->whereHas('travel', function($q) use ($user) {
+                    $q->where('kab_kota', $user->kabupaten);
+                });
+            }
+
+            // Search functionality
+            if (request()->has('search') && !empty(request('search'))) {
+                $query->search(request('search'));
+            }
+
+            // Filter by status
+            if (request()->has('status') && !empty(request('status'))) {
+                $query->byStatus(request('status'));
+            }
+
+            $jamaahHajiKhusus = $query->latest()->paginate(10);
+            $groupedJamaahHajiKhusus = null;
         }
 
-        // Search functionality
-        if (request()->has('search') && !empty(request('search'))) {
-            $query->search(request('search'));
-        }
-
-        // Filter by status
-        if (request()->has('status') && !empty(request('status'))) {
-            $query->byStatus(request('status'));
-        }
-
-        $jamaahHajiKhusus = $query->latest()->paginate(10);
-
-        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus'));
+        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus', 'groupedJamaahHajiKhusus'));
     }
 
     /**

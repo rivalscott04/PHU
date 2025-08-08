@@ -126,135 +126,272 @@
                 </div>
 
                 <!-- Data Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered dt-responsive nowrap w-100">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th>Nama Lengkap</th>
-                                <th>No. KTP</th>
-                                <th>Usia</th>
-                                <th>No. Paspor</th>
-                                <th>No. SPPH</th>
-                                <th>Status</th>
-                                <th>Bukti Setor</th>
-                                <th>Dokumen</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($jamaahHajiKhusus as $index => $jamaah)
-                            <tr>
-                                <td>{{ $jamaahHajiKhusus->firstItem() + $index }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar-xs me-3">
-                                            <span class="avatar-title rounded-circle bg-primary">
-                                                {{ strtoupper(substr($jamaah->nama_lengkap, 0, 1)) }}
-                                            </span>
+                @if(auth()->user()->role === 'admin' && $groupedJamaahHajiKhusus)
+                    <!-- Admin View: Grouped by Travel -->
+                    @foreach($groupedJamaahHajiKhusus as $travelId => $jamaahGroup)
+                        @php
+                            $travel = $jamaahGroup->first()->travel;
+                            $totalJamaah = $jamaahGroup->count();
+                        @endphp
+                        <div class="mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0">
+                                    <i class="bx bx-building me-2"></i>
+                                    <strong>{{ $travel->Penyelenggara ?? 'Travel Tidak Diketahui' }}</strong>
+                                    <span class="badge bg-primary ms-2">{{ $totalJamaah }} Jamaah</span>
+                                    <span class="badge bg-info ms-1">{{ $travel->kab_kota ?? 'Kabupaten Tidak Diketahui' }}</span>
+                                </h6>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table table-bordered dt-responsive nowrap w-100">
+                                    <thead>
+                                        <tr>
+                                            <th>No</th>
+                                            <th>Nama Lengkap</th>
+                                            <th>No. KTP</th>
+                                            <th>Usia</th>
+                                            <th>No. Paspor</th>
+                                            <th>No. SPPH</th>
+                                            <th>Status</th>
+                                            <th>Bukti Setor</th>
+                                            <th>Dokumen</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($jamaahGroup as $index => $jamaah)
+                                        <tr>
+                                            <td>{{ $index + 1 }}</td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar-xs me-3">
+                                                        <span class="avatar-title rounded-circle bg-primary">
+                                                            {{ strtoupper(substr($jamaah->nama_lengkap, 0, 1)) }}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
+                                                        <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <code>{{ $jamaah->no_ktp }}</code>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ $jamaah->getAge() }} tahun</span>
+                                            </td>
+                                            <td>
+                                                @if($jamaah->no_paspor)
+                                                    <code>{{ $jamaah->no_paspor }}</code>
+                                                    @if($jamaah->tanggal_berlaku_paspor)
+                                                        <br><small class="text-muted">Berlaku: {{ $jamaah->tanggal_berlaku_paspor->format('d/m/Y') }}</small>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                @if($jamaah->nomor_porsi)
+                                                    <code>{{ $jamaah->nomor_porsi }}</code>
+                                                    @if($jamaah->tahun_pendaftaran)
+                                                        <br><small class="text-muted">Tahun: {{ $jamaah->tahun_pendaftaran }}</small>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="badge {{ $jamaah->getStatusBadgeClass() }}">
+                                                    {{ $jamaah->getStatusText() }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                @if($jamaah->bukti_setor_bank)
+                                                    <div class="d-flex flex-column gap-1">
+                                                        <span class="badge {{ $jamaah->getBuktiSetorStatusBadgeClass() }}">
+                                                            {{ $jamaah->getBuktiSetorStatusText() }}
+                                                        </span>
+                                                        @if(in_array(auth()->user()->role, ['admin', 'kabupaten']))
+                                                            <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                                    onclick="verifyBuktiSetor({{ $jamaah->id }}, '{{ $jamaah->nama_lengkap }}')"
+                                                                    title="Verifikasi Bukti Setor">
+                                                                <i class="bx bx-check-circle me-1"></i>
+                                                                Verifikasi
+                                                            </button>
+                                                        @endif
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">Belum Upload</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column gap-1">
+                                                    @php
+                                                        $completion = $jamaah->getDocumentCompletionPercentage();
+                                                    @endphp
+                                                    <div class="progress" style="height: 6px;">
+                                                        <div class="progress-bar {{ $completion == 100 ? 'bg-success' : ($completion >= 50 ? 'bg-warning' : 'bg-danger') }}" 
+                                                             style="width: {{ $completion }}%"></div>
+                                                    </div>
+                                                    <small class="text-muted">{{ $completion }}% lengkap</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <a href="{{ route('jamaah.haji-khusus.show', $jamaah->id) }}" 
+                                                       class="btn btn-info btn-sm" title="Detail">
+                                                        <i class="bx bx-show"></i>
+                                                    </a>
+                                                    <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
+                                                       class="btn btn-primary btn-sm" title="Edit">
+                                                        <i class="bx bx-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-danger btn-sm" 
+                                                            onclick="confirmDelete({{ $jamaah->id }})" title="Hapus">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    @endforeach
+                @else
+                    <!-- Regular View: Normal Table -->
+                    <div class="table-responsive">
+                        <table class="table table-bordered dt-responsive nowrap w-100">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Lengkap</th>
+                                    <th>No. KTP</th>
+                                    <th>Usia</th>
+                                    <th>No. Paspor</th>
+                                    <th>No. SPPH</th>
+                                    <th>Status</th>
+                                    <th>Bukti Setor</th>
+                                    <th>Dokumen</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($jamaahHajiKhusus as $index => $jamaah)
+                                <tr>
+                                    <td>{{ $jamaahHajiKhusus->firstItem() + $index }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-3">
+                                                <span class="avatar-title rounded-circle bg-primary">
+                                                    {{ strtoupper(substr($jamaah->nama_lengkap, 0, 1)) }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
+                                                <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
-                                            <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <code>{{ $jamaah->no_ktp }}</code>
-                                </td>
-                                <td>
-                                    <span class="badge bg-info">{{ $jamaah->getAge() }} tahun</span>
-                                </td>
-                                <td>
-                                    @if($jamaah->no_paspor)
-                                        <code>{{ $jamaah->no_paspor }}</code>
-                                        @if($jamaah->tanggal_berlaku_paspor)
-                                            <br><small class="text-muted">Berlaku: {{ $jamaah->tanggal_berlaku_paspor->format('d/m/Y') }}</small>
-                                        @endif
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    @if($jamaah->nomor_porsi)
-                                        <code>{{ $jamaah->nomor_porsi }}</code>
-                                        @if($jamaah->tahun_pendaftaran)
-                                            <br><small class="text-muted">Tahun: {{ $jamaah->tahun_pendaftaran }}</small>
-                                        @endif
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <span class="badge {{ $jamaah->getStatusBadgeClass() }}">
-                                        {{ $jamaah->getStatusText() }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @if($jamaah->bukti_setor_bank)
-                                        <div class="d-flex flex-column gap-1">
-                                            <span class="badge {{ $jamaah->getBuktiSetorStatusBadgeClass() }}">
-                                                {{ $jamaah->getBuktiSetorStatusText() }}
-                                            </span>
-                                            @if(in_array(auth()->user()->role, ['admin', 'kabupaten']))
-                                                <button type="button" class="btn btn-sm btn-outline-primary" 
-                                                        onclick="verifyBuktiSetor({{ $jamaah->id }}, '{{ $jamaah->nama_lengkap }}')"
-                                                        title="Verifikasi Bukti Setor">
-                                                    <i class="bx bx-check-circle me-1"></i>
-                                                    Verifikasi
-                                                </button>
+                                    </td>
+                                    <td>
+                                        <code>{{ $jamaah->no_ktp }}</code>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">{{ $jamaah->getAge() }} tahun</span>
+                                    </td>
+                                    <td>
+                                        @if($jamaah->no_paspor)
+                                            <code>{{ $jamaah->no_paspor }}</code>
+                                            @if($jamaah->tanggal_berlaku_paspor)
+                                                <br><small class="text-muted">Berlaku: {{ $jamaah->tanggal_berlaku_paspor->format('d/m/Y') }}</small>
                                             @endif
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if($jamaah->nomor_porsi)
+                                            <code>{{ $jamaah->nomor_porsi }}</code>
+                                            @if($jamaah->tahun_pendaftaran)
+                                                <br><small class="text-muted">Tahun: {{ $jamaah->tahun_pendaftaran }}</small>
+                                            @endif
+                                        @else
+                                            <span class="text-muted">-</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $jamaah->getStatusBadgeClass() }}">
+                                            {{ $jamaah->getStatusText() }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if($jamaah->bukti_setor_bank)
+                                            <div class="d-flex flex-column gap-1">
+                                                <span class="badge {{ $jamaah->getBuktiSetorStatusBadgeClass() }}">
+                                                    {{ $jamaah->getBuktiSetorStatusText() }}
+                                                </span>
+                                                @if(in_array(auth()->user()->role, ['admin', 'kabupaten']))
+                                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                                            onclick="verifyBuktiSetor({{ $jamaah->id }}, '{{ $jamaah->nama_lengkap }}')"
+                                                            title="Verifikasi Bukti Setor">
+                                                        <i class="bx bx-check-circle me-1"></i>
+                                                        Verifikasi
+                                                    </button>
+                                                @endif
+                                            </div>
+                                        @else
+                                            <span class="text-muted">Belum Upload</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column gap-1">
+                                            @php
+                                                $completion = $jamaah->getDocumentCompletionPercentage();
+                                            @endphp
+                                            <div class="progress" style="height: 6px;">
+                                                <div class="progress-bar {{ $completion == 100 ? 'bg-success' : ($completion >= 50 ? 'bg-warning' : 'bg-danger') }}" 
+                                                     style="width: {{ $completion }}%"></div>
+                                            </div>
+                                            <small class="text-muted">{{ $completion }}% lengkap</small>
                                         </div>
-                                    @else
-                                        <span class="text-muted">Belum Upload</span>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div class="d-flex flex-column gap-1">
-                                        @php
-                                            $completion = $jamaah->getDocumentCompletionPercentage();
-                                        @endphp
-                                        <div class="progress" style="height: 6px;">
-                                            <div class="progress-bar {{ $completion == 100 ? 'bg-success' : ($completion >= 50 ? 'bg-warning' : 'bg-danger') }}" 
-                                                 style="width: {{ $completion }}%"></div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <a href="{{ route('jamaah.haji-khusus.show', $jamaah->id) }}" 
+                                               class="btn btn-info btn-sm" title="Detail">
+                                                <i class="bx bx-show"></i>
+                                            </a>
+                                            <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
+                                               class="btn btn-primary btn-sm" title="Edit">
+                                                <i class="bx bx-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-danger btn-sm" 
+                                                    onclick="confirmDelete({{ $jamaah->id }})" title="Hapus">
+                                                <i class="bx bx-trash"></i>
+                                            </button>
                                         </div>
-                                        <small class="text-muted">{{ $completion }}% lengkap</small>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex gap-1">
-                                        <a href="{{ route('jamaah.haji-khusus.show', $jamaah->id) }}" 
-                                           class="btn btn-info btn-sm" title="Detail">
-                                            <i class="bx bx-show"></i>
-                                        </a>
-                                        <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
-                                           class="btn btn-primary btn-sm" title="Edit">
-                                            <i class="bx bx-edit"></i>
-                                        </a>
-                                        <button type="button" class="btn btn-danger btn-sm" 
-                                                onclick="confirmDelete({{ $jamaah->id }})" title="Hapus">
-                                            <i class="bx bx-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="9" class="text-center">
-                                    <div class="text-muted">
-                                        <i class="bx bx-user font-size-24 mb-2"></i>
-                                        <p>Belum ada data jamaah haji khusus</p>
-                                        <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-primary">
-                                            <i class="bx bx-plus me-1"></i>
-                                            Tambah Jamaah Pertama
-                                        </a>
-                                    </div>
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <div class="text-muted">
+                                            <i class="bx bx-user font-size-24 mb-2"></i>
+                                            <p>Belum ada data jamaah haji khusus</p>
+                                            <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-primary">
+                                                <i class="bx bx-plus me-1"></i>
+                                                Tambah Jamaah Pertama
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
 
                 <!-- Pagination -->
                 <div class="d-flex justify-content-center">

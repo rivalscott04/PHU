@@ -178,7 +178,18 @@ class KanwilController extends Controller
 
     public function showTravel()
     {
-        $data = TravelCompany::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $data = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see travel companies in their area
+            $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $data = collect();
+        }
 
         return view('kanwil.travel', ['data' => $data]);
     }
@@ -214,13 +225,15 @@ class KanwilController extends Controller
     {
         $user = auth()->user();
         
-        // Admin can see all cabang travel
         if ($user->role === 'admin') {
+            // Admin can see all cabang travel
             $data = CabangTravel::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see cabang travel in their area
+            $data = CabangTravel::where('kabupaten', $user->kabupaten)->get();
         } else {
-            // Kabupaten users can see cabang travel in their area
-            // For now, show all data but this can be filtered by area later
-            $data = CabangTravel::all();
+            // Other roles see empty data
+            $data = collect();
         }
 
         return view('kanwil.cabangTravel', ['data' => $data]);

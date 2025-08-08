@@ -17,65 +17,131 @@
                     </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        No</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Nama</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Alamat</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        No HP</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 200px; min-width: 200px;">
-                                        NIK</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($jamaah as $key => $item)
+                    @if(auth()->user()->role === 'admin' && $groupedJamaah)
+                        <!-- Admin View: Grouped by Travel -->
+                        @foreach($groupedJamaah as $travelId => $jamaahGroup)
+                            @php
+                                $travel = $jamaahGroup->first()->travel;
+                                $totalJamaah = $jamaahGroup->count();
+                            @endphp
+                            <div class="mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="bx bx-building me-2"></i>
+                                        <strong>{{ $travel->Penyelenggara ?? 'Travel Tidak Diketahui' }}</strong>
+                                        <span class="badge bg-primary ms-2">{{ $totalJamaah }} Jamaah</span>
+                                        <span class="badge bg-info ms-1">{{ $travel->kab_kota ?? 'Kabupaten Tidak Diketahui' }}</span>
+                                    </h6>
+                                </div>
+                                <div class="table-responsive p-0">
+                                    <table class="table align-items-center mb-0">
+                                        <thead>
+                                            <tr class="text-center">
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Alamat</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No HP</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 200px; min-width: 200px;">NIK</th>
+                                                <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($jamaahGroup as $key => $item)
+                                                <tr class="text-center">
+                                                    <td class="text-sm font-weight-bold">{{ $key + 1 }}</td>
+                                                    <td class="text-sm font-weight-bold">{{ $item->nama }}</td>
+                                                    <td class="text-sm font-weight-bold">{{ $item->alamat }}</td>
+                                                    <td class="text-sm font-weight-bold">{{ $item->nomor_hp }}</td>
+                                                    <td class="text-sm font-weight-bold" style="width: 200px; min-width: 200px;">
+                                                        <div class="d-flex align-items-center justify-content-center">
+                                                            <span id="nik_{{ $item->id }}"
+                                                                data-nik="{{ $item->nik }}">{{ str_repeat('*', strlen($item->nik)) }}</span>
+                                                            <button class="btn btn-link p-0 ms-2"
+                                                                onclick="toggleNik('{{ $item->id }}')">
+                                                                <i id="icon_{{ $item->id }}" class="bx bxs-show"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('jamaah.detail', $item->id) }}">
+                                                            <i class="bx bx-info-circle me-2"></i>
+                                                        </a>
+                                                        <a href="{{ route('jamaah.edit', $item->id) }}">
+                                                            <i class="bx bx-edit text-success me-2"></i>
+                                                        </a>
+                                                        <a href="javascript:void(0)"
+                                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
+                                                            <i class="bx bx-trash text-danger"></i>
+                                                        </a>
+                                                        <form id="delete-form-{{ $item->id }}"
+                                                            action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
+                                                            style="display: none;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        @endforeach
+                    @else
+                        <!-- Regular View: Normal Table -->
+                        <div class="table-responsive p-0">
+                            <table class="table align-items-center mb-0">
+                                <thead>
                                     <tr class="text-center">
-                                        <td class="text-sm font-weight-bold">{{ $key + 1 }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->nama }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->alamat }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->nomor_hp }}</td>
-                                        <td class="text-sm font-weight-bold" style="width: 200px; min-width: 200px;">
-                                            <div class="d-flex align-items-center justify-content-center">
-                                                <span id="nik_{{ $item->id }}"
-                                                    data-nik="{{ $item->nik }}">{{ str_repeat('*', strlen($item->nik)) }}</span>
-                                                <button class="btn btn-link p-0 ms-2"
-                                                    onclick="toggleNik('{{ $item->id }}')">
-                                                    <i id="icon_{{ $item->id }}" class="bx bxs-show"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('jamaah.detail', $item->id) }}">
-                                                <i class="bx bx-info-circle me-2"></i>
-                                            </a>
-                                            <a href="{{ route('jamaah.edit', $item->id) }}">
-                                                <i class="bx bx-edit text-success me-2"></i>
-                                            </a>
-                                            <a href="javascript:void(0)"
-                                                onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
-                                                <i class="bx bx-trash text-danger"></i>
-                                            </a>
-                                            <form id="delete-form-{{ $item->id }}"
-                                                action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
-                                                style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                        </td>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Alamat</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No HP</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7" style="width: 200px; min-width: 200px;">NIK</th>
+                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                                     </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                                </thead>
+                                <tbody>
+                                    @foreach ($jamaah as $key => $item)
+                                        <tr class="text-center">
+                                            <td class="text-sm font-weight-bold">{{ $key + 1 }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->nama }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->alamat }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $item->nomor_hp }}</td>
+                                            <td class="text-sm font-weight-bold" style="width: 200px; min-width: 200px;">
+                                                <div class="d-flex align-items-center justify-content-center">
+                                                    <span id="nik_{{ $item->id }}"
+                                                        data-nik="{{ $item->nik }}">{{ str_repeat('*', strlen($item->nik)) }}</span>
+                                                    <button class="btn btn-link p-0 ms-2"
+                                                        onclick="toggleNik('{{ $item->id }}')">
+                                                        <i id="icon_{{ $item->id }}" class="bx bxs-show"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <a href="{{ route('jamaah.detail', $item->id) }}">
+                                                    <i class="bx bx-info-circle me-2"></i>
+                                                </a>
+                                                <a href="{{ route('jamaah.edit', $item->id) }}">
+                                                    <i class="bx bx-edit text-success me-2"></i>
+                                                </a>
+                                                <a href="javascript:void(0)"
+                                                    onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
+                                                    <i class="bx bx-trash text-danger"></i>
+                                                </a>
+                                                <form id="delete-form-{{ $item->id }}"
+                                                    action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
+                                                    style="display: none;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

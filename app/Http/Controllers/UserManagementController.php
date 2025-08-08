@@ -58,9 +58,12 @@ class UserManagementController extends Controller
         if ($user->role === 'admin') {
             // Admin can see all travel companies
             $travelCompanies = \App\Models\TravelCompany::all();
-        } else {
+        } else if ($user->role === 'kabupaten') {
             // Kabupaten can only see travel companies from their kabupaten
-            $travelCompanies = \App\Models\TravelCompany::where('kab_kota', $user->city)->get();
+            $travelCompanies = \App\Models\TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travelCompanies = collect();
         }
         
         return view('admin.travel.create', compact('travelCompanies'));
@@ -123,7 +126,7 @@ class UserManagementController extends Controller
         // Check if kabupaten user is trying to create travel user for different kabupaten
         if ($user->role === 'kabupaten') {
             $travelCompany = \App\Models\TravelCompany::find($request->travel_id);
-            if ($travelCompany->kab_kota !== $user->city) {
+            if ($travelCompany->kab_kota !== $user->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa membuat user travel untuk kabupaten Anda sendiri.');
             }
         }
