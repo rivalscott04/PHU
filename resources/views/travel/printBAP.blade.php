@@ -139,14 +139,13 @@
         <div class="title">
             BERITA ACARA<br>
             PELAPORAN PEMBERANGKATAN JAMAAH UMROH<br>
-            Nomor : B- &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/ Kw.
-            18.04/2/Hj.00/{{ $month }}/{{ now()->year }}
+            Nomor : {{ $data->nomor_surat ?? 'B-xxx/Kw.18.04/2/Hj.00/xx/xxxx' }}
         </div>
 
         <div class="content">
 
-            <p>Pada hari ini <b>{{ $dayName }}</b>, tanggal <b>{{ $day }}</b>, bulan <b>{{ $monthYear }}</b>, tahun
-                <b>{{ $yearInWords }}</b>,
+            <p>Pada hari ini <b>{{ \Carbon\Carbon::now()->translatedFormat('l') }}</b>, tanggal <b>{{ \Carbon\Carbon::now()->day }}</b>, bulan <b>{{ \Carbon\Carbon::now()->translatedFormat('F') }}</b>, tahun
+                <b>{{ \Carbon\Carbon::now()->year }}</b>,
                 yang bertanda tangan dibawah ini :
             </p>
 
@@ -222,7 +221,12 @@
             <div class="signature">
                 Petugas Satgas Umrah<br>
                 Kanwil Kementerian Agama Prov. NTB<br><br>
+                            @if($data->status === 'diterima' && $qrCodeData)
+                <div style="width: 80px; height: 80px; margin: 0 auto; border: 2px solid #000; background-image: url('data:image/png;base64,{{ $qrCodeData }}'); background-size: contain; background-repeat: no-repeat; background-position: center;"></div>
+                <small style="font-size: 8pt; display: block; margin-top: 5px;">Tanda Tangan Digital</small>
+            @else
                 <span class="input-line" style="width:100px;display:inline-block"></span>
+            @endif
             </div>
             <div class="signature" style="margin-left: 50px;">
                 Petugas PPIU<br>
@@ -231,6 +235,8 @@
             </div>
         </div>
     </section>
+    
+
 </body>
 
 </html>

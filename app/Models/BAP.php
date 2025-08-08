@@ -31,5 +31,8 @@ class BAP extends Model
         'returndate',
         'airlines2',
         'user_id',
+        'status',
+        'pdf_file_path',
+        'nomor_surat',
     ];
 }

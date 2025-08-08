@@ -134,6 +134,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
+    Route::post('bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
+    Route::get('/verify-qr', [BAPController::class, 'showVerifyQR'])->name('verify-qr');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
