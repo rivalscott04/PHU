@@ -11,6 +11,14 @@ class JamaahHajiKhusus extends Model
 
     protected $table = 'jamaah_haji_khusus';
     
+    /**
+     * Get the route key for the model.
+     */
+    public function getRouteKeyName()
+    {
+        return 'id';
+    }
+    
     protected $fillable = [
         'travel_id',
         'nama_lengkap',

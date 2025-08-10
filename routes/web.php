@@ -84,7 +84,9 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/jamaah/umrah', [JamaahController::class, 'storeUmrah'])->name('jamaah.umrah.store');
 
     // Jamaah Haji Khusus routes - MUST BE BEFORE generic jamaah routes
-    Route::resource('jamaah/haji-khusus', JamaahHajiKhususController::class)->names([
+    Route::get('/jamaah/haji-khusus/export', [JamaahHajiKhususController::class, 'export'])->name('jamaah.haji-khusus.export');
+    Route::get('/jamaah/haji-khusus/export-pdf', [JamaahHajiKhususController::class, 'exportPDF'])->name('jamaah.haji-khusus.export-pdf');
+    Route::resource('jamaah/haji-khusus', JamaahHajiKhususController::class, ['parameters' => ['haji-khusus' => 'id']])->names([
         'index' => 'jamaah.haji-khusus.index',
         'create' => 'jamaah.haji-khusus.create',
         'store' => 'jamaah.haji-khusus.store',
@@ -93,10 +95,9 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         'update' => 'jamaah.haji-khusus.update',
         'destroy' => 'jamaah.haji-khusus.destroy',
     ]);
-    Route::put('/jamaah/haji-khusus/{jamaahHajiKhusus}/status', [JamaahHajiKhususController::class, 'updateStatus'])->name('jamaah.haji-khusus.update-status');
-    Route::post('/jamaah/haji-khusus/{jamaahHajiKhusus}/verify-bukti-setor', [JamaahHajiKhususController::class, 'verifyBuktiSetor'])->name('jamaah.haji-khusus.verify-bukti-setor');
-    Route::post('/jamaah/haji-khusus/{jamaahHajiKhusus}/assign-porsi', [JamaahHajiKhususController::class, 'assignPorsiNumber'])->name('jamaah.haji-khusus.assign-porsi');
-    Route::get('/jamaah/haji-khusus/export', [JamaahHajiKhususController::class, 'export'])->name('jamaah.haji-khusus.export');
+    Route::put('/jamaah/haji-khusus/{id}/status', [JamaahHajiKhususController::class, 'updateStatus'])->name('jamaah.haji-khusus.update-status');
+    Route::post('/jamaah/haji-khusus/{id}/verify-bukti-setor', [JamaahHajiKhususController::class, 'verifyBuktiSetor'])->name('jamaah.haji-khusus.verify-bukti-setor');
+    Route::post('/jamaah/haji-khusus/{id}/assign-porsi', [JamaahHajiKhususController::class, 'assignPorsiNumber'])->name('jamaah.haji-khusus.assign-porsi');
 
     Route::get('/jamaah/template', [JamaahController::class, 'downloadTemplate'])->name('jamaah.template');
     Route::get('/jamaah/{id}', [JamaahController::class, 'detail'])->name('jamaah.detail');

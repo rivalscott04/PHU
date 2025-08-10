@@ -4,13 +4,6 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
-            <h4 class="mb-sm-0 font-size-18">Data Jamaah Haji Khusus</h4>
-            <div class="page-title-right">
-                <ol class="breadcrumb m-0">
-                    <li class="breadcrumb-item"><a href="{{ route('home') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item active">Jamaah Haji Khusus</li>
-                </ol>
-            </div>
         </div>
     </div>
 </div>
@@ -26,10 +19,10 @@
                             <i class="bx bx-plus me-1"></i>
                             Tambah Jamaah
                         </a>
-                        <a href="{{ route('jamaah.haji-khusus.export') }}" class="btn btn-success">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
                             <i class="bx bx-download me-1"></i>
                             Export Data
-                        </a>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -58,70 +51,6 @@
                             <i class="bx bx-refresh me-1"></i>
                             Reset Filter
                         </a>
-                    </div>
-                </div>
-
-                <!-- Statistics Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="card bg-primary text-white">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <i class="bx bx-user font-size-24"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->total() : $jamaahHajiKhusus->count() }}</h4>
-                                        <p class="mb-0">Total Jamaah</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-warning text-white">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <i class="bx bx-time font-size-24"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'pending')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'pending')->count() }}</h4>
-                                        <p class="mb-0">Menunggu</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-success text-white">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <i class="bx bx-check-circle font-size-24"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'approved')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'approved')->count() }}</h4>
-                                        <p class="mb-0">Disetujui</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="card bg-info text-white">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="flex-shrink-0">
-                                        <i class="bx bx-check-double font-size-24"></i>
-                                    </div>
-                                    <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'completed')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'completed')->count() }}</h4>
-                                        <p class="mb-0">Selesai</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -154,7 +83,6 @@
                                             <th>No. SPPH</th>
                                             <th>Status</th>
                                             <th>Bukti Setor</th>
-                                            <th>Dokumen</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -163,16 +91,9 @@
                                         <tr>
                                             <td>{{ $index + 1 }}</td>
                                             <td>
-                                                <div class="d-flex align-items-center">
-                                                    <div class="avatar-xs me-3">
-                                                        <span class="avatar-title rounded-circle bg-primary">
-                                                            {{ strtoupper(substr($jamaah->nama_lengkap, 0, 1)) }}
-                                                        </span>
-                                                    </div>
-                                                    <div>
-                                                        <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
-                                                        <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
-                                                    </div>
+                                                <div>
+                                                    <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
+                                                    <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
                                                 </div>
                                             </td>
                                             <td>
@@ -184,9 +105,6 @@
                                             <td>
                                                 @if($jamaah->no_paspor)
                                                     <code>{{ $jamaah->no_paspor }}</code>
-                                                    @if($jamaah->tanggal_berlaku_paspor)
-                                                        <br><small class="text-muted">Berlaku: {{ $jamaah->tanggal_berlaku_paspor->format('d/m/Y') }}</small>
-                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
@@ -194,9 +112,6 @@
                                             <td>
                                                 @if($jamaah->nomor_porsi)
                                                     <code>{{ $jamaah->nomor_porsi }}</code>
-                                                    @if($jamaah->tahun_pendaftaran)
-                                                        <br><small class="text-muted">Tahun: {{ $jamaah->tahun_pendaftaran }}</small>
-                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif
@@ -226,24 +141,12 @@
                                                 @endif
                                             </td>
                                             <td>
-                                                <div class="d-flex flex-column gap-1">
-                                                    @php
-                                                        $completion = $jamaah->getDocumentCompletionPercentage();
-                                                    @endphp
-                                                    <div class="progress" style="height: 6px;">
-                                                        <div class="progress-bar {{ $completion == 100 ? 'bg-success' : ($completion >= 50 ? 'bg-warning' : 'bg-danger') }}" 
-                                                             style="width: {{ $completion }}%"></div>
-                                                    </div>
-                                                    <small class="text-muted">{{ $completion }}% lengkap</small>
-                                                </div>
-                                            </td>
-                                            <td>
                                                 <div class="d-flex gap-1">
                                                     <a href="{{ route('jamaah.haji-khusus.show', $jamaah->id) }}" 
                                                        class="btn btn-info btn-sm" title="Detail">
                                                         <i class="bx bx-show"></i>
                                                     </a>
-                                                    <a href="{{ route('jamaah.haji-khusus.edit', $jamaah) }}" 
+                                                    <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
                                                        class="btn btn-primary btn-sm" title="Edit">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
@@ -274,7 +177,6 @@
                                     <th>No. SPPH</th>
                                     <th>Status</th>
                                     <th>Bukti Setor</th>
-                                    <th>Dokumen</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -283,16 +185,9 @@
                                 <tr>
                                     <td>{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->firstItem() + $index : $index + 1 }}</td>
                                     <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-xs me-3">
-                                                <span class="avatar-title rounded-circle bg-primary">
-                                                    {{ strtoupper(substr($jamaah->nama_lengkap, 0, 1)) }}
-                                                </span>
-                                            </div>
-                                            <div>
-                                                <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
-                                                <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
-                                            </div>
+                                        <div>
+                                            <h6 class="mb-0">{{ $jamaah->nama_lengkap }}</h6>
+                                            <small class="text-muted">{{ $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}</small>
                                         </div>
                                     </td>
                                     <td>
@@ -304,9 +199,6 @@
                                     <td>
                                         @if($jamaah->no_paspor)
                                             <code>{{ $jamaah->no_paspor }}</code>
-                                            @if($jamaah->tanggal_berlaku_paspor)
-                                                <br><small class="text-muted">Berlaku: {{ $jamaah->tanggal_berlaku_paspor->format('d/m/Y') }}</small>
-                                            @endif
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -314,9 +206,6 @@
                                     <td>
                                         @if($jamaah->nomor_porsi)
                                             <code>{{ $jamaah->nomor_porsi }}</code>
-                                            @if($jamaah->tahun_pendaftaran)
-                                                <br><small class="text-muted">Tahun: {{ $jamaah->tahun_pendaftaran }}</small>
-                                            @endif
                                         @else
                                             <span class="text-muted">-</span>
                                         @endif
@@ -346,24 +235,12 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <div class="d-flex flex-column gap-1">
-                                            @php
-                                                $completion = $jamaah->getDocumentCompletionPercentage();
-                                            @endphp
-                                            <div class="progress" style="height: 6px;">
-                                                <div class="progress-bar {{ $completion == 100 ? 'bg-success' : ($completion >= 50 ? 'bg-warning' : 'bg-danger') }}" 
-                                                     style="width: {{ $completion }}%"></div>
-                                            </div>
-                                            <small class="text-muted">{{ $completion }}% lengkap</small>
-                                        </div>
-                                    </td>
-                                    <td>
                                         <div class="d-flex gap-1">
                                             <a href="{{ route('jamaah.haji-khusus.show', $jamaah->id) }}" 
                                                class="btn btn-info btn-sm" title="Detail">
                                                 <i class="bx bx-show"></i>
                                             </a>
-                                            <a href="{{ route('jamaah.haji-khusus.edit', $jamaah) }}" 
+                                            <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
                                                class="btn btn-primary btn-sm" title="Edit">
                                                 <i class="bx bx-edit"></i>
                                             </a>
@@ -376,29 +253,68 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="9" class="text-center">
-                                        <div class="text-muted">
-                                            <i class="bx bx-user font-size-24 mb-2"></i>
-                                            <p>Belum ada data jamaah haji khusus</p>
-                                            <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-primary">
-                                                <i class="bx bx-plus me-1"></i>
-                                                Tambah Jamaah Pertama
-                                            </a>
-                                        </div>
-                                    </td>
+                                    <td colspan="9" class="text-center">Tidak ada data jamaah haji khusus</td>
                                 </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
-                @endif
 
-                <!-- Pagination -->
-                @if(auth()->user()->role !== 'admin' && $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator)
-                    <div class="d-flex justify-content-center">
-                        {{ $jamaahHajiKhusus->links() }}
-                    </div>
+                    <!-- Pagination -->
+                    @if($jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                        <div class="d-flex justify-content-center mt-3">
+                            {{ $jamaahHajiKhusus->links() }}
+                        </div>
+                    @endif
                 @endif
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exportModalLabel">Export Data Jamaah Haji Khusus</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Export Global</h6>
+                        <p class="text-muted small">Export semua data jamaah dari semua PIHK</p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" onclick="exportGlobal('excel')">
+                                <i class="bx bx-file me-1"></i> Export Excel Global
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="exportGlobal('pdf')">
+                                <i class="bx bx-file-pdf me-1"></i> Export PDF Global
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Export Per PIHK</h6>
+                        <p class="text-muted small">Export data jamaah dari PIHK tertentu</p>
+                        <select id="travelSelect" class="form-select mb-2">
+                            <option value="">Pilih PIHK...</option>
+                            @foreach($travelCompanies ?? [] as $travel)
+                                @if($travel->Status === 'PIHK')
+                                    <option value="{{ $travel->id }}">{{ $travel->Penyelenggara }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" onclick="exportByTravel('excel')">
+                                <i class="bx bx-file me-1"></i> Export Excel PIHK
+                            </button>
+                            <button type="button" class="btn btn-danger" onclick="exportByTravel('pdf')">
+                                <i class="bx bx-file-pdf me-1"></i> Export PDF PIHK
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -406,217 +322,68 @@
 
 @endsection
 
-<!-- Verifikasi Bukti Setor Modal -->
-<div class="modal fade" id="verifyBuktiSetorModal" tabindex="-1" aria-labelledby="verifyBuktiSetorModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="verifyBuktiSetorModalLabel">Verifikasi Bukti Setor Bank</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="verifyBuktiSetorForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Jamaah</label>
-                        <input type="text" class="form-control" id="jamaahName" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="status_verifikasi_bukti" class="form-label">Status Verifikasi <span class="text-danger">*</span></label>
-                        <select class="form-select" id="status_verifikasi_bukti" name="status_verifikasi_bukti" required>
-                            <option value="">Pilih Status</option>
-                            <option value="verified">Terverifikasi</option>
-                            <option value="rejected">Ditolak</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="catatan_verifikasi" class="form-label">Catatan Verifikasi</label>
-                        <textarea class="form-control" id="catatan_verifikasi" name="catatan_verifikasi" rows="3" 
-                                  placeholder="Masukkan catatan verifikasi (opsional)"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-check-circle me-1"></i>
-                        Verifikasi
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Assign Porsi Modal -->
-<div class="modal fade" id="assignPorsiModal" tabindex="-1" aria-labelledby="assignPorsiModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                                    <h5 class="modal-title" id="assignPorsiModalLabel">Tetapkan Nomor SPPH</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <form id="assignPorsiForm">
-                @csrf
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Nama Jamaah</label>
-                        <input type="text" class="form-control" id="jamaahNamePorsi" readonly>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nomor_porsi" class="form-label">Nomor SPPH <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="nomor_porsi" name="nomor_porsi" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="tahun_pendaftaran" class="form-label">Tahun Pendaftaran <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="tahun_pendaftaran" name="tahun_pendaftaran" maxlength="4" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bx bx-save me-1"></i>
-                        Tetapkan Porsi
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@push('js')
+@push('scripts')
 <script>
+function exportGlobal(format) {
+    const url = format === 'excel' 
+        ? '{{ route("jamaah.haji-khusus.export") }}'
+        : '{{ route("jamaah.haji-khusus.export-pdf") }}';
+    
+    window.open(url, '_blank');
+    $('#exportModal').modal('hide');
+}
+
+function exportByTravel(format) {
+    const travelId = document.getElementById('travelSelect').value;
+    if (!travelId) {
+        alert('Silakan pilih PIHK terlebih dahulu');
+        return;
+    }
+    
+    const url = format === 'excel' 
+        ? `{{ route("jamaah.haji-khusus.export") }}?travel_id=${travelId}`
+        : `{{ route("jamaah.haji-khusus.export-pdf") }}?travel_id=${travelId}`;
+    
+    window.open(url, '_blank');
+    $('#exportModal').modal('hide');
+}
+
 function confirmDelete(id) {
-    Swal.fire({
-        title: 'Apakah Anda yakin?',
-        text: "Data jamaah haji khusus akan dihapus permanen!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            // Create form and submit
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `/jamaah/haji-khusus/${id}`;
-            form.innerHTML = `
-                <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                <input type="hidden" name="_method" value="DELETE">
-            `;
-            document.body.appendChild(form);
-            form.submit();
-        }
-    });
+    if (confirm('Apakah Anda yakin ingin menghapus jamaah ini?')) {
+        window.location.href = `{{ url('jamaah/haji-khusus') }}/${id}/delete`;
+    }
 }
 
-// Verify Bukti Setor
-function verifyBuktiSetor(jamaahId, jamaahName) {
-    document.getElementById('jamaahName').value = jamaahName;
-    document.getElementById('verifyBuktiSetorForm').action = `/jamaah/haji-khusus/${jamaahId}/verify-bukti-setor`;
-    $('#verifyBuktiSetorModal').modal('show');
-}
-
-// Assign Porsi
-function assignPorsi(jamaahId, jamaahName) {
-    document.getElementById('jamaahNamePorsi').value = jamaahName;
-    document.getElementById('assignPorsiForm').action = `/jamaah/haji-khusus/${jamaahId}/assign-porsi`;
-    $('#assignPorsiModal').modal('show');
-}
-
-// Handle verify bukti setor form submission
-document.getElementById('verifyBuktiSetorForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const url = this.action;
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: data.message,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
+function verifyBuktiSetor(id, nama) {
+    const status = prompt(`Verifikasi bukti setor untuk ${nama}:\nMasukkan status (verified/rejected):`);
+    if (status && ['verified', 'rejected'].includes(status.toLowerCase())) {
+        const notes = prompt('Masukkan catatan (opsional):');
+        
+        fetch(`{{ url('jamaah/haji-khusus') }}/${id}/verify-bukti-setor`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({
+                status: status.toLowerCase(),
+                notes: notes
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Verifikasi berhasil!');
                 location.reload();
-            });
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: data.message,
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            title: 'Error!',
-            text: 'Terjadi kesalahan saat verifikasi bukti setor',
-            icon: 'error',
-            confirmButtonText: 'OK'
+            } else {
+                alert('Verifikasi gagal: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat verifikasi');
         });
-    });
-});
-
-// Handle assign porsi form submission
-document.getElementById('assignPorsiForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const formData = new FormData(this);
-    const url = this.action;
-    
-    fetch(url, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Berhasil!',
-                text: data.message,
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                location.reload();
-            });
-        } else {
-            Swal.fire({
-                title: 'Error!',
-                text: data.message,
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        Swal.fire({
-            title: 'Error!',
-                            text: 'Terjadi kesalahan saat menetapkan nomor SPPH',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    });
-});
+    }
+}
 </script>
 @endpush 

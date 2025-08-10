@@ -115,26 +115,33 @@ class DashboardController extends Controller
 
     private function getKabupatenDashboard($user, $monthlyData, $growthPercentage, $currentMonth)
     {
-        // Kabupaten-specific statistics
+        // Kabupaten-specific statistics - filter by kabupaten
         $jamaahHaji = DB::table('jamaah')
-            ->where('jenis_jamaah', 'haji')
-            ->whereMonth('created_at', $currentMonth)
+            ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
+            ->where('jamaah.jenis_jamaah', 'haji')
+            ->where('travels.kab_kota', $user->kabupaten)
+            ->whereMonth('jamaah.created_at', $currentMonth)
             ->count();
 
         $jamaahUmrah = DB::table('jamaah')
-            ->where('jenis_jamaah', 'umrah')
-            ->whereMonth('created_at', $currentMonth)
+            ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
+            ->where('jamaah.jenis_jamaah', 'umrah')
+            ->where('travels.kab_kota', $user->kabupaten)
+            ->whereMonth('jamaah.created_at', $currentMonth)
             ->count();
 
         $bapDiajukan = DB::table('bap')
+            ->where('kab_kota', $user->kabupaten)
             ->where('status', 'diajukan')
             ->count();
 
         $bapDiproses = DB::table('bap')
+            ->where('kab_kota', $user->kabupaten)
             ->where('status', 'diproses')
             ->count();
 
         $bapSelesai = DB::table('bap')
+            ->where('kab_kota', $user->kabupaten)
             ->where('status', 'diterima')
             ->count();
 

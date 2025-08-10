@@ -19,21 +19,48 @@ class SertifikatController extends Controller
 {
     public function index()
     {
-        $sertifikat = Sertifikat::with(['travel', 'cabang'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all sertifikat
+            $sertifikat = Sertifikat::with(['travel', 'cabang'])
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see sertifikat from travel in their area
+            $sertifikat = Sertifikat::with(['travel', 'cabang'])
+                ->whereHas('travel', function($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })
+                ->orderBy('created_at', 'desc')
+                ->paginate(10);
+        } else {
+            // Other roles see empty data
+            $sertifikat = collect();
+        }
 
         return view('sertifikat.index', compact('sertifikat'));
     }
 
     public function create()
     {
-        // Hanya ambil travel company yang Status-nya PPIU
-        $travels = TravelCompany::where('Status', 'PPIU')->get();
-
-        // Untuk cabang, ambil semua dulu (karena tidak ada kolom Status)
-        // Nanti bisa difilter di view atau ditambahkan kolom Status di database
-        $cabangs = CabangTravel::all();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all PPIU travel companies
+            $travels = TravelCompany::where('Status', 'PPIU')->get();
+            $cabangs = CabangTravel::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see PPIU travel companies in their area
+            $travels = TravelCompany::where('Status', 'PPIU')
+                ->where('kab_kota', $user->kabupaten)
+                ->get();
+            $cabangs = CabangTravel::where('kabupaten', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travels = collect();
+            $cabangs = collect();
+        }
 
         return view('sertifikat.create', compact('travels', 'cabangs'));
     }

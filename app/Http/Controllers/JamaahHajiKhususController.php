@@ -105,7 +105,7 @@ class JamaahHajiKhususController extends Controller
 
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|string|size:16|unique:jamaah_haji_khusus,no_ktp',
+            'no_ktp' => 'required|string|size:16',
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -163,8 +163,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(JamaahHajiKhusus $jamaahHajiKhusus)
+    public function show($id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -179,8 +180,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(JamaahHajiKhusus $jamaahHajiKhusus)
+    public function edit($id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -195,8 +197,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, JamaahHajiKhusus $jamaahHajiKhusus)
+    public function update(Request $request, $id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -207,7 +210,7 @@ class JamaahHajiKhususController extends Controller
 
         $request->validate([
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|string|size:16|unique:jamaah_haji_khusus,no_ktp,' . $jamaahHajiKhusus->id,
+            'no_ktp' => 'required|string|size:16',
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -267,8 +270,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(JamaahHajiKhusus $jamaahHajiKhusus)
+    public function destroy($id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -294,8 +298,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Update status of jamaah haji khusus
      */
-    public function updateStatus(Request $request, JamaahHajiKhusus $jamaahHajiKhusus)
+    public function updateStatus(Request $request, $id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $request->validate([
             'status_pendaftaran' => 'required|in:pending,approved,rejected,completed'
         ]);
@@ -569,8 +574,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Verify bukti setor bank
      */
-    public function verifyBuktiSetor(Request $request, JamaahHajiKhusus $jamaahHajiKhusus)
+    public function verifyBuktiSetor(Request $request, $id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Only admin and kabupaten can verify
@@ -606,8 +612,9 @@ class JamaahHajiKhususController extends Controller
     /**
      * Assign porsi number
      */
-    public function assignPorsiNumber(Request $request, JamaahHajiKhusus $jamaahHajiKhusus)
+    public function assignPorsiNumber(Request $request, $id)
     {
+        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
         $user = Auth::user();
         
         // Only admin and kabupaten can assign porsi number

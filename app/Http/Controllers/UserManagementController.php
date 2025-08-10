@@ -31,7 +31,7 @@ class UserManagementController extends Controller
             // Kabupaten can only see travel users from their kabupaten
             $travelUsers = User::where('role', 'user')
                 ->whereHas('travel', function($query) use ($user) {
-                    $query->where('kab_kota', $user->city);
+                    $query->where('kab_kota', $user->kabupaten);
                 })
                 ->with('travel')
                 ->get();
@@ -159,7 +159,7 @@ class UserManagementController extends Controller
         
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->city) {
+            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
@@ -177,7 +177,7 @@ class UserManagementController extends Controller
         
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->city) {
+            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
@@ -232,7 +232,7 @@ class UserManagementController extends Controller
         
         // Check if kabupaten user is trying to delete travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->city) {
+            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa menghapus user travel dari kabupaten Anda sendiri.');
             }
         }

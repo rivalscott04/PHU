@@ -65,12 +65,12 @@
 
                         <!-- Admin View: Modern Accordion Design -->
                         <div class="accordion" id="travelAccordion">
-                            @foreach($groupedJamaah as $travelId => $jamaahGroup)
-                                @php
-                                    $travel = $jamaahGroup->first()->travel;
-                                    $totalJamaah = $jamaahGroup->count();
+                        @foreach($groupedJamaah as $travelId => $jamaahGroup)
+                            @php
+                                $travel = $jamaahGroup->first()->travel;
+                                $totalJamaah = $jamaahGroup->count();
                                     $accordionId = 'travel_' . $travelId;
-                                @endphp
+                            @endphp
                                 
                                 <div class="accordion-item border-0 mb-3 shadow-sm travel-item" data-travel-name="{{ strtolower($travel->Penyelenggara ?? '') }}" data-kabupaten="{{ strtolower($travel->kab_kota ?? '') }}">
                                     <div class="accordion-header" id="heading_{{ $accordionId }}">
@@ -86,7 +86,7 @@
                                                     <div>
                                                         <h6 class="mb-0 fw-bold text-truncate" style="max-width: 300px;" title="{{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }}">
                                                             {{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }}
-                                                        </h6>
+                                    </h6>
                                                         <small class="opacity-75">{{ $travel->kab_kota ?? 'Kabupaten Tidak Diketahui' }}</small>
                                                     </div>
                                                 </div>
@@ -131,7 +131,7 @@
                                                         </button>
                                                     </div>
                                                 </div>
-                                            </div>
+                                </div>
                                             
                                             <!-- Jamaah Table -->
                                             <div class="table-responsive">
@@ -140,14 +140,14 @@
                                                         <tr>
                                                             <th class="text-center" style="width: 50px;">No</th>
                                                             <th>Nama Jamaah</th>
-                                                            <th>Alamat</th>
-                                                            <th>No HP</th>
+                                                <th>Alamat</th>
+                                                <th>No HP</th>
                                                             <th style="width: 200px;">NIK</th>
                                                             <th class="text-center" style="width: 120px;">Aksi</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        @foreach ($jamaahGroup as $key => $item)
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach ($jamaahGroup as $key => $item)
                                                             <tr class="jamaah-row" data-jamaah-name="{{ strtolower($item->nama) }}">
                                                                 <td class="text-center fw-bold">{{ $key + 1 }}</td>
                                                                 <td>
@@ -165,16 +165,16 @@
                                                                 </td>
                                                                 <td>
                                                                     <div class="d-flex align-items-center">
-                                                                        <span id="nik_{{ $item->id }}" 
+                                                            <span id="nik_{{ $item->id }}"
                                                                               data-nik="{{ $item->nik }}" 
                                                                               class="text-monospace">{{ str_repeat('*', strlen($item->nik)) }}</span>
                                                                         <button class="btn btn-link btn-sm p-0 ms-2" 
                                                                                 onclick="toggleNik('{{ $item->id }}')"
                                                                                 title="Tampilkan/Sembunyikan NIK">
                                                                             <i id="icon_{{ $item->id }}" class="bx bxs-show text-success"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                </td>
+                                                            </button>
+                                                        </div>
+                                                    </td>
                                                                 <td class="text-center">
                                                                     <div class="btn-group" role="group">
                                                                         <a href="{{ route('jamaah.detail', $item->id) }}" 
@@ -194,17 +194,17 @@
                                                                             <i class="bx bx-trash"></i>
                                                                         </button>
                                                                     </div>
-                                                                    <form id="delete-form-{{ $item->id }}"
+                                                        <form id="delete-form-{{ $item->id }}"
                                                                           action="{{ route('jamaah.destroy', $item->id) }}" 
                                                                           method="POST" style="display: none;">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                    </form>
-                                                                </td>
-                                                            </tr>
-                                                        @endforeach
-                                                    </tbody>
-                                                </table>
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
                                             </div>
                                             
                                             <!-- Summary Footer -->
@@ -223,9 +223,9 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
                                 </div>
-                            @endforeach
+                            </div>
+                        @endforeach
                         </div>
                         
 
@@ -642,8 +642,8 @@
             if (button && collapse) {
                 button.classList.add('collapsed');
                 collapse.classList.remove('show');
-            }
-        });
-    }
+                }
+            });
+        }
     </script>
 @endsection

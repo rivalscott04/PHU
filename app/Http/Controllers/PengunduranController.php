@@ -15,7 +15,22 @@ class PengunduranController extends Controller
 
     public function index()
     {
-        $pengunduran = Pengunduran::with('user')->get();
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all pengunduran
+            $pengunduran = Pengunduran::with('user')->get();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten users can only see pengunduran from travel in their area
+            $pengunduran = Pengunduran::with('user')
+                ->whereHas('user.travel', function($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
+        } else {
+            // Other roles see empty data
+            $pengunduran = collect();
+        }
+        
         return view('kanwil.listPengunduran', compact('pengunduran'));
     }
 

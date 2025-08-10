@@ -47,7 +47,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            '*.nik' => 'required|numeric|digits:16|unique:jamaah,nik',
+            '*.nik' => 'required|numeric|digits:16',
             '*.nama' => 'required|string|max:255',
             '*.alamat' => 'required|string',
             '*.nomor_hp' => 'required|numeric|digits_between:10,13',
@@ -60,7 +60,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
             '*.nik.required' => 'NIK wajib diisi',
             '*.nik.numeric' => 'NIK harus berupa angka',
             '*.nik.digits' => 'NIK harus 16 digit',
-            '*.nik.unique' => 'NIK sudah terdaftar',
+            '*.nik.required' => 'NIK wajib diisi',
             '*.nama.required' => 'Nama wajib diisi',
             '*.alamat.required' => 'Alamat wajib diisi',
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
