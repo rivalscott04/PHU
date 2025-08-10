@@ -158,19 +158,50 @@ class TravelCapabilityService
             'visible' => true,
         ];
 
-        // Master Travel (Admin only)
+        // Master Data (Admin only)
         if ($user->role === 'admin') {
             $menus[] = [
-                'name' => 'Master Travel',
+                'name' => 'Master Data',
+                'icon' => 'bx bx-data',
+                'hasSubmenu' => true,
                 'items' => [
+                                           [
+                           'name' => 'Data PPIU Pusat',
+                           'route' => 'travel',
+                           'icon' => 'bx bxs-plane-alt',
+                           'visible' => true,
+                       ],
+                       [
+                           'name' => 'Data PPIU Cabang',
+                           'route' => 'cabang.travel',
+                           'icon' => 'bx bxs-business',
+                           'visible' => true,
+                       ],
                     [
-                        'name' => 'Data Travel Pusat',
-                        'route' => 'travel',
-                        'icon' => 'bx bxs-plane-alt',
+                        'name' => 'User Kabupaten',
+                        'route' => 'kabupaten.index',
+                        'icon' => 'bx bx-user-circle',
                         'visible' => true,
                     ],
+                                           [
+                           'name' => 'User PPIU',
+                           'route' => 'travels.index',
+                           'icon' => 'bx bx-user-plus',
+                           'visible' => true,
+                       ],
+                ],
+            ];
+        }
+
+        // Master Data (Kabupaten only - simplified accordion)
+        if ($user->role === 'kabupaten') {
+            $menus[] = [
+                'name' => 'Master Data',
+                'icon' => 'bx bx-data',
+                'hasSubmenu' => true,
+                'items' => [
                     [
-                        'name' => 'Data Travel Cabang',
+                        'name' => 'Data PPIU Cabang',
                         'route' => 'cabang.travel',
                         'icon' => 'bx bxs-business',
                         'visible' => true,
@@ -179,55 +210,12 @@ class TravelCapabilityService
             ];
         }
 
-        // Data Cabang Travel (Kabupaten only - separate menu)
-        if ($user->role === 'kabupaten') {
-            $menus[] = [
-                'name' => 'Data Cabang Travel',
-                'route' => 'cabang.travel',
-                'icon' => 'bx bxs-business',
-                'visible' => true,
-            ];
-        }
-
-        // Master Akun (Admin only)
-        if ($user->role === 'admin') {
-            $menus[] = [
-                'name' => 'Master Akun',
-                'items' => [
-                    [
-                        'name' => 'User Kabupaten',
-                        'route' => 'kabupaten.index',
-                        'icon' => 'bx bx-user-circle',
-                        'visible' => true,
-                    ],
-                    [
-                        'name' => 'User Travel',
-                        'route' => 'travels.index',
-                        'icon' => 'bx bx-user-plus',
-                        'visible' => true,
-                    ],
-                ],
-            ];
-        }
-
-
-
-        // Sertifikat (Kabupaten only - for impersonation testing)
-        if ($user->role === 'kabupaten') {
-            $menus[] = [
-                'name' => 'Sertifikat',
-                'route' => 'sertifikat.index',
-                'icon' => 'bx bx-award',
-                'visible' => true,
-            ];
-        }
-
-        // Travel Services
-        $travelServices = [];
+        // Data Jamaah (Accordion)
+        $jamaahItems = [];
         
         // Add Data BAP for admin, kabupaten, and travel users
         if (in_array($user->role, ['admin', 'kabupaten', 'user'])) {
-            $travelServices[] = [
+            $jamaahItems[] = [
                 'name' => 'Data BAP',
                 'route' => 'bap',
                 'icon' => 'bx bx-list-ul',
@@ -237,13 +225,13 @@ class TravelCapabilityService
 
         // Add Jamaah menus based on capabilities
         if ($user->role === 'admin') {
-            $travelServices[] = [
+            $jamaahItems[] = [
                 'name' => 'Jamaah Umrah',
                 'route' => 'jamaah.umrah',
                 'icon' => 'bx bxs-group',
                 'visible' => true,
             ];
-            $travelServices[] = [
+            $jamaahItems[] = [
                 'name' => 'Jamaah Haji Khusus',
                 'route' => 'jamaah.haji-khusus.index',
                 'icon' => 'bx bxs-star',
@@ -253,7 +241,7 @@ class TravelCapabilityService
             $travel = $user->travel;
             if ($travel) {
                 if ($travel->canHandleUmrah()) {
-                    $travelServices[] = [
+                    $jamaahItems[] = [
                         'name' => 'Jamaah Umrah',
                         'route' => 'jamaah.umrah',
                         'icon' => 'bx bxs-group',
@@ -261,7 +249,7 @@ class TravelCapabilityService
                     ];
                 }
                 if ($travel->canHandleHajiKhusus()) {
-                    $travelServices[] = [
+                    $jamaahItems[] = [
                         'name' => 'Jamaah Haji Khusus',
                         'route' => 'jamaah.haji-khusus.index',
                         'icon' => 'bx bxs-star',
@@ -271,47 +259,88 @@ class TravelCapabilityService
             }
         }
 
+        if (!empty($jamaahItems)) {
+            $menus[] = [
+                'name' => 'Data Jamaah',
+                'icon' => 'bx bx-user-circle',
+                'hasSubmenu' => true,
+                'items' => $jamaahItems,
+            ];
+        }
+
+        // Layanan (Accordion)
+        $layananItems = [];
+        
+        $layananItems[] = [
+            'name' => 'Keberangkatan',
+            'route' => 'keberangkatan',
+            'icon' => 'bx bx-calendar',
+            'visible' => true,
+        ];
+        
+        if ($user->role === 'admin') {
+            $layananItems[] = [
+                'name' => 'Pengunduran',
+                'route' => 'pengunduran',
+                'icon' => 'bx bx-send',
+                'visible' => true,
+            ];
+        }
+
+        if ($user->role === 'admin') {
+            $layananItems[] = [
+                'name' => 'Pengaduan',
+                'route' => 'pengaduan',
+                'icon' => 'bx bx-envelope',
+                'visible' => true,
+            ];
+        }
+
         $menus[] = [
-            'name' => 'Travel',
-            'items' => $travelServices,
+            'name' => 'Layanan',
+            'icon' => 'bx bx-cog',
+            'hasSubmenu' => true,
+            'items' => $layananItems,
         ];
 
-        // Other menus
-        $menus[] = [
-            'name' => 'Other Services',
-            'items' => [
-                [
-                    'name' => 'Sertifikat PPIU',
-                    'route' => 'sertifikat.index',
-                    'icon' => 'bx bx-award',
-                    'visible' => $user->role === 'admin', // Only admin can create certificates
-                ],
-                [
-                    'name' => 'Sertifikat Saya',
-                    'route' => 'travel.certificates',
-                    'icon' => 'bx bx-award',
-                    'visible' => $user->role === 'user', // Only travel users can see their certificates
-                ],
-                [
-                    'name' => 'Pengaduan',
-                    'route' => 'pengaduan',
-                    'icon' => 'bx bx-envelope',
-                    'visible' => $user->role === 'admin', // Only admin can see pengaduan menu
-                ],
-                [
-                    'name' => 'Keberangkatan',
-                    'route' => 'keberangkatan',
-                    'icon' => 'bx bx-calendar',
-                    'visible' => true,
-                ],
-                [
-                    'name' => 'Pengunduran',
-                    'route' => in_array($user->role, ['admin', 'kabupaten']) ? 'pengunduran' : 'pengunduran.create',
-                    'icon' => 'bx bx-send',
-                    'visible' => true,
-                ],
-            ],
-        ];
+        // Sertifikat (Accordion)
+        $sertifikatItems = [];
+        
+        if ($user->role === 'admin') {
+            $sertifikatItems[] = [
+                'name' => 'Sertifikat PPIU',
+                'route' => 'sertifikat.index',
+                'icon' => 'bx bx-award',
+                'visible' => true,
+            ];
+        }
+        
+        if ($user->role === 'user') {
+            $sertifikatItems[] = [
+                'name' => 'Sertifikat Saya',
+                'route' => 'travel.certificates',
+                'icon' => 'bx bx-award',
+                'visible' => true,
+            ];
+        }
+        
+        if ($user->role === 'kabupaten') {
+            $sertifikatItems[] = [
+                'name' => 'Sertifikat',
+                'route' => 'sertifikat.index',
+                'icon' => 'bx bx-award',
+                'visible' => true,
+            ];
+        }
+
+        if (!empty($sertifikatItems)) {
+            $menus[] = [
+                'name' => 'Sertifikat',
+                'icon' => 'bx bx-award',
+                'hasSubmenu' => true,
+                'items' => $sertifikatItems,
+            ];
+        }
 
         return $menus;
     }
