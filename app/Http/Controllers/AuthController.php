@@ -104,6 +104,12 @@ class AuthController extends Controller
         ]);
 
         $user = auth()->user();
+        
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+        
         $user->password = $request->password;
         $user->is_password_changed = true;
         $user->save();
@@ -119,14 +125,15 @@ class AuthController extends Controller
 
         $user = auth()->user();
         
-        if ($user->role === 'admin') {
+        // Check if user is authenticated before accessing role
+        if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
             $travelData = TravelCompany::all();
-        } else if ($user->role === 'kabupaten') {
+        } else if ($user && $user->role === 'kabupaten') {
             // Kabupaten users can only see travel companies in their area
             $travelData = TravelCompany::where('kab_kota', $user->kabupaten)->get();
         } else {
-            // Other roles see empty data
+            // Other roles or unauthenticated users see empty data
             $travelData = collect();
         }
 
@@ -156,14 +163,15 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         
-        if ($user->role === 'admin') {
+        // Check if user is authenticated before accessing role
+        if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
             $data = TravelCompany::all();
-        } else if ($user->role === 'kabupaten') {
+        } else if ($user && $user->role === 'kabupaten') {
             // Kabupaten users can only see travel companies in their area
             $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
         } else {
-            // Other roles see empty data
+            // Other roles or unauthenticated users see empty data
             $data = collect();
         }
         

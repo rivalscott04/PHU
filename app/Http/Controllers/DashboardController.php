@@ -11,22 +11,27 @@ class DashboardController extends Controller
     {
         $user = auth()->user();
         
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+        
         // Get monthly data for the stacked column chart
         $monthlyData = collect(range(1, 12))->map(function ($month) use ($user) {
             $startDate = Carbon::create(null, $month, 1, 0, 0, 0);
             $endDate = $startDate->copy()->endOfMonth();
 
-                    if ($user->role === 'user') {
-            // For travel users, get BAP data through user_id
-            return [
-                'month' => $startDate->format('M'),
-                'total' => DB::table('bap')
-                    ->where('user_id', $user->id)
-                    ->whereYear('created_at', Carbon::now()->year)
-                    ->whereMonth('created_at', $month)
-                    ->count()
-            ];
-        } else {
+            if ($user->role === 'user') {
+                // For travel users, get BAP data through user_id
+                return [
+                    'month' => $startDate->format('M'),
+                    'total' => DB::table('bap')
+                        ->where('user_id', $user->id)
+                        ->whereYear('created_at', Carbon::now()->year)
+                        ->whereMonth('created_at', $month)
+                        ->count()
+                ];
+            } else {
                 // For admin and kabupaten, get jamaah data
                 return [
                     'month' => $startDate->format('M'),

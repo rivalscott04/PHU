@@ -45,7 +45,7 @@ Route::get('/jamaah/template-test', function () {
 
 Route::get('/', [AuthController::class, 'showLanding']);
 
-Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('list.travel');
+Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('list.travel')->middleware('auth');
 
 Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');

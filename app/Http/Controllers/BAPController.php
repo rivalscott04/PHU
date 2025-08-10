@@ -13,6 +13,12 @@ class BAPController extends Controller
     public function showFormBAP()
     {
         $user = auth()->user();
+        
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+        
         $jamaahCount = 0;
         $travelData = null;
 
@@ -237,6 +243,11 @@ class BAPController extends Controller
     public function index()
     {
         $user = auth()->user();
+        
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
 
         if ($user->role === 'user') {
             // User (travel) hanya bisa melihat BAP yang mereka buat dan sesuai kabupatennya
@@ -321,6 +332,12 @@ class BAPController extends Controller
     {
         // Check if user has permission to update status
         $user = auth()->user();
+        
+        // Check if user is authenticated
+        if (!$user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+        
         if (!in_array($user->role, ['admin', 'kabupaten'])) {
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengubah status BAP.');
         }

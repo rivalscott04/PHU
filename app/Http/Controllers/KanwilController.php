@@ -180,14 +180,15 @@ class KanwilController extends Controller
     {
         $user = auth()->user();
         
-        if ($user->role === 'admin') {
+        // Check if user is authenticated before accessing role
+        if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
             $data = TravelCompany::all();
-        } else if ($user->role === 'kabupaten') {
+        } else if ($user && $user->role === 'kabupaten') {
             // Kabupaten users can only see travel companies in their area
             $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
         } else {
-            // Other roles see empty data
+            // Other roles or unauthenticated users see empty data
             $data = collect();
         }
 
