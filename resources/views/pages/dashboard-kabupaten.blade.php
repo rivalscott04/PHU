@@ -35,7 +35,7 @@
                     <div class="row">
                         <div class="col-sm-4">
                             <div class="avatar-md profile-user-wid mb-4">
-                                <img src="{{ asset('images/users/avatar-1.jpg') }}" alt=""
+                                <img src="{{ asset('images/users/default-avatar.svg') }}" alt=""
                                     class="img-thumbnail rounded-circle" />
                             </div>
                             <h5 class="font-size-15 text-truncate">
