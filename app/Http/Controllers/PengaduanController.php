@@ -32,7 +32,7 @@ class PengaduanController extends Controller
             'nama_pengadu' => 'required|string|max:255',
             'travels_id' => 'required|exists:travels,id',
             'hal_aduan' => 'required|string',
-            'berkas_aduan' => 'nullable|file|max:500',
+            'berkas_aduan' => 'nullable|file|max:300',
         ]);
 
         $berkasPath = null;
@@ -60,7 +60,7 @@ class PengaduanController extends Controller
             'nama_pengadu' => 'required|string|max:255',
             'travels_id' => 'required|exists:travels,id',
             'hal_aduan' => 'required|string',
-            'berkas_aduan' => 'nullable|file|max:500',
+            'berkas_aduan' => 'nullable|file|max:300',
         ]);
 
         $berkasPath = null;

@@ -227,6 +227,35 @@
             border-color: var(--secondary-color);
         }
 
+        /* Custom styling for all calendar buttons to avoid black colors */
+        .fc .fc-button-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
+        }
+
+        .fc .fc-button-primary:active {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
+        }
+
+        /* Ensure active button has good contrast */
+        .fc .fc-button-primary.fc-button-active {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white !important;
+            font-weight: 600;
+        }
+
         .event-popup {
             display: none;
             position: fixed;
@@ -724,29 +753,25 @@
                     </div>
                     <div class="col-md-7" data-aos="fade-up" data-aos-delay="100">
                         <h3>
-                            Voluptatem dignissimos provident quasi corporis
-                            voluptates sit assumenda.
+                            Sistem Terpadu Pengelolaan Haji dan Umroh Khusus
+                            Kanwil NTB
                         </h3>
                         <p class="fst-italic">
-                            Lorem ipsum dolor sit amet, consectetur
-                            adipiscing elit, sed do eiusmod tempor
-                            incididunt ut labore et dolore magna aliqua.
+                            Platform digital yang mengintegrasikan seluruh proses pengelolaan haji dan umroh khusus 
+                            di wilayah Nusa Tenggara Barat dengan sistem yang terpusat dan terkoordinasi.
                         </p>
                         <ul>
                             <li>
                                 <i class="bi bi-check"></i><span>
-                                    Ullamco laboris nisi ut aliquip ex ea
-                                    commodo consequat.</span>
+                                    Monitoring real-time keberangkatan jamaah haji dan umroh khusus</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Duis aute irure dolor in reprehenderit
-                                    in voluptate velit.</span>
+                                <span>Pengelolaan data travel berizin dan terverifikasi Kemenag</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Ullam est qui quos consequatur eos
-                                    accusamus.</span>
+                                <span>Sistem pengaduan terintegrasi untuk perlindungan jamaah</span>
                             </li>
                         </ul>
                     </div>
@@ -759,19 +784,16 @@
                         <img src="{{ asset('img/hero-3.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up" data-aos-delay="200">
-                        <h3>Corporis temporibus maiores provident</h3>
+                        <h3>Pelayanan Terpadu dan Transparan</h3>
                         <p class="fst-italic">
-                            Lorem ipsum dolor sit amet, consectetur
-                            adipiscing elit, sed do eiusmod tempor
-                            incididunt ut labore et dolore magna aliqua.
+                            Memberikan pelayanan yang terintegrasi dan transparan dalam pengelolaan 
+                            haji dan umroh khusus dengan standar pelayanan yang tinggi.
                         </p>
                         <p>
-                            Ullamco laboris nisi ut aliquip ex ea commodo
-                            consequat. Duis aute irure dolor in
-                            reprehenderit in voluptate velit esse cillum
-                            dolore eu fugiat nulla pariatur. Excepteur sint
-                            occaecat cupidatat non proident, sunt in culpa
-                            qui officia deserunt mollit anim id est laborum
+                            Sistem ini dirancang untuk memastikan setiap jamaah mendapatkan pelayanan 
+                            yang optimal mulai dari pendaftaran, pembayaran, hingga keberangkatan. 
+                            Dengan teknologi yang modern, kami memastikan transparansi dalam setiap 
+                            tahap proses dan memberikan kemudahan akses informasi bagi semua pihak terkait.
                         </p>
                     </div>
                 </div>
@@ -783,30 +805,25 @@
                     </div>
                     <div class="col-md-7" data-aos="fade-up">
                         <h3>
-                            Sunt consequatur ad ut est nulla consectetur
-                            reiciendis animi voluptas
+                            Keamanan dan Perlindungan Jamaah
                         </h3>
                         <p>
-                            Cupiditate placeat cupiditate placeat est ipsam
-                            culpa. Delectus quia minima quod. Sunt saepe
-                            odit aut quia voluptatem hic voluptas dolor
-                            doloremque.
+                            Memprioritaskan keamanan dan kenyamanan jamaah dengan sistem monitoring 
+                            yang komprehensif dan mekanisme pengaduan yang responsif untuk memastikan 
+                            perlindungan hak-hak jamaah.
                         </p>
                         <ul>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Ullamco laboris nisi ut aliquip ex ea
-                                    commodo consequat.</span>
+                                <span>Sistem verifikasi travel berizin dan terpercaya</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i><span>
-                                    Duis aute irure dolor in reprehenderit
-                                    in voluptate velit.</span>
+                                    Monitoring real-time status keberangkatan jamaah</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Facilis ut et voluptatem aperiam. Autem
-                                    soluta ad fugiat</span>.
+                                <span>Mekanisme pengaduan cepat dan terintegrasi</span>
                             </li>
                         </ul>
                     </div>
@@ -819,21 +836,18 @@
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up">
                         <h3>
-                            Quas et necessitatibus eaque impedit ipsum animi
-                            consequatur incidunt in
+                            Teknologi Modern untuk Pelayanan Optimal
                         </h3>
                         <p class="fst-italic">
-                            Lorem ipsum dolor sit amet, consectetur
-                            adipiscing elit, sed do eiusmod tempor
-                            incididunt ut labore et dolore magna aliqua.
+                            Menggunakan teknologi terkini untuk memberikan pelayanan yang efisien, 
+                            akurat, dan mudah diakses oleh semua stakeholder dalam pengelolaan haji dan umroh khusus.
                         </p>
                         <p>
-                            Ullamco laboris nisi ut aliquip ex ea commodo
-                            consequat. Duis aute irure dolor in
-                            reprehenderit in voluptate velit esse cillum
-                            dolore eu fugiat nulla pariatur. Excepteur sint
-                            occaecat cupidatat non proident, sunt in culpa
-                            qui officia deserunt mollit anim id est laborum
+                            Platform ini dibangun dengan teknologi modern yang memungkinkan akses 
+                            real-time, pelaporan yang akurat, dan komunikasi yang efektif antara 
+                            jamaah, travel, dan pihak terkait. Dengan sistem yang terintegrasi, 
+                            kami memastikan setiap proses berjalan lancar dan transparan sesuai 
+                            dengan standar pelayanan yang telah ditetapkan.
                         </p>
                     </div>
                 </div>
@@ -851,12 +865,6 @@
                     <span>Form</span>
                     <span class="description-title">Pengaduan</span>
                 </div>
-                <div class="text-center mt-3">
-                    <button type="button" class="btn btn-success rounded-pill px-3 py-2 border border-0" 
-                            onclick="openPengaduanModal()">
-                        <i class="bi bi-eye me-2"></i>Lihat Pengaduan yang Sudah Selesai
-                    </button>
-                </div>
             </div>
             <!-- End Section Title -->
 
@@ -871,80 +879,122 @@
                     </div>
                 @endif
 
-                <div class="row gy-4">
-                    <div class="col-lg-4">
-                        <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
-                            <i class="bi bi-geo-alt flex-shrink-0"></i>
-                            <div>
-                                <h3>Alamat Kantor</h3>
-                                <p>Jl. Udayana No.6, Mataram</p>
-                            </div>
-                        </div>
+                <!-- Tab Navigation -->
+                <div class="row mb-4" data-aos="fade-up" data-aos-delay="150">
+                    <div class="col-12">
+                        <ul class="nav nav-tabs nav-fill" id="pengaduanTab" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="form-tab" data-bs-toggle="tab" data-bs-target="#form-pengaduan" type="button" role="tab">
+                                    <i class="bi bi-plus-circle me-2"></i>Buat Pengaduan Baru
+                                </button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="riwayat-tab" data-bs-toggle="tab" data-bs-target="#riwayat-pengaduan" type="button" role="tab">
+                                    <i class="bi bi-clock-history me-2"></i>Riwayat Pengaduan
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
 
-                        <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
-                            <i class="bi bi-telephone flex-shrink-0"></i>
-                            <div>
-                                <h3>Telephone</h3>
-                                <p>0370-123456</p>
-                            </div>
-                        </div>
+                <!-- Tab Content -->
+                <div class="tab-content" id="pengaduanTabContent">
+                    <!-- Tab 1: Form Pengaduan -->
+                    <div class="tab-pane fade show active" id="form-pengaduan" role="tabpanel">
+                        <div class="row gy-4">
+                            <div class="col-lg-4">
+                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
+                                    <i class="bi bi-geo-alt flex-shrink-0"></i>
+                                    <div>
+                                        <h3>Alamat Kantor</h3>
+                                        <p>Jl. Udayana No.6, Mataram</p>
+                                    </div>
+                                </div>
 
-                        <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
-                            <i class="bi bi-envelope flex-shrink-0"></i>
-                            <div>
-                                <h3>Email</h3>
-                                <p>ntb.kemenag@go.id</p>
+                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
+                                    <i class="bi bi-telephone flex-shrink-0"></i>
+                                    <div>
+                                        <h3>Telephone</h3>
+                                        <p>0370-123456</p>
+                                    </div>
+                                </div>
+
+                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
+                                    <i class="bi bi-envelope flex-shrink-0"></i>
+                                    <div>
+                                        <h3>Email</h3>
+                                        <p>ntb.kemenag@go.id</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-8">
+                                <form id="pengaduanForm" action="{{ route('pengaduan.store-public') }}" method="post"
+                                    class="php-email-form" data-aos="fade-up" data-aos-delay="200"
+                                    enctype="multipart/form-data">
+                                    @csrf
+                                    <div class="row gy-4">
+                                        <div class="col-md-6">
+                                            <input type="text" name="nama_pengadu" class="form-control"
+                                                placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" 
+                                                style="background-color: white;" />
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <select class="form-control" name="travels_id" required style="background-color: white;">
+                                                <option value="">-- Pilih Travel --</option>
+                                                @foreach ($travels as $travel)
+                                                    <option value="{{ $travel->id }}"
+                                                        {{ old('travels_id') == $travel->id ? 'selected' : '' }}>
+                                                        {{ $travel->Penyelenggara }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <textarea class="form-control" name="hal_aduan" rows="6" placeholder="Hal yang Diadukan" required 
+                                                      style="background-color: white;">{{ old('hal_aduan') }}</textarea>
+                                        </div>
+
+                                        <div class="col-md-12">
+                                            <input type="file" class="form-control" name="berkas_aduan" style="background-color: white;" />
+                                            <small class="text-muted mt-1">File maksimal 300KB</small>
+                                        </div>
+
+                                        <div class="col-md-12 text-center">
+                                            <div class="loading">Loading</div>
+                                            <div class="error-message"></div>
+                                            <div class="sent-message">Pengaduan Anda telah terkirim. Terima kasih!</div>
+                                            <div class="mt-3">
+                                                <button type="button"
+                                                    class="btn btn-success rounded-pill px-3 py-2 border border-0"
+                                                    style="background-color: #1acc8d" onclick="confirmSubmit()">Kirim
+                                                    Pengaduan</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-lg-8">
-                        <form id="pengaduanForm" action="{{ route('pengaduan.store-public') }}" method="post"
-                            class="php-email-form" data-aos="fade-up" data-aos-delay="200"
-                            enctype="multipart/form-data">
-                            @csrf
-                            <div class="row gy-4">
-                                <div class="col-md-6">
-                                    <input type="text" name="nama_pengadu" class="form-control"
-                                        placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" 
-                                        style="background-color: white;" />
-                                </div>
-
-                                <div class="col-md-6">
-                                    <select class="form-control" name="travels_id" required style="background-color: white;">
-                                        <option value="">-- Pilih Travel --</option>
-                                        @foreach ($travels as $travel)
-                                            <option value="{{ $travel->id }}"
-                                                {{ old('travels_id') == $travel->id ? 'selected' : '' }}>
-                                                {{ $travel->Penyelenggara }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <textarea class="form-control" name="hal_aduan" rows="6" placeholder="Hal yang Diadukan" required 
-                                              style="background-color: white;">{{ old('hal_aduan') }}</textarea>
-                                </div>
-
-                                <div class="col-md-12">
-                                    <input type="file" class="form-control" name="berkas_aduan" style="background-color: white;" />
-                                    <small class="text-muted mt-1">File maksimal 2MB</small>
-                                </div>
-
-                                <div class="col-md-12 text-center">
-                                    <div class="loading">Loading</div>
-                                    <div class="error-message"></div>
-                                    <div class="sent-message">Pengaduan Anda telah terkirim. Terima kasih!</div>
-                                    <div class="mt-3">
-                                        <button type="button"
-                                            class="btn btn-success rounded-pill px-3 py-2 border border-0"
-                                            style="background-color: #1acc8d" onclick="confirmSubmit()">Kirim
-                                            Pengaduan</button>
+                    <!-- Tab 2: Riwayat Pengaduan -->
+                    <div class="tab-pane fade" id="riwayat-pengaduan" role="tabpanel">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="card-body p-4">
+                                        <div class="text-center" id="riwayatContent">
+                                            <div class="spinner-border text-primary" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <p class="mt-3 text-muted">Memuat data pengaduan...</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -953,87 +1003,45 @@
     </main>
 
     <footer id="footer" class="footer dark-background">
-        <div class="container footer-top">
-            <div class="row gy-4">
-                <div class="col-lg-4 col-md-6 footer-about">
-                    <a href="index.html" class="logo d-flex align-items-center">
-                        <span class="sitename">UHK Kanwil NTB</span>
-                    </a>
-                    <div class="footer-contact pt-3">
-                        <p>Jl Udayana No 6</p>
-                        <p>Mataram. NTB</p>
-                        <p class="mt-3">
-                            <strong>Phone:</strong>
-                            <span>12345678</span>
-                        </p>
-                        <p>
-                            <strong>Email:</strong>
-                            <span>ntb.kemenag@kemenag.go.id</span>
-                        </p>
-                    </div>
-                    <div class="social-links d-flex mt-4">
-                        <a href=""><i class="bi bi-twitter-x"></i></a>
-                        <a href=""><i class="bi bi-facebook"></i></a>
-                        <a href=""><i class="bi bi-instagram"></i></a>
-                        <a href=""><i class="bi bi-linkedin"></i></a>
-                    </div>
-                </div>
-
-                <div class="col-lg-2 col-md-3 footer-links">
-                    <h4>Tautan</h4>
-                    <ul>
-                        <li><a href="#">Home</a></li>
-                        <li><a href="#">About us</a></li>
-                        <li><a href="#">Services</a></li>
-                        <li><a href="#">Terms of service</a></li>
-                        <li><a href="#">Privacy policy</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-2 col-md-3 footer-links">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li><a href="#">Web Design</a></li>
-                        <li><a href="#">Web Development</a></li>
-                        <li><a href="#">Product Management</a></li>
-                        <li><a href="#">Marketing</a></li>
-                        <li><a href="#">Graphic Design</a></li>
-                    </ul>
-                </div>
-
-                <div class="col-lg-4 col-md-12 footer-newsletter">
-                    <h4>Our Newsletter</h4>
-                    <p>
-                        Subscribe to our newsletter and receive the latest
-                        news about our products and services!
-                    </p>
-                    <form action="forms/newsletter.php" method="post" class="php-email-form">
-                        <div class="newsletter-form">
-                            <input type="email" name="email" /><input type="submit" value="Subscribe" />
+        <div class="container py-4">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <div class="footer-contact">
+                        <h5 class="mb-4 text-white">Kantor Wilayah Kementerian Agama Provinsi NTB</h5>
+                        <div class="row justify-content-center">
+                            <div class="col-md-4">
+                                <p class="mb-2 text-white-50">
+                                    <i class="bi bi-geo-alt me-2"></i>Jl. Udayana No. 6, Mataram, NTB
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-2 text-white-50">
+                                    <i class="bi bi-telephone me-2"></i>0370-123456
+                                </p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-2 text-white-50">
+                                    <i class="bi bi-envelope me-2"></i>ntb.kemenag@kemenag.go.id
+                                </p>
+                            </div>
                         </div>
-                        <div class="loading">Loading</div>
-                        <div class="error-message"></div>
-                        <div class="sent-message">
-                            Your subscription request has been sent. Thank
-                            you!
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <div class="container copyright text-center mt-4">
-            <p>
-                © <span>Copyright</span>
-                <strong class="px-1 sitename">UHK Kanwil NTB</strong>
-                <span>All Rights Reserved</span>
-            </p>
-            <div class="credits">
-                <!-- All the links in the footer should remain intact. -->
-                <!-- You can delete the links only if you've purchased the pro version. -->
-                <!-- Licensing information: https://bootstrapmade.com/license/ -->
-                <!-- Purchase the pro version with working PHP/AJAX contact form: [buy-url] -->
-                Designed with Love
+        
+        <div class="container text-center py-3 border-top border-secondary">
+            <div class="row">
+                <div class="col-12">
+                    <p class="mb-2 text-white-50">
+                        © <script>document.write(new Date().getFullYear())</script> 
+                        <strong class="text-white">UHK Kanwil NTB</strong>. All Rights Reserved
+                    </p>
+                    <p class="mb-0 text-white-50 small">
+                        Designed with <i class="bi bi-heart-fill text-danger"></i> by 
+                        <strong class="text-white">UHK Kanwil NTB</strong>
+                    </p>
+                </div>
             </div>
         </div>
     </footer>
@@ -1305,21 +1313,28 @@
             })
         }
 
-        function openPengaduanModal() {
+        // Tab navigation handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const riwayatTab = document.getElementById('riwayat-tab');
+            if (riwayatTab) {
+                riwayatTab.addEventListener('click', function() {
+                    loadRiwayatPengaduan();
+                });
+            }
+        });
+
+        function loadRiwayatPengaduan() {
+            const riwayatContent = document.getElementById('riwayatContent');
+            
             // Show loading state
-            const modalBody = document.getElementById('pengaduanModalBody');
-            modalBody.innerHTML = `
+            riwayatContent.innerHTML = `
                 <div class="text-center">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-2">Memuat data pengaduan...</p>
+                    <p class="mt-3 text-muted">Memuat data pengaduan...</p>
                 </div>
             `;
-            
-            // Show modal first
-            const modal = new bootstrap.Modal(document.getElementById('pengaduanModal'));
-            modal.show();
             
             // Fetch completed pengaduan data
             fetch('/api/pengaduan-completed')
@@ -1355,9 +1370,9 @@
                         });
                         
                         html += '</tbody></table></div>';
-                        modalBody.innerHTML = html;
+                        riwayatContent.innerHTML = html;
                     } else {
-                        modalBody.innerHTML = `
+                        riwayatContent.innerHTML = `
                             <div class="text-center py-4">
                                 <i class="bi bi-info-circle text-muted" style="font-size: 3rem;"></i>
                                 <h5 class="text-muted mt-3">Belum ada pengaduan yang selesai diproses</h5>
@@ -1368,12 +1383,12 @@
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    modalBody.innerHTML = `
+                    riwayatContent.innerHTML = `
                         <div class="text-center py-4">
                             <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
                             <h5 class="text-danger mt-3">Terjadi kesalahan</h5>
                             <p class="text-muted">Gagal memuat data pengaduan. Silakan coba lagi nanti.</p>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="openPengaduanModal()">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="loadRiwayatPengaduan()">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Coba Lagi
                             </button>
                         </div>
@@ -1381,32 +1396,21 @@
                 });
         }
 
+        // Keep the old function for backward compatibility (if needed)
+        function openPengaduanModal() {
+            // Redirect to riwayat tab
+            const riwayatTab = document.getElementById('riwayat-tab');
+            if (riwayatTab) {
+                riwayatTab.click();
+            }
+        }
+
         function downloadPDF(id) {
             window.open(`/pengaduan/${id}/download-pdf`, '_blank');
         }
     </script>
 
-    <!-- Pengaduan Modal -->
-    <div class="modal fade" id="pengaduanModal" tabindex="-1" aria-labelledby="pengaduanModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pengaduanModalLabel">
-                        <i class="bi bi-shield-check me-2"></i>Pengaduan yang Sudah Selesai
-                    </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="pengaduanModalBody">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2">Memuat data pengaduan...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+
 </body>
 
 </html>

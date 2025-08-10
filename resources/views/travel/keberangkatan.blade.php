@@ -64,6 +64,35 @@
             border-color: var(--secondary-color);
         }
 
+        /* Custom styling for all calendar buttons to avoid black colors */
+        .fc .fc-button-primary {
+            background-color: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .fc .fc-button-primary:hover {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
+        }
+
+        .fc .fc-button-primary:active {
+            background-color: var(--secondary-color) !important;
+            border-color: var(--secondary-color) !important;
+            color: white !important;
+        }
+
+        /* Ensure active button has good contrast */
+        .fc .fc-button-primary.fc-button-active {
+            background-color: var(--success-color) !important;
+            border-color: var(--success-color) !important;
+            color: white !important;
+            font-weight: 600;
+        }
+
         .event-popup {
             display: none;
             position: fixed;
