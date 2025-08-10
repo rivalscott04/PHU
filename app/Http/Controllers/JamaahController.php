@@ -21,7 +21,7 @@ class JamaahController extends Controller
     public function indexHaji()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'user') {
             // User (travel) hanya bisa melihat jamaah dari kabupatennya
             $travel = $user->travel;
@@ -30,62 +30,62 @@ class JamaahController extends Controller
                     ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
             }
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                             ->whereHas('travel', function($query) use ($user) {
-                                 $query->where('kab_kota', $user->kabupaten);
-                             })->get();
+                ->whereHas('travel', function ($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
             // Kabupaten hanya bisa melihat jamaah dari kabupatennya
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                             ->whereHas('travel', function($query) use ($user) {
-                                 $query->where('kab_kota', $user->kabupaten);
-                             })->get();
+                ->whereHas('travel', function ($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'admin') {
             // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
             $jamaah = collect(); // Empty for admin view
             $groupedJamaah = Jamaah::where('jenis_jamaah', 'haji')
-                                   ->with('travel')
-                                   ->get()
-                                   ->groupBy('travel_id');
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
         } else {
             $jamaah = collect();
             $groupedJamaah = null;
         }
-        
+
         return view('jamaah.haji.index', compact('jamaah', 'groupedJamaah'));
     }
 
     public function indexUmrah()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'user') {
             // User (travel) hanya bisa melihat jamaah dari kabupatennya
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                             ->whereHas('travel', function($query) use ($user) {
-                                 $query->where('kab_kota', $user->kabupaten);
-                             })->get();
+                ->whereHas('travel', function ($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
             // Kabupaten hanya bisa melihat jamaah dari kabupatennya
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                             ->whereHas('travel', function($query) use ($user) {
-                                 $query->where('kab_kota', $user->kabupaten);
-                             })->get();
+                ->whereHas('travel', function ($query) use ($user) {
+                    $query->where('kab_kota', $user->kabupaten);
+                })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'admin') {
             // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
             $jamaah = collect(); // Empty for admin view
             $groupedJamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                                   ->with('travel')
-                                   ->get()
-                                   ->groupBy('travel_id');
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
         } else {
             $jamaah = collect();
             $groupedJamaah = null;
         }
-        
+
         return view('jamaah.umrah.index', compact('jamaah', 'groupedJamaah'));
     }
 
@@ -227,31 +227,31 @@ class JamaahController extends Controller
         $format = $request->get('format', 'excel');
         $type = $request->get('type', 'global');
         $travelId = $request->get('travel_id');
-        
+
         if ($format === 'pdf') {
             return $this->exportUmrahPDF($request);
         }
-        
+
         if ($type === 'travel' && $travelId) {
             // Export specific travel
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                           ->where('travel_id', $travelId)
-                           ->with('travel')
-                           ->get();
-            
+                ->where('travel_id', $travelId)
+                ->with('travel')
+                ->get();
+
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_umrah_travel.xlsx';
-            
+
             return Excel::download(new JamaahUmrahExport($jamaah, false), $filename);
         } else {
             // Export global with separators
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                           ->with('travel')
-                           ->get()
-                           ->groupBy('travel_id');
-            
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
+
             $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.xlsx';
-            
+
             return Excel::download(new JamaahUmrahExport($jamaah, true), $filename);
         }
     }
@@ -261,31 +261,31 @@ class JamaahController extends Controller
         $format = $request->get('format', 'excel');
         $type = $request->get('type', 'global');
         $travelId = $request->get('travel_id');
-        
+
         if ($format === 'pdf') {
             return $this->exportHajiPDF($request);
         }
-        
+
         if ($type === 'travel' && $travelId) {
             // Export specific travel
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                           ->where('travel_id', $travelId)
-                           ->with('travel')
-                           ->get();
-            
+                ->where('travel_id', $travelId)
+                ->with('travel')
+                ->get();
+
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_travel.xlsx';
-            
+
             return Excel::download(new JamaahHajiExport($jamaah, false), $filename);
         } else {
             // Export global with separators
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                           ->with('travel')
-                           ->get()
-                           ->groupBy('travel_id');
-            
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
+
             $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.xlsx';
-            
+
             return Excel::download(new JamaahHajiExport($jamaah, true), $filename);
         }
     }
@@ -294,27 +294,27 @@ class JamaahController extends Controller
     {
         $type = $request->get('type', 'global');
         $travelId = $request->get('travel_id');
-        
+
         if ($type === 'travel' && $travelId) {
             // Export specific travel
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                           ->where('travel_id', $travelId)
-                           ->with('travel')
-                           ->get();
-            
+                ->where('travel_id', $travelId)
+                ->with('travel')
+                ->get();
+
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_umrah_travel.pdf';
-            
+
             return $this->generatePDF($jamaah, false, 'umrah', $filename);
         } else {
             // Export global with separators
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                           ->with('travel')
-                           ->get()
-                           ->groupBy('travel_id');
-            
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
+
             $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.pdf';
-            
+
             return $this->generatePDF($jamaah, true, 'umrah', $filename);
         }
     }
@@ -323,27 +323,27 @@ class JamaahController extends Controller
     {
         $type = $request->get('type', 'global');
         $travelId = $request->get('travel_id');
-        
+
         if ($type === 'travel' && $travelId) {
             // Export specific travel
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                           ->where('travel_id', $travelId)
-                           ->with('travel')
-                           ->get();
-            
+                ->where('travel_id', $travelId)
+                ->with('travel')
+                ->get();
+
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_travel.pdf';
-            
+
             return $this->generatePDF($jamaah, false, 'haji', $filename);
         } else {
             // Export global with separators
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                           ->with('travel')
-                           ->get()
-                           ->groupBy('travel_id');
-            
+                ->with('travel')
+                ->get()
+                ->groupBy('travel_id');
+
             $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.pdf';
-            
+
             return $this->generatePDF($jamaah, true, 'haji', $filename);
         }
     }
@@ -351,10 +351,10 @@ class JamaahController extends Controller
     private function generatePDF($data, $isGlobal, $type, $filename)
     {
         $html = $this->generatePDFHTML($data, $isGlobal, $type);
-        
+
         $pdf = Pdf::loadHTML($html);
         $pdf->setPaper('A4', 'portrait');
-        
+
         return $pdf->download($filename);
     }
 
@@ -362,7 +362,7 @@ class JamaahController extends Controller
     {
         $jenisJamaah = ucfirst($type);
         $title = "DATA JAMAAH {$jenisJamaah}";
-        
+
         $html = '<!DOCTYPE html>
 <html lang="id">
 <head>
@@ -373,7 +373,7 @@ class JamaahController extends Controller
             size: A4;
             margin: 15mm;
         }
-        
+
         body {
             font-family: Arial, sans-serif;
             font-size: 11pt;
@@ -381,27 +381,27 @@ class JamaahController extends Controller
             margin: 0;
             padding: 0;
         }
-        
+
         .header {
             text-align: center;
             font-size: 12pt;
             line-height: 1.2;
             margin-bottom: 5mm;
         }
-        
+
         .logo {
             width: 60px;
             position: absolute;
             left: 15mm;
             top: 15mm;
         }
-        
+
         .letterhead {
             border-bottom: 2px solid black;
             padding-bottom: 2mm;
             margin-bottom: 3mm;
         }
-        
+
         .title {
             text-align: center;
             font-weight: bold;
@@ -410,43 +410,43 @@ class JamaahController extends Controller
             font-size: 14pt;
             line-height: 1.2;
         }
-        
+
         .content {
             margin: 2mm 0;
             font-size: 11pt;
             line-height: 1.2;
         }
-        
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 3mm;
         }
-        
+
         th, td {
             border: 1px solid #000;
             padding: 2mm;
             text-align: left;
             font-size: 10pt;
         }
-        
+
         th {
             background-color: #f0f0f0;
             font-weight: bold;
         }
-        
+
         .separator {
             background-color: #e0e0e0;
             font-weight: bold;
             text-align: center;
         }
-        
+
         .footer {
             margin-top: 10mm;
             text-align: center;
             font-size: 10pt;
         }
-        
+
         .page-break {
             page-break-before: always;
         }
@@ -476,7 +476,7 @@ class JamaahController extends Controller
             foreach ($data as $travelId => $jamaahGroup) {
                 $travel = $jamaahGroup->first()->travel;
                 $totalJamaah = $jamaahGroup->count();
-                
+
                 $html .= '
                 <table>
                     <tr class="separator">
@@ -492,7 +492,7 @@ class JamaahController extends Controller
                         <th>No HP</th>
                         <th>NIK</th>
                     </tr>';
-                
+
                 foreach ($jamaahGroup as $index => $jamaah) {
                     $html .= '
                     <tr>
@@ -503,7 +503,7 @@ class JamaahController extends Controller
                         <td>' . htmlspecialchars($jamaah->nik) . '</td>
                     </tr>';
                 }
-                
+
                 $html .= '</table><div class="page-break"></div>';
             }
         } else {
@@ -516,7 +516,7 @@ class JamaahController extends Controller
                     <th>No HP</th>
                     <th>NIK</th>
                 </tr>';
-            
+
             foreach ($data as $index => $jamaah) {
                 $html .= '
                 <tr>
@@ -527,13 +527,13 @@ class JamaahController extends Controller
                     <td>' . htmlspecialchars($jamaah->nik) . '</td>
                 </tr>';
             }
-            
+
             $html .= '</table>';
         }
 
         $html .= '
     </div>
-    
+
     <div class="footer">
         <p>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</p>
         <p>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</p>

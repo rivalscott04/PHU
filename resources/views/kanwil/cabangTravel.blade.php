@@ -6,7 +6,12 @@
             <div class="card">
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
                     <h6>Data Cabang Travel</h6>
-                    <a href="{{ route('form.cabang_travel') }}" class="btn btn-primary">Tambah</a>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                            <i class="bx bx-upload"></i> Import Data
+                        </button>
+                        <a href="{{ route('form.cabang_travel') }}" class="btn btn-primary">Tambah</a>
+                    </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
@@ -44,14 +49,13 @@
                                         <td>{{ $item->telepon }}</td>
                                         <td>
                                             <div class="btn-group" role="group">
-                                                <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" 
-                                                   class="btn btn-sm btn-warning">
+                                                <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}"
+                                                    class="btn btn-sm btn-warning">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <form action="{{ route('cabang.travel.destroy', $item->id_cabang) }}" 
-                                                      method="POST" 
-                                                      style="display: inline;"
-                                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                <form action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
+                                                    method="POST" style="display: inline;"
+                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger">
@@ -66,6 +70,51 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Upload Data -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="uploadModalLabel">Import Data Cabang Travel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('import.cabang_travel') }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="file" class="form-label">Pilih File Excel</label>
+                            <input type="file" class="form-control" id="file" name="file" accept=".xlsx, .xls"
+                                required>
+                            <div class="form-text">Format file yang didukung: .xlsx, .xls</div>
+                        </div>
+                        <div class="mb-3">
+                            <a href="{{ asset('template/cabang-travel.xlsx') }}" class="text-sm text-decoration-none">
+                                <i class="bx bx-download"></i> Download Template Excel
+                            </a>
+                        </div>
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <small>
+                                <strong>Petunjuk:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li>Download template Excel terlebih dahulu</li>
+                                    <li>Isi data sesuai format yang tersedia</li>
+                                    <li>Pastikan semua kolom wajib terisi</li>
+                                    <li>Upload file yang sudah diisi</li>
+                                </ul>
+                            </small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bx bx-upload"></i> Import Data
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

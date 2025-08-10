@@ -10,6 +10,7 @@ class CabangTravel extends Model
     use HasFactory;
 
     protected $table = 'travel_cabang';
+    protected $primaryKey = 'id_cabang';
 
     protected $fillable = [
         'Penyelenggara',

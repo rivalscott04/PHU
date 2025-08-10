@@ -17,24 +17,24 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="Penyelenggara" class="form-label">Penyelenggara</label>
-                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" 
-                                       value="{{ old('Penyelenggara', $cabangTravel->Penyelenggara) }}" required>
+                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara"
+                                    value="{{ old('Penyelenggara', $cabangTravel->Penyelenggara) }}" required>
                                 @error('Penyelenggara')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="kabupaten" class="form-label">Kabupaten</label>
-                                <input type="text" class="form-control" id="kabupaten" name="kabupaten" 
-                                       value="{{ old('kabupaten', $cabangTravel->kabupaten) }}" required>
+                                <input type="text" class="form-control" id="kabupaten" name="kabupaten"
+                                    value="{{ old('kabupaten', $cabangTravel->kabupaten) }}" required>
                                 @error('kabupaten')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="pusat" class="form-label">Pusat</label>
-                                <input type="text" class="form-control" id="pusat" name="pusat" 
-                                       value="{{ old('pusat', $cabangTravel->pusat) }}">
+                                <input type="text" class="form-control" id="pusat" name="pusat"
+                                    value="{{ old('pusat', $cabangTravel->pusat) }}">
                                 @error('pusat')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
@@ -42,7 +42,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="pimpinan_pusat" class="form-label">Pimpinan Pusat</label>
                                 <input type="text" class="form-control" id="pimpinan_pusat" name="pimpinan_pusat"
-                                       value="{{ old('pimpinan_pusat', $cabangTravel->pimpinan_pusat) }}" required>
+                                    value="{{ old('pimpinan_pusat', $cabangTravel->pimpinan_pusat) }}" required>
                                 @error('pimpinan_pusat')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
@@ -56,16 +56,16 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="SK_BA" class="form-label">No SK / BA</label>
-                                <input type="text" class="form-control" id="SK_BA" name="SK_BA" 
-                                       value="{{ old('SK_BA', $cabangTravel->SK_BA) }}">
+                                <input type="text" class="form-control" id="SK_BA" name="SK_BA"
+                                    value="{{ old('SK_BA', $cabangTravel->SK_BA) }}">
                                 @error('SK_BA')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal" class="form-label">Tanggal</label>
-                                <input type="date" class="form-control" id="tanggal" name="tanggal" 
-                                       value="{{ old('tanggal', $cabangTravel->tanggal ? $cabangTravel->tanggal->format('Y-m-d') : '') }}">
+                                <input type="date" class="form-control" id="tanggal" name="tanggal"
+                                    value="{{ old('tanggal', $cabangTravel->tanggal && $cabangTravel->tanggal instanceof \Carbon\Carbon ? $cabangTravel->tanggal->format('Y-m-d') : $cabangTravel->tanggal) }}">
                                 @error('tanggal')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
@@ -73,7 +73,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="pimpinan_cabang" class="form-label">Pimpinan Cabang</label>
                                 <input type="text" class="form-control" id="pimpinan_cabang" name="pimpinan_cabang"
-                                       value="{{ old('pimpinan_cabang', $cabangTravel->pimpinan_cabang) }}" required>
+                                    value="{{ old('pimpinan_cabang', $cabangTravel->pimpinan_cabang) }}" required>
                                 @error('pimpinan_cabang')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
@@ -87,8 +87,8 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="telepon" class="form-label">Telepon</label>
-                                <input type="text" class="form-control" id="telepon" name="telepon" 
-                                       value="{{ old('telepon', $cabangTravel->telepon) }}" required>
+                                <input type="text" class="form-control" id="telepon" name="telepon"
+                                    value="{{ old('telepon', $cabangTravel->telepon) }}" required>
                                 @error('telepon')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror

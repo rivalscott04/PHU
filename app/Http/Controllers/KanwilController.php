@@ -41,7 +41,7 @@ class KanwilController extends Controller
         $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
 
         $travelCompany = TravelCompany::create($validatedData);
-        
+
         // Set default capabilities based on status
         $travelCompany->setDefaultCapabilities();
         $travelCompany->save();
@@ -81,7 +81,7 @@ class KanwilController extends Controller
         // Temukan data dan update
         $travelCompany = TravelCompany::findOrFail($id);
         $travelCompany->update($validatedData);
-        
+
         // Update capabilities based on new status
         $travelCompany->setDefaultCapabilities();
         $travelCompany->save();
@@ -118,7 +118,7 @@ class KanwilController extends Controller
 
             // Update status
             $travelCompany->Status = $newStatus;
-            
+
             // Update capabilities based on new status
             $travelCompany->setDefaultCapabilities();
             $travelCompany->save();
@@ -131,7 +131,7 @@ class KanwilController extends Controller
 
             // Clear any cache that might be affecting the data
             \Cache::forget('travel_companies');
-            
+
             $statusText = $newStatus === 'PIHK' ? 'PIHK (Haji & Umrah)' : 'PPIU (Umrah Only)';
             $oldStatusText = $oldStatus === 'PIHK' ? 'PIHK (Haji & Umrah)' : 'PPIU (Umrah Only)';
 
@@ -143,32 +143,29 @@ class KanwilController extends Controller
                 'capabilities' => $travelCompany->getAvailableServices(),
                 'travel_id' => $travelCompany->id
             ]);
-
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation error in updateStatus', [
                 'errors' => $e->errors(),
                 'id' => $id
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Validation error: ' . implode(', ', array_flatten($e->errors()))
             ], 422);
-
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             \Log::error('Travel company not found', ['id' => $id]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Travel company tidak ditemukan'
             ], 404);
-
         } catch (\Exception $e) {
             \Log::error('Error in updateStatus', [
                 'error' => $e->getMessage(),
                 'id' => $id
             ]);
-            
+
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
@@ -179,7 +176,7 @@ class KanwilController extends Controller
     public function showTravel()
     {
         $user = auth()->user();
-        
+
         // Check if user is authenticated before accessing role
         if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
@@ -225,7 +222,7 @@ class KanwilController extends Controller
     public function showCabangTravel()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'admin') {
             // Admin can see all cabang travel
             $data = CabangTravel::all();
@@ -242,34 +239,23 @@ class KanwilController extends Controller
 
     public function downloadTemplate()
     {
+        $filePath = public_path('template/template-travel.xlsx');
+
+        // Cek apakah file exists
+        if (!file_exists($filePath)) {
+            return response()->json(['error' => 'Template file not found'], 404);
+        }
+
         $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="template_travel.csv"',
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="template-travel.xlsx"',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
+            'Pragma' => 'public',
         ];
 
-        $callback = function() {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, [
-                'Penyelenggara',
-                'Pusat',
-                'Tanggal',
-                'nilai_akreditasi',
-                'tanggal_akreditasi',
-                'lembaga_akreditasi',
-                'Pimpinan',
-                'alamat_kantor_lama',
-                'alamat_kantor_baru',
-                'Telepon',
-                'Status',
-                'kab_kota'
-            ]);
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return response()->download($filePath, 'template-travel.xlsx', $headers);
     }
-
     public function import(Request $request)
     {
         $request->validate([
@@ -284,14 +270,14 @@ class KanwilController extends Controller
         }
     }
 
-    public function editCabangTravel($id)
+    public function editCabangTravel($id_cabang)
     {
-        $cabangTravel = CabangTravel::findOrFail($id);
+        $cabangTravel = CabangTravel::findOrFail($id_cabang);
         $travels = TravelCompany::all();
         return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
     }
 
-    public function updateCabangTravel(Request $request, $id)
+    public function updateCabangTravel(Request $request, $id_cabang)
     {
         $request->validate([
             'Penyelenggara' => 'required|string|max:255',
@@ -306,15 +292,15 @@ class KanwilController extends Controller
             'telepon' => 'required|string|max:20',
         ]);
 
-        $cabangTravel = CabangTravel::findOrFail($id);
+        $cabangTravel = CabangTravel::findOrFail($id_cabang);
         $cabangTravel->update($request->all());
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil diperbarui.');
     }
 
-    public function destroyCabangTravel($id)
+    public function destroyCabangTravel($id_cabang)
     {
-        $cabangTravel = CabangTravel::findOrFail($id);
+        $cabangTravel = CabangTravel::findOrFail($id_cabang);
         $cabangTravel->delete();
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil dihapus.');
@@ -322,29 +308,12 @@ class KanwilController extends Controller
 
     public function downloadTemplateCabang()
     {
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="template_cabang_travel.csv"',
-        ];
+        $filePath = public_path('template/template-cabang.xlsx');
 
-        $callback = function() {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, [
-                'penyelenggara',
-                'kabupaten',
-                'pusat',
-                'pimpinan_pusat',
-                'alamat_pusat',
-                'sk_ba',
-                'tanggal',
-                'pimpinan_cabang',
-                'alamat_cabang',
-                'telepon'
-            ]);
+        if (file_exists($filePath)) {
+            return response()->download($filePath, 'template-cabang-travel.xlsx');
+        }
 
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
+        return back()->with('error', 'Template file tidak ditemukan');
     }
 }

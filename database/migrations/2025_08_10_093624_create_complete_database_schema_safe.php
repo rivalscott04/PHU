@@ -23,6 +23,7 @@ return new class extends Migration
                 $table->timestamp('email_verified_at')->nullable();
                 $table->string('password');
                 $table->enum('role', ['admin', 'kabupaten', 'user'])->default('user');
+                $table->string('kabupaten')->nullable(); // Added from seeder
                 $table->string('address')->nullable();
                 $table->string('city')->nullable();
                 $table->string('country')->nullable();
@@ -34,23 +35,38 @@ return new class extends Migration
             });
         }
 
-        // Create travels table
+        // Create travels table (renamed from travels to travel_companies based on seeder usage)
         if (!Schema::hasTable('travels')) {
             Schema::create('travels', function (Blueprint $table) {
                 $table->id();
                 $table->string('Penyelenggara');
                 $table->string('Status');
                 $table->string('kab_kota'); // Kabupaten/Kota travel berada
-                $table->string('alamat');
-                $table->string('no_telp');
-                $table->string('email');
+                $table->string('alamat')->nullable(); // Made nullable
+                $table->string('no_telp')->nullable(); // Made nullable
+                $table->string('email')->nullable(); // Made nullable
                 $table->string('website')->nullable();
-                $table->string('nama_pimpinan');
-                $table->string('jabatan_pimpinan');
-                $table->string('no_izin');
-                $table->date('tanggal_izin');
-                $table->string('masa_berlaku');
+                $table->string('nama_pimpinan')->nullable(); // Made nullable
+                $table->string('jabatan_pimpinan')->nullable(); // Made nullable
+                $table->string('no_izin')->nullable(); // Made nullable
+                $table->date('tanggal_izin')->nullable(); // Made nullable
+                $table->string('masa_berlaku')->nullable();
                 $table->string('kantor_cabang')->nullable();
+
+                // Additional fields from seeder
+                $table->string('Pusat')->nullable(); // From seeder
+                $table->date('Tanggal')->nullable(); // From seeder
+                $table->string('nilai_akreditasi')->nullable(); // From seeder
+                $table->date('tanggal_akreditasi')->nullable(); // From seeder
+                $table->string('lembaga_akreditasi')->nullable(); // From seeder
+                $table->string('Pimpinan')->nullable(); // From seeder
+                $table->text('alamat_kantor_lama')->nullable(); // From seeder
+                $table->text('alamat_kantor_baru')->nullable(); // From seeder
+                $table->string('Telepon')->nullable(); // From seeder
+                $table->boolean('can_haji')->default(false); // From seeder
+                $table->boolean('can_umrah')->default(false); // From seeder
+                $table->json('capabilities')->nullable(); // From seeder
+
                 $table->timestamps();
             });
         }
@@ -59,13 +75,25 @@ return new class extends Migration
         if (!Schema::hasTable('travel_cabang')) {
             Schema::create('travel_cabang', function (Blueprint $table) {
                 $table->id('id_cabang');
-                $table->unsignedBigInteger('travel_id');
-                $table->string('nama_cabang');
-                $table->string('alamat_cabang');
-                $table->string('no_telp_cabang');
+                $table->unsignedBigInteger('travel_id')->nullable(); // Made nullable for seeder compatibility
+                $table->string('nama_cabang')->nullable(); // Made nullable
+                $table->string('alamat_cabang')->nullable(); // Made nullable
+                $table->string('no_telp_cabang')->nullable(); // Made nullable
                 $table->string('email_cabang')->nullable();
-                $table->string('nama_pimpinan_cabang');
-                $table->string('jabatan_pimpinan_cabang');
+                $table->string('nama_pimpinan_cabang')->nullable(); // Made nullable
+                $table->string('jabatan_pimpinan_cabang')->nullable(); // Made nullable
+
+                // Fields that are actually used in CabangTravelSeeder
+                $table->string('Penyelenggara')->nullable(); // From seeder error
+                $table->string('kabupaten')->nullable(); // From seeder
+                $table->string('pusat')->nullable(); // From seeder
+                $table->string('pimpinan_pusat')->nullable(); // From seeder
+                $table->text('alamat_pusat')->nullable(); // From seeder
+                $table->string('SK_BA')->nullable(); // From seeder
+                $table->date('tanggal')->nullable(); // From seeder
+                $table->string('pimpinan_cabang')->nullable(); // From seeder
+                $table->string('telepon')->nullable(); // From seeder
+
                 $table->timestamps();
             });
         }
@@ -89,6 +117,7 @@ return new class extends Migration
                 $table->string('pdf_file_path')->nullable();
                 $table->enum('status', ['pending', 'diajukan', 'diproses', 'diterima'])->default('pending');
                 $table->unsignedBigInteger('user_id');
+                $table->string('nomor_surat')->nullable(); // Added from seeder
                 $table->timestamps();
             });
         }
@@ -98,7 +127,7 @@ return new class extends Migration
             Schema::create('jamaah', function (Blueprint $table) {
                 $table->id();
                 $table->unsignedBigInteger('travel_id'); // Jamaah ikut travel
-                $table->unsignedBigInteger('user_id');
+                $table->unsignedBigInteger('user_id')->nullable(); // Made nullable since seeder doesn't always set it
                 $table->string('nik', 16); // No unique constraint - one person can go multiple times
                 $table->string('nama');
                 $table->text('alamat');
@@ -129,7 +158,7 @@ return new class extends Migration
                 $table->string('pekerjaan');
                 $table->string('pendidikan_terakhir');
                 $table->enum('status_pernikahan', ['Belum Menikah', 'Menikah', 'Cerai']);
-                $table->boolean('pergi_haji')->default(false); // Changed to boolean
+                $table->enum('pergi_haji', ['Belum', 'Sudah']);
                 $table->string('golongan_darah');
                 $table->string('alergi')->nullable();
                 $table->string('no_paspor')->nullable();
@@ -243,7 +272,7 @@ return new class extends Migration
 
         // Add foreign key constraints
         $this->addForeignKeys();
-        
+
         // Add indexes safely
         $this->addIndexes();
     }
@@ -257,9 +286,7 @@ return new class extends Migration
         if (Schema::hasTable('users') && Schema::hasTable('travels')) {
             try {
                 Schema::table('users', function (Blueprint $table) {
-                    if (!Schema::hasColumn('users', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('set null');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -270,9 +297,7 @@ return new class extends Migration
         if (Schema::hasTable('travel_cabang') && Schema::hasTable('travels')) {
             try {
                 Schema::table('travel_cabang', function (Blueprint $table) {
-                    if (!Schema::hasColumn('travel_cabang', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -283,9 +308,7 @@ return new class extends Migration
         if (Schema::hasTable('bap') && Schema::hasTable('users')) {
             try {
                 Schema::table('bap', function (Blueprint $table) {
-                    if (!Schema::hasColumn('bap', 'user_id_foreign')) {
-                        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-                    }
+                    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -296,12 +319,8 @@ return new class extends Migration
         if (Schema::hasTable('jamaah') && Schema::hasTable('travels') && Schema::hasTable('users')) {
             try {
                 Schema::table('jamaah', function (Blueprint $table) {
-                    if (!Schema::hasColumn('jamaah', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
-                    if (!Schema::hasColumn('jamaah', 'user_id_foreign')) {
-                        $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+                    $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -312,12 +331,8 @@ return new class extends Migration
         if (Schema::hasTable('jamaah_haji_khusus') && Schema::hasTable('travels') && Schema::hasTable('users')) {
             try {
                 Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
-                    if (!Schema::hasColumn('jamaah_haji_khusus', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
-                    if (!Schema::hasColumn('jamaah_haji_khusus', 'verified_by_foreign')) {
-                        $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+                    $table->foreign('verified_by')->references('id')->on('users')->onDelete('set null');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -328,9 +343,7 @@ return new class extends Migration
         if (Schema::hasTable('pengaduan') && Schema::hasTable('users')) {
             try {
                 Schema::table('pengaduan', function (Blueprint $table) {
-                    if (!Schema::hasColumn('pengaduan', 'processed_by_foreign')) {
-                        $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
-                    }
+                    $table->foreign('processed_by')->references('id')->on('users')->onDelete('set null');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -341,9 +354,7 @@ return new class extends Migration
         if (Schema::hasTable('pengunduran') && Schema::hasTable('travels')) {
             try {
                 Schema::table('pengunduran', function (Blueprint $table) {
-                    if (!Schema::hasColumn('pengunduran', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -354,12 +365,8 @@ return new class extends Migration
         if (Schema::hasTable('sertifikat') && Schema::hasTable('travels') && Schema::hasTable('travel_cabang')) {
             try {
                 Schema::table('sertifikat', function (Blueprint $table) {
-                    if (!Schema::hasColumn('sertifikat', 'travel_id_foreign')) {
-                        $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
-                    }
-                    if (!Schema::hasColumn('sertifikat', 'cabang_id_foreign')) {
-                        $table->foreign('cabang_id')->references('id_cabang')->on('travel_cabang')->onDelete('cascade');
-                    }
+                    $table->foreign('travel_id')->references('id')->on('travels')->onDelete('cascade');
+                    $table->foreign('cabang_id')->references('id_cabang')->on('travel_cabang')->onDelete('set null');
                 });
             } catch (\Exception $e) {
                 // Foreign key might already exist
@@ -378,6 +385,7 @@ return new class extends Migration
                 Schema::table('users', function (Blueprint $table) {
                     $table->index('travel_id');
                     $table->index('role');
+                    $table->index('kabupaten');
                 });
             } catch (\Exception $e) {
                 // Index might already exist
@@ -481,42 +489,58 @@ return new class extends Migration
     public function down(): void
     {
         // Drop foreign keys first
-        Schema::table('sertifikat', function (Blueprint $table) {
-            $table->dropForeign(['cabang_id']);
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('sertifikat')) {
+            Schema::table('sertifikat', function (Blueprint $table) {
+                $table->dropForeign(['cabang_id']);
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        Schema::table('pengunduran', function (Blueprint $table) {
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('pengunduran')) {
+            Schema::table('pengunduran', function (Blueprint $table) {
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        Schema::table('pengaduan', function (Blueprint $table) {
-            $table->dropForeign(['processed_by']);
-        });
+        if (Schema::hasTable('pengaduan')) {
+            Schema::table('pengaduan', function (Blueprint $table) {
+                $table->dropForeign(['processed_by']);
+            });
+        }
 
-        Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
-            $table->dropForeign(['verified_by']);
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('jamaah_haji_khusus')) {
+            Schema::table('jamaah_haji_khusus', function (Blueprint $table) {
+                $table->dropForeign(['verified_by']);
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        Schema::table('jamaah', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('jamaah')) {
+            Schema::table('jamaah', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        Schema::table('bap', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
-        });
+        if (Schema::hasTable('bap')) {
+            Schema::table('bap', function (Blueprint $table) {
+                $table->dropForeign(['user_id']);
+            });
+        }
 
-        Schema::table('travel_cabang', function (Blueprint $table) {
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('travel_cabang')) {
+            Schema::table('travel_cabang', function (Blueprint $table) {
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['travel_id']);
-        });
+        if (Schema::hasTable('users')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropForeign(['travel_id']);
+            });
+        }
 
-        // Drop tables
+        // Drop tables in reverse dependency order
         Schema::dropIfExists('sertifikat');
         Schema::dropIfExists('pengunduran');
         Schema::dropIfExists('pengaduan');
