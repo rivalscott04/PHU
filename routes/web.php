@@ -105,6 +105,10 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::delete('/jamaah/{id}', [JamaahController::class, 'destroy'])->name('jamaah.destroy');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
+    
+    // Export routes for jamaah umrah and haji
+    Route::get('/jamaah/umrah/export', [JamaahController::class, 'exportUmrah'])->name('jamaah.umrah.export');
+    Route::get('/jamaah/haji/export', [JamaahController::class, 'exportHaji'])->name('jamaah.haji.export');
 
     // Pengaduan routes - accessible by admin only
     Route::middleware(['admin'])->group(function () {

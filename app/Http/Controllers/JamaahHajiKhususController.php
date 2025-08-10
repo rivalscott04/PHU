@@ -31,8 +31,9 @@ class JamaahHajiKhususController extends Controller
                 $query->byStatus(request('status'));
             }
 
-            $jamaahHajiKhusus = collect(); // Empty for admin view
-            $groupedJamaahHajiKhusus = $query->latest()->get()->groupBy('travel_id');
+            $allJamaah = $query->latest()->get();
+            $jamaahHajiKhusus = $allJamaah; // For statistics
+            $groupedJamaahHajiKhusus = $allJamaah->groupBy('travel_id');
         } else {
             // User dan Kabupaten melihat data seperti biasa
             $query = JamaahHajiKhusus::with('travel');

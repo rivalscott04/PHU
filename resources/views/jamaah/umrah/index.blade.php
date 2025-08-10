@@ -10,14 +10,59 @@
                         <a href="{{ route('jamaah.umrah.create') }}" class="btn btn-primary btn-md me-2">
                             <i class="bx bx-plus me-1"></i> Tambah
                         </a>
-                        <button type="button" class="btn btn-success btn-md" data-bs-toggle="modal"
+                        <button type="button" class="btn btn-success btn-md me-2" data-bs-toggle="modal"
                             data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
+                        </button>
+                        <button type="button" class="btn btn-info btn-md" data-bs-toggle="modal"
+                            data-bs-target="#exportModal">
+                            <i class="bx bx-export me-1"></i> Export Data
                         </button>
                     </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     @if(auth()->user()->role === 'admin' && $groupedJamaah)
+                        <!-- Global Search and Controls -->
+                        <div class="p-3 border-bottom bg-light">
+                            <div class="row align-items-center">
+                                <div class="col-md-6">
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white border-end-0">
+                                            <i class="bx bx-search text-muted"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control border-start-0" 
+                                               id="globalSearch"
+                                               placeholder="Cari PPIU atau nama jamaah..."
+                                               onkeyup="globalSearch()">
+                                    </div>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="expandAll()">
+                                            <i class="bx bx-expand-alt me-1"></i>Expand All
+                                        </button>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="collapseAll()">
+                                            <i class="bx bx-collapse-alt me-1"></i>Collapse All
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-6">
+                                    <small class="text-muted">
+                                        Total: <strong>{{ $groupedJamaah->count() }}</strong> PPIU, 
+                                        <strong>{{ $groupedJamaah->sum(function($group) { return $group->count(); }) }}</strong> Jamaah
+                                    </small>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <small class="text-muted">
+                                        Showing: <span id="visibleCount">{{ $groupedJamaah->count() }}</span> PPIU
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Admin View: Modern Accordion Design -->
                         <div class="accordion" id="travelAccordion">
                             @foreach($groupedJamaah as $travelId => $jamaahGroup)
@@ -27,7 +72,7 @@
                                     $accordionId = 'travel_' . $travelId;
                                 @endphp
                                 
-                                <div class="accordion-item border-0 mb-3 shadow-sm">
+                                <div class="accordion-item border-0 mb-3 shadow-sm travel-item" data-travel-name="{{ strtolower($travel->Penyelenggara ?? '') }}" data-kabupaten="{{ strtolower($travel->kab_kota ?? '') }}">
                                     <div class="accordion-header" id="heading_{{ $accordionId }}">
                                         <button class="accordion-button collapsed" 
                                                 type="button" 
@@ -103,7 +148,7 @@
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($jamaahGroup as $key => $item)
-                                                            <tr class="jamaah-row">
+                                                            <tr class="jamaah-row" data-jamaah-name="{{ strtolower($item->nama) }}">
                                                                 <td class="text-center fw-bold">{{ $key + 1 }}</td>
                                                                 <td>
                                                                     <h6 class="mb-0 fw-bold">{{ $item->nama }}</h6>
@@ -275,6 +320,96 @@
         </div>
     </div>
 
+    <!-- Export Modal -->
+    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exportModalLabel">Export Data Jamaah Umrah</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Global Export -->
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="bx bx-globe me-2"></i>Export Global</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted small">Export semua data jamaah dari semua PPIU dalam satu file dengan separator per PPIU.</p>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-primary" onclick="exportGlobal('excel')">
+                                            <i class="bx bx-file me-2"></i>Export Excel Global
+                                        </button>
+                                        <button type="button" class="btn btn-outline-success" onclick="exportGlobal('pdf')">
+                                            <i class="bx bx-file-pdf me-2"></i>Export PDF Global
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Travel Specific Export -->
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="bx bx-building me-2"></i>Export Per PPIU</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted small">Export data jamaah dari PPIU tertentu saja.</p>
+                                    <div class="mb-3">
+                                        <label for="travelSelect" class="form-label">Pilih PPIU:</label>
+                                        <select class="form-select" id="travelSelect">
+                                            <option value="">Pilih PPIU...</option>
+                                            @if(auth()->user()->role === 'admin' && $groupedJamaah)
+                                                @foreach($groupedJamaah as $travelId => $jamaahGroup)
+                                                    @php
+                                                        $travel = $jamaahGroup->first()->travel;
+                                                        $totalJamaah = $jamaahGroup->count();
+                                                    @endphp
+                                                    <option value="{{ $travelId }}" data-travel-name="{{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }}">
+                                                        {{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }} ({{ $totalJamaah }} Jamaah)
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button type="button" class="btn btn-outline-success" onclick="exportByTravel('excel')" disabled id="exportTravelExcel">
+                                            <i class="bx bx-file me-2"></i>Export Excel PPIU
+                                        </button>
+                                        <button type="button" class="btn btn-outline-info" onclick="exportByTravel('pdf')" disabled id="exportTravelPdf">
+                                            <i class="bx bx-file-pdf me-2"></i>Export PDF PPIU
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Export Summary -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading"><i class="bx bx-info-circle me-2"></i>Informasi Export</h6>
+                                <ul class="mb-0 small">
+                                    <li><strong>Export Global:</strong> Semua data jamaah dengan separator per PPIU</li>
+                                    <li><strong>Export Per PPIU:</strong> Data jamaah dari PPIU tertentu saja</li>
+                                    <li><strong>Format Excel:</strong> File .xlsx dengan multiple sheets</li>
+                                    <li><strong>Format PDF:</strong> File .pdf dengan header resmi Kemenag</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <style>
     /* Accordion Styles - Following Skote Theme */
     .accordion-button {
@@ -300,6 +435,12 @@
     .accordion-button:not(.collapsed) .badge.bg-light {
         background-color: rgba(255,255,255,0.2) !important;
         color: white !important;
+    }
+    
+    /* Accordion arrow color when active */
+    .accordion-button:not(.collapsed)::after {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e") !important;
+        filter: brightness(0) invert(1) !important;
     }
     
     .accordion-button:focus {
@@ -395,12 +536,93 @@
             }
         }
     }
-    
-    // Export jamaah data
-    function exportJamaah(travelId) {
-        // Implementation for export functionality
-        alert('Export functionality for Travel ID: ' + travelId);
+
+    // Global search functionality
+    function globalSearch() {
+        const globalSearchInput = document.getElementById('globalSearch');
+        const searchTerm = globalSearchInput.value.toLowerCase();
+        const travelItems = document.querySelectorAll('.travel-item');
+        const visibleCount = document.getElementById('visibleCount');
+        let currentVisibleCount = 0;
+
+        travelItems.forEach(item => {
+            const travelName = item.getAttribute('data-travel-name');
+            const kabupaten = item.getAttribute('data-kabupaten');
+            const travelContent = item.querySelector('.accordion-body').innerHTML.toLowerCase();
+
+            if (travelName.includes(searchTerm) || kabupaten.includes(searchTerm) || travelContent.includes(searchTerm)) {
+                item.style.display = '';
+                currentVisibleCount++;
+            } else {
+                item.style.display = 'none';
+            }
+        });
+        visibleCount.textContent = currentVisibleCount;
     }
+
+    // Expand all accordions
+    function expandAll() {
+        const accordions = document.querySelectorAll('.accordion-item');
+        accordions.forEach(item => {
+            const button = item.querySelector('.accordion-button');
+            const collapse = item.querySelector('.accordion-collapse');
+            if (button && collapse) {
+                button.classList.remove('collapsed');
+                collapse.classList.add('show');
+            }
+        });
+    }
+
+    // Collapse all accordions
+    function collapseAll() {
+        const accordions = document.querySelectorAll('.accordion-item');
+        accordions.forEach(item => {
+            const button = item.querySelector('.accordion-button');
+            const collapse = item.querySelector('.accordion-collapse');
+            if (button && collapse) {
+                button.classList.add('collapsed');
+                collapse.classList.remove('show');
+            }
+        });
+    }
+    
+    // Export jamaah data (legacy function for individual travel export)
+    function exportJamaah(travelId) {
+        // Redirect to export route for specific travel
+        window.open(`/jamaah/umrah/export?travel_id=${travelId}`, '_blank');
+    }
+    
+    // Global export function
+    function exportGlobal(format) {
+        const url = `/jamaah/umrah/export?format=${format}&type=global`;
+        window.open(url, '_blank');
+    }
+    
+    // Export by travel function
+    function exportByTravel(format) {
+        const travelId = document.getElementById('travelSelect').value;
+        if (!travelId) {
+            alert('Silakan pilih PPIU terlebih dahulu!');
+            return;
+        }
+        const url = `/jamaah/umrah/export?format=${format}&type=travel&travel_id=${travelId}`;
+        window.open(url, '_blank');
+    }
+    
+    // Enable/disable travel export buttons based on selection
+    document.addEventListener('DOMContentLoaded', function() {
+        const travelSelect = document.getElementById('travelSelect');
+        const exportTravelExcel = document.getElementById('exportTravelExcel');
+        const exportTravelPdf = document.getElementById('exportTravelPdf');
+        
+        if (travelSelect) {
+            travelSelect.addEventListener('change', function() {
+                const isSelected = this.value !== '';
+                exportTravelExcel.disabled = !isSelected;
+                exportTravelPdf.disabled = !isSelected;
+            });
+        }
+    });
     
     // Print jamaah data
     function printJamaah(accordionId) {

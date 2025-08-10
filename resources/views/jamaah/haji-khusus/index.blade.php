@@ -71,7 +71,7 @@
                                         <i class="bx bx-user font-size-24"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus->total() }}</h4>
+                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->total() : $jamaahHajiKhusus->count() }}</h4>
                                         <p class="mb-0">Total Jamaah</p>
                                     </div>
                                 </div>
@@ -86,7 +86,7 @@
                                         <i class="bx bx-time font-size-24"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus->where('status_pendaftaran', 'pending')->count() }}</h4>
+                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'pending')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'pending')->count() }}</h4>
                                         <p class="mb-0">Menunggu</p>
                                     </div>
                                 </div>
@@ -101,7 +101,7 @@
                                         <i class="bx bx-check-circle font-size-24"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus->where('status_pendaftaran', 'approved')->count() }}</h4>
+                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'approved')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'approved')->count() }}</h4>
                                         <p class="mb-0">Disetujui</p>
                                     </div>
                                 </div>
@@ -116,7 +116,7 @@
                                         <i class="bx bx-check-double font-size-24"></i>
                                     </div>
                                     <div class="flex-grow-1 ms-3">
-                                        <h4 class="mb-1">{{ $jamaahHajiKhusus->where('status_pendaftaran', 'completed')->count() }}</h4>
+                                        <h4 class="mb-1">{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->where('status_pendaftaran', 'completed')->count() : $jamaahHajiKhusus->where('status_pendaftaran', 'completed')->count() }}</h4>
                                         <p class="mb-0">Selesai</p>
                                     </div>
                                 </div>
@@ -281,7 +281,7 @@
                             <tbody>
                                 @forelse($jamaahHajiKhusus as $index => $jamaah)
                                 <tr>
-                                    <td>{{ $jamaahHajiKhusus->firstItem() + $index }}</td>
+                                    <td>{{ $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator ? $jamaahHajiKhusus->firstItem() + $index : $index + 1 }}</td>
                                     <td>
                                         <div class="d-flex align-items-center">
                                             <div class="avatar-xs me-3">
@@ -394,9 +394,11 @@
                 @endif
 
                 <!-- Pagination -->
-                <div class="d-flex justify-content-center">
-                    {{ $jamaahHajiKhusus->links() }}
-                </div>
+                @if(auth()->user()->role !== 'admin' && $jamaahHajiKhusus instanceof \Illuminate\Pagination\LengthAwarePaginator)
+                    <div class="d-flex justify-content-center">
+                        {{ $jamaahHajiKhusus->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

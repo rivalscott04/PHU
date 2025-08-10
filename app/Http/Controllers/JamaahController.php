@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Jamaah;
 use App\Exports\JamaahExport;
+use App\Exports\JamaahUmrahExport;
+use App\Exports\JamaahHajiExport;
 use Illuminate\Http\Request;
 use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -212,5 +214,332 @@ class JamaahController extends Controller
     {
         $jamaah = Jamaah::findOrFail($id);
         return view('jamaah.detail', compact('jamaah'));
+    }
+
+    public function export()
+    {
+        return Excel::download(new JamaahExport, 'jamaah.xlsx');
+    }
+
+    public function exportUmrah(Request $request)
+    {
+        $format = $request->get('format', 'excel');
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($format === 'pdf') {
+            return $this->exportUmrahPDF($request);
+        }
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                           ->where('travel_id', $travelId)
+                           ->with('travel')
+                           ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_umrah_travel.xlsx';
+            
+            return Excel::download(new JamaahUmrahExport($jamaah, false), $filename);
+        } else {
+            // Export global with separators
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                           ->with('travel')
+                           ->get()
+                           ->groupBy('travel_id');
+            
+            $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new JamaahUmrahExport($jamaah, true), $filename);
+        }
+    }
+
+    public function exportHaji(Request $request)
+    {
+        $format = $request->get('format', 'excel');
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($format === 'pdf') {
+            return $this->exportHajiPDF($request);
+        }
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                           ->where('travel_id', $travelId)
+                           ->with('travel')
+                           ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_travel.xlsx';
+            
+            return Excel::download(new JamaahHajiExport($jamaah, false), $filename);
+        } else {
+            // Export global with separators
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                           ->with('travel')
+                           ->get()
+                           ->groupBy('travel_id');
+            
+            $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new JamaahHajiExport($jamaah, true), $filename);
+        }
+    }
+
+    public function exportUmrahPDF(Request $request)
+    {
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                           ->where('travel_id', $travelId)
+                           ->with('travel')
+                           ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_umrah_travel.pdf';
+            
+            return $this->generatePDF($jamaah, false, 'umrah', $filename);
+        } else {
+            // Export global with separators
+            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
+                           ->with('travel')
+                           ->get()
+                           ->groupBy('travel_id');
+            
+            $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.pdf';
+            
+            return $this->generatePDF($jamaah, true, 'umrah', $filename);
+        }
+    }
+
+    public function exportHajiPDF(Request $request)
+    {
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                           ->where('travel_id', $travelId)
+                           ->with('travel')
+                           ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_travel.pdf';
+            
+            return $this->generatePDF($jamaah, false, 'haji', $filename);
+        } else {
+            // Export global with separators
+            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
+                           ->with('travel')
+                           ->get()
+                           ->groupBy('travel_id');
+            
+            $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.pdf';
+            
+            return $this->generatePDF($jamaah, true, 'haji', $filename);
+        }
+    }
+
+    private function generatePDF($data, $isGlobal, $type, $filename)
+    {
+        $html = $this->generatePDFHTML($data, $isGlobal, $type);
+        
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+        $pdf->setPaper('A4', 'portrait');
+        
+        return $pdf->download($filename);
+    }
+
+    private function generatePDFHTML($data, $isGlobal, $type)
+    {
+        $jenisJamaah = ucfirst($type);
+        $title = "DATA JAMAAH {$jenisJamaah}";
+        
+        $html = '<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>' . $title . '</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .header {
+            text-align: center;
+            font-size: 12pt;
+            line-height: 1.2;
+            margin-bottom: 5mm;
+        }
+        
+        .logo {
+            width: 60px;
+            position: absolute;
+            left: 15mm;
+            top: 15mm;
+        }
+        
+        .letterhead {
+            border-bottom: 2px solid black;
+            padding-bottom: 2mm;
+            margin-bottom: 3mm;
+        }
+        
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 2mm;
+            margin-bottom: 3mm;
+            font-size: 14pt;
+            line-height: 1.2;
+        }
+        
+        .content {
+            margin: 2mm 0;
+            font-size: 11pt;
+            line-height: 1.2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 3mm;
+        }
+        
+        th, td {
+            border: 1px solid #000;
+            padding: 2mm;
+            text-align: left;
+            font-size: 10pt;
+        }
+        
+        th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        
+        .separator {
+            background-color: #e0e0e0;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .footer {
+            margin-top: 10mm;
+            text-align: center;
+            font-size: 10pt;
+        }
+        
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="letterhead">
+        <img src="' . asset('images/kemenag.png') . '" alt="Logo" class="logo">
+        <div class="header">
+            <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
+                KANTOR WILAYAH KEMENTERIAN AGAMA<br>
+                PROVINSI NUSA TENGGARA BARAT<br></strong>
+            <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
+                Website : www.ntb.Kemenag.go.id
+            </span>
+        </div>
+    </div>
+
+    <div class="title">
+        ' . $title . '<br>
+        <span style="font-size: 12pt;">Tanggal: ' . now()->format('d F Y') . '</span>
+    </div>
+
+    <div class="content">';
+
+        if ($isGlobal) {
+            foreach ($data as $travelId => $jamaahGroup) {
+                $travel = $jamaahGroup->first()->travel;
+                $totalJamaah = $jamaahGroup->count();
+                
+                $html .= '
+                <table>
+                    <tr class="separator">
+                        <td colspan="5">
+                            <strong>PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</strong><br>
+                            <small>Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total Jamaah: ' . $totalJamaah . ' | Status: ' . ($travel->Status ?? 'N/A') . '</small>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Jamaah</th>
+                        <th>Alamat</th>
+                        <th>No HP</th>
+                        <th>NIK</th>
+                    </tr>';
+                
+                foreach ($jamaahGroup as $index => $jamaah) {
+                    $html .= '
+                    <tr>
+                        <td>' . ($index + 1) . '</td>
+                        <td>' . htmlspecialchars($jamaah->nama) . '</td>
+                        <td>' . htmlspecialchars($jamaah->alamat) . '</td>
+                        <td>' . htmlspecialchars($jamaah->nomor_hp) . '</td>
+                        <td>' . htmlspecialchars($jamaah->nik) . '</td>
+                    </tr>';
+                }
+                
+                $html .= '</table><div class="page-break"></div>';
+            }
+        } else {
+            $html .= '
+            <table>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Jamaah</th>
+                    <th>Alamat</th>
+                    <th>No HP</th>
+                    <th>NIK</th>
+                </tr>';
+            
+            foreach ($data as $index => $jamaah) {
+                $html .= '
+                <tr>
+                    <td>' . ($index + 1) . '</td>
+                    <td>' . htmlspecialchars($jamaah->nama) . '</td>
+                    <td>' . htmlspecialchars($jamaah->alamat) . '</td>
+                    <td>' . htmlspecialchars($jamaah->nomor_hp) . '</td>
+                    <td>' . htmlspecialchars($jamaah->nik) . '</td>
+                </tr>';
+            }
+            
+            $html .= '</table>';
+        }
+
+        $html .= '
+    </div>
+    
+    <div class="footer">
+        <p>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</p>
+        <p>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</p>
+    </div>
+</body>
+</html>';
+
+        return $html;
     }
 }

@@ -58,12 +58,22 @@
     overflow: hidden;
 }
 
-.metismenu .has-arrow[aria-expanded="true"] .arrow {
-    transform: rotate(180deg);
+/* Arrow styles for Skote's built-in accordion arrows */
+.metismenu .has-arrow::after {
+    transition: transform 0.3s ease;
+    color: rgba(255,255,255,0.7) !important;
 }
 
-.metismenu .has-arrow .arrow {
-    transition: transform 0.3s ease;
+.metismenu .has-arrow[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+    color: white !important;
+}
+
+/* Force white color for active accordion arrows - highest specificity */
+#sidebar-menu .metismenu .has-arrow[aria-expanded="true"]::after,
+.vertical-menu .metismenu .has-arrow[aria-expanded="true"]::after,
+body .vertical-menu .metismenu .has-arrow[aria-expanded="true"]::after {
+    color: white !important;
 }
 
 /* Compact Design */
@@ -97,7 +107,6 @@
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="{{ $menu['icon'] }}"></i>
                                 <span>{{ $menu['name'] }}</span>
-                                <i class="arrow bx bx-chevron-right"></i>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
                                 @foreach($menu['items'] as $item)
@@ -112,22 +121,7 @@
                                 @endforeach
                             </ul>
                         </li>
-                    @elseif(isset($menu['items']))
-                        <!-- Menu Group (Legacy) -->
-                        <li class="menu-title">{{ $menu['name'] }}</li>
-                        @foreach($menu['items'] as $item)
-                            @if($item['visible'])
-                                <li>
-                                    <a href="{{ route($item['route']) }}" class="waves-effect">
-                                        <i class="{{ $item['icon'] }}"></i>
-                                        @if(isset($item['badge']))
-                                            <span class="badge rounded-pill bg-info float-end">{{ $item['badge'] }}</span>
-                                        @endif
-                                        <span>{{ $item['name'] }}</span>
-                                    </a>
-                                </li>
-                            @endif
-                        @endforeach
+
                     @else
                         <!-- Single Menu Item -->
                         @if($menu['visible'])
