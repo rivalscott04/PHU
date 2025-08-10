@@ -23,7 +23,7 @@
                 <div class="d-flex justify-content-between align-items-center">
                     <h4 class="card-title">Informasi Jamaah Haji Khusus</h4>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('jamaah.haji-khusus.edit', $jamaahHajiKhusus->id) }}" class="btn btn-primary">
+                        <a href="{{ route('jamaah.haji-khusus.edit', $jamaahHajiKhusus) }}" class="btn btn-primary">
                             <i class="bx bx-edit me-1"></i>
                             Edit
                         </a>

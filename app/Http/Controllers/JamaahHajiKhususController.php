@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\JamaahHajiKhusus;
 use App\Models\TravelCompany;
+use App\Exports\JamaahHajiKhususExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class JamaahHajiKhususController extends Controller
 {
@@ -308,24 +311,259 @@ class JamaahHajiKhususController extends Controller
     /**
      * Export jamaah haji khusus data
      */
-    public function export()
+    public function export(Request $request)
     {
-        $user = Auth::user();
-        $query = JamaahHajiKhusus::with('travel');
+        $format = $request->get('format', 'excel');
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($format === 'pdf') {
+            return $this->exportPDF($request);
+        }
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = JamaahHajiKhusus::where('travel_id', $travelId)
+                                     ->with('travel')
+                                     ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_khusus_travel.xlsx';
+            
+            return Excel::download(new JamaahHajiKhususExport($jamaah, false), $filename);
+        } else {
+            // Export global with separators
+            $jamaah = JamaahHajiKhusus::with('travel')
+                                     ->get()
+                                     ->groupBy('travel_id');
+            
+            $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.xlsx';
+            
+            return Excel::download(new JamaahHajiKhususExport($jamaah, true), $filename);
+        }
+    }
 
-        // Filter based on user role
-        if ($user->role === 'user' && $user->travel) {
-            $query->where('travel_id', $user->travel->id);
+    public function exportPDF(Request $request)
+    {
+        $type = $request->get('type', 'global');
+        $travelId = $request->get('travel_id');
+        
+        if ($type === 'travel' && $travelId) {
+            // Export specific travel
+            $jamaah = JamaahHajiKhusus::where('travel_id', $travelId)
+                                     ->with('travel')
+                                     ->get();
+            
+            $travel = $jamaah->first()->travel ?? null;
+            $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_khusus_travel.pdf';
+            
+            return $this->generatePDF($jamaah, false, 'haji-khusus', $filename);
+        } else {
+            // Export global with separators
+            $jamaah = JamaahHajiKhusus::with('travel')
+                                     ->get()
+                                     ->groupBy('travel_id');
+            
+            $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.pdf';
+            
+            return $this->generatePDF($jamaah, true, 'haji-khusus', $filename);
+        }
+    }
+
+    private function generatePDF($data, $isGlobal, $type, $filename)
+    {
+        $html = $this->generatePDFHTML($data, $isGlobal, $type);
+        
+        $pdf = Pdf::loadHTML($html);
+        $pdf->setPaper('A4', 'landscape');
+        
+        return $pdf->download($filename);
+    }
+
+    private function generatePDFHTML($data, $isGlobal, $type)
+    {
+        $title = 'Data Jamaah Haji Khusus';
+        
+        $html = '
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+            <title>' . $title . '</title>
+            <style>
+                body { font-family: Arial, sans-serif; font-size: 10px; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; }
+                .header h1 { margin: 0; font-size: 16px; font-weight: bold; }
+                .header p { margin: 5px 0; font-size: 12px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                th, td { border: 1px solid #000; padding: 4px; text-align: left; }
+                th { background-color: #34C38F; color: white; font-weight: bold; }
+                .separator { background-color: #556EE6; color: white; font-weight: bold; }
+                .page-break { page-break-before: always; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h1>
+                <p>DIREKTORAT JENDERAL PENYELENGGARAAN HAJI DAN UMRAH</p>
+                <p>DIREKTORAT PELAYANAN HAJI LUAR NEGERI</p>
+                <h2>' . $title . '</h2>
+                <p>Tanggal: ' . now()->format('d/m/Y') . '</p>
+            </div>';
+
+        if ($isGlobal) {
+            foreach ($data as $travelId => $jamaahGroup) {
+                $travel = $jamaahGroup->first()->travel;
+                
+                $html .= '
+                <table>
+                    <tr class="separator">
+                        <td colspan="8">PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
+                        <td colspan="8">Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . '</td>
+                        <td colspan="8">Total: ' . $jamaahGroup->count() . ' Jamaah</td>
+                        <td colspan="5">Status: ' . ($travel->Status ?? 'N/A') . '</td>
+                    </tr>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Lengkap</th>
+                        <th>No. KTP</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Alamat</th>
+                        <th>No. HP</th>
+                        <th>No. Paspor</th>
+                        <th>No. SPPH</th>
+                        <th>Status Bukti Setor</th>
+                        <th>Status Pendaftaran</th>
+                        <th>PPIU</th>
+                        <th>Kabupaten</th>
+                        <th>Status PPIU</th>
+                        <th>Tanggal Daftar</th>
+                        <th>Pekerjaan</th>
+                        <th>Pendidikan</th>
+                        <th>Pergi Haji</th>
+                        <th>Alergi</th>
+                        <th>Catatan</th>
+                        <th>Nama Ayah</th>
+                        <th>Email</th>
+                        <th>Golongan Darah</th>
+                        <th>Status Nikah</th>
+                        <th>Tempat Lahir</th>
+                        <th>Tanggal Lahir</th>
+                        <th>Kota</th>
+                        <th>Provinsi</th>
+                        <th>Kode Pos</th>
+                    </tr>';
+
+                foreach ($jamaahGroup as $index => $jamaah) {
+                    $html .= '
+                    <tr>
+                        <td>' . ($index + 1) . '</td>
+                        <td>' . $jamaah->nama_lengkap . '</td>
+                        <td>' . $jamaah->no_ktp . '</td>
+                        <td>' . ($jamaah->jenis_kelamin === 'L' ? 'L' : 'P') . '</td>
+                        <td>' . $jamaah->alamat . '</td>
+                        <td>' . $jamaah->no_hp . '</td>
+                        <td>' . ($jamaah->no_paspor ?: '-') . '</td>
+                        <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
+                        <td>' . $jamaah->getBuktiSetorStatusText() . '</td>
+                        <td>' . $jamaah->getStatusText() . '</td>
+                        <td>' . ($jamaah->travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
+                        <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
+                        <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
+                        <td>' . ($jamaah->created_at ? $jamaah->created_at->format('d/m/Y') : '-') . '</td>
+                        <td>' . $jamaah->pekerjaan . '</td>
+                        <td>' . $jamaah->pendidikan_terakhir . '</td>
+                        <td>' . ($jamaah->pergi_haji ?: '-') . '</td>
+                        <td>' . ($jamaah->alergi ?: '-') . '</td>
+                        <td>' . ($jamaah->catatan_khusus ?: '-') . '</td>
+                        <td>' . $jamaah->nama_ayah . '</td>
+                        <td>' . ($jamaah->email ?: '-') . '</td>
+                        <td>' . $jamaah->golongan_darah . '</td>
+                        <td>' . $jamaah->status_pernikahan . '</td>
+                        <td>' . $jamaah->tempat_lahir . '</td>
+                        <td>' . ($jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '-') . '</td>
+                        <td>' . $jamaah->kota . '</td>
+                        <td>' . $jamaah->provinsi . '</td>
+                        <td>' . $jamaah->kode_pos . '</td>
+                    </tr>';
+                }
+                
+                $html .= '</table><div class="page-break"></div>';
+            }
+        } else {
+            $html .= '
+            <table>
+                <tr>
+                    <th>No</th>
+                    <th>Nama Lengkap</th>
+                    <th>No. KTP</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Alamat</th>
+                    <th>No. HP</th>
+                    <th>No. Paspor</th>
+                    <th>No. SPPH</th>
+                    <th>Status Bukti Setor</th>
+                    <th>Status Pendaftaran</th>
+                    <th>PPIU</th>
+                    <th>Kabupaten</th>
+                    <th>Status PPIU</th>
+                    <th>Tanggal Daftar</th>
+                    <th>Pekerjaan</th>
+                    <th>Pendidikan</th>
+                    <th>Pergi Haji</th>
+                    <th>Alergi</th>
+                    <th>Catatan</th>
+                    <th>Nama Ayah</th>
+                    <th>Email</th>
+                    <th>Golongan Darah</th>
+                    <th>Status Nikah</th>
+                    <th>Tempat Lahir</th>
+                    <th>Tanggal Lahir</th>
+                    <th>Kota</th>
+                    <th>Provinsi</th>
+                    <th>Kode Pos</th>
+                </tr>';
+
+            foreach ($data as $index => $jamaah) {
+                $html .= '
+                <tr>
+                    <td>' . ($index + 1) . '</td>
+                    <td>' . $jamaah->nama_lengkap . '</td>
+                    <td>' . $jamaah->no_ktp . '</td>
+                    <td>' . ($jamaah->jenis_kelamin === 'L' ? 'L' : 'P') . '</td>
+                    <td>' . $jamaah->alamat . '</td>
+                    <td>' . $jamaah->no_hp . '</td>
+                    <td>' . ($jamaah->no_paspor ?: '-') . '</td>
+                    <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
+                    <td>' . $jamaah->getBuktiSetorStatusText() . '</td>
+                    <td>' . $jamaah->getStatusText() . '</td>
+                    <td>' . ($jamaah->travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
+                    <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
+                    <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
+                    <td>' . ($jamaah->created_at ? $jamaah->created_at->format('d/m/Y') : '-') . '</td>
+                    <td>' . $jamaah->pekerjaan . '</td>
+                    <td>' . $jamaah->pendidikan_terakhir . '</td>
+                    <td>' . ($jamaah->pergi_haji ?: '-') . '</td>
+                    <td>' . ($jamaah->alergi ?: '-') . '</td>
+                    <td>' . ($jamaah->catatan_khusus ?: '-') . '</td>
+                    <td>' . $jamaah->nama_ayah . '</td>
+                    <td>' . ($jamaah->email ?: '-') . '</td>
+                    <td>' . $jamaah->golongan_darah . '</td>
+                    <td>' . $jamaah->status_pernikahan . '</td>
+                    <td>' . $jamaah->tempat_lahir . '</td>
+                    <td>' . ($jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '-') . '</td>
+                    <td>' . $jamaah->kota . '</td>
+                    <td>' . $jamaah->provinsi . '</td>
+                    <td>' . $jamaah->kode_pos . '</td>
+                </tr>';
+            }
+            
+            $html .= '</table>';
         }
 
-        $jamaahHajiKhusus = $query->get();
-
-        // Generate Excel/CSV export
-        // Implementation depends on your export library
-        return response()->json([
-            'message' => 'Export functionality will be implemented',
-            'data' => $jamaahHajiKhusus
-        ]);
+        $html .= '</body></html>';
+        
+        return $html;
     }
 
     /**

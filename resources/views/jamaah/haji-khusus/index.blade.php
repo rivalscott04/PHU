@@ -243,7 +243,7 @@
                                                        class="btn btn-info btn-sm" title="Detail">
                                                         <i class="bx bx-show"></i>
                                                     </a>
-                                                    <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
+                                                    <a href="{{ route('jamaah.haji-khusus.edit', $jamaah) }}" 
                                                        class="btn btn-primary btn-sm" title="Edit">
                                                         <i class="bx bx-edit"></i>
                                                     </a>
@@ -363,7 +363,7 @@
                                                class="btn btn-info btn-sm" title="Detail">
                                                 <i class="bx bx-show"></i>
                                             </a>
-                                            <a href="{{ route('jamaah.haji-khusus.edit', $jamaah->id) }}" 
+                                            <a href="{{ route('jamaah.haji-khusus.edit', $jamaah) }}" 
                                                class="btn btn-primary btn-sm" title="Edit">
                                                 <i class="bx bx-edit"></i>
                                             </a>

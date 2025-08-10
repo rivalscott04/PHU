@@ -9,6 +9,7 @@ use App\Exports\JamaahHajiExport;
 use Illuminate\Http\Request;
 use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class JamaahController extends Controller
 {
@@ -351,7 +352,7 @@ class JamaahController extends Controller
     {
         $html = $this->generatePDFHTML($data, $isGlobal, $type);
         
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadHTML($html);
+        $pdf = Pdf::loadHTML($html);
         $pdf->setPaper('A4', 'portrait');
         
         return $pdf->download($filename);
