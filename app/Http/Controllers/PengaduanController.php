@@ -198,11 +198,19 @@ class PengaduanController extends Controller
      */
     public function getCompletedPengaduan()
     {
-        $completedPengaduan = Pengaduan::with('travel')
-            ->where('status', 'completed')
-            ->orderBy('completed_at', 'desc')
-            ->get();
+        try {
+            $completedPengaduan = Pengaduan::with('travel')
+                ->where('status', 'completed')
+                ->orderBy('completed_at', 'desc')
+                ->get();
 
-        return response()->json($completedPengaduan);
+            return response()->json($completedPengaduan);
+        } catch (\Exception $e) {
+            \Log::error('Error in getCompletedPengaduan: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Terjadi kesalahan saat mengambil data pengaduan',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

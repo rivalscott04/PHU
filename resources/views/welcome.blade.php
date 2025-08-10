@@ -417,7 +417,7 @@
                     <li><a href="#beranda" class="active">Beranda</a></li>
                     <li><a href="#about">Tentang</a></li>
                     <li><a href="#calendar-section">Jadwal Keberangkatan</a></li>
-                    <li><a href="#travel">Travel</a></li>
+                    <li><a href="#informasi">Informasi</a></li>
                     <li><a href="#contact">Contact</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -583,46 +583,127 @@
             </div>
         </section>
 
-        <!-- Stats Section -->
-        <section id="stats" class="stats section light-background">
+        <!-- Informasi Section -->
+        <section id="informasi" class="informasi section light-background">
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Informasi</h2>
+                <div>
+                    <span>Informasi</span>
+                    <span class="description-title">Publik</span>
+                </div>
+            </div>
+            <!-- End Section Title -->
+
             <div class="container" data-aos="fade-up" data-aos-delay="100">
-                <div class="row gy-4">
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
-                        <a href="{{ route('list.travel') }}" class="text-decoration-none w-100 text-center">
-                            <i class="bi bi-building-fill"></i>
-                            <div class="stats-item">
-                                <span data-purecounter-start="0" data-purecounter-end="{{ $stats['travelCount'] }}"
-                                    data-purecounter-duration="1" class="purecounter"></span>
-                                <p>Jumlah Travel</p>
+                <div class="row gy-4 icon-boxes">
+                    <!-- FAQ Section -->
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="icon-box">
+                            <i class="bi bi-question-circle"></i>
+                            <h3>FAQ (Frequently Asked Questions)</h3>
+                            <p>
+                                Temukan jawaban untuk pertanyaan yang sering diajukan tentang sistem PHU Kanwil NTB, cara melihat jadwal keberangkatan, dan prosedur pengaduan.
+                            </p>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse">
+                                    Lihat FAQ <i class="bi bi-chevron-down"></i>
+                                </button>
                             </div>
-                        </a>
-                    </div>
-
-                    <!-- End Stats Item -->
-
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
-                        <i class="bi bi-people"></i>
-                        <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahHajiCount'] }}"
-                                data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Jamaah Haji</p>
+                            <div class="collapse mt-3" id="faqCollapse">
+                                <div class="card card-body border-0 bg-light">
+                                    <div class="mb-3">
+                                        <strong>Q: Apa itu Sistem PHU Kanwil NTB?</strong><br>
+                                        <small class="text-muted">A: Sistem Informasi Haji dan Umroh Khusus (PHU) Kanwil NTB adalah platform digital untuk mengelola dan memantau kegiatan haji dan umroh di wilayah NTB.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Q: Bagaimana cara melihat jadwal keberangkatan?</strong><br>
+                                        <small class="text-muted">A: Anda dapat melihat jadwal keberangkatan di menu "Jadwal Keberangkatan" yang menampilkan kalender dengan detail waktu keberangkatan dan kepulangan.</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Q: Berapa lama proses pengaduan?</strong><br>
+                                        <small class="text-muted">A: Proses pengaduan akan ditindaklanjuti dalam waktu maksimal 3-5 hari kerja setelah pengaduan diterima.</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- End Stats Item -->
+                    <!-- End Icon Box -->
 
-                    <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center">
-                        <i class="bi bi-people"></i>
-                        <div class="stats-item">
-                            <span data-purecounter-start="0" data-purecounter-end="{{ $stats['jamaahUmrahCount'] }}"
-                                data-purecounter-duration="1" class="purecounter"></span>
-                            <p>Jumlah Jamaah Umrah</p>
+                    <!-- Informasi Pengaduan Section -->
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="icon-box">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <h3>Informasi Pengaduan</h3>
+                            <p>
+                                Pelajari cara mengajukan pengaduan dan jenis pengaduan yang dapat diajukan terkait layanan haji dan umroh.
+                            </p>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-warning btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#pengaduanCollapse">
+                                    Lihat Detail <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="collapse mt-3" id="pengaduanCollapse">
+                                <div class="card card-body border-0 bg-light">
+                                    <div class="mb-3">
+                                        <strong>Cara Mengajukan Pengaduan:</strong><br>
+                                        <small class="text-muted">
+                                            1. Isi form pengaduan dengan lengkap<br>
+                                            2. Pilih travel yang terkait dengan pengaduan<br>
+                                            3. Jelaskan detail hal yang diadukan<br>
+                                            4. Lampirkan bukti pendukung (opsional)<br>
+                                            5. Klik tombol "Kirim Pengaduan"
+                                        </small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <strong>Kontak Darurat:</strong><br>
+                                        <small class="text-muted">
+                                            <i class="bi bi-telephone me-1"></i>0370-123456<br>
+                                            <i class="bi bi-envelope me-1"></i>ntb.kemenag@go.id<br>
+                                            <i class="bi bi-geo-alt me-1"></i>Jl. Udayana No.6, Mataram
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <!-- End Stats Item -->
+                    <!-- End Icon Box -->
+
+
+
+                    <!-- Panduan Section -->
+                    <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
+                        <div class="icon-box">
+                            <i class="bi bi-book"></i>
+                            <h3>Panduan Penggunaan</h3>
+                            <p>
+                                Pelajari cara menggunakan sistem PHU dengan panduan lengkap untuk setiap fitur yang tersedia.
+                            </p>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panduanCollapse">
+                                    Lihat Panduan <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                            <div class="collapse mt-3" id="panduanCollapse">
+                                <div class="card card-body border-0 bg-light">
+                                    <div class="mb-2">
+                                        <strong>Fitur Utama:</strong><br>
+                                        <small class="text-muted">
+                                            • Jadwal Keberangkatan: Lihat kalender keberangkatan<br>
+                                            • Pengaduan: Ajukan keluhan terkait layanan<br>
+                                            • Informasi Travel: Data travel berizin<br>
+                                            • Statistik: Data terkini keberangkatan
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End Icon Box -->
                 </div>
             </div>
         </section>
-        <!-- /Stats Section -->
+        <!-- /Informasi Section -->
 
         <!-- Details Section -->
         <section id="details" class="details section">
@@ -1225,22 +1306,45 @@
         }
 
         function openPengaduanModal() {
+            // Show loading state
+            const modalBody = document.getElementById('pengaduanModalBody');
+            modalBody.innerHTML = `
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Memuat data pengaduan...</p>
+                </div>
+            `;
+            
+            // Show modal first
+            const modal = new bootstrap.Modal(document.getElementById('pengaduanModal'));
+            modal.show();
+            
             // Fetch completed pengaduan data
             fetch('/api/pengaduan-completed')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
-                    const modalBody = document.getElementById('pengaduanModalBody');
                     if (data.length > 0) {
                         let html = '<div class="table-responsive"><table class="table table-hover">';
                         html += '<thead class="table-dark"><tr><th>No</th><th>Nama Pengadu</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
                         
                         data.forEach((item, index) => {
+                            const travelName = item.travel ? item.travel.Penyelenggara : 'Tidak diketahui';
+                            const halAduan = item.hal_aduan ? (item.hal_aduan.length > 50 ? item.hal_aduan.substring(0, 50) + '...' : item.hal_aduan) : 'Tidak ada detail';
+                            const completedDate = item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : 'Tidak diketahui';
+                            
                             html += `<tr>
                                 <td>${index + 1}</td>
-                                <td><strong>${item.nama_pengadu}</strong></td>
-                                <td><span class="text-primary">${item.travel.Penyelenggara}</span></td>
-                                <td><span class="text-muted">${item.hal_aduan.substring(0, 50)}${item.hal_aduan.length > 50 ? '...' : ''}</span></td>
-                                <td><small class="text-muted">${new Date(item.completed_at).toLocaleDateString('id-ID')}</small></td>
+                                <td><strong>${item.nama_pengadu || 'Tidak diketahui'}</strong></td>
+                                <td><span class="text-primary">${travelName}</span></td>
+                                <td><span class="text-muted">${halAduan}</span></td>
+                                <td><small class="text-muted">${completedDate}</small></td>
                                 <td>
                                     <button type="button" class="btn btn-success btn-sm rounded-pill" 
                                             onclick="downloadPDF(${item.id})">
@@ -1261,13 +1365,19 @@
                             </div>
                         `;
                     }
-                    
-                    const modal = new bootstrap.Modal(document.getElementById('pengaduanModal'));
-                    modal.show();
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Terjadi kesalahan saat mengambil data pengaduan');
+                    modalBody.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                            <h5 class="text-danger mt-3">Terjadi kesalahan</h5>
+                            <p class="text-muted">Gagal memuat data pengaduan. Silakan coba lagi nanti.</p>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="openPengaduanModal()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Coba Lagi
+                            </button>
+                        </div>
+                    `;
                 });
         }
 
