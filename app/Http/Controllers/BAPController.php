@@ -333,41 +333,44 @@ class BAPController extends Controller
 
         $request->validate([
             'status' => 'required|in:pending,diajukan,diproses,diterima',
-            'nomor_surat' => 'nullable|string|max:10',
-            'bulan_surat' => 'nullable|string|max:2',
-            'tahun_surat' => 'nullable|string|max:4',
         ]);
 
         $data = BAP::findOrFail($id);
         $oldStatus = $data->status;
         
-        // Validasi: Jika status diubah ke 'diterima', pastikan status sebelumnya adalah 'diproses' dan nomor surat sudah ada
-        if ($request->status === 'diterima') {
-            if ($oldStatus !== 'diproses') {
-                return redirect()->back()->with('error', 'Status harus diubah ke "diproses" terlebih dahulu sebelum bisa diubah menjadi "diterima".');
-            }
-            if (!$data->nomor_surat) {
-                return redirect()->back()->with('error', 'Status tidak bisa diubah menjadi "diterima" karena nomor surat belum diisi. Silakan ubah ke status "diproses" terlebih dahulu.');
-            }
-        }
-        
         $data->status = $request->status;
         
-        // Jika status berubah menjadi 'diproses' dan data nomor diisi
-        if ($request->status === 'diproses' && $request->filled('nomor_surat')) {
-            // Generate nomor surat lengkap
-            $nomor = str_pad($request->nomor_surat, 3, '0', STR_PAD_LEFT);
-            $bulan = str_pad($request->bulan_surat ?? date('m'), 2, '0', STR_PAD_LEFT);
-            $tahun = $request->tahun_surat ?? date('Y');
+        // Jika status berubah menjadi 'diterima', generate nomor surat otomatis
+        if ($request->status === 'diterima') {
+            // Cari nomor urut terakhir untuk bulan dan tahun saat ini
+            $currentMonth = date('m');
+            $currentYear = date('Y');
             
-            $nomorSuratLengkap = "B-{$nomor}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
+            $lastBAP = BAP::where('status', 'diterima')
+                         ->where('nomor_surat', 'like', "%/{$currentMonth}/{$currentYear}")
+                         ->orderBy('id', 'desc')
+                         ->first();
+            
+            $nextNumber = 1;
+            if ($lastBAP && $lastBAP->nomor_surat) {
+                // Extract nomor dari format B-{nomor}/Kw.18.04/2/Hj.00/{bulan}/{tahun}
+                if (preg_match('/B-(\d+)\/Kw\.18\.04\/2\/Hj\.00\/\d{2}\/\d{4}/', $lastBAP->nomor_surat, $matches)) {
+                    $nextNumber = intval($matches[1]) + 1;
+                }
+            }
+            
+            // Generate nomor surat lengkap
+            $bulan = str_pad($currentMonth, 2, '0', STR_PAD_LEFT);
+            $tahun = $currentYear;
+            
+            $nomorSuratLengkap = "B-{$nextNumber}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
             $data->nomor_surat = $nomorSuratLengkap;
         }
         
         $data->save();
 
         $message = 'Status berhasil diubah dari ' . ucfirst($oldStatus) . ' menjadi ' . ucfirst($request->status);
-        if ($request->status === 'diproses' && $request->filled('nomor_surat')) {
+        if ($request->status === 'diterima') {
             $message .= ' dengan nomor surat: ' . $data->nomor_surat;
         }
 
