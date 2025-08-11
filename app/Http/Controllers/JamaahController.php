@@ -9,7 +9,8 @@ use App\Exports\JamaahHajiExport;
 use Illuminate\Http\Request;
 use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class JamaahController extends Controller
 {
@@ -352,10 +353,20 @@ class JamaahController extends Controller
     {
         $html = $this->generatePDFHTML($data, $isGlobal, $type);
 
-        $pdf = Pdf::loadHTML($html);
-        $pdf->setPaper('A4', 'portrait');
+        $options = new Options();
+        $options->set('isHtml5ParserEnabled', true);
+        $options->set('isPhpEnabled', true);
+        $options->set('isRemoteEnabled', true);
 
-        return $pdf->download($filename);
+        $dompdf = new Dompdf($options);
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+
+        return response($dompdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"'
+        ]);
     }
 
     private function generatePDFHTML($data, $isGlobal, $type)
