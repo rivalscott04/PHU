@@ -20,26 +20,26 @@
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
+                        <table class="table align-items-center mb-0" style="font-size: 12px;">
                             <thead>
                                 <tr class="text-center">
-                                    <th>No.</th>
-                                    <th>Nama</th>
-                                    <th>Jabatan</th>
-                                    <th>PPIU</th>
-                                    <th>Alamat & Hp</th>
-                                    <th>Kab/Kota</th>
-                                    <th>Jumlah Jamaah</th>
-                                    <th>Paket</th>
-                                    <th>Harga</th>
-                                    <th>Status</th>
-                                    <th>Aksi</th>
+                                    <th style="font-size: 12px;">No.</th>
+                                    <th style="font-size: 12px;">Nama</th>
+                                    <th style="font-size: 12px;">Jabatan</th>
+                                    <th style="font-size: 12px;">PPIU</th>
+                                    <th style="font-size: 12px;">Alamat & Hp</th>
+                                    <th style="font-size: 12px;">Kab/Kota</th>
+                                    <th style="font-size: 12px;">Jumlah Jamaah</th>
+                                    <th style="font-size: 12px;">Paket</th>
+                                    <th style="font-size: 12px;">Harga</th>
+                                    <th style="font-size: 12px;">Status</th>
+                                    <th style="font-size: 12px;">Aksi</th>
 
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody style="font-size: 12px;">
                                 @foreach ($data as $item)
-                                    <tr class="text-center">
+                                    <tr class="text-center" style="font-size: 12px;">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->jabatan }}</td>
@@ -48,17 +48,18 @@
                                         <td>{{ $item->kab_kota }}</td>
                                         <td>{{ $item->people }}</td>
                                         <td>{{ $item->package }}</td>
-                                        <td><span>Rp.
+                                        <td style="font-size: 11px;"><span>Rp.
                                             </span>{{ number_format($item->price, 2, ',', '.') }}</td>
-                                        <td>
+                                        <td style="font-size: 11px;">
                                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                                                 <form action="{{ route('bap.updateStatus', $item->id) }}" method="POST" id="statusForm{{ $item->id }}">
                                                     @csrf
                                                     <div class="d-flex flex-column gap-1">
                                                         <select name="status" 
-                                                            class="form-select {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
+                                                            class="form-select form-select-sm {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
                                                                 {{ $item->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
                                                                 {{ $item->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
+                                                            style="font-size: 11px; padding: 2px 4px;"
                                                             onchange="handleStatusChange({{ $item->id }}, this.value)">
                                                             <option value="pending"
                                                                 {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
@@ -78,20 +79,20 @@
                                                 </form>
                                             @else
                                                 <div>
-                                                    <div>{{ ucfirst($item->status) }}</div>
+                                                    <div style="font-size: 11px;">{{ ucfirst($item->status) }}</div>
                                                     @if($item->nomor_surat)
-                                                        <small class="text-muted">{{ $item->nomor_surat }}</small>
+                                                        <small class="text-muted" style="font-size: 9px;">{{ $item->nomor_surat }}</small>
                                                     @endif
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="fs-4 font-weight-bold">
+                                        <td style="font-size: 12px;">
                                             @if($item->status === 'diterima')
                                                 <a href="{{ route('cetak.bap', $item->id) }}" target="_blank" title="Cetak BAP"><i
-                                                        class="bx bx-printer ms-2 text-success"></i></a>
+                                                        class="bx bx-printer ms-2 text-success" style="font-size: 16px;"></i></a>
                                             @endif
                                             <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
-                                                    class="bx bx-info-circle"></i></a>
+                                                    class="bx bx-info-circle" style="font-size: 16px;"></i></a>
                                         </td>
                                     </tr>
                                 @endforeach
