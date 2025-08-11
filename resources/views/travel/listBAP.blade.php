@@ -74,7 +74,7 @@
                                                                 {{ $item->status == 'diterima' ? 'selected' : '' }}>Diterima
                                                             </option>
                                                         </select>
-                                                        @if($item->nomor_surat)
+                                                        @if($item->status === 'diterima' && $item->nomor_surat)
                                                             <small class="text-muted" style="font-size: 9px;">{{ $item->nomor_surat }}</small>
                                                         @endif
                                                     </div>
@@ -82,7 +82,7 @@
                                             @else
                                                 <div>
                                                     <div style="font-size: 11px;">{{ ucfirst($item->status) }}</div>
-                                                    @if($item->nomor_surat)
+                                                    @if($item->status === 'diterima' && $item->nomor_surat)
                                                         <small class="text-muted" style="font-size: 9px;">{{ $item->nomor_surat }}</small>
                                                     @endif
                                                 </div>

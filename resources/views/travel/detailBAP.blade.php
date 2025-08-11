@@ -177,7 +177,7 @@
                                         <option value="diterima" {{ $data->status == 'diterima' ? 'selected' : '' }}>Diterima
                                         </option>
                                     </select>
-                                    @if($data->nomor_surat)
+                                    @if($data->status === 'diterima' && $data->nomor_surat)
                                         <small class="text-muted mt-1 d-block">{{ $data->nomor_surat }}</small>
                                     @endif
                                 </div>
