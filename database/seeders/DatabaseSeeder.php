@@ -18,11 +18,10 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             BAPSeeder::class,
             CabangTravelSeeder::class,
-            JamaahHajiKhusus::class,
+            JamaahHajiKhususSeeder::class,
             JamaahUmrahSeeder::class,
             KabupatenSeeder::class,
             TravelCompanySeeder::class,
-            CabangTravelSeeder::class,
             TravelUserSeeder::class,
             UpdateTravelCapabilitiesSeeder::class,
         ]);
