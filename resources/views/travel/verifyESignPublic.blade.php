@@ -51,6 +51,18 @@
         .info-table tr:nth-child(even) {
             background: #e9ecef;
         }
+        /* Mobile adjustments */
+        @media (max-width: 575.98px) {
+            .header-logo { padding: 1.25rem; }
+            .verification-icon { font-size: 2.75rem; }
+            .card-body { padding: 1rem !important; }
+            #qrScanner { height: 220px !important; }
+            .modal-dialog { margin: 0.5rem; }
+            .modal-lg { --bs-modal-width: 95vw; }
+            .status-badge { display: inline-block; width: 100%; margin-bottom: 0.5rem; }
+            .table-responsive { -webkit-overflow-scrolling: touch; }
+            .info-table td { padding: 0.5rem; word-break: break-word; }
+        }
     </style>
 </head>
 <body>
@@ -124,7 +136,7 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div id="modalResultContent"></div>
+                    <div id="modalResultContent" class="table-responsive"></div>
                 </div>
             </div>
         </div>
@@ -227,47 +239,51 @@
 
             if (result.success && result.data) {
                 html += `
-                    <div class="row">
-                        <div class="col-md-6">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6">
                             <div class="result-card card mb-3">
                                 <div class="card-header bg-primary text-white">
                                     <h6 class="mb-0"><i class="bx bx-file me-2"></i>Informasi Dokumen</h6>
                                 </div>
                                 <div class="card-body">
-                                    <table class="table table-sm info-table">
+                                    <div class="table-responsive">
+                                    <table class="table table-sm info-table mb-0">
                                         <tr><td><strong>Jenis Dokumen</strong></td><td>: ${result.data.jenis_dokumen || 'Berita Acara Pelaporan (BAP)'}</td></tr>
                                         <tr><td><strong>Nomor Surat</strong></td><td>: ${result.data.nomor_surat}</td></tr>
                                         <tr><td><strong>Nama Travel</strong></td><td>: ${result.data.nama_travel}</td></tr>
                                         <tr><td><strong>Status Dokumen</strong></td><td>: ${result.data.status_dokumen}</td></tr>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-12 col-md-6">
                             <div class="result-card card mb-3">
                                 <div class="card-header bg-info text-white">
                                     <h6 class="mb-0"><i class="bx bx-user me-2"></i>Informasi Petugas</h6>
                                 </div>
                                 <div class="card-body">
-                                    <table class="table table-sm info-table">
+                                    <div class="table-responsive">
+                                    <table class="table table-sm info-table mb-0">
                                         <tr><td><strong>Nama Petugas</strong></td><td>: ${result.data.nama_petugas}</td></tr>
                                         <tr><td><strong>Jabatan</strong></td><td>: ${result.data.jabatan_petugas}</td></tr>
                                         <tr><td><strong>Tanggal Dibuat</strong></td><td>: ${result.data.tanggal_dibuat}</td></tr>
                                         <tr><td><strong>Token</strong></td><td>: <code class="bg-light px-2 py-1">${result.data.token}</code></td></tr>
                                     </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="text-center">
-                        <div class="row justify-content-center">
-                            <div class="col-md-6">
+                        <div class="row justify-content-center g-2">
+                            <div class="col-12 col-md-6">
                                 <span class="badge status-badge bg-${result.hash_valid ? 'success' : 'danger'}">
                                     <i class="bx ${result.hash_valid ? 'bx-check' : 'bx-x'} me-1"></i>
                                     ${result.hash_valid ? 'Tanda Tangan Valid' : 'Tanda Tangan Tidak Valid'}
                                 </span>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-12 col-md-6">
                                 <span class="badge status-badge bg-${result.dokumen_valid ? 'success' : 'warning'}">
                                     <i class="bx ${result.dokumen_valid ? 'bx-check' : 'bx-error'} me-1"></i>
                                     ${result.dokumen_valid ? 'Dokumen Aktif' : 'Dokumen Tidak Aktif'}
