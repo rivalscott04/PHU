@@ -487,7 +487,8 @@ class JamaahController extends Controller
                 <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
                     KANTOR WILAYAH KEMENTERIAN AGAMA<br>
                     PROVINSI NUSA TENGGARA BARAT<br></strong>
-                <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
+                <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram<br>
+                    Telp. (0370) 622317 Faksimili (0370) 622317<br>
                     Website : www.ntb.Kemenag.go.id
                 </span>
             </div>
