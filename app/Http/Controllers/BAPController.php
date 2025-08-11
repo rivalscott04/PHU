@@ -81,8 +81,8 @@ class BAPController extends Controller
                 // Generate token untuk verifikasi manual
                 $token = strtoupper(substr(hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname), 0, 8));
                 
-                // Generate QR Code dengan URL relative untuk verifikasi
-                $verificationUrl = '/verify-e-sign?token=' . $token . '&bap_id=' . $data->id;
+                // Generate QR Code dengan URL lengkap untuk verifikasi
+                $verificationUrl = route('verify-e-sign.with-params', ['token' => $token, 'bap_id' => $data->id]);
                 
                 $qrCode = \Endroid\QrCode\QrCode::create($verificationUrl)
                 ->setSize(300)
@@ -534,12 +534,20 @@ class BAPController extends Controller
         ]);
     }
 
-    public function showVerifyQR(Request $request)
+    public function showVerifyQR(Request $request, $token = null, $bapId = null)
     {
+        // Jika parameter dari URL path
+        if ($token && $bapId) {
+            $result = $this->verifyBAPByToken($token);
+            $verificationData = json_decode($result->getContent(), true);
+            
+            return view('travel.verifyESign', compact('verificationData', 'token', 'bapId'));
+        }
+        
+        // Jika parameter dari query string (untuk kompatibilitas)
         $token = $request->get('token');
         $bapId = $request->get('bap_id');
         
-        // Jika ada token dan bap_id, langsung verifikasi
         if ($token && $bapId) {
             $result = $this->verifyBAPByToken($token);
             $verificationData = json_decode($result->getContent(), true);
