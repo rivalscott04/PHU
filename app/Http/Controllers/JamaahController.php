@@ -417,7 +417,8 @@ class JamaahController extends Controller
         }
 
         .logo {
-            width: 60px;
+            height: 90px;
+            width: auto;
             position: absolute;
             left: 15mm;
             top: 15mm;
