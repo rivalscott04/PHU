@@ -31,6 +31,10 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
             $flattenedData = collect();
             
             foreach ($this->data as $travelId => $jamaahGroup) {
+                if ($jamaahGroup->isEmpty()) {
+                    continue;
+                }
+                
                 $travel = $jamaahGroup->first()->travel;
                 
                 // Add separator row for travel
@@ -110,11 +114,11 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
                     'Kabupaten: ' . $row['kabupaten'],
                     'Total Jamaah: ' . $row['total_jamaah'],
                     'Status: ' . $row['status'],
-                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
+                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
                 ];
             } else if (isset($row['empty']) && $row['empty']) {
                 // Empty row
-                return array_fill(0, 29, '');
+                return array_fill(0, 30, '');
             } else {
                 // Jamaah data
                 $jamaah = $row['jamaah'];
@@ -130,29 +134,29 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
     {
         return [
             '', // No will be handled by Excel
-            $jamaah->nama_lengkap,
-            $jamaah->no_ktp,
-            $jamaah->tempat_lahir,
+            $jamaah->nama_lengkap ?? '',
+            $jamaah->no_ktp ?? '',
+            $jamaah->tempat_lahir ?? '',
             $jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '',
             $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
-            $jamaah->golongan_darah,
-            $jamaah->status_pernikahan,
-            $jamaah->alamat,
-            $jamaah->kota,
-            $jamaah->provinsi,
-            $jamaah->kode_pos,
-            $jamaah->no_hp,
-            $jamaah->email,
-            $jamaah->nama_ayah,
-            $jamaah->pekerjaan,
-            $jamaah->pendidikan_terakhir,
-            $jamaah->pergi_haji,
-            $jamaah->alergi,
-            $jamaah->catatan_khusus,
-            $jamaah->no_paspor,
+            $jamaah->golongan_darah ?? '',
+            $jamaah->status_pernikahan ?? '',
+            $jamaah->alamat ?? '',
+            $jamaah->kota ?? '',
+            $jamaah->provinsi ?? '',
+            $jamaah->kode_pos ?? '',
+            $jamaah->no_hp ?? '',
+            $jamaah->email ?? '',
+            $jamaah->nama_ayah ?? '',
+            $jamaah->pekerjaan ?? '',
+            $jamaah->pendidikan_terakhir ?? '',
+            $jamaah->pergi_haji ?? '',
+            $jamaah->alergi ?? '',
+            $jamaah->catatan_khusus ?? '',
+            $jamaah->no_paspor ?? '',
             $jamaah->tanggal_berlaku_paspor ? $jamaah->tanggal_berlaku_paspor->format('d/m/Y') : '',
-            $jamaah->nomor_porsi,
-            $jamaah->tahun_pendaftaran,
+            $jamaah->nomor_porsi ?? '',
+            $jamaah->tahun_pendaftaran ?? '',
             $jamaah->getBuktiSetorStatusText(),
             $jamaah->travel->Penyelenggara ?? 'Tidak Diketahui',
             $jamaah->travel->kab_kota ?? 'Tidak Diketahui',
@@ -167,7 +171,7 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
         $highestRow = $sheet->getHighestRow();
         
         // Header style
-        $sheet->getStyle('A1:AC1')->applyFromArray([
+        $sheet->getStyle('A1:AD1')->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF']
@@ -190,7 +194,7 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
 
         // Apply styles to all data rows
         for ($row = 2; $row <= $highestRow; $row++) {
-            $sheet->getStyle("A{$row}:AC{$row}")->applyFromArray([
+            $sheet->getStyle("A{$row}:AD{$row}")->applyFromArray([
                 'borders' => [
                     'allBorders' => [
                         'borderStyle' => Border::BORDER_THIN,
@@ -205,7 +209,7 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
             $currentRow = 2;
             foreach ($this->data as $travelId => $jamaahGroup) {
                 // Style separator row
-                $sheet->getStyle("A{$currentRow}:AC{$currentRow}")->applyFromArray([
+                $sheet->getStyle("A{$currentRow}:AD{$currentRow}")->applyFromArray([
                     'font' => [
                         'bold' => true,
                         'color' => ['rgb' => 'FFFFFF']

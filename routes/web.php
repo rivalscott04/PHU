@@ -139,9 +139,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
-    Route::post('bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
-    Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
-Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');
@@ -219,5 +216,8 @@ Route::get('/api/provinces', [ApiController::class, 'getProvinces'])->name('api.
 Route::get('/api/cities', [ApiController::class, 'getCities'])->name('api.cities');
 Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.districts');
 
-// Public verification route (no authentication required)
+// Public verification routes (no authentication required)
 Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi');
+Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
+Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
+Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');

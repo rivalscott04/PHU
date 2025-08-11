@@ -332,6 +332,10 @@ class JamaahHajiKhususController extends Controller
                                      ->with('travel')
                                      ->get();
             
+            if ($jamaah->isEmpty()) {
+                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk travel ini.');
+            }
+            
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_khusus_travel.xlsx';
             
@@ -341,6 +345,10 @@ class JamaahHajiKhususController extends Controller
             $jamaah = JamaahHajiKhusus::with('travel')
                                      ->get()
                                      ->groupBy('travel_id');
+            
+            if ($jamaah->isEmpty()) {
+                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk diexport.');
+            }
             
             $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.xlsx';
             
@@ -359,6 +367,10 @@ class JamaahHajiKhususController extends Controller
                                      ->with('travel')
                                      ->get();
             
+            if ($jamaah->isEmpty()) {
+                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk travel ini.');
+            }
+            
             $travel = $jamaah->first()->travel ?? null;
             $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_khusus_travel.pdf';
             
@@ -368,6 +380,10 @@ class JamaahHajiKhususController extends Controller
             $jamaah = JamaahHajiKhusus::with('travel')
                                      ->get()
                                      ->groupBy('travel_id');
+            
+            if ($jamaah->isEmpty()) {
+                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk diexport.');
+            }
             
             $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.pdf';
             
@@ -418,6 +434,10 @@ class JamaahHajiKhususController extends Controller
 
         if ($isGlobal) {
             foreach ($data as $travelId => $jamaahGroup) {
+                if ($jamaahGroup->isEmpty()) {
+                    continue;
+                }
+                
                 $travel = $jamaahGroup->first()->travel;
                 
                 $html .= '
@@ -426,7 +446,7 @@ class JamaahHajiKhususController extends Controller
                         <td colspan="8">PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
                         <td colspan="8">Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . '</td>
                         <td colspan="8">Total: ' . $jamaahGroup->count() . ' Jamaah</td>
-                        <td colspan="5">Status: ' . ($travel->Status ?? 'N/A') . '</td>
+                        <td colspan="6">Status: ' . ($travel->Status ?? 'N/A') . '</td>
                     </tr>
                     <tr>
                         <th>No</th>
@@ -463,11 +483,11 @@ class JamaahHajiKhususController extends Controller
                     $html .= '
                     <tr>
                         <td>' . ($index + 1) . '</td>
-                        <td>' . $jamaah->nama_lengkap . '</td>
-                        <td>' . $jamaah->no_ktp . '</td>
+                        <td>' . ($jamaah->nama_lengkap ?? '') . '</td>
+                        <td>' . ($jamaah->no_ktp ?? '') . '</td>
                         <td>' . ($jamaah->jenis_kelamin === 'L' ? 'L' : 'P') . '</td>
-                        <td>' . $jamaah->alamat . '</td>
-                        <td>' . $jamaah->no_hp . '</td>
+                        <td>' . ($jamaah->alamat ?? '') . '</td>
+                        <td>' . ($jamaah->no_hp ?? '') . '</td>
                         <td>' . ($jamaah->no_paspor ?: '-') . '</td>
                         <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
                         <td>' . $jamaah->getBuktiSetorStatusText() . '</td>
@@ -476,20 +496,20 @@ class JamaahHajiKhususController extends Controller
                         <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
                         <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
                         <td>' . ($jamaah->created_at ? $jamaah->created_at->format('d/m/Y') : '-') . '</td>
-                        <td>' . $jamaah->pekerjaan . '</td>
-                        <td>' . $jamaah->pendidikan_terakhir . '</td>
+                        <td>' . ($jamaah->pekerjaan ?? '') . '</td>
+                        <td>' . ($jamaah->pendidikan_terakhir ?? '') . '</td>
                         <td>' . ($jamaah->pergi_haji ?: '-') . '</td>
                         <td>' . ($jamaah->alergi ?: '-') . '</td>
                         <td>' . ($jamaah->catatan_khusus ?: '-') . '</td>
-                        <td>' . $jamaah->nama_ayah . '</td>
+                        <td>' . ($jamaah->nama_ayah ?? '') . '</td>
                         <td>' . ($jamaah->email ?: '-') . '</td>
-                        <td>' . $jamaah->golongan_darah . '</td>
-                        <td>' . $jamaah->status_pernikahan . '</td>
-                        <td>' . $jamaah->tempat_lahir . '</td>
+                        <td>' . ($jamaah->golongan_darah ?? '') . '</td>
+                        <td>' . ($jamaah->status_pernikahan ?? '') . '</td>
+                        <td>' . ($jamaah->tempat_lahir ?? '') . '</td>
                         <td>' . ($jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '-') . '</td>
-                        <td>' . $jamaah->kota . '</td>
-                        <td>' . $jamaah->provinsi . '</td>
-                        <td>' . $jamaah->kode_pos . '</td>
+                        <td>' . ($jamaah->kota ?? '') . '</td>
+                        <td>' . ($jamaah->provinsi ?? '') . '</td>
+                        <td>' . ($jamaah->kode_pos ?? '') . '</td>
                     </tr>';
                 }
                 
@@ -533,11 +553,11 @@ class JamaahHajiKhususController extends Controller
                 $html .= '
                 <tr>
                     <td>' . ($index + 1) . '</td>
-                    <td>' . $jamaah->nama_lengkap . '</td>
-                    <td>' . $jamaah->no_ktp . '</td>
+                    <td>' . ($jamaah->nama_lengkap ?? '') . '</td>
+                    <td>' . ($jamaah->no_ktp ?? '') . '</td>
                     <td>' . ($jamaah->jenis_kelamin === 'L' ? 'L' : 'P') . '</td>
-                    <td>' . $jamaah->alamat . '</td>
-                    <td>' . $jamaah->no_hp . '</td>
+                    <td>' . ($jamaah->alamat ?? '') . '</td>
+                    <td>' . ($jamaah->no_hp ?? '') . '</td>
                     <td>' . ($jamaah->no_paspor ?: '-') . '</td>
                     <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
                     <td>' . $jamaah->getBuktiSetorStatusText() . '</td>
@@ -546,20 +566,20 @@ class JamaahHajiKhususController extends Controller
                     <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
                     <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
                     <td>' . ($jamaah->created_at ? $jamaah->created_at->format('d/m/Y') : '-') . '</td>
-                    <td>' . $jamaah->pekerjaan . '</td>
-                    <td>' . $jamaah->pendidikan_terakhir . '</td>
+                    <td>' . ($jamaah->pekerjaan ?? '') . '</td>
+                    <td>' . ($jamaah->pendidikan_terakhir ?? '') . '</td>
                     <td>' . ($jamaah->pergi_haji ?: '-') . '</td>
                     <td>' . ($jamaah->alergi ?: '-') . '</td>
                     <td>' . ($jamaah->catatan_khusus ?: '-') . '</td>
-                    <td>' . $jamaah->nama_ayah . '</td>
+                    <td>' . ($jamaah->nama_ayah ?? '') . '</td>
                     <td>' . ($jamaah->email ?: '-') . '</td>
-                    <td>' . $jamaah->golongan_darah . '</td>
-                    <td>' . $jamaah->status_pernikahan . '</td>
-                    <td>' . $jamaah->tempat_lahir . '</td>
+                    <td>' . ($jamaah->golongan_darah ?? '') . '</td>
+                    <td>' . ($jamaah->status_pernikahan ?? '') . '</td>
+                    <td>' . ($jamaah->tempat_lahir ?? '') . '</td>
                     <td>' . ($jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '-') . '</td>
-                    <td>' . $jamaah->kota . '</td>
-                    <td>' . $jamaah->provinsi . '</td>
-                    <td>' . $jamaah->kode_pos . '</td>
+                    <td>' . ($jamaah->kota ?? '') . '</td>
+                    <td>' . ($jamaah->provinsi ?? '') . '</td>
+                    <td>' . ($jamaah->kode_pos ?? '') . '</td>
                 </tr>';
             }
             
