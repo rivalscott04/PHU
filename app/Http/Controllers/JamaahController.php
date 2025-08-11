@@ -440,7 +440,7 @@ class JamaahController extends Controller
         }
 
         .content {
-            margin: 2mm 0 20mm 0;
+            margin: 2mm 0;
             font-size: 11pt;
             line-height: 1.2;
         }
@@ -470,14 +470,11 @@ class JamaahController extends Controller
         }
 
         .footer {
-            position: fixed;
-            bottom: 10mm;
-            left: 0;
-            right: 0;
+            margin-top: 10mm;
             text-align: center;
             font-size: 10pt;
-            background: white;
-            padding: 2mm 0;
+            border-top: 1px solid #ccc;
+            padding-top: 5mm;
         }
 
         .page-break {
