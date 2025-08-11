@@ -38,13 +38,13 @@ class BAPSeeder extends Seeder
             ]
         );
 
-        // Create sample BAP data
+        // Create sample BAP data dengan kabupaten/kota NTB
         BAP::create([
             'name' => 'Ahmad Fauzi',
             'jabatan' => 'Direktur',
             'ppiuname' => 'PT. Travel Umrah Sejahtera',
-            'address_phone' => 'Jl. Sudirman No. 123, Jakarta - 081234567890',
-            'kab_kota' => 'Jakarta Pusat',
+            'address_phone' => 'Jl. Udayana No. 123, Mataram - 081234567890',
+            'kab_kota' => 'Kota Mataram',
             'people' => 25,
             'package' => 'Paket Umrah Reguler',
             'price' => 25000000,
@@ -60,8 +60,8 @@ class BAPSeeder extends Seeder
             'name' => 'Siti Nurhaliza',
             'jabatan' => 'Manager',
             'ppiuname' => 'PT. Haji Umrah Berkah',
-            'address_phone' => 'Jl. Thamrin No. 456, Jakarta - 081234567891',
-            'kab_kota' => 'Jakarta Selatan',
+            'address_phone' => 'Jl. Pejanggik No. 456, Mataram - 081234567891',
+            'kab_kota' => 'Kota Mataram',
             'people' => 30,
             'package' => 'Paket Umrah Plus',
             'price' => 30000000,
@@ -77,8 +77,8 @@ class BAPSeeder extends Seeder
             'name' => 'Muhammad Rizki',
             'jabatan' => 'CEO',
             'ppiuname' => 'PT. Travel Haji Indonesia',
-            'address_phone' => 'Jl. Gatot Subroto No. 789, Jakarta - 081234567892',
-            'kab_kota' => 'Jakarta Barat',
+            'address_phone' => 'Jl. Selaparang No. 789, Mataram - 081234567892',
+            'kab_kota' => 'Kota Mataram',
             'people' => 40,
             'package' => 'Paket Haji Khusus',
             'price' => 45000000,
@@ -95,8 +95,8 @@ class BAPSeeder extends Seeder
             'name' => 'Budi Santoso',
             'jabatan' => 'Manager',
             'ppiuname' => 'PT. Umrah Berkah Indonesia',
-            'address_phone' => 'Jl. Sudirman No. 789, Jakarta - 081234567894',
-            'kab_kota' => 'Jakarta Pusat',
+            'address_phone' => 'Jl. Raya Senggigi No. 789, Lombok Barat - 081234567894',
+            'kab_kota' => 'Lombok Barat',
             'people' => 28,
             'package' => 'Paket Umrah Reguler',
             'price' => 28000000,
@@ -113,8 +113,8 @@ class BAPSeeder extends Seeder
             'name' => 'Ahmad Santoso',
             'jabatan' => 'Manager',
             'ppiuname' => 'PT. Umrah Berkah Sejahtera',
-            'address_phone' => 'Jl. Sudirman No. 456, Jakarta - 081234567893',
-            'kab_kota' => 'Jakarta Pusat',
+            'address_phone' => 'Jl. Raya Praya No. 456, Lombok Tengah - 081234567893',
+            'kab_kota' => 'Lombok Tengah',
             'people' => 35,
             'package' => 'Paket Umrah Premium',
             'price' => 35000000,
@@ -125,6 +125,58 @@ class BAPSeeder extends Seeder
             'user_id' => $travelUser->id,
             'status' => 'diterima',
             'nomor_surat' => 'B-002/Kw.18.04/2/Hj.00/08/2025'
+        ]);
+
+        BAP::create([
+            'name' => 'Ahmad Suryadi',
+            'jabatan' => 'Direktur',
+            'ppiuname' => 'PT. Lombok Barat Travel',
+            'address_phone' => 'Jl. Raya Gerung No. 123, Lombok Barat - 0370-123456',
+            'kab_kota' => 'Lombok Barat',
+            'people' => 5,
+            'package' => 'Paket Umrah Reguler',
+            'price' => 20000000,
+            'datetime' => '2025-08-15',
+            'airlines' => 'Lion Air',
+            'returndate' => '2025-08-25',
+            'airlines2' => 'Lion Air',
+            'user_id' => $travelUser->id,
+            'status' => 'diproses',
+            'nomor_surat' => 'B-004/Kw.18.04/2/Hj.00/08/2025'
+        ]);
+
+        BAP::create([
+            'name' => 'Siti Rahma',
+            'jabatan' => 'Manager',
+            'ppiuname' => 'PT. Lombok Timur Travel',
+            'address_phone' => 'Jl. Raya Selong No. 456, Lombok Timur - 0376-123456',
+            'kab_kota' => 'Lombok Timur',
+            'people' => 15,
+            'package' => 'Paket Umrah Plus',
+            'price' => 32000000,
+            'datetime' => '2025-09-10',
+            'airlines' => 'Saudi Airlines',
+            'returndate' => '2025-09-20',
+            'airlines2' => 'Saudi Airlines',
+            'user_id' => $travelUser->id,
+            'status' => 'diajukan'
+        ]);
+
+        BAP::create([
+            'name' => 'Budi Prasetyo',
+            'jabatan' => 'CEO',
+            'ppiuname' => 'PT. Sumbawa Travel',
+            'address_phone' => 'Jl. Raya Sumbawa Besar No. 789, Sumbawa - 0371-123456',
+            'kab_kota' => 'Sumbawa',
+            'people' => 20,
+            'package' => 'Paket Umrah Reguler',
+            'price' => 26000000,
+            'datetime' => '2025-10-05',
+            'airlines' => 'Garuda Indonesia',
+            'returndate' => '2025-10-15',
+            'airlines2' => 'Garuda Indonesia',
+            'user_id' => $travelUser->id,
+            'status' => 'pending'
         ]);
     }
 }
