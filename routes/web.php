@@ -220,7 +220,5 @@ Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.
 Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi');
 Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
 Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
-// Backward compatibility: redirect old public path to the canonical one
-Route::get('/public/verify-e-sign', function () {
-    return redirect()->to('/verify-e-sign?' . http_build_query(request()->query()));
-})->name('verify-e-sign.public');
+// Public verification for BAP - direct access without redirect
+Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');

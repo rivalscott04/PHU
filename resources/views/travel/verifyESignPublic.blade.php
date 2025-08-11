@@ -181,8 +181,7 @@
             fetch('/bap/verify-qr', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ token: token })
             })
@@ -211,8 +210,7 @@
             fetch('/bap/verify-qr', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({ qr_data: qrData })
             })

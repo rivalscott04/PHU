@@ -81,9 +81,9 @@ class BAPController extends Controller
                 // Generate token untuk verifikasi manual
                 $token = strtoupper(substr(hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname), 0, 8));
                 
-                // Generate QR Code dengan URL lengkap ke halaman verifikasi publik yang benar
+                // Generate QR Code dengan URL lengkap untuk verifikasi public tanpa navbar
                 $baseUrl = request()->getSchemeAndHttpHost();
-                $verificationUrl = $baseUrl . '/verify-e-sign?token=' . $token . '&bap_id=' . $data->id;
+                $verificationUrl = $baseUrl . '/public/verify-e-sign?token=' . $token . '&bap_id=' . $data->id;
                 
                 $qrCode = \Endroid\QrCode\QrCode::create($verificationUrl)
                 ->setSize(300)
