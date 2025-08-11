@@ -171,7 +171,10 @@ class TravelCompanySeeder extends Seeder
         ];
 
         foreach ($travelCompanies as $companyData) {
-            $travelCompany = TravelCompany::create($companyData);
+            $travelCompany = TravelCompany::updateOrCreate(
+                ['Penyelenggara' => $companyData['Penyelenggara']],
+                $companyData
+            );
             
             // Set default capabilities based on status
             $travelCompany->setDefaultCapabilities();

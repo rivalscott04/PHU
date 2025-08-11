@@ -38,7 +38,10 @@ class AdminSeeder extends Seeder
         ];
 
         foreach ($admins as $admin) {
-            DB::table('users')->insert($admin);
+            DB::table('users')->updateOrInsert(
+                ['email' => $admin['email']],
+                $admin
+            );
         }
 
         $this->command->info('Admin users seeded successfully!');

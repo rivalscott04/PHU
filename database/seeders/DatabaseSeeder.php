@@ -16,14 +16,14 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            BAPSeeder::class,
-            CabangTravelSeeder::class,
-            JamaahHajiKhususSeeder::class,
-            JamaahUmrahSeeder::class,
-            KabupatenSeeder::class,
             TravelCompanySeeder::class,
-            TravelUserSeeder::class,
             UpdateTravelCapabilitiesSeeder::class,
+            KabupatenSeeder::class,
+            TravelUserSeeder::class,
+            CabangTravelSeeder::class,
+            BAPSeeder::class,
+            JamaahUmrahSeeder::class,
+            JamaahHajiKhususSeeder::class,
         ]);
     }
 }
