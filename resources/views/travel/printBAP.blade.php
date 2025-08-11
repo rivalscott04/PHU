@@ -39,7 +39,7 @@
             text-align: center;
             font-size: 12pt;
             line-height: 1.2;
-            margin-bottom: 5mm;
+            margin-bottom: 2mm;
         }
 
         .logo {
@@ -140,11 +140,9 @@
                     KANTOR WILAYAH KEMENTERIAN AGAMA<br>
                     PROVINSI NUSA TENGGARA BARAT<br></strong>
                 <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
-                    Website : www.ntb.Kemenag.go.id
-                </span>
+                    Website : www.ntb.Kemenag.go.id</span>
             </div>
         </div>
-
         <div class="title">
             BERITA ACARA<br>
             PELAPORAN PEMBERANGKATAN JAMAAH UMROH<br>
@@ -229,12 +227,12 @@
             <div class="signature">
                 Petugas Satgas Umrah<br>
                 Kanwil Kementerian Agama Prov. NTB<br><br>
-                            @if($data->status === 'diterima' && $qrCodeData)
-                <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital" style="width: 80px; height: 80px; margin: 0 auto; display: block;">
+                @if($data->status === 'diterima' && $qrCodeData)
+                <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital" style="width: 120px; height: 120px; margin: 0 auto; display: block;">
                 <small style="font-size: 8pt; display: block; margin-top: 5px; text-align: center;">Token: {{ $token ?? 'N/A' }}</small>
-            @else
-                <span class="input-line" style="width:80px;display:inline-block"></span>
-            @endif
+                @else
+                <span class="input-line" style="width:120px;height:120px;display:inline-block"></span>
+                @endif
             </div>
             <div class="signature" style="margin-left: 50px;">
                 Petugas PPIU<br>

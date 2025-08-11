@@ -81,24 +81,12 @@ class BAPController extends Controller
                 // Generate token untuk verifikasi manual
                 $token = strtoupper(substr(hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname), 0, 8));
                 
-                // Generate QR Code dengan data verifikasi yang mengarah ke halaman verifikasi
-                $qrData = [
-                    'type' => 'bap_verification',
-                    'bap_id' => $data->id,
-                    'nomor_surat' => $data->nomor_surat,
-                    'nama_travel' => $data->ppiuname,
-                    'nama_petugas' => 'Bidang PHU Kanwil NTB',
-                    'jabatan_petugas' => 'Verifikator',
-                    'tanggal_dibuat' => now()->format('Y-m-d H:i:s'),
-                    'status_dokumen' => $data->status,
-                    'verifikasi_url' => '/verify-e-sign',
-                    'token' => $token,
-                    'hash_verifikasi' => hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname)
-                ];
+                // Generate QR Code dengan URL relative untuk verifikasi
+                $verificationUrl = '/verify-e-sign?token=' . $token . '&bap_id=' . $data->id;
                 
-                $qrCode = \Endroid\QrCode\QrCode::create(json_encode($qrData))
-                ->setSize(120)
-                ->setMargin(0);
+                $qrCode = \Endroid\QrCode\QrCode::create($verificationUrl)
+                ->setSize(300)
+                ->setMargin(10);
 
                 $writer = new \Endroid\QrCode\Writer\PngWriter();
                 $result = $writer->write($qrCode);
@@ -546,8 +534,19 @@ class BAPController extends Controller
         ]);
     }
 
-    public function showVerifyQR()
+    public function showVerifyQR(Request $request)
     {
+        $token = $request->get('token');
+        $bapId = $request->get('bap_id');
+        
+        // Jika ada token dan bap_id, langsung verifikasi
+        if ($token && $bapId) {
+            $result = $this->verifyBAPByToken($token);
+            $verificationData = json_decode($result->getContent(), true);
+            
+            return view('travel.verifyESign', compact('verificationData', 'token', 'bapId'));
+        }
+        
         return view('travel.verifyESign');
     }
 }

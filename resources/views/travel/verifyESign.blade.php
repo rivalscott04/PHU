@@ -37,7 +37,8 @@
                                 <div class="mb-3">
                                     <label for="tokenInput" class="form-label">Token Verifikasi</label>
                                     <input type="text" id="tokenInput" class="form-control form-control-lg text-center" 
-                                        placeholder="Masukkan token 8 karakter" maxlength="8" style="font-size: 1.2rem; letter-spacing: 2px;">
+                                        placeholder="Masukkan token 8 karakter" maxlength="8" style="font-size: 1.2rem; letter-spacing: 2px;"
+                                        value="{{ $token ?? '' }}">
                                     <small class="text-muted">Contoh: A1B2C3D4</small>
                                 </div>
                                 <div class="text-center">
@@ -82,6 +83,13 @@
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script>
     let html5QrcodeScanner = null;
+    
+    // Auto-verification jika ada parameter URL
+    @if(isset($verificationData) && $verificationData['success'])
+        document.addEventListener('DOMContentLoaded', function() {
+            showVerificationResult(@json($verificationData));
+        });
+    @endif
 
     function verifyToken() {
         const token = document.getElementById('tokenInput').value.trim().toUpperCase();
