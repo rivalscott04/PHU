@@ -440,7 +440,7 @@ class JamaahController extends Controller
         }
 
         .content {
-            margin: 2mm 0;
+            margin: 2mm 0 20mm 0;
             font-size: 11pt;
             line-height: 1.2;
         }
@@ -470,9 +470,14 @@ class JamaahController extends Controller
         }
 
         .footer {
-            margin-top: 10mm;
+            position: fixed;
+            bottom: 10mm;
+            left: 0;
+            right: 0;
             text-align: center;
             font-size: 10pt;
+            background: white;
+            padding: 2mm 0;
         }
 
         .page-break {
@@ -534,7 +539,7 @@ class JamaahController extends Controller
                     </tr>';
                 }
 
-                $html .= '</table><div class="page-break"></div>';
+                $html .= '</table>';
             }
         } else {
             $html .= '
