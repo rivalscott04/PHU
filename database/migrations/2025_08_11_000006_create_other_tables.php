@@ -183,35 +183,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Create failed_jobs table
-        Schema::create('failed_jobs', function (Blueprint $table) {
-            $table->id();
-            $table->string('uuid')->unique();
-            $table->text('connection');
-            $table->text('queue');
-            $table->longText('payload');
-            $table->longText('exception');
-            $table->timestamp('failed_at')->useCurrent();
-        });
-
-        // Create password_reset_tokens table
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        // Create personal_access_tokens table
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
-            $table->timestamps();
-        });
+        // Note: failed_jobs, password_reset_tokens, and personal_access_tokens tables are created by Laravel's default migrations
 
         // Add foreign key constraints
         Schema::table('users', function (Blueprint $table) {
@@ -280,10 +252,7 @@ return new class extends Migration
             $table->dropForeign(['travel_id']);
         });
 
-        // Drop tables
-        Schema::dropIfExists('personal_access_tokens');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('failed_jobs');
+        // Drop tables (excluding Laravel default tables)
         Schema::dropIfExists('sertifikat_settings');
         Schema::dropIfExists('sertifikat');
         Schema::dropIfExists('pengunduran');
