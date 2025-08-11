@@ -357,6 +357,7 @@ class JamaahController extends Controller
         $options->set('isHtml5ParserEnabled', true);
         $options->set('isPhpEnabled', true);
         $options->set('isRemoteEnabled', true);
+        $options->set('chroot', public_path());
 
         $dompdf = new Dompdf($options);
         $dompdf->loadHtml($html);
@@ -373,6 +374,14 @@ class JamaahController extends Controller
     {
         $jenisJamaah = ucfirst($type);
         $title = "DATA JAMAAH {$jenisJamaah}";
+        
+        // Convert logo to base64
+        $logoPath = public_path('images/kemenag.png');
+        $logoBase64 = '';
+        if (file_exists($logoPath)) {
+            $logoData = file_get_contents($logoPath);
+            $logoBase64 = 'data:image/png;base64,' . base64_encode($logoData);
+        }
 
         $html = '<!DOCTYPE html>
 <html lang="id">
@@ -465,7 +474,7 @@ class JamaahController extends Controller
 </head>
 <body>
     <div class="letterhead">
-        <img src="' . public_path('images/kemenag.png') . '" alt="Logo" class="logo">
+        <img src="' . $logoBase64 . '" alt="Logo" class="logo">
         <div class="header">
             <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
                 KANTOR WILAYAH KEMENTERIAN AGAMA<br>
