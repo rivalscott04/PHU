@@ -465,7 +465,7 @@ class JamaahController extends Controller
 </head>
 <body>
     <div class="letterhead">
-        <img src="' . asset('images/kemenag.png') . '" alt="Logo" class="logo">
+        <img src="' . public_path('images/kemenag.png') . '" alt="Logo" class="logo">
         <div class="header">
             <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
                 KANTOR WILAYAH KEMENTERIAN AGAMA<br>
