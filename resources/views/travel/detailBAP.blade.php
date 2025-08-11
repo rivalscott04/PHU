@@ -298,7 +298,7 @@
 
 <!-- Modal for Status Update with Nomor Surat -->
 <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header py-2">
                 <h6 class="modal-title mb-0" id="statusModalLabel" style="font-size: 14px;">Update Status BAP</h6>
@@ -308,14 +308,14 @@
                 <p class="mb-3" style="font-size: 14px;">Untuk mengubah status menjadi "Diproses", silakan isi nomor surat tugas:</p>
                 <div class="row">
                     <div class="col-md-4">
-                        <label for="nomor_surat" class="form-label" style="font-size: 13px; font-weight: 500;">Nomor Surat *</label>
-                        <input type="number" class="form-control form-control-sm" id="nomor_surat" name="nomor_surat" 
-                               placeholder="001" min="1" max="999" required style="font-size: 13px;">
-                        <small class="text-muted" style="font-size: 11px;">Contoh: 001, 002, dst</small>
+                        <label for="nomor_surat" class="form-label" style="font-size: 14px; font-weight: 500;">Nomor Surat *</label>
+                        <input type="number" class="form-control" id="nomor_surat" name="nomor_surat" 
+                               placeholder="001" min="1" max="999" required style="font-size: 14px;">
+                        <small class="text-muted" style="font-size: 12px;">Contoh: 001, 002, dst</small>
                     </div>
                     <div class="col-md-4">
-                        <label for="bulan_surat" class="form-label" style="font-size: 13px; font-weight: 500;">Bulan</label>
-                        <select class="form-select form-select-sm" id="bulan_surat" name="bulan_surat" style="font-size: 13px;">
+                        <label for="bulan_surat" class="form-label" style="font-size: 14px; font-weight: 500;">Bulan</label>
+                        <select class="form-select" id="bulan_surat" name="bulan_surat" style="font-size: 14px;">
                             <option value="01">Januari</option>
                             <option value="02">Februari</option>
                             <option value="03">Maret</option>
@@ -331,20 +331,20 @@
                         </select>
                     </div>
                     <div class="col-md-4">
-                        <label for="tahun_surat" class="form-label" style="font-size: 13px; font-weight: 500;">Tahun</label>
-                        <input type="number" class="form-control form-control-sm" id="tahun_surat" name="tahun_surat" 
-                               value="{{ date('Y') }}" min="2020" max="2030" required style="font-size: 13px;">
+                        <label for="tahun_surat" class="form-label" style="font-size: 14px; font-weight: 500;">Tahun</label>
+                        <input type="number" class="form-control" id="tahun_surat" name="tahun_surat" 
+                               value="{{ date('Y') }}" min="2020" max="2030" required style="font-size: 14px;">
                     </div>
                 </div>
                 <div class="mt-3">
-                    <small class="text-muted" style="font-size: 11px;">
+                    <small class="text-muted" style="font-size: 13px;">
                         Format nomor surat akan menjadi: B-<span id="preview_nomor">001</span>/Kw.18.04/2/Hj.00/<span id="preview_bulan">01</span>/<span id="preview_tahun">{{ date('Y') }}</span>
                     </small>
                 </div>
             </div>
-            <div class="modal-footer py-2">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal" style="font-size: 12px;">Batal</button>
-                <button type="button" class="btn btn-primary btn-sm" onclick="submitStatusWithNomorSurat()" style="font-size: 12px;">Update Status</button>
+            <div class="modal-footer py-3">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="font-size: 14px;">Batal</button>
+                <button type="button" class="btn btn-primary" onclick="submitStatusWithNomorSurat()" style="font-size: 14px;">Update Status</button>
             </div>
         </div>
     </div>
