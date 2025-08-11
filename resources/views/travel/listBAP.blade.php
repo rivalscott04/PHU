@@ -48,18 +48,18 @@
                                         <td>{{ $item->kab_kota }}</td>
                                         <td>{{ $item->people }}</td>
                                         <td>{{ $item->package }}</td>
-                                        <td style="font-size: 11px;"><span>Rp.
+                                        <td><span>Rp.
                                             </span>{{ number_format($item->price, 2, ',', '.') }}</td>
-                                        <td style="font-size: 11px;">
+                                        <td>
                                             @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                                                 <form action="{{ route('bap.updateStatus', $item->id) }}" method="POST" id="statusForm{{ $item->id }}">
                                                     @csrf
                                                     <div class="d-flex flex-column gap-1">
                                                         <select name="status" 
-                                                            class="form-select form-select-sm {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
+                                                            class="form-select {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
                                                                 {{ $item->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
                                                                 {{ $item->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
-                                                            style="font-size: 11px; padding: 2px 4px;"
+                                                            style="font-size: 11px;"
                                                             onchange="handleStatusChange({{ $item->id }}, this.value)">
                                                             <option value="pending"
                                                                 {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
@@ -86,13 +86,13 @@
                                                 </div>
                                             @endif
                                         </td>
-                                        <td style="font-size: 12px;">
+                                        <td class="fs-4 font-weight-bold">
                                             @if($item->status === 'diterima')
                                                 <a href="{{ route('cetak.bap', $item->id) }}" target="_blank" title="Cetak BAP"><i
-                                                        class="bx bx-printer ms-2 text-success" style="font-size: 16px;"></i></a>
+                                                        class="bx bx-printer ms-2 text-success"></i></a>
                                             @endif
                                             <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
-                                                    class="bx bx-info-circle" style="font-size: 16px;"></i></a>
+                                                    class="bx bx-info-circle"></i></a>
                                         </td>
                                     </tr>
                                 @endforeach
