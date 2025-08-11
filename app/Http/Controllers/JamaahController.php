@@ -395,11 +395,18 @@ class JamaahController extends Controller
         }
 
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11pt;
-            line-height: 1.2;
             margin: 0;
-            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .sheet {
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+            page-break-after: always;
+            padding: 15mm;
+            min-height: 100vh;
         }
 
         .header {
@@ -472,18 +479,19 @@ class JamaahController extends Controller
         }
     </style>
 </head>
-<body>
-    <div class="letterhead">
-        <img src="' . $logoBase64 . '" alt="Logo" class="logo">
-        <div class="header">
-            <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
-                KANTOR WILAYAH KEMENTERIAN AGAMA<br>
-                PROVINSI NUSA TENGGARA BARAT<br></strong>
-            <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
-                Website : www.ntb.Kemenag.go.id
-            </span>
+<body class="F4">
+    <section class="sheet">
+        <div class="letterhead">
+            <img src="' . $logoBase64 . '" alt="Logo" class="logo">
+            <div class="header">
+                <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
+                    KANTOR WILAYAH KEMENTERIAN AGAMA<br>
+                    PROVINSI NUSA TENGGARA BARAT<br></strong>
+                <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
+                    Website : www.ntb.Kemenag.go.id
+                </span>
+            </div>
         </div>
-    </div>
 
     <div class="title">
         ' . $title . '<br>
@@ -558,6 +566,7 @@ class JamaahController extends Controller
         <p>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</p>
         <p>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</p>
     </div>
+    </section>
 </body>
 </html>';
 
