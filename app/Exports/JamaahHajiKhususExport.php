@@ -27,8 +27,8 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
     public function collection()
     {
         if ($this->isGlobal) {
-            // For global export, we need to flatten the grouped data
-            $flattenedData = collect();
+            // For global export, flatten the grouped data with separators
+            $exportData = collect();
             
             foreach ($this->data as $travelId => $jamaahGroup) {
                 if ($jamaahGroup->isEmpty()) {
@@ -37,233 +37,199 @@ class JamaahHajiKhususExport implements FromCollection, WithHeadings, WithMappin
                 
                 $travel = $jamaahGroup->first()->travel;
                 
-                // Add separator row for travel
-                $flattenedData->push([
-                    'separator' => true,
-                    'travel_name' => $travel->Penyelenggara ?? 'PPIU Tidak Diketahui',
-                    'kabupaten' => $travel->kab_kota ?? 'Kabupaten Tidak Diketahui',
-                    'total_jamaah' => $jamaahGroup->count(),
-                    'status' => $travel->Status ?? 'N/A'
+                // Add separator row
+                $exportData->push([
+                    'SEPARATOR' => 'PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui'),
+                    'KABUPATEN' => $travel->kab_kota ?? 'Tidak Diketahui',
+                    'TOTAL_JAMAAH' => $jamaahGroup->count(),
+                    'STATUS' => $travel->Status ?? 'N/A',
+                    'NAMA' => '',
+                    'NIK' => '',
+                    'ALAMAT' => '',
+                    'NO_HP' => '',
+                    'STATUS_PENDAFTARAN' => '',
+                    'NOMOR_PORSI' => '',
                 ]);
                 
                 // Add jamaah data
                 foreach ($jamaahGroup as $jamaah) {
-                    $flattenedData->push([
-                        'separator' => false,
-                        'jamaah' => $jamaah
+                    $exportData->push([
+                        'SEPARATOR' => '',
+                        'KABUPATEN' => '',
+                        'TOTAL_JAMAAH' => '',
+                        'STATUS' => '',
+                        'NAMA' => $jamaah->nama_lengkap ?? '',
+                        'NIK' => $jamaah->no_ktp ?? '',
+                        'ALAMAT' => $jamaah->alamat ?? '',
+                        'NO_HP' => $jamaah->no_hp ?? '',
+                        'STATUS_PENDAFTARAN' => $jamaah->getStatusText(),
+                        'NOMOR_PORSI' => $jamaah->nomor_porsi ?? '',
                     ]);
                 }
                 
                 // Add empty row after each travel
-                $flattenedData->push([
-                    'separator' => false,
-                    'empty' => true
+                $exportData->push([
+                    'SEPARATOR' => '',
+                    'KABUPATEN' => '',
+                    'TOTAL_JAMAAH' => '',
+                    'STATUS' => '',
+                    'NAMA' => '',
+                    'NIK' => '',
+                    'ALAMAT' => '',
+                    'NO_HP' => '',
+                    'STATUS_PENDAFTARAN' => '',
+                    'NOMOR_PORSI' => '',
                 ]);
             }
             
-            return $flattenedData;
+            return $exportData;
         } else {
-            // For travel-specific export, return the collection directly
-            return $this->data;
+            // For travel-specific export, return simple collection
+            return $this->data->map(function ($jamaah) {
+                return [
+                    'NAMA' => $jamaah->nama_lengkap ?? '',
+                    'NIK' => $jamaah->no_ktp ?? '',
+                    'ALAMAT' => $jamaah->alamat ?? '',
+                    'NO_HP' => $jamaah->no_hp ?? '',
+                    'STATUS_PENDAFTARAN' => $jamaah->getStatusText(),
+                    'NOMOR_PORSI' => $jamaah->nomor_porsi ?? '',
+                ];
+            });
         }
     }
 
     public function headings(): array
     {
-        return [
-            'No',
-            'Nama Lengkap',
-            'No. KTP',
-            'Tempat Lahir',
-            'Tanggal Lahir',
-            'Jenis Kelamin',
-            'Golongan Darah',
-            'Status Pernikahan',
-            'Alamat',
-            'Kota',
-            'Provinsi',
-            'Kode Pos',
-            'No. HP',
-            'Email',
-            'Nama Ayah',
-            'Pekerjaan',
-            'Pendidikan Terakhir',
-            'Pergi Haji',
-            'Alergi',
-            'Catatan Khusus',
-            'No. Paspor',
-            'Tanggal Berlaku Paspor',
-            'No. SPPH',
-            'Tahun Pendaftaran',
-            'Status Bukti Setor',
-            'PPIU',
-            'Kabupaten/Kota',
-            'Status PPIU',
-            'Status Pendaftaran',
-            'Tanggal Daftar'
-        ];
+        if ($this->isGlobal) {
+            return [
+                'PPIU',
+                'Kabupaten',
+                'Total Jamaah',
+                'Status',
+                'Nama Jamaah',
+                'NIK',
+                'Alamat',
+                'No HP',
+                'Status Pendaftaran',
+                'Nomor Porsi'
+            ];
+        } else {
+            return [
+                'Nama Jamaah',
+                'NIK',
+                'Alamat',
+                'No HP',
+                'Status Pendaftaran',
+                'Nomor Porsi'
+            ];
+        }
     }
 
     public function map($row): array
     {
         if ($this->isGlobal) {
-            if (isset($row['separator']) && $row['separator']) {
-                // Separator row for travel
-                return [
-                    'PPIU: ' . $row['travel_name'],
-                    'Kabupaten: ' . $row['kabupaten'],
-                    'Total Jamaah: ' . $row['total_jamaah'],
-                    'Status: ' . $row['status'],
-                    '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''
-                ];
-            } else if (isset($row['empty']) && $row['empty']) {
-                // Empty row
-                return array_fill(0, 30, '');
-            } else {
-                // Jamaah data
-                $jamaah = $row['jamaah'];
-                return $this->mapJamaahData($jamaah);
-            }
+            return [
+                $row['SEPARATOR'],
+                $row['KABUPATEN'],
+                $row['TOTAL_JAMAAH'],
+                $row['STATUS'],
+                $row['NAMA'],
+                $row['NIK'],
+                $row['ALAMAT'],
+                $row['NO_HP'],
+                $row['STATUS_PENDAFTARAN'],
+                $row['NOMOR_PORSI'],
+            ];
         } else {
-            // For travel-specific export
-            return $this->mapJamaahData($row);
+            return [
+                $row['NAMA'],
+                $row['NIK'],
+                $row['ALAMAT'],
+                $row['NO_HP'],
+                $row['STATUS_PENDAFTARAN'],
+                $row['NOMOR_PORSI'],
+            ];
         }
-    }
-
-    private function mapJamaahData($jamaah): array
-    {
-        return [
-            '', // No will be handled by Excel
-            $jamaah->nama_lengkap ?? '',
-            $jamaah->no_ktp ?? '',
-            $jamaah->tempat_lahir ?? '',
-            $jamaah->tanggal_lahir ? $jamaah->tanggal_lahir->format('d/m/Y') : '',
-            $jamaah->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan',
-            $jamaah->golongan_darah ?? '',
-            $jamaah->status_pernikahan ?? '',
-            $jamaah->alamat ?? '',
-            $jamaah->kota ?? '',
-            $jamaah->provinsi ?? '',
-            $jamaah->kode_pos ?? '',
-            $jamaah->no_hp ?? '',
-            $jamaah->email ?? '',
-            $jamaah->nama_ayah ?? '',
-            $jamaah->pekerjaan ?? '',
-            $jamaah->pendidikan_terakhir ?? '',
-            $jamaah->pergi_haji ?? '',
-            $jamaah->alergi ?? '',
-            $jamaah->catatan_khusus ?? '',
-            $jamaah->no_paspor ?? '',
-            $jamaah->tanggal_berlaku_paspor ? $jamaah->tanggal_berlaku_paspor->format('d/m/Y') : '',
-            $jamaah->nomor_porsi ?? '',
-            $jamaah->tahun_pendaftaran ?? '',
-            $jamaah->getBuktiSetorStatusText(),
-            $jamaah->travel->Penyelenggara ?? 'Tidak Diketahui',
-            $jamaah->travel->kab_kota ?? 'Tidak Diketahui',
-            $jamaah->travel->Status ?? 'N/A',
-            $jamaah->getStatusText(),
-            $jamaah->created_at ? $jamaah->created_at->format('d/m/Y H:i') : ''
-        ];
     }
 
     public function styles(Worksheet $sheet)
     {
         $highestRow = $sheet->getHighestRow();
         
-        // Header style
-        $sheet->getStyle('A1:AD1')->applyFromArray([
+        // Style for headers
+        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
-                'color' => ['rgb' => 'FFFFFF']
+                'color' => ['rgb' => 'FFFFFF'],
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '34C38F'] // Green for Haji Khusus
+                'startColor' => ['rgb' => '34C38F'], // Green for Haji Khusus
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
-                'vertical' => Alignment::VERTICAL_CENTER
+                'vertical' => Alignment::VERTICAL_CENTER,
             ],
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['rgb' => '000000']
-                ]
-            ]
         ]);
 
-        // Apply styles to all data rows
+        // Style for separator rows (PPIU headers)
         for ($row = 2; $row <= $highestRow; $row++) {
-            $sheet->getStyle("A{$row}:AD{$row}")->applyFromArray([
-                'borders' => [
-                    'allBorders' => [
-                        'borderStyle' => Border::BORDER_THIN,
-                        'color' => ['rgb' => '000000']
-                    ]
-                ]
-            ]);
-        }
-
-        // Style separator rows (travel headers)
-        if ($this->isGlobal) {
-            $currentRow = 2;
-            foreach ($this->data as $travelId => $jamaahGroup) {
-                // Style separator row
-                $sheet->getStyle("A{$currentRow}:AD{$currentRow}")->applyFromArray([
+            $separatorValue = $sheet->getCell('A' . $row)->getValue();
+            if (strpos($separatorValue, 'PPIU:') === 0) {
+                $sheet->getStyle('A' . $row . ':' . $sheet->getHighestColumn() . $row)->applyFromArray([
                     'font' => [
                         'bold' => true,
-                        'color' => ['rgb' => 'FFFFFF']
+                        'color' => ['rgb' => 'FFFFFF'],
                     ],
                     'fill' => [
                         'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '556EE6'] // Blue for separator
+                        'startColor' => ['rgb' => '556EE6'], // Blue for separator
                     ],
                     'alignment' => [
                         'horizontal' => Alignment::HORIZONTAL_LEFT,
-                        'vertical' => Alignment::VERTICAL_CENTER
-                    ]
+                        'vertical' => Alignment::VERTICAL_CENTER,
+                    ],
                 ]);
-                
-                $currentRow += $jamaahGroup->count() + 2; // +2 for separator and empty row
             }
         }
+
+        // Border for all cells
+        $sheet->getStyle('A1:' . $sheet->getHighestColumn() . $highestRow)->applyFromArray([
+            'borders' => [
+                'allBorders' => [
+                    'borderStyle' => Border::BORDER_THIN,
+                    'color' => ['rgb' => '000000'],
+                ],
+            ],
+        ]);
 
         return $sheet;
     }
 
     public function columnWidths(): array
     {
-        return [
-            'A' => 5,   // No
-            'B' => 25,  // Nama Lengkap
-            'C' => 20,  // No. KTP
-            'D' => 15,  // Tempat Lahir
-            'E' => 15,  // Tanggal Lahir
-            'F' => 12,  // Jenis Kelamin
-            'G' => 12,  // Golongan Darah
-            'H' => 15,  // Status Pernikahan
-            'I' => 30,  // Alamat
-            'J' => 15,  // Kota
-            'K' => 15,  // Provinsi
-            'L' => 10,  // Kode Pos
-            'M' => 15,  // No. HP
-            'N' => 25,  // Email
-            'O' => 20,  // Nama Ayah
-            'P' => 15,  // Pekerjaan
-            'Q' => 20,  // Pendidikan Terakhir
-            'R' => 12,  // Pergi Haji
-            'S' => 15,  // Alergi
-            'T' => 25,  // Catatan Khusus
-            'U' => 15,  // No. Paspor
-            'V' => 20,  // Tanggal Berlaku Paspor
-            'W' => 15,  // No. SPPH
-            'X' => 15,  // Tahun Pendaftaran
-            'Y' => 20,  // Status Bukti Setor
-            'Z' => 25,  // PPIU
-            'AA' => 20, // Kabupaten/Kota
-            'AB' => 15, // Status PPIU
-            'AC' => 20, // Status Pendaftaran
-            'AD' => 20, // Tanggal Daftar
-        ];
+        if ($this->isGlobal) {
+            return [
+                'A' => 25, // PPIU
+                'B' => 15, // Kabupaten
+                'C' => 12, // Total Jamaah
+                'D' => 10, // Status
+                'E' => 25, // Nama Jamaah
+                'F' => 20, // NIK
+                'G' => 40, // Alamat
+                'H' => 15, // No HP
+                'I' => 20, // Status Pendaftaran
+                'J' => 15, // Nomor Porsi
+            ];
+        } else {
+            return [
+                'A' => 25, // Nama Jamaah
+                'B' => 20, // NIK
+                'C' => 40, // Alamat
+                'D' => 15, // No HP
+                'E' => 20, // Status Pendaftaran
+                'F' => 15, // Nomor Porsi
+            ];
+        }
     }
 }
