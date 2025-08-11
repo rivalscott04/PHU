@@ -89,12 +89,14 @@
                                             @endif
                                         </td>
                                         <td class="fs-4 font-weight-bold">
-                                            @if($item->status === 'diterima')
-                                                <a href="{{ route('cetak.bap', $item->id) }}" target="_blank" title="Cetak BAP"><i
-                                                        class="bx bx-printer ms-2 text-success"></i></a>
-                                            @endif
-                                            <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
-                                                    class="bx bx-info-circle"></i></a>
+                                            <div class="d-flex gap-2 justify-content-center">
+                                                @if($item->status === 'diterima')
+                                                    <a href="{{ route('cetak.bap', $item->id) }}" target="_blank" title="Cetak BAP"><i
+                                                            class="bx bx-printer text-success"></i></a>
+                                                @endif
+                                                <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
+                                                        class="bx bx-info-circle"></i></a>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach
