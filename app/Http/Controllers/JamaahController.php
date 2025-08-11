@@ -440,7 +440,7 @@ class JamaahController extends Controller
         }
 
         .content {
-            margin: 2mm 0 20mm 0;
+            margin: 2mm 0 40mm 0;
             font-size: 11pt;
             line-height: 1.2;
         }
@@ -470,16 +470,12 @@ class JamaahController extends Controller
         }
 
         .footer {
-            position: fixed;
-            bottom: 10mm;
-            left: 15mm;
-            right: 15mm;
+            margin-top: 50mm;
             font-size: 10pt;
-            border: 1px solid #ccc;
-            border-top: 2px solid #000;
-            background: white;
-            padding: 3mm;
-            border-radius: 3px;
+            font-weight: bold;
+            text-align: left;
+            border-top: 1px solid #000;
+            padding-top: 5mm;
         }
 
         .page-break {
@@ -541,7 +537,11 @@ class JamaahController extends Controller
                     </tr>';
                 }
 
-                $html .= '</table><div class="page-break"></div>';
+                $html .= '</table>
+                <div class="footer">
+                    Dokumen ini dibuat otomatis dari sistem PHU
+                </div>
+                <div class="page-break"></div>';
             }
         } else {
             $html .= '
@@ -571,17 +571,6 @@ class JamaahController extends Controller
         $html .= '
     </div>
 
-    <div class="footer">
-        <div style="display: flex; align-items: center;">
-            <div style="width: 20px; height: 20px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
-                <span style="color: #1976d2; font-size: 12px;">✓</span>
-            </div>
-            <div>
-                <div style="font-size: 9pt; color: #666;">Dokumen ini dibuat secara otomatis oleh sistem PHU</div>
-                <div style="font-size: 9pt; font-weight: bold;">Token: ' . strtoupper(substr(md5(now()), 0, 8)) . '</div>
-            </div>
-        </div>
-    </div>
     </section>
 </body>
 </html>';
