@@ -160,7 +160,7 @@ return new class extends Migration
         ];
 
         foreach ($travelUsers as $user) {
-            DB::table('users')->firstOrCreate(
+            DB::table('users')->updateOrInsert(
                 ['email' => $user['email']],
                 array_merge($user, [
                     'email_verified_at' => null,

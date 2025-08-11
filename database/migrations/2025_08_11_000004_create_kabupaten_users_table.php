@@ -153,7 +153,7 @@ return new class extends Migration
         ];
 
         foreach ($kabupatenUsers as $user) {
-            DB::table('users')->firstOrCreate(
+            DB::table('users')->updateOrInsert(
                 ['email' => $user['email']],
                 array_merge($user, [
                     'travel_id' => null,

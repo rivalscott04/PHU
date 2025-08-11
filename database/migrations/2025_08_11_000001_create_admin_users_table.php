@@ -37,8 +37,8 @@ return new class extends Migration
             $table->index(['role']);
         });
 
-        // Create admin user using firstOrCreate
-        DB::table('users')->firstOrCreate(
+        // Create admin user using updateOrInsert
+        DB::table('users')->updateOrInsert(
             ['email' => 'admin@phu.com'],
             [
                 'username' => 'admin',

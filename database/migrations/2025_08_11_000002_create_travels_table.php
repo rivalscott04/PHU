@@ -220,7 +220,7 @@ return new class extends Migration
         ];
 
         foreach ($travelCompanies as $travel) {
-            DB::table('travels')->firstOrCreate(
+            DB::table('travels')->updateOrInsert(
                 ['Penyelenggara' => $travel['Penyelenggara']],
                 $travel
             );
