@@ -470,11 +470,16 @@ class JamaahController extends Controller
         }
 
         .footer {
-            margin-top: 10mm;
-            text-align: left;
+            position: fixed;
+            bottom: 10mm;
+            left: 15mm;
+            right: 15mm;
             font-size: 10pt;
-            border-top: 1px solid #ccc;
-            padding-top: 5mm;
+            border: 1px solid #ccc;
+            border-top: 2px solid #000;
+            background: white;
+            padding: 3mm;
+            border-radius: 3px;
         }
 
         .page-break {
@@ -536,7 +541,7 @@ class JamaahController extends Controller
                     </tr>';
                 }
 
-                $html .= '</table>';
+                $html .= '</table><div class="page-break"></div>';
             }
         } else {
             $html .= '
@@ -567,8 +572,15 @@ class JamaahController extends Controller
     </div>
 
     <div class="footer">
-        <p><strong>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</strong></p>
-        <p><strong>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</strong></p>
+        <div style="display: flex; align-items: center;">
+            <div style="width: 20px; height: 20px; background: #e3f2fd; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 8px;">
+                <span style="color: #1976d2; font-size: 12px;">✓</span>
+            </div>
+            <div>
+                <div style="font-size: 9pt; color: #666;">Dokumen ini dibuat secara otomatis oleh sistem PHU</div>
+                <div style="font-size: 9pt; font-weight: bold;">Token: ' . strtoupper(substr(md5(now()), 0, 8)) . '</div>
+            </div>
+        </div>
     </div>
     </section>
 </body>
