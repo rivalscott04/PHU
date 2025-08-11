@@ -440,7 +440,7 @@ class JamaahController extends Controller
         }
 
         .content {
-            margin: 2mm 0;
+            margin: 2mm 0 20mm 0;
             font-size: 11pt;
             line-height: 1.2;
         }
@@ -471,7 +471,7 @@ class JamaahController extends Controller
 
         .footer {
             margin-top: 10mm;
-            text-align: center;
+            text-align: left;
             font-size: 10pt;
             border-top: 1px solid #ccc;
             padding-top: 5mm;
@@ -567,8 +567,8 @@ class JamaahController extends Controller
     </div>
 
     <div class="footer">
-        <p>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</p>
-        <p>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</p>
+        <p><strong>Dokumen ini dibuat secara otomatis oleh sistem PHU Kanwil Kementerian Agama Provinsi NTB</strong></p>
+        <p><strong>Tanggal cetak: ' . now()->format('d/m/Y H:i:s') . '</strong></p>
     </div>
     </section>
 </body>
