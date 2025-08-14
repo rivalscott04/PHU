@@ -58,7 +58,9 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="days" class="form-label">Jumlah Hari</label>
-                                <input type="number" class="form-control" id="days" name="days" required>
+                                <input type="number" class="form-control" id="days" name="days" readonly>
+                                <small class="form-text text-muted">Otomatis dihitung berdasarkan tanggal keberangkatan dan
+                                    kepulangan</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="package" class="form-label">Nama Paket</label>
@@ -111,28 +113,47 @@
             document.getElementById('price_hidden').value = rawValue;
         }
 
-        function calculateReturnDate() {
+        function calculateDays() {
             const departureDate = document.getElementById('datetime').value;
-            const packageDays = parseInt(document.getElementById('days').value) || 0;
+            const returnDate = document.getElementById('returndate').value;
 
-            if (departureDate && packageDays > 0) {
-                // Buat objek Date dari tanggal keberangkatan
-                const returnDate = new Date(departureDate);
-                // Tambahkan jumlah hari paket
-                returnDate.setDate(returnDate.getDate() + packageDays);
+            if (departureDate && returnDate) {
+                // Buat objek Date dari string tanggal
+                const startDate = new Date(departureDate);
+                const endDate = new Date(returnDate);
 
-                // Format tanggal untuk input date (YYYY-MM-DD)
-                const year = returnDate.getFullYear();
-                const month = String(returnDate.getMonth() + 1).padStart(2, '0');
-                const day = String(returnDate.getDate()).padStart(2, '0');
+                // Hitung selisih hari
+                const timeDifference = endDate.getTime() - startDate.getTime();
+                const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
 
-                // Atur nilai tanggal kepulangan
-                document.getElementById('returndate').value = `${year}-${month}-${day}`;
+                // Pastikan jumlah hari tidak negatif
+                if (dayDifference >= 0) {
+                    document.getElementById('days').value = dayDifference;
+                } else {
+                    document.getElementById('days').value = '';
+                    alert('Tanggal kepulangan harus setelah tanggal keberangkatan!');
+                }
+            } else {
+                document.getElementById('days').value = '';
             }
         }
 
-        // Tambahkan event listener untuk tanggal berangkat dan paket
-        document.getElementById('datetime').addEventListener('change', calculateReturnDate);
-        document.getElementById('days').addEventListener('input', calculateReturnDate);
+        // Tambahkan event listener untuk kedua input tanggal
+        document.getElementById('datetime').addEventListener('change', calculateDays);
+        document.getElementById('returndate').addEventListener('change', calculateDays);
+
+        // Validasi tambahan untuk memastikan tanggal kepulangan tidak sebelum tanggal keberangkatan
+        document.getElementById('returndate').addEventListener('change', function() {
+            const departureDate = document.getElementById('datetime').value;
+            const returnDate = this.value;
+
+            if (departureDate && returnDate) {
+                if (new Date(returnDate) < new Date(departureDate)) {
+                    alert('Tanggal kepulangan tidak boleh sebelum tanggal keberangkatan!');
+                    this.value = '';
+                    document.getElementById('days').value = '';
+                }
+            }
+        });
     </script>
 @endpush

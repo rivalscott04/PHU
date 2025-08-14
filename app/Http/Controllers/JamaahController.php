@@ -374,7 +374,7 @@ class JamaahController extends Controller
     {
         $jenisJamaah = ucfirst($type);
         $title = "DATA JAMAAH {$jenisJamaah}";
-        
+
         // Convert logo to base64
         $logoPath = public_path('images/kemenag.png');
         $logoBase64 = '';
@@ -384,147 +384,201 @@ class JamaahController extends Controller
         }
 
         $html = '<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>' . $title . '</title>
-    <style>
-        @page {
-            size: A4;
-            margin: 15mm;
-        }
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <title>' . $title . '</title>
+        <style>
+            @page {
+                size: A4;
+                margin: 15mm 15mm 35mm 15mm;
+            }
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-        }
+            body {
+                margin: 0;
+                font-family: Arial, sans-serif;
+                position: relative;
+                min-height: 100vh;
+            }
 
-        .sheet {
-            margin: 0;
-            overflow: hidden;
-            position: relative;
-            box-sizing: border-box;
-            page-break-after: always;
-            padding: 15mm;
-            min-height: 100vh;
-        }
+            .page-container {
+                position: relative;
+                min-height: calc(100vh - 50mm);
+                padding-bottom: 20mm;
+            }
 
-        .header {
-            text-align: center;
-            font-size: 12pt;
-            line-height: 1.2;
-            margin-bottom: 5mm;
-        }
+            .header {
+                text-align: center;
+                font-size: 12pt;
+                line-height: 1.2;
+                margin-bottom: 5mm;
+            }
 
-        .logo {
-            height: 90px;
-            width: auto;
-            position: absolute;
-            left: 15mm;
-            top: 15mm;
-        }
+            .logo {
+                height: 90px;
+                width: auto;
+                position: absolute;
+                left: 0;
+                top: 0;
+            }
 
-        .letterhead {
-            border-bottom: 2px solid black;
-            padding-bottom: 2mm;
-            margin-bottom: 3mm;
-        }
+            .letterhead {
+                border-bottom: 2px solid black;
+                padding-bottom: 4mm;
+                margin-bottom: 5mm;
+            }
 
-        .title {
-            text-align: center;
-            font-weight: bold;
-            margin-top: 2mm;
-            margin-bottom: 3mm;
-            font-size: 14pt;
-            line-height: 1.2;
-        }
+            .title {
+                text-align: center;
+                font-weight: bold;
+                margin-top: 2mm;
+                margin-bottom: 3mm;
+                font-size: 14pt;
+                line-height: 1.2;
+            }
 
-        .content {
-            margin: 2mm 0 40mm 0;
-            font-size: 11pt;
-            line-height: 1.2;
-        }
+            .content {
+                margin: 2mm 0;
+                font-size: 11pt;
+                line-height: 1.2;
+            }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 3mm;
-        }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-bottom: 3mm;
+            }
 
-        th, td {
-            border: 1px solid #000;
-            padding: 2mm;
-            text-align: left;
-            font-size: 10pt;
-        }
+            th, td {
+                border: 1px solid #000;
+                padding: 2mm;
+                text-align: left;
+                font-size: 10pt;
+            }
 
-        th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
+            th {
+                background-color: #f0f0f0;
+                font-weight: bold;
+            }
 
-        .separator {
-            background-color: #e0e0e0;
-            font-weight: bold;
-            text-align: center;
-        }
+            .separator {
+                background-color: #e0e0e0;
+                font-weight: bold;
+                text-align: center;
+                padding: 4mm 2mm;
+            }
 
-        .footer {
-            margin-top: 50mm;
-            font-size: 10pt;
-            font-weight: bold;
-            text-align: left;
-            border-top: 1px solid #000;
-            padding-top: 5mm;
-        }
+            .footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                text-align: left;
+                font-size: 10pt;
+                font-weight: bold;
+                border-top: 1px solid #000;
+                padding: 3mm 0mm 5mm 0mm;
+                background: white;
+                height: 5mm;
+                z-index: 1000;
+            }
 
-        .page-break {
-            page-break-before: always;
-        }
-    </style>
-</head>
-<body class="F4">
-    <section class="sheet">
-        <div class="letterhead">
-            <img src="' . $logoBase64 . '" alt="Logo" class="logo">
-            <div class="header">
-                <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
-                    KANTOR WILAYAH KEMENTERIAN AGAMA<br>
-                    PROVINSI NUSA TENGGARA BARAT<br></strong>
-                <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram<br>
-                    Telp. (0370) 622317 Faksimili (0370) 622317<br>
-                    Website : www.ntb.Kemenag.go.id
-                </span>
-            </div>
+            /* Tambahan CSS untuk memastikan footer muncul di semua halaman */
+            .footer::before {
+                content: "";
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 20mm;
+                background: white;
+                z-index: -1;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            .ppiu-section {
+                page-break-inside: avoid;
+                margin-bottom: 5mm;
+            }
+
+            table {
+                page-break-inside: auto;
+            }
+
+            tr {
+                page-break-inside: avoid;
+            }
+
+            thead {
+                display: table-header-group;
+            }
+
+            /* Styling khusus untuk halaman pertama */
+            .first-page {
+                margin-bottom: 25mm;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- Footer harus ditempatkan di awal body agar muncul di semua halaman -->
+        <div class="footer">
+            Dokumen ini dibuat otomatis dari sistem PHU
         </div>
 
-    <div class="title">
-        ' . $title . '<br>
-        <span style="font-size: 12pt;">Tanggal: ' . now()->format('d F Y') . '</span>
-    </div>
+        <div class="page-container first-page">
+            <div class="letterhead">
+                <img src="' . $logoBase64 . '" alt="Logo" class="logo">
+                <div class="header">
+                    <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
+                        KANTOR WILAYAH KEMENTERIAN AGAMA<br>
+                        PROVINSI NUSA TENGGARA BARAT<br></strong>
+                    <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram<br>
+                        Telp. (0370) 622317 Faksimili (0370) 622317<br>
+                        Website : www.ntb.Kemenag.go.id
+                    </span>
+                </div>
+            </div>
 
-    <div class="content">';
+            <div class="title">
+                ' . $title . '<br>
+                <span style="font-size: 12pt;">Tanggal: ' . now()->format('d F Y') . '</span>
+            </div>
+
+            <div class="content">';
 
         if ($isGlobal) {
+            $isFirstSection = true;
             foreach ($data as $travelId => $jamaahGroup) {
+                if (!$isFirstSection) {
+                    $html .= '<div class="page-break"></div>
+                    <div class="page-container">';
+                }
+
                 $travel = $jamaahGroup->first()->travel;
                 $totalJamaah = $jamaahGroup->count();
 
                 $html .= '
-                <table>
-                    <tr class="separator">
-                        <td colspan="5">
-                            <strong>PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</strong><br>
-                            <small>Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total Jamaah: ' . $totalJamaah . ' | Status: ' . ($travel->Status ?? 'N/A') . '</small>
-                        </td>
-                    </tr>
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Jamaah</th>
-                        <th>Alamat</th>
-                        <th>No HP</th>
-                        <th>NIK</th>
-                    </tr>';
+                    <div class="ppiu-section">
+                        <table>
+                            <thead>
+                                <tr class="separator">
+                                    <td colspan="5">
+                                        <strong>PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</strong><br>
+                                        <small>Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total Jamaah: ' . $totalJamaah . ' | Status: ' . ($travel->Status ?? 'N/A') . '</small>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Nama Jamaah</th>
+                                    <th>Alamat</th>
+                                    <th>No HP</th>
+                                    <th>NIK</th>
+                                </tr>
+                            </thead>
+                            <tbody>';
 
                 foreach ($jamaahGroup as $index => $jamaah) {
                     $html .= '
@@ -537,22 +591,30 @@ class JamaahController extends Controller
                     </tr>';
                 }
 
-                $html .= '</table>
-                <div class="footer">
-                    Dokumen ini dibuat otomatis dari sistem PHU
-                </div>
-                <div class="page-break"></div>';
+                $html .= '
+                            </tbody>
+                        </table>
+                    </div>';
+
+                if (!$isFirstSection) {
+                    $html .= '</div>';
+                }
+
+                $isFirstSection = false;
             }
         } else {
             $html .= '
             <table>
-                <tr>
-                    <th>No</th>
-                    <th>Nama Jamaah</th>
-                    <th>Alamat</th>
-                    <th>No HP</th>
-                    <th>NIK</th>
-                </tr>';
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Nama Jamaah</th>
+                        <th>Alamat</th>
+                        <th>No HP</th>
+                        <th>NIK</th>
+                    </tr>
+                </thead>
+                <tbody>';
 
             foreach ($data as $index => $jamaah) {
                 $html .= '
@@ -565,15 +627,16 @@ class JamaahController extends Controller
                 </tr>';
             }
 
-            $html .= '</table>';
+            $html .= '
+                </tbody>
+            </table>';
         }
 
         $html .= '
-    </div>
-
-    </section>
-</body>
-</html>';
+            </div>
+        </div>
+    </body>
+    </html>';
 
         return $html;
     }

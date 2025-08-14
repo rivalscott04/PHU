@@ -106,7 +106,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::delete('/jamaah/{id}', [JamaahController::class, 'destroy'])->name('jamaah.destroy');
     Route::post('/jamaah/import', [JamaahController::class, 'import'])->name('jamaah.import');
     Route::get('/jamaah/export', [JamaahController::class, 'export'])->name('jamaah.export');
-    
+
     // Export routes for jamaah umrah and haji
     Route::get('/jamaah/umrah/export', [JamaahController::class, 'exportUmrah'])->name('jamaah.umrah.export');
     Route::get('/jamaah/haji/export', [JamaahController::class, 'exportHaji'])->name('jamaah.haji.export');
@@ -120,10 +120,6 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::post('/pengaduan/{id}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.update-status');
         Route::get('/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDF'])->name('pengaduan.download-pdf');
     });
-
-    // Public pengaduan routes (no authentication required)
-    Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
-    Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');
 
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
@@ -225,3 +221,7 @@ Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic']
 
 // Public download routes (no authentication required)
 Route::get('/public/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDFPublic'])->name('pengaduan.download-pdf.public');
+
+// Public pengaduan routes (no authentication required)
+Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
+Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');

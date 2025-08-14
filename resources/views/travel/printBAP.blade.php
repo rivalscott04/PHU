@@ -176,7 +176,10 @@
                 <span class="label">Jumlah Jamaah</span>: <span class="input-line">{{ $data->people }} Orang</span>
             </div>
             <div class="form-group">
-                <span class="label">Paket</span>: <span class="input-line">{{ $data->package }} Hari</span>
+                <span class="label">Nama Paket</span>: <span class="input-line">{{ $data->package }}</span>
+            </div>
+            <div class="form-group">
+                <span class="label">Lama Perjalanan</span>: <span class="input-line">{{ $data->days }} Hari</span>
             </div>
             <div class="form-group">
                 <span class="label">Harga</span>: Rp <span class="input-line">
@@ -227,11 +230,13 @@
             <div class="signature">
                 Petugas Satgas Umrah<br>
                 Kanwil Kementerian Agama Prov. NTB<br><br>
-                @if($data->status === 'diterima' && $qrCodeData)
-                <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital" style="width: 120px; height: 120px; margin: 0 auto; display: block;">
-                <small style="font-size: 8pt; display: block; margin-top: 5px; text-align: center;">Token: {{ $token ?? 'N/A' }}</small>
+                @if ($data->status === 'diterima' && $qrCodeData)
+                    <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital"
+                        style="width: 120px; height: 120px; margin: 0 auto; display: block;">
+                    <small style="font-size: 8pt; display: block; margin-top: 5px; text-align: center;">Token:
+                        {{ $token ?? 'N/A' }}</small>
                 @else
-                <span class="input-line" style="width:120px;height:120px;display:inline-block"></span>
+                    <span class="input-line" style="width:120px;height:120px;display:inline-block"></span>
                 @endif
             </div>
             <div class="signature" style="margin-left: 50px;">
@@ -241,7 +246,7 @@
             </div>
         </div>
     </section>
-    
+
 
 </body>
 
