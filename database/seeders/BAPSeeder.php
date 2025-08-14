@@ -47,8 +47,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Udayana No. 123, Mataram - 081234567890',
             'kab_kota' => 'Kota Mataram',
             'people' => 25,
-            'days' => 10, // 2025-03-25 - 2025-03-15 = 10 hari
             'package' => 'Paket Umrah Reguler',
+            'days' => 10, // 2025-03-25 - 2025-03-15 = 10 hari
             'price' => 25000000,
             'datetime' => '2025-03-15',
             'airlines' => 'Garuda Indonesia',
@@ -65,8 +65,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Pejanggik No. 456, Mataram - 081234567891',
             'kab_kota' => 'Kota Mataram',
             'people' => 30,
-            'days' => 10, // 2025-04-20 - 2025-04-10 = 10 hari
             'package' => 'Paket Umrah Plus',
+            'days' => 10, // 2025-04-20 - 2025-04-10 = 10 hari
             'price' => 30000000,
             'datetime' => '2025-04-10',
             'airlines' => 'Saudi Airlines',
@@ -83,8 +83,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Selaparang No. 789, Mataram - 081234567892',
             'kab_kota' => 'Kota Mataram',
             'people' => 40,
-            'days' => 21, // 2025-06-10 - 2025-05-20 = 21 hari
             'package' => 'Paket Haji Khusus',
+            'days' => 21, // 2025-06-10 - 2025-05-20 = 21 hari
             'price' => 45000000,
             'datetime' => '2025-05-20',
             'airlines' => 'Emirates',
@@ -102,8 +102,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Raya Senggigi No. 789, Lombok Barat - 081234567894',
             'kab_kota' => 'Lombok Barat',
             'people' => 28,
-            'days' => 10, // 2025-07-20 - 2025-07-10 = 10 hari
             'package' => 'Paket Umrah Reguler',
+            'days' => 10, // 2025-07-20 - 2025-07-10 = 10 hari
             'price' => 28000000,
             'datetime' => '2025-07-10',
             'airlines' => 'Garuda Indonesia',
@@ -121,8 +121,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Raya Praya No. 456, Lombok Tengah - 081234567893',
             'kab_kota' => 'Lombok Tengah',
             'people' => 35,
-            'days' => 10, // 2025-06-25 - 2025-06-15 = 10 hari
             'package' => 'Paket Umrah Premium',
+            'days' => 10, // 2025-06-25 - 2025-06-15 = 10 hari
             'price' => 35000000,
             'datetime' => '2025-06-15',
             'airlines' => 'Saudi Airlines',
@@ -140,8 +140,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Raya Gerung No. 123, Lombok Barat - 0370-123456',
             'kab_kota' => 'Lombok Barat',
             'people' => 5,
-            'days' => 10, // 2025-08-25 - 2025-08-15 = 10 hari
             'package' => 'Paket Umrah Reguler',
+            'days' => 10, // 2025-08-25 - 2025-08-15 = 10 hari
             'price' => 20000000,
             'datetime' => '2025-08-15',
             'airlines' => 'Lion Air',
@@ -159,8 +159,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Raya Selong No. 456, Lombok Timur - 0376-123456',
             'kab_kota' => 'Lombok Timur',
             'people' => 15,
-            'days' => 10, // 2025-09-20 - 2025-09-10 = 10 hari
             'package' => 'Paket Umrah Plus',
+            'days' => 10, // 2025-09-20 - 2025-09-10 = 10 hari
             'price' => 32000000,
             'datetime' => '2025-09-10',
             'airlines' => 'Saudi Airlines',
@@ -177,8 +177,8 @@ class BAPSeeder extends Seeder
             'address_phone' => 'Jl. Raya Sumbawa Besar No. 789, Sumbawa - 0371-123456',
             'kab_kota' => 'Sumbawa',
             'people' => 20,
-            'days' => 10, // 2025-10-15 - 2025-10-05 = 10 hari
             'package' => 'Paket Umrah Reguler',
+            'days' => 10, // 2025-10-15 - 2025-10-05 = 10 hari
             'price' => 26000000,
             'datetime' => '2025-10-05',
             'airlines' => 'Garuda Indonesia',

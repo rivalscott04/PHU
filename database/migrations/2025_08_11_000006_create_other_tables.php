@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('nomor_hp', 13);
             $table->string('jenis_jamaah');
             $table->timestamps();
-            
+
             $table->index(['travel_id']);
             $table->index(['user_id']);
             $table->index(['jenis_jamaah']);
@@ -70,7 +70,7 @@ return new class extends Migration
             $table->text('catatan_verifikasi')->nullable();
             $table->timestamp('tanggal_verifikasi')->nullable();
             $table->timestamps();
-            
+
             $table->index(['travel_id']);
             $table->index(['status_pendaftaran']);
             $table->index(['status_verifikasi_bukti']);
@@ -87,6 +87,7 @@ return new class extends Migration
             $table->string('kab_kota');
             $table->integer('people');
             $table->string('package');
+            $table->integer('days');
             $table->decimal('price', 10, 2);
             $table->date('datetime');
             $table->string('airlines');
@@ -97,7 +98,7 @@ return new class extends Migration
             $table->unsignedBigInteger('user_id');
             $table->string('nomor_surat')->nullable();
             $table->timestamps();
-            
+
             $table->index(['user_id']);
             $table->index(['status']);
             $table->index(['datetime']);
@@ -123,7 +124,7 @@ return new class extends Migration
             $table->timestamp('completed_at')->nullable();
             $table->unsignedBigInteger('processed_by')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status_pengaduan']);
             $table->index(['kategori_pengaduan']);
             $table->index(['processed_by']);
@@ -142,7 +143,7 @@ return new class extends Migration
             $table->enum('status_pengunduran', ['pending', 'approved', 'rejected'])->default('pending');
             $table->text('catatan_admin')->nullable();
             $table->timestamps();
-            
+
             $table->index(['travel_id']);
             $table->index(['status_pengunduran']);
         });
@@ -167,7 +168,7 @@ return new class extends Migration
             $table->enum('jenis_lokasi', ['pusat', 'cabang'])->default('pusat');
             $table->enum('status', ['active', 'revoked'])->default('active');
             $table->timestamps();
-            
+
             $table->unique('uuid');
             $table->index(['travel_id']);
             $table->index(['cabang_id']);
