@@ -86,7 +86,6 @@ return new class extends Migration
             $table->string('address_phone');
             $table->string('kab_kota');
             $table->integer('people');
-            $table->string('package');
             $table->integer('days');
             $table->decimal('price', 10, 2);
             $table->date('datetime');
