@@ -48,7 +48,12 @@
                                                 value="{{ $data->people }}" disabled>
                                         </div>
                                         <div class="col-md-12 mb-3">
-                                            <label for="package" class="form-label">Paket</label>
+                                            <label for="days" class="form-label">Jumlah Hari</label>
+                                            <input type="text" class="form-control" id="days"
+                                                value="{{ $data->days }}" disabled>
+                                        </div>
+                                        <div class="col-md-12 mb-3">
+                                            <label for="package" class="form-label">Nama Paket</label>
                                             <input type="text" class="form-control" id="package"
                                                 value="{{ $data->package }}" disabled>
                                         </div>

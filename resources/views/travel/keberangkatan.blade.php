@@ -332,7 +332,7 @@
                         html: `<div class="fc-content">
                         <div class="fc-title">${arg.event.title}</div>
                         <div class="fc-description" style="font-size: 0.8em;">
-                            ${arg.event.extendedProps.package} hari
+                            ${arg.event.extendedProps.days} hari
                         </div>
                     </div>`
                     };
@@ -422,7 +422,7 @@
                     <i class="fas fa-clock"></i> Durasi
                 </div>
                 <div class="detail-value">
-                    ${event.extendedProps.package} Hari
+                    ${event.extendedProps.days} Hari
                 </div>
             </div>
             <div class="detail-item">

@@ -222,3 +222,6 @@ Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap
 Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
 // Public verification for BAP - direct access without redirect
 Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');
+
+// Public download routes (no authentication required)
+Route::get('/public/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDFPublic'])->name('pengaduan.download-pdf.public');

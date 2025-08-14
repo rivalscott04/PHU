@@ -57,8 +57,12 @@
                                     value="{{ $jamaahCount }}" readonly>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="package" class="form-label">Paket (Jumlah Hari)</label>
-                                <input type="number" class="form-control" id="package" name="package" required>
+                                <label for="days" class="form-label">Jumlah Hari</label>
+                                <input type="number" class="form-control" id="days" name="days" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="package" class="form-label">Nama Paket</label>
+                                <input type="text" class="form-control" id="package" name="package" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="price" class="form-label">Harga</label>
@@ -109,7 +113,7 @@
 
         function calculateReturnDate() {
             const departureDate = document.getElementById('datetime').value;
-            const packageDays = parseInt(document.getElementById('package').value) || 0;
+            const packageDays = parseInt(document.getElementById('days').value) || 0;
 
             if (departureDate && packageDays > 0) {
                 // Buat objek Date dari tanggal keberangkatan
@@ -129,6 +133,6 @@
 
         // Tambahkan event listener untuk tanggal berangkat dan paket
         document.getElementById('datetime').addEventListener('change', calculateReturnDate);
-        document.getElementById('package').addEventListener('input', calculateReturnDate);
+        document.getElementById('days').addEventListener('input', calculateReturnDate);
     </script>
 @endpush

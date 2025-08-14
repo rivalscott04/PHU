@@ -1156,7 +1156,7 @@
                         html: `<div class="fc-content">
                         <div class="fc-title">${arg.event.title}</div>
                         <div class="fc-description" style="font-size: 0.8em;">
-                            ${arg.event.extendedProps.package} hari
+                            ${arg.event.extendedProps.days} hari
                         </div>
                     </div>`
                     };
@@ -1256,7 +1256,7 @@
                     <i class="fas fa-clock text-gray-500"></i> Durasi
                 </div>
                 <div class="detail-value text-gray-700 pl-6">
-                    ${event.extendedProps.package} Hari
+                    ${event.extendedProps.days} Hari
                 </div>
             </div>
 
@@ -1347,18 +1347,17 @@
                 .then(data => {
                     if (data.length > 0) {
                         let html = '<div class="table-responsive"><table class="table table-hover">';
-                        html += '<thead class="table-dark"><tr><th>No</th><th>Nama Pengadu</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
+                        html += '<thead class="bg-light"><tr><th>No</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
                         
                         data.forEach((item, index) => {
                             const travelName = item.travel ? item.travel.Penyelenggara : 'Tidak diketahui';
-                            const halAduan = item.hal_aduan ? (item.hal_aduan.length > 50 ? item.hal_aduan.substring(0, 50) + '...' : item.hal_aduan) : 'Tidak ada detail';
+                            const halAduan = item.hal_aduan ? item.hal_aduan : 'Tidak ada detail';
                             const completedDate = item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : 'Tidak diketahui';
                             
                             html += `<tr>
                                 <td>${index + 1}</td>
-                                <td><strong>${item.nama_pengadu || 'Tidak diketahui'}</strong></td>
                                 <td><span class="text-primary">${travelName}</span></td>
-                                <td><span class="text-muted">${halAduan}</span></td>
+                                <td style="max-width: 300px; word-wrap: break-word; text-align: left;"><span class="text-muted">${halAduan}</span></td>
                                 <td><small class="text-muted">${completedDate}</small></td>
                                 <td>
                                     <button type="button" class="btn btn-success btn-sm rounded-pill" 
@@ -1406,7 +1405,7 @@
         }
 
         function downloadPDF(id) {
-            window.open(`/pengaduan/${id}/download-pdf`, '_blank');
+            window.open(`/public/pengaduan/${id}/download-pdf`, '_blank', 'noopener,noreferrer');
         }
     </script>
 

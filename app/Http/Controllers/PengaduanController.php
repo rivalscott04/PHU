@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Pengaduan;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use PDF;
 
 class PengaduanController extends Controller
 {
@@ -86,18 +87,32 @@ class PengaduanController extends Controller
         if ($user->role === 'admin') {
             // Admin can see all pengaduan
             $pengaduan = Pengaduan::with('travel')->get();
+            $pengaduanQuery = Pengaduan::query();
         } else if ($user->role === 'kabupaten') {
             // Kabupaten users can only see pengaduan from travel in their area
             $pengaduan = Pengaduan::with('travel')
                 ->whereHas('travel', function($query) use ($user) {
                     $query->where('kab_kota', $user->kabupaten);
                 })->get();
+            $pengaduanQuery = Pengaduan::whereHas('travel', function($query) use ($user) {
+                $query->where('kab_kota', $user->kabupaten);
+            });
         } else {
             // Other roles see empty data
             $pengaduan = collect();
+            $pengaduanQuery = Pengaduan::whereRaw('1 = 0'); // Empty query
         }
         
-        return view('pengaduan.index', compact('pengaduan'));
+        // Calculate statistics
+        $stats = [
+            'total' => $pengaduanQuery->count(),
+            'pending' => $pengaduanQuery->where('status', 'pending')->count(),
+            'in_progress' => $pengaduanQuery->where('status', 'in_progress')->count(),
+            'completed' => $pengaduanQuery->where('status', 'completed')->count(),
+            'rejected' => $pengaduanQuery->where('status', 'rejected')->count(),
+        ];
+        
+        return view('pengaduan.index', compact('pengaduan', 'stats'));
     }
 
     public function detail($id)
@@ -119,7 +134,7 @@ class PengaduanController extends Controller
         $pengaduan = Pengaduan::findOrFail($id);
         $pengaduan->update([
             'status' => $request->status,
-            'admin_notes' => $request->admin_notes,
+            'admin_notes' => $request->admin_notes ?? '',
             'processed_by' => auth()->id(),
         ]);
 
@@ -131,11 +146,7 @@ class PengaduanController extends Controller
             $this->generatePDF($pengaduan);
         }
 
-        if ($request->expectsJson()) {
-            return response()->json(['success' => true, 'message' => 'Status pengaduan berhasil diperbarui.']);
-        }
-        
-        return redirect()->back()->with('success', 'Status pengaduan berhasil diperbarui.');
+        return response()->json(['success' => true, 'message' => 'Status pengaduan berhasil diperbarui.']);
     }
 
     /**
@@ -143,15 +154,23 @@ class PengaduanController extends Controller
      */
     private function generatePDF($pengaduan)
     {
-        // Generate PDF content
-        $pdfContent = view('pengaduan.pdf', compact('pengaduan'))->render();
+        // Generate PDF using DomPDF
+        $pdf = PDF::loadView('pengaduan.pdf', compact('pengaduan'));
+        
+        // Create directory if not exists
+        $directory = storage_path('app/public/pengaduan_pdf');
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
         
         // Save PDF file
         $filename = 'pengaduan_' . $pengaduan->id . '_' . date('Y-m-d_H-i-s') . '.pdf';
         $pdfPath = 'pengaduan_pdf/' . $filename;
         
-        // For now, we'll just store the filename
-        // In production, you'd use a PDF library like DomPDF or TCPDF
+        // Save PDF to storage
+        $pdf->save(storage_path('app/public/' . $pdfPath));
+        
+        // Update database with PDF path
         $pengaduan->update(['pdf_output' => $pdfPath]);
     }
 
@@ -212,5 +231,34 @@ class PengaduanController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Public download PDF for completed pengaduan (no authentication required)
+     */
+    public function downloadPDFPublic($id)
+    {
+        $pengaduan = Pengaduan::with('travel')->findOrFail($id);
+        
+        if ($pengaduan->status !== 'completed') {
+            abort(404, 'PDF hanya tersedia untuk pengaduan yang telah selesai.');
+        }
+
+        if (!$pengaduan->pdf_output) {
+            abort(404, 'PDF belum tersedia.');
+        }
+
+        $path = storage_path('app/public/' . $pengaduan->pdf_output);
+        
+        if (!file_exists($path)) {
+            abort(404, 'File PDF tidak ditemukan.');
+        }
+
+        $filename = 'pengaduan_' . $pengaduan->id . '_' . date('Y-m-d') . '.pdf';
+        
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . $filename . '"'
+        ]);
     }
 }

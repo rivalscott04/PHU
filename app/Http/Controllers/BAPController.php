@@ -269,6 +269,7 @@ class BAPController extends Controller
             'address_phone' => 'required|string|max:255',
             'kab_kota' => 'required|string|max:255',
             'people' => 'required|integer',
+            'days' => 'required|integer|min:1',
             'package' => 'required|string|max:255',
             'price' => 'required|numeric',
             'datetime' => 'required|date',
@@ -384,7 +385,8 @@ class BAPController extends Controller
 
     public function getEvents()
     {
-        $events = BAP::all()->map(function ($event) {
+        // Hanya ambil BAP dengan status 'diterima' untuk ditampilkan di jadwal keberangkatan
+        $events = BAP::where('status', 'diterima')->get()->map(function ($event) {
             return [
                 'title' => $event->ppiuname,
                 'start' => $event->datetime,
@@ -397,6 +399,7 @@ class BAPController extends Controller
                     'kab_kota' => $event->kab_kota,
                     'people' => $event->people,
                     'package' => $event->package,
+                    'days' => $event->days,
                     'price' => $event->price,
                     'airlines' => $event->airlines,
                     'returndate' => $event->returndate,
