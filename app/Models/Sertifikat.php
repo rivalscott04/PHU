@@ -90,15 +90,48 @@ class Sertifikat extends Model
     {
         $bulan = now()->format('m');
         $tahun = now()->format('Y');
-        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)->count() + 1;
+        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)
+                               ->whereMonth('created_at', $bulan)
+                               ->count() + 1;
         
-        return "B-{$nomorUrut}/Kw.18.01/HJ.00/2/{$bulan}/{$tahun}";
+        return $nomorUrut; // Return hanya angka urut, bukan format lengkap
     }
 
     public function generateNomorDokumen()
     {
         $tahun = now()->format('Y');
-        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)->count() + 1;
+        $bulan = now()->format('m');
+        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)
+                               ->whereMonth('created_at', $bulan)
+                               ->count() + 1;
+        
+        return str_pad($nomorUrut, 3, '0', STR_PAD_LEFT); // Return 3 digit dengan leading zero
+    }
+
+    // Method untuk mendapatkan nomor surat berikutnya (untuk form)
+    public static function getNextNomorSurat($tahun = null, $bulan = null)
+    {
+        $tahun = $tahun ?: now()->format('Y');
+        $bulan = $bulan ?: now()->format('m');
+        
+        // Hitung berdasarkan tahun dan bulan untuk memastikan urutan yang benar
+        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)
+                               ->whereMonth('created_at', $bulan)
+                               ->count() + 1;
+        
+        return $nomorUrut;
+    }
+
+    // Method untuk mendapatkan nomor dokumen berikutnya (untuk form)
+    public static function getNextNomorDokumen($tahun = null, $bulan = null)
+    {
+        $tahun = $tahun ?: now()->format('Y');
+        $bulan = $bulan ?: now()->format('m');
+        
+        // Hitung berdasarkan tahun dan bulan untuk memastikan urutan yang benar
+        $nomorUrut = Sertifikat::whereYear('created_at', $tahun)
+                               ->whereMonth('created_at', $bulan)
+                               ->count() + 1;
         
         return str_pad($nomorUrut, 3, '0', STR_PAD_LEFT);
     }

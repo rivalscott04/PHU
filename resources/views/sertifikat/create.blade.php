@@ -24,7 +24,9 @@
                     <!-- Form untuk Sertifikat Pusat -->
                     <form action="{{ route('sertifikat.store') }}" method="POST" id="form-pusat">
                         @csrf
-                        <input type="hidden" name="jenis_lokasi" value="pusat">
+                                                 <input type="hidden" name="jenis_lokasi" value="pusat">
+                         <input type="hidden" name="nomor_surat" value="{{ $nextNomorSurat }}">
+                         <input type="hidden" name="nomor_dokumen" value="{{ $nextNomorDokumen }}">
                         
                                                                          <!-- Tab Navigation -->
                         <ul class="nav nav-tabs mb-4" id="sertifikatTab" role="tablist">
@@ -120,9 +122,9 @@
                                         <div class="mb-3">
                                             <label for="nomor_surat_pusat" class="form-label">Nomor Surat *</label>
                                             <input type="number" class="form-control @error('nomor_surat') is-invalid @enderror" 
-                                                   id="nomor_surat_pusat" name="nomor_surat" value="{{ old('nomor_surat') }}" 
-                                                   placeholder="1, 2, 3, dst" required>
-                                            <small class="form-text text-muted">Nomor urut surat</small>
+                                                   id="nomor_surat_pusat" name="nomor_surat" value="{{ $nextNomorSurat }}" 
+                                                   placeholder="1, 2, 3, dst" readonly>
+                                            <small class="form-text text-muted">Nomor urut surat (otomatis)</small>
                                             @error('nomor_surat')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -158,10 +160,10 @@
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label for="nomor_dokumen_pusat" class="form-label">Nomor Dokumen *</label>
-                                            <input type="number" class="form-control @error('nomor_dokumen') is-invalid @enderror" 
-                                                   id="nomor_dokumen_pusat" name="nomor_dokumen" value="{{ old('nomor_dokumen') }}" 
-                                                   placeholder="001, 002, dst" required>
-                                            <small class="form-text text-muted">3 digit angka</small>
+                                            <input type="text" class="form-control @error('nomor_dokumen') is-invalid @enderror" 
+                                                   id="nomor_dokumen_pusat" name="nomor_dokumen" value="{{ $nextNomorDokumen }}" 
+                                                   placeholder="001, 002, dst" readonly>
+                                            <small class="form-text text-muted">3 digit angka (otomatis)</small>
                                             @error('nomor_dokumen')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -205,6 +207,8 @@
                      <form action="{{ route('sertifikat.store') }}" method="POST" id="form-cabang" style="display: none;">
                          @csrf
                          <input type="hidden" name="jenis_lokasi" value="cabang">
+                         <input type="hidden" name="nomor_surat" value="{{ $nextNomorSurat }}">
+                         <input type="hidden" name="nomor_dokumen" value="{{ $nextNomorDokumen }}">
                          
                          <!-- Tab Navigation untuk Cabang -->
                          <ul class="nav nav-tabs mb-4" id="sertifikatTabCabang" role="tablist">
@@ -307,9 +311,9 @@
                                           <div class="mb-3">
                                               <label for="nomor_surat_cabang" class="form-label">Nomor Surat *</label>
                                               <input type="number" class="form-control @error('nomor_surat') is-invalid @enderror" 
-                                                     id="nomor_surat_cabang" name="nomor_surat" value="{{ old('nomor_surat') }}" 
-                                                     placeholder="1, 2, 3, dst" required>
-                                              <small class="form-text text-muted">Nomor urut surat</small>
+                                                     id="nomor_surat_cabang" name="nomor_surat" value="{{ $nextNomorSurat }}" 
+                                                     placeholder="1, 2, 3, dst" readonly>
+                                              <small class="form-text text-muted">Nomor urut surat (otomatis)</small>
                                               @error('nomor_surat')
                                                   <div class="invalid-feedback">{{ $message }}</div>
                                               @enderror
@@ -345,10 +349,10 @@
                                       <div class="col-md-3">
                                           <div class="mb-3">
                                               <label for="nomor_dokumen_cabang" class="form-label">Nomor Dokumen *</label>
-                                              <input type="number" class="form-control @error('nomor_dokumen') is-invalid @enderror" 
-                                                     id="nomor_dokumen_cabang" name="nomor_dokumen" value="{{ old('nomor_dokumen') }}" 
-                                                     placeholder="001, 002, dst" required>
-                                              <small class="form-text text-muted">3 digit angka</small>
+                                              <input type="text" class="form-control @error('nomor_dokumen') is-invalid @enderror" 
+                                                     id="nomor_dokumen_cabang" name="nomor_dokumen" value="{{ $nextNomorDokumen }}" 
+                                                     placeholder="001, 002, dst" readonly>
+                                              <small class="form-text text-muted">3 digit angka (otomatis)</small>
                                               @error('nomor_dokumen')
                                                   <div class="invalid-feedback">{{ $message }}</div>
                                               @enderror
@@ -499,11 +503,50 @@
                   field.removeAttribute('required');
               });
               
-              // Add data-required attribute to all required fields
-              const allRequiredFields = document.querySelectorAll('[required]');
-              allRequiredFields.forEach(field => {
-                  field.setAttribute('data-required', 'true');
-              });
-         });
+                             // Add data-required attribute to all required fields
+               const allRequiredFields = document.querySelectorAll('[required]');
+               allRequiredFields.forEach(field => {
+                   field.setAttribute('data-required', 'true');
+               });
+
+               // Function to update nomor otomatis when bulan/tahun changes
+               function updateNomorOtomatis() {
+                   const bulanPusat = document.getElementById('bulan_surat_pusat').value;
+                   const tahunPusat = document.getElementById('tahun_surat_pusat').value;
+                   const bulanCabang = document.getElementById('bulan_surat_cabang').value;
+                   const tahunCabang = document.getElementById('tahun_surat_cabang').value;
+
+                   if (bulanPusat && tahunPusat) {
+                       fetch(`/sertifikat/get-next-nomor?bulan=${bulanPusat}&tahun=${tahunPusat}`)
+                           .then(response => response.json())
+                           .then(data => {
+                               document.getElementById('nomor_surat_pusat').value = data.nomor_surat;
+                               document.getElementById('nomor_dokumen_pusat').value = data.nomor_dokumen;
+                               // Update hidden inputs
+                               document.querySelector('input[name="nomor_surat"]').value = data.nomor_surat;
+                               document.querySelector('input[name="nomor_dokumen"]').value = data.nomor_dokumen;
+                           });
+                   }
+
+                   if (bulanCabang && tahunCabang) {
+                       fetch(`/sertifikat/get-next-nomor?bulan=${bulanCabang}&tahun=${tahunCabang}`)
+                           .then(response => response.json())
+                           .then(data => {
+                               document.getElementById('nomor_surat_cabang').value = data.nomor_surat;
+                               document.getElementById('nomor_dokumen_cabang').value = data.nomor_dokumen;
+                               // Update hidden inputs for cabang form
+                               const cabangForm = document.getElementById('form-cabang');
+                               cabangForm.querySelector('input[name="nomor_surat"]').value = data.nomor_surat;
+                               cabangForm.querySelector('input[name="nomor_dokumen"]').value = data.nomor_dokumen;
+                           });
+                   }
+               }
+
+               // Add event listeners for bulan and tahun changes
+               document.getElementById('bulan_surat_pusat').addEventListener('change', updateNomorOtomatis);
+               document.getElementById('tahun_surat_pusat').addEventListener('change', updateNomorOtomatis);
+               document.getElementById('bulan_surat_cabang').addEventListener('change', updateNomorOtomatis);
+               document.getElementById('tahun_surat_cabang').addEventListener('change', updateNomorOtomatis);
+          });
          </script>
 @endsection 

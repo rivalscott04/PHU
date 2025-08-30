@@ -154,6 +154,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/sertifikat/{id}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
     Route::get('/sertifikat/travel-data/{id}', [SertifikatController::class, 'getTravelData'])->name('sertifikat.travel-data');
     Route::get('/sertifikat/cabang-data/{id}', [SertifikatController::class, 'getCabangData'])->name('sertifikat.cabang-data');
+    Route::get('/sertifikat/get-next-nomor', [SertifikatController::class, 'getNextNomor'])->name('sertifikat.get-next-nomor');
     Route::get('/sertifikat/{id}/view', [SertifikatController::class, 'view'])->name('sertifikat.view');
     Route::get('/sertifikat/settings', [SertifikatController::class, 'getSettings'])->name('sertifikat.settings');
     Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');

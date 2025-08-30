@@ -62,7 +62,11 @@ class SertifikatController extends Controller
             $cabangs = collect();
         }
 
-        return view('sertifikat.create', compact('travels', 'cabangs'));
+        // Get next nomor surat and dokumen
+        $nextNomorSurat = \App\Models\Sertifikat::getNextNomorSurat();
+        $nextNomorDokumen = \App\Models\Sertifikat::getNextNomorDokumen();
+        
+        return view('sertifikat.create', compact('travels', 'cabangs', 'nextNomorSurat', 'nextNomorDokumen'));
     }
 
     public function getTravelData($id)
@@ -89,6 +93,20 @@ class SertifikatController extends Controller
         ]);
     }
 
+    public function getNextNomor(Request $request)
+    {
+        $bulan = $request->get('bulan');
+        $tahun = $request->get('tahun');
+        
+        $nomorSurat = \App\Models\Sertifikat::getNextNomorSurat($tahun, $bulan);
+        $nomorDokumen = \App\Models\Sertifikat::getNextNomorDokumen($tahun, $bulan);
+        
+        return response()->json([
+            'nomor_surat' => $nomorSurat,
+            'nomor_dokumen' => $nomorDokumen
+        ]);
+    }
+
     public function store(Request $request)
     {
         \Log::info('=== STORE SERTIFIKAT START ===');
@@ -104,9 +122,9 @@ class SertifikatController extends Controller
                 'alamat' => 'required|string',
                 'tanggal_diterbitkan' => 'required|date',
                 'nomor_surat' => 'required|numeric|min:1',
+                'nomor_dokumen' => 'required|string',
                 'bulan_surat' => 'required|numeric|min:1|max:12',
                 'tahun_surat' => 'required|numeric|min:2020|max:2030',
-                'nomor_dokumen' => 'required|numeric|min:1',
                 'tanggal_tandatangan' => 'required|date',
                 'jenis_lokasi' => 'required|in:pusat,cabang'
             ]);
@@ -119,9 +137,9 @@ class SertifikatController extends Controller
                 'alamat' => 'required|string',
                 'tanggal_diterbitkan' => 'required|date',
                 'nomor_surat' => 'required|numeric|min:1',
+                'nomor_dokumen' => 'required|string',
                 'bulan_surat' => 'required|numeric|min:1|max:12',
                 'tahun_surat' => 'required|numeric|min:2020|max:2030',
-                'nomor_dokumen' => 'required|numeric|min:1',
                 'tanggal_tandatangan' => 'required|date',
                 'jenis_lokasi' => 'required|in:pusat,cabang'
             ]);
@@ -149,14 +167,13 @@ class SertifikatController extends Controller
             \Log::info('Set cabang_id for CABANG:', ['cabang_id' => $request->cabang_id]);
         }
 
-        // Format nomor surat sesuai template
+        // Format nomor surat sesuai template menggunakan data dari form
         $data['nomor_surat'] = "B-{$data['nomor_surat']}/Kw.18.01/HJ.00/2/" .
             str_pad($data['bulan_surat'], 2, '0', STR_PAD_LEFT) . "/{$data['tahun_surat']}";
         \Log::info('Formatted nomor_surat:', ['nomor_surat' => $data['nomor_surat']]);
 
-        // Format nomor dokumen menjadi 3 digit
-        $data['nomor_dokumen'] = str_pad($data['nomor_dokumen'], 3, '0', STR_PAD_LEFT);
-        \Log::info('Formatted nomor_dokumen:', ['nomor_dokumen' => $data['nomor_dokumen']]);
+        // Nomor dokumen sudah dalam format yang benar dari form
+        \Log::info('Nomor dokumen from form:', ['nomor_dokumen' => $data['nomor_dokumen']]);
 
         \Log::info('Creating sertifikat with data:', $data);
         $sertifikat = Sertifikat::create($data);
