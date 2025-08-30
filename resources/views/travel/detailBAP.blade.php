@@ -52,11 +52,11 @@
                                             <input type="text" class="form-control" id="days"
                                                 value="{{ $data->days }}" disabled>
                                         </div>
-                                        <div class="col-md-12 mb-3">
+                                        {{-- <div class="col-md-12 mb-3">
                                             <label for="package" class="form-label">Nama Paket</label>
                                             <input type="text" class="form-control" id="package"
                                                 value="{{ $data->package }}" disabled>
-                                        </div>
+                                        </div> --}}
                                         <div class="col-md-12 mb-3">
                                             <label for="price" class="form-label">Harga</label>
                                             <input type="text" class="form-control" id="price"
@@ -82,7 +82,7 @@
                                             <input type="text" class="form-control" id="airlines2"
                                                 value="{{ $data->airlines2 }}" disabled>
                                         </div>
-                                    </div>  
+                                    </div>
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <h5 class="mb-3">Pernyataan yang diupload</h5>
@@ -175,22 +175,25 @@
                                         onchange="handleStatusChangeDetail(this.value)">
                                         <option value="pending" {{ $data->status == 'pending' ? 'selected' : '' }}>Pending
                                         </option>
-                                        <option value="diajukan" {{ $data->status == 'diajukan' ? 'selected' : '' }}>Diajukan
+                                        <option value="diajukan" {{ $data->status == 'diajukan' ? 'selected' : '' }}>
+                                            Diajukan
                                         </option>
-                                        <option value="diproses" {{ $data->status == 'diproses' ? 'selected' : '' }}>Diproses
+                                        <option value="diproses" {{ $data->status == 'diproses' ? 'selected' : '' }}>
+                                            Diproses
                                         </option>
-                                        <option value="diterima" {{ $data->status == 'diterima' ? 'selected' : '' }}>Diterima
+                                        <option value="diterima" {{ $data->status == 'diterima' ? 'selected' : '' }}>
+                                            Diterima
                                         </option>
                                     </select>
-                                    @if($data->status === 'diterima' && $data->nomor_surat)
+                                    @if ($data->status === 'diterima' && $data->nomor_surat)
                                         <small class="text-muted mt-1 d-block">{{ $data->nomor_surat }}</small>
                                     @endif
                                 </div>
                             </div>
                         </form>
                     @endif
-                    
-                    @if($data->status === 'diterima')
+
+                    @if ($data->status === 'diterima')
                         <div class="mt-3">
                             <a href="{{ route('cetak.bap', $data->id) }}" target="_blank" class="btn btn-success">
                                 <i class="bx bx-printer me-2"></i>Cetak BAP
@@ -204,16 +207,14 @@
 @endsection
 
 @push('js')
-<script>
-    function handleStatusChangeDetail(status) {
-        const form = document.getElementById('statusFormDetail');
-        
-        // Submit form langsung untuk semua status
-        form.submit();
-    }
+    <script>
+        function handleStatusChangeDetail(status) {
+            const form = document.getElementById('statusFormDetail');
 
-
-</script>
+            // Submit form langsung untuk semua status
+            form.submit();
+        }
+    </script>
 @endpush
 
 

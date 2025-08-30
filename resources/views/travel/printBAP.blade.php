@@ -176,10 +176,7 @@
                 <span class="label">Jumlah Jamaah</span>: <span class="input-line">{{ $data->people }} Orang</span>
             </div>
             <div class="form-group">
-                <span class="label">Nama Paket</span>: <span class="input-line">{{ $data->package }}</span>
-            </div>
-            <div class="form-group">
-                <span class="label">Lama Perjalanan</span>: <span class="input-line">{{ $data->days }} Hari</span>
+                <span class="label">Paket</span>: <span class="input-line">{{ $data->days }} Hari</span>
             </div>
             <div class="form-group">
                 <span class="label">Harga</span>: Rp <span class="input-line">

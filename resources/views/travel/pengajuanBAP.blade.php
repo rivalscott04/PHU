@@ -50,7 +50,7 @@
                                     {{ !in_array(auth()->user()->role, ['admin', 'kabupaten']) ? 'readonly' : '' }}>
                             </div>
 
-                            <!-- Rest of the form remains the same -->
+                            <!-- Modified form fields with new logic -->
                             <div class="col-md-6 mb-3">
                                 <label for="people" class="form-label">Jumlah Jamaah</label>
                                 <input type="number" class="form-control" id="people" name="people"
@@ -58,13 +58,9 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="days" class="form-label">Jumlah Hari</label>
-                                <input type="number" class="form-control" id="days" name="days" readonly>
-                                <small class="form-text text-muted">Otomatis dihitung berdasarkan tanggal keberangkatan dan
-                                    kepulangan</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="package" class="form-label">Nama Paket</label>
-                                <input type="text" class="form-control" id="package" name="package" required>
+                                <input type="number" class="form-control" id="days" name="days" required
+                                    min="1">
+                                <small class="form-text text-muted">Masukkan jumlah hari perjalanan</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="price" class="form-label">Harga</label>
@@ -82,7 +78,9 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="returndate" class="form-label">Tanggal Kepulangan</label>
-                                <input type="date" class="form-control" id="returndate" name="returndate" required>
+                                <input type="date" class="form-control" id="returndate" name="returndate" readonly>
+                                <small class="form-text text-muted">Otomatis dihitung berdasarkan jumlah hari dan tanggal
+                                    keberangkatan</small>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="airlines2" class="form-label">Nama Airline Kepulangan</label>
@@ -113,46 +111,38 @@
             document.getElementById('price_hidden').value = rawValue;
         }
 
-        function calculateDays() {
+        function calculateReturnDate() {
             const departureDate = document.getElementById('datetime').value;
-            const returnDate = document.getElementById('returndate').value;
+            const days = document.getElementById('days').value;
 
-            if (departureDate && returnDate) {
-                // Buat objek Date dari string tanggal
+            if (departureDate && days && days > 0) {
+                // Buat objek Date dari tanggal keberangkatan
                 const startDate = new Date(departureDate);
-                const endDate = new Date(returnDate);
 
-                // Hitung selisih hari
-                const timeDifference = endDate.getTime() - startDate.getTime();
-                const dayDifference = Math.ceil(timeDifference / (1000 * 3600 * 24));
+                // Tambahkan jumlah hari (dikurangi 1 karena hari keberangkatan sudah dihitung)
+                const returnDate = new Date(startDate);
+                returnDate.setDate(startDate.getDate() + parseInt(days) - 1);
 
-                // Pastikan jumlah hari tidak negatif
-                if (dayDifference >= 0) {
-                    document.getElementById('days').value = dayDifference;
-                } else {
-                    document.getElementById('days').value = '';
-                    alert('Tanggal kepulangan harus setelah tanggal keberangkatan!');
-                }
+                // Format tanggal untuk input type="date" (YYYY-MM-DD)
+                const formattedReturnDate = returnDate.toISOString().split('T')[0];
+
+                // Set nilai tanggal kepulangan
+                document.getElementById('returndate').value = formattedReturnDate;
             } else {
-                document.getElementById('days').value = '';
+                // Kosongkan tanggal kepulangan jika input tidak lengkap
+                document.getElementById('returndate').value = '';
             }
         }
 
-        // Tambahkan event listener untuk kedua input tanggal
-        document.getElementById('datetime').addEventListener('change', calculateDays);
-        document.getElementById('returndate').addEventListener('change', calculateDays);
+        // Tambahkan event listener untuk input hari dan tanggal keberangkatan
+        document.getElementById('days').addEventListener('input', calculateReturnDate);
+        document.getElementById('datetime').addEventListener('change', calculateReturnDate);
 
-        // Validasi tambahan untuk memastikan tanggal kepulangan tidak sebelum tanggal keberangkatan
-        document.getElementById('returndate').addEventListener('change', function() {
-            const departureDate = document.getElementById('datetime').value;
-            const returnDate = this.value;
-
-            if (departureDate && returnDate) {
-                if (new Date(returnDate) < new Date(departureDate)) {
-                    alert('Tanggal kepulangan tidak boleh sebelum tanggal keberangkatan!');
-                    this.value = '';
-                    document.getElementById('days').value = '';
-                }
+        // Validasi tambahan untuk memastikan jumlah hari minimal 1
+        document.getElementById('days').addEventListener('input', function() {
+            if (this.value < 1) {
+                this.value = '';
+                document.getElementById('returndate').value = '';
             }
         });
     </script>
