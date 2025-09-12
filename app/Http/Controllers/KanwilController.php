@@ -308,7 +308,7 @@ class KanwilController extends Controller
 
     public function downloadTemplateCabang()
     {
-        $filePath = public_path('template/template-cabang.xlsx');
+        $filePath = public_path('template/cabang-travel.xlsx');
 
         if (file_exists($filePath)) {
             return response()->download($filePath, 'template-cabang-travel.xlsx');
