@@ -222,14 +222,14 @@
         }
 
         .stat-icon i {
-            font-size: 2.5rem;
-            color: #007bff;
+            font-size: 2.8rem;
             transition: all 0.3s ease;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
         }
 
         .stat-item:hover .stat-icon i {
-            transform: scale(1.1);
-            color: #0056b3;
+            transform: scale(1.15) rotate(5deg);
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
         }
 
         .stat-number {
@@ -257,7 +257,7 @@
             }
             
             .stat-icon i {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
             
             .stat-number {
@@ -620,64 +620,6 @@
         </section>
         <!-- /Hero Section -->
 
-        <!-- Stats Section -->
-        <section class="stats-section section light-background">
-            <div class="container" data-aos="fade-up" data-aos-delay="100">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="stats-bar">
-                            <div class="row g-3">
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal">
-                                        <div class="stat-icon">
-                                            <i class="bx bx-building"></i>
-                                        </div>
-                                        <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['travelCount'] }}</h3>
-                                            <p class="stat-label">Travel Berizin</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal">
-                                        <div class="stat-icon">
-                                            <i class="bx bx-group"></i>
-                                        </div>
-                                        <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h3>
-                                            <p class="stat-label">Total Jamaah</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal">
-                                        <div class="stat-icon">
-                                            <i class="bx bx-plane"></i>
-                                        </div>
-                                        <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['airlineCount'] }}</h3>
-                                            <p class="stat-label">Maskapai</p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal">
-                                        <div class="stat-icon">
-                                            <i class="bx bx-map"></i>
-                                        </div>
-                                        <div class="stat-content">
-                                            <h3 class="stat-number">{{ $travels->groupBy('kab_kota')->count() }}</h3>
-                                            <p class="stat-label">Kabupaten</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- /Stats Section -->
 
         <!-- About Section -->
         <section id="about" class="about section">
@@ -772,6 +714,75 @@
                 </div>
             </div>
         </section>
+
+        <!-- Stats Section -->
+        <section class="stats-section section light-background">
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Statistik</h2>
+                <div>
+                    <span>Data</span>
+                    <span class="description-title">Terbaru</span>
+                </div>
+            </div>
+            <!-- End Section Title -->
+
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="stats-bar">
+                            <div class="row g-3">
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-building text-primary"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['travelCount'] }}</h3>
+                                            <p class="stat-label">Travel Berizin</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-users text-success"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h3>
+                                            <p class="stat-label">Total Jamaah</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-plane text-info"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['airlineCount'] }}</h3>
+                                            <p class="stat-label">Maskapai</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-map-marker-alt text-warning"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $travels->groupBy('kab_kota')->count() }}</h3>
+                                            <p class="stat-label">Kabupaten</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /Stats Section -->
 
         <!-- Informasi Section -->
         <section id="informasi" class="informasi section light-background">
@@ -1214,7 +1225,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="travelModalLabel">
-                        <i class="bx bx-building me-2"></i>Detail Travel Berizin
+                        <i class="fas fa-building me-2"></i>Detail Travel Berizin
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1242,7 +1253,7 @@
                             @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">
-                                    <i class="bx bx-map-pin me-1"></i>
+                                    <i class="fas fa-map-marker-alt me-1"></i>
                                     {{ $kabupaten }}: <strong>{{ $travelList->count() }} travel</strong>
                                 </small>
                             </div>
@@ -1264,7 +1275,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="jamaahModalLabel">
-                        <i class="bx bx-group me-2"></i>Detail Data Jamaah
+                        <i class="fas fa-users me-2"></i>Detail Data Jamaah
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1304,7 +1315,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="maskapaiModalLabel">
-                        <i class="bx bx-plane me-2"></i>Detail Maskapai
+                        <i class="fas fa-plane me-2"></i>Detail Maskapai
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1315,7 +1326,7 @@
                     </div>
                     <hr>
                     <div class="alert alert-info">
-                        <i class="bx bx-info-circle me-2"></i>
+                        <i class="fas fa-info-circle me-2"></i>
                         <strong>Info:</strong> Maskapai yang tersedia untuk penerbangan haji dan umrah dari wilayah NTB.
                     </div>
                 </div>
@@ -1332,7 +1343,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="kabupatenModalLabel">
-                        <i class="bx bx-map me-2"></i>Detail Kabupaten/Kota
+                        <i class="fas fa-map-marker-alt me-2"></i>Detail Kabupaten/Kota
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -1347,7 +1358,7 @@
                         @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
                         <div class="col-md-6 mb-2">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="bx bx-map-pin me-2 text-primary"></i>{{ $kabupaten }}</span>
+                                <span><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $kabupaten }}</span>
                                 <span class="badge bg-primary">{{ $travelList->count() }} travel</span>
                             </div>
                         </div>
