@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\BAPController;
+use App\Http\Controllers\UtilityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -226,3 +227,5 @@ Route::get('/public/pengaduan/{id}/download-pdf', [PengaduanController::class, '
 // Public pengaduan routes (no authentication required)
 Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
 Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');
+
+Route::get('/storage-link', [UtilityController::class, 'storageLink'])->name('utility.storage-link');

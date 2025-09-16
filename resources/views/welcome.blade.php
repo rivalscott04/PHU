@@ -188,6 +188,108 @@
             animation: fadeIn 0.5s ease forwards;
         }
 
+        /* Stats Section Styles */
+        .stats-section {
+            padding: 60px 0;
+        }
+
+        .stats-bar {
+            background: #fff;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px 15px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-item:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+        }
+
+        .stat-icon {
+            margin-bottom: 15px;
+        }
+
+        .stat-icon i {
+            font-size: 2.5rem;
+            color: #007bff;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover .stat-icon i {
+            transform: scale(1.1);
+            color: #0056b3;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .stats-bar {
+                padding: 30px 20px;
+            }
+            
+            .stat-item {
+                padding: 15px 10px;
+            }
+            
+            .stat-icon i {
+                font-size: 2rem;
+            }
+            
+            .stat-number {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* Modal Styles */
+        .stat-detail-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        .modal-content {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
         :root {
             --primary-color: #2563eb;
             --secondary-color: #1e40af;
@@ -517,6 +619,65 @@
             </svg>
         </section>
         <!-- /Hero Section -->
+
+        <!-- Stats Section -->
+        <section class="stats-section section light-background">
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="stats-bar">
+                            <div class="row g-3">
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal">
+                                        <div class="stat-icon">
+                                            <i class="bx bx-building"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['travelCount'] }}</h3>
+                                            <p class="stat-label">Travel Berizin</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal">
+                                        <div class="stat-icon">
+                                            <i class="bx bx-group"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h3>
+                                            <p class="stat-label">Total Jamaah</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal">
+                                        <div class="stat-icon">
+                                            <i class="bx bx-plane"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $stats['airlineCount'] }}</h3>
+                                            <p class="stat-label">Maskapai</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3 col-6">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal">
+                                        <div class="stat-icon">
+                                            <i class="bx bx-map"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <h3 class="stat-number">{{ $travels->groupBy('kab_kota')->count() }}</h3>
+                                            <p class="stat-label">Kabupaten</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /Stats Section -->
 
         <!-- About Section -->
         <section id="about" class="about section">
@@ -1045,6 +1206,160 @@
             </div>
         </div>
     </footer>
+
+    <!-- Stats Detail Modals -->
+    <!-- Travel Modal -->
+    <div class="modal fade" id="travelModal" tabindex="-1" aria-labelledby="travelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="travelModalLabel">
+                        <i class="bx bx-building me-2"></i>Detail Travel Berizin
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-detail-card">
+                                <h6 class="text-primary">PPIU (Penyelenggara Perjalanan Ibadah Umrah)</h6>
+                                <h3 class="text-success">{{ $travels->where('Status', 'PPIU')->count() }}</h3>
+                                <p class="text-muted">Travel khusus umrah</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-detail-card">
+                                <h6 class="text-primary">PIHK (Penyelenggara Ibadah Haji Khusus)</h6>
+                                <h3 class="text-info">{{ $travels->where('Status', 'PIHK')->count() }}</h3>
+                                <p class="text-muted">Travel haji & umrah</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="mt-3">
+                        <h6>Distribusi per Kabupaten/Kota:</h6>
+                        <div class="row">
+                            @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">
+                                    <i class="bx bx-map-pin me-1"></i>
+                                    {{ $kabupaten }}: <strong>{{ $travelList->count() }} travel</strong>
+                                </small>
+                            </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="{{ route('list.travel') }}" class="btn btn-primary">Lihat Daftar Travel</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Jamaah Modal -->
+    <div class="modal fade" id="jamaahModal" tabindex="-1" aria-labelledby="jamaahModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="jamaahModalLabel">
+                        <i class="bx bx-group me-2"></i>Detail Data Jamaah
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="stat-detail-card">
+                                <h6 class="text-primary">Jamaah Haji</h6>
+                                <h3 class="text-warning">{{ $stats['jamaahHajiCount'] }}</h3>
+                                <p class="text-muted">Jamaah haji khusus</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-detail-card">
+                                <h6 class="text-primary">Jamaah Umrah</h6>
+                                <h3 class="text-success">{{ $stats['jamaahUmrahCount'] }}</h3>
+                                <p class="text-muted">Jamaah umrah</p>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="text-center">
+                        <h4 class="text-primary">Total Jamaah: {{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h4>
+                        <p class="text-muted">Terdaftar dalam sistem PHU Kanwil NTB</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Maskapai Modal -->
+    <div class="modal fade" id="maskapaiModal" tabindex="-1" aria-labelledby="maskapaiModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="maskapaiModalLabel">
+                        <i class="bx bx-plane me-2"></i>Detail Maskapai
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary">{{ $stats['airlineCount'] }}</h3>
+                        <p class="text-muted">Maskapai yang bekerja sama</p>
+                    </div>
+                    <hr>
+                    <div class="alert alert-info">
+                        <i class="bx bx-info-circle me-2"></i>
+                        <strong>Info:</strong> Maskapai yang tersedia untuk penerbangan haji dan umrah dari wilayah NTB.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kabupaten Modal -->
+    <div class="modal fade" id="kabupatenModal" tabindex="-1" aria-labelledby="kabupatenModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="kabupatenModalLabel">
+                        <i class="bx bx-map me-2"></i>Detail Kabupaten/Kota
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary">{{ $travels->groupBy('kab_kota')->count() }}</h3>
+                        <p class="text-muted">Kabupaten/Kota yang terlayani</p>
+                    </div>
+                    <hr>
+                    <h6>Daftar Kabupaten/Kota:</h6>
+                    <div class="row">
+                        @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="bx bx-map-pin me-2 text-primary"></i>{{ $kabupaten }}</span>
+                                <span class="badge bg-primary">{{ $travelList->count() }} travel</span>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Scroll Top -->
     <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i
