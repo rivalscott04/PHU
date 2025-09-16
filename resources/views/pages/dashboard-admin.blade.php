@@ -51,12 +51,22 @@
                                 <div class="row">
                                     <div class="col-6">
                                         <h5 class="font-size-15">
-                                            {{ $totalTravel }}
+                                            {{ $totalTravelPusat }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            Total Travel
+                                            Travel Pusat
                                         </p>
                                     </div>
+                                    <div class="col-6">
+                                        <h5 class="font-size-15">
+                                            {{ $totalTravelCabang }}
+                                        </h5>
+                                        <p class="text-muted mb-0">
+                                            Travel Cabang
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="row mt-2">
                                     <div class="col-6">
                                         <h5 class="font-size-15">
                                             {{ $totalUsers }}

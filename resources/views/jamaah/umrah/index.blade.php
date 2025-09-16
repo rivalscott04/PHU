@@ -427,7 +427,7 @@
     </div>
 
     <style>
-        /* Accordion Styles - Following Skote Theme */
+        /* Accordion Styles - Following Theme */
         .accordion-button {
             border: none;
             box-shadow: none;
@@ -489,7 +489,7 @@
             margin: 0 1px;
         }
 
-        /* Summary Cards - Following Skote Theme */
+        /* Summary Cards - Following Theme */
         .card.bg-gradient-primary {
             background: linear-gradient(45deg, #556ee6, #6c757d) !important;
         }

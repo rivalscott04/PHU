@@ -58,7 +58,7 @@
     overflow: hidden;
 }
 
-/* Arrow styles for Skote's built-in accordion arrows */
+/* Arrow styles for theme's built-in accordion arrows */
 .metismenu .has-arrow::after {
     transition: transform 0.3s ease;
     color: rgba(255,255,255,0.7) !important;

@@ -93,7 +93,8 @@ class DashboardController extends Controller
         // Admin-specific statistics
         $totalJamaah = DB::table('jamaah')->count();
         $totalBAP = DB::table('bap')->count();
-        $totalTravel = DB::table('travels')->count();
+        $totalTravelPusat = DB::table('travels')->count();
+        $totalTravelCabang = DB::table('travel_cabang')->count();
         $totalUsers = DB::table('users')->count();
         $totalRevenue = DB::table('bap')
             ->select(DB::raw('SUM(people * price) as total_income'))
@@ -104,7 +105,8 @@ class DashboardController extends Controller
             'role' => $user->role,
             'totalJamaah' => $totalJamaah,
             'totalBAP' => $totalBAP,
-            'totalTravel' => $totalTravel,
+            'totalTravelPusat' => $totalTravelPusat,
+            'totalTravelCabang' => $totalTravelCabang,
             'totalUsers' => $totalUsers,
             'totalRevenue' => $totalRevenue,
             'monthlyData' => $monthlyData,

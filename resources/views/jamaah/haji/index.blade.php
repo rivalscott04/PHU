@@ -411,7 +411,7 @@
     </div>
 
     <style>
-    /* Accordion Styles - Following Skote Theme */
+    /* Accordion Styles - Following Theme */
     .accordion-button {
         border: none;
         box-shadow: none;
