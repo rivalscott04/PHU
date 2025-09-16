@@ -177,4 +177,12 @@ class AuthController extends Controller
         
         return view('travel-list', compact('data'));
     }
+
+    public function showPublicListTravel()
+    {
+        // Public access - show all travel companies without authentication
+        $data = TravelCompany::all();
+        
+        return view('travel-list-public', compact('data'));
+    }
 }

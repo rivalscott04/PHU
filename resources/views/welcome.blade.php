@@ -1263,7 +1263,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <a href="{{ route('list.travel') }}" class="btn btn-primary">Lihat Daftar Travel</a>
+                    <a href="{{ route('travel.public') }}" class="btn btn-primary">Lihat Daftar Travel</a>
                 </div>
             </div>
         </div>
