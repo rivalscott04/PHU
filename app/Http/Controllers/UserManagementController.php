@@ -81,8 +81,10 @@ class UserManagementController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users',
+            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
             'password' => 'required|string|min:8',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         User::create([
@@ -108,9 +110,11 @@ class UserManagementController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users',
+            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
             'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         // Check if kabupaten user is trying to create travel user for different kabupaten
@@ -175,11 +179,13 @@ class UserManagementController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $id,
+            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $id . '|regex:/^08/',
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal' => 'nullable|string|max:10',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         $updateData = [

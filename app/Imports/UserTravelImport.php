@@ -85,7 +85,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
         return [
             '*.nama' => 'required|string|max:255',
             '*.email' => 'required|email|max:255',
-            '*.nomor_hp' => 'required|string|max:20',
+            '*.nomor_hp' => 'required|string|max:20|regex:/^08/',
             '*.password' => 'required|string|min:5',
         ];
     }
@@ -102,6 +102,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
             '*.nomor_hp.string' => 'Nomor HP harus berupa teks',
             '*.nomor_hp.max' => 'Nomor HP maksimal 20 karakter',
+            '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
             '*.password.required' => 'Password wajib diisi',
             '*.password.string' => 'Password harus berupa teks',
             '*.password.min' => 'Password minimal 5 karakter',

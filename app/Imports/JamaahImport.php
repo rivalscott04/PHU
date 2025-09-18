@@ -50,7 +50,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
             '*.nik' => 'required|numeric|digits:16',
             '*.nama' => 'required|string|max:255',
             '*.alamat' => 'required|string',
-            '*.nomor_hp' => 'required|numeric|digits_between:10,13',
+            '*.nomor_hp' => 'required|numeric|digits_between:10,13|regex:/^08/',
         ];
     }
 
@@ -60,12 +60,12 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
             '*.nik.required' => 'NIK wajib diisi',
             '*.nik.numeric' => 'NIK harus berupa angka',
             '*.nik.digits' => 'NIK harus 16 digit',
-            '*.nik.required' => 'NIK wajib diisi',
             '*.nama.required' => 'Nama wajib diisi',
             '*.alamat.required' => 'Alamat wajib diisi',
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
             '*.nomor_hp.numeric' => 'Nomor HP harus berupa angka',
             '*.nomor_hp.digits_between' => 'Nomor HP harus 10-13 digit',
+            '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ];
     }
 }

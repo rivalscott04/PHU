@@ -69,3 +69,37 @@
         </div>
     </div>
 @endsection
+
+@section('scripts')
+<script>
+// Auto format phone number with validation
+document.getElementById('nomor_hp').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, '');
+    e.target.value = value;
+    
+    // Validate phone number starts with 08
+    const phoneInput = e.target;
+    const phoneValue = phoneInput.value;
+    
+    // Remove existing validation message
+    const existingMessage = phoneInput.parentNode.querySelector('.phone-validation-message');
+    if (existingMessage) {
+        existingMessage.remove();
+    }
+    
+    // Add validation if phone number is entered but doesn't start with 08
+    if (phoneValue && phoneValue.length > 0 && !phoneValue.startsWith('08')) {
+        const errorMessage = document.createElement('div');
+        errorMessage.className = 'phone-validation-message text-danger small mt-1';
+        errorMessage.textContent = 'Nomor HP harus diawali dengan 08';
+        phoneInput.parentNode.appendChild(errorMessage);
+        phoneInput.classList.add('is-invalid');
+    } else if (phoneValue && phoneValue.startsWith('08')) {
+        phoneInput.classList.remove('is-invalid');
+        phoneInput.classList.add('is-valid');
+    } else {
+        phoneInput.classList.remove('is-invalid', 'is-valid');
+    }
+});
+</script>
+@endsection

@@ -116,7 +116,9 @@ class JamaahController extends Controller
             'nik' => 'required|max:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15',
+            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {
@@ -139,7 +141,9 @@ class JamaahController extends Controller
             'nik' => 'required|max:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15',
+            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {
@@ -167,7 +171,9 @@ class JamaahController extends Controller
         $request->validate([
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15',
+            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+        ], [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {

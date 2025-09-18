@@ -113,7 +113,7 @@ class JamaahHajiKhususController extends Controller
             'kota' => 'required|string|max:255',
             'provinsi' => 'required|string|max:255',
             'kode_pos' => 'required|string|size:5',
-            'no_hp' => 'required|string|max:15',
+            'no_hp' => 'required|string|max:15|regex:/^08/',
             'email' => 'nullable|email|max:255',
             'nama_ayah' => 'required|string|max:255',
             'pekerjaan' => 'required|string|max:255',
@@ -134,6 +134,8 @@ class JamaahHajiKhususController extends Controller
             'dokumen_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
             'surat_keterangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
             'bukti_setor_bank' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
+        ], [
+            'no_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         $data = $request->all();
@@ -218,7 +220,7 @@ class JamaahHajiKhususController extends Controller
             'kota' => 'required|string|max:255',
             'provinsi' => 'required|string|max:255',
             'kode_pos' => 'required|string|size:5',
-            'no_hp' => 'required|string|max:15',
+            'no_hp' => 'required|string|max:15|regex:/^08/',
             'email' => 'nullable|email|max:255',
             'nama_ayah' => 'required|string|max:255',
             'pekerjaan' => 'required|string|max:255',
@@ -238,6 +240,8 @@ class JamaahHajiKhususController extends Controller
             'dokumen_paspor' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
             'dokumen_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
             'surat_keterangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
+        ], [
+            'no_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         $data = $request->except(['dokumen_ktp', 'dokumen_kk', 'dokumen_paspor', 'dokumen_foto', 'surat_keterangan']);
