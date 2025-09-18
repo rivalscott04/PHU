@@ -7,6 +7,9 @@
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
                     <h6>Data Cabang Travel</h6>
                     <div class="d-flex gap-2">
+                        <a href="{{ route('cabang.travel.export') }}" class="btn btn-info">
+                            <i class="bx bx-download"></i> Export Excel
+                        </a>
                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             <i class="bx bx-upload"></i> Import Data
                         </button>

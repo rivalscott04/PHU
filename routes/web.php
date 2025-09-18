@@ -54,9 +54,6 @@ Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->nam
 Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
-Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
-Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
-
 Route::get('/test', function () {
     return 'Middleware test';
 })->middleware('auth', 'password.changed');
@@ -71,6 +68,14 @@ Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('
 
 Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
+
+    // Change Password routes
+    Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
+    Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
+
+    // User Profile routes
+    Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile', [UserProfileController::class, 'update'])->name('profile.update');
 
     // Impersonate routes
     Route::get('/impersonate', [ImpersonateController::class, 'index'])->name('impersonate.index');
@@ -144,6 +149,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/travel/form', [KanwilController::class, 'store'])->name('post.travel');
     Route::get('/travel/{id}/edit', [KanwilController::class, 'edit'])->name('travel.edit');
     Route::put('/travel/{id}', [KanwilController::class, 'update'])->name('travel.update');
+    Route::get('/travel/export', [KanwilController::class, 'exportTravelPusat'])->name('travel.export');
 
     // Update travel status route - using POST method to avoid method override issues
     Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
@@ -174,6 +180,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::delete('/cabang-travel/{id}', [KanwilController::class, 'destroyCabangTravel'])->name('cabang.travel.destroy');
         Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
         Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
+        Route::get('/cabang-travel/export', [KanwilController::class, 'exportTravelCabang'])->name('cabang.travel.export');
     });
 
     Route::get('import-form', [ExcelImportController::class, 'importForm'])->name('import.form');
@@ -202,6 +209,11 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/travel-users', [UserManagementController::class, 'indexTravel'])->name('travels.index');
         Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
         Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
+        
+        // Travel User Import
+        Route::get('/travel-users/import', [UserManagementController::class, 'importTravelForm'])->name('travels.import.form');
+        Route::post('/travel-users/import', [UserManagementController::class, 'importTravelUsers'])->name('travels.import');
+        Route::get('/travel-users/template', [UserManagementController::class, 'downloadTravelUserTemplate'])->name('travels.template');
 
         // General User Management
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');

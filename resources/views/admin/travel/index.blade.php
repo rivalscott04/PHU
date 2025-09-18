@@ -6,10 +6,16 @@
             <div class="card">
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
                     <h6>Data User Travel</h6>
-                    <a href="{{ route('travels.create') }}" class="btn btn-primary">
-                        <i class="bx bx-plus me-1"></i>
-                        Tambah User Travel
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route('travels.import.form') }}" class="btn btn-success">
+                            <i class="bx bx-upload me-1"></i>
+                            Import Excel
+                        </a>
+                        <a href="{{ route('travels.create') }}" class="btn btn-primary">
+                            <i class="bx bx-plus me-1"></i>
+                            Tambah User Travel
+                        </a>
+                    </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">

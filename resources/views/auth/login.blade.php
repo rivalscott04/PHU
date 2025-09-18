@@ -76,9 +76,15 @@
                                 <form class="form-horizontal" action="{{ route('login.perform') }}" method="POST">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="email" class="form-label">Email</label>
-                                        <input type="email" class="form-control" id="email" name="email"
-                                            placeholder="Masukkan email">
+                                        <label for="email_or_phone" class="form-label">Email atau Nomor HP</label>
+                                        <input type="text" class="form-control @error('email_or_phone') is-invalid @enderror" 
+                                               id="email_or_phone" name="email_or_phone"
+                                               placeholder="Masukkan email atau nomor HP"
+                                               value="{{ old('email_or_phone') }}">
+                                        @error('email_or_phone')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                        @enderror
+                                        <small class="form-text text-muted">Bisa menggunakan email atau nomor HP untuk login</small>
                                     </div>
 
                                     <div class="mb-3">

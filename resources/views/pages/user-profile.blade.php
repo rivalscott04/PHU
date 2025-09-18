@@ -66,12 +66,37 @@
                             </div>
                         </div>
                         <div class="card-body">
+                            @if (session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            @if (session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ session('error') }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
+                            @if ($errors->any())
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            @endif
+
                             <p class="text-uppercase text-sm">User Information</p>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="example-text-input" class="form-control-label">Username</label>
-                                        <input class="form-control" type="text" name="username" value="{{ old('username', auth()->user()->username) }}">
+                                        <label for="example-text-input" class="form-control-label">Nama</label>
+                                        <input class="form-control" type="text" name="nama" value="{{ old('nama', auth()->user()->nama) }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -82,14 +107,8 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="example-text-input" class="form-control-label">First name</label>
-                                        <input class="form-control" type="text" name="firstname"  value="{{ old('firstname', auth()->user()->firstname) }}">
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label for="example-text-input" class="form-control-label">Last name</label>
-                                        <input class="form-control" type="text" name="lastname" value="{{ old('lastname', auth()->user()->lastname) }}">
+                                        <label for="example-text-input" class="form-control-label">Nomor HP</label>
+                                        <input class="form-control" type="text" name="nomor_hp" value="{{ old('nomor_hp', auth()->user()->nomor_hp) }}">
                                     </div>
                                 </div>
                             </div>
@@ -130,6 +149,29 @@
                                         <label for="example-text-input" class="form-control-label">About me</label>
                                         <input class="form-control" type="text" name="about"
                                             value="{{ old('about', auth()->user()->about) }}">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <hr class="horizontal dark">
+                            <p class="text-uppercase text-sm">Change Password</p>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="current_password" class="form-control-label">Current Password</label>
+                                        <input class="form-control" type="password" name="current_password" placeholder="Leave empty if not changing">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="new_password" class="form-control-label">New Password</label>
+                                        <input class="form-control" type="password" name="new_password" placeholder="Leave empty if not changing">
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="new_password_confirmation" class="form-control-label">Confirm New Password</label>
+                                        <input class="form-control" type="password" name="new_password_confirmation" placeholder="Confirm new password">
                                     </div>
                                 </div>
                             </div>

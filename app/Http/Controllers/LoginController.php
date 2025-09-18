@@ -23,11 +23,18 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $request->validate([
+            'email_or_phone' => 'required|string',
+            'password' => 'required|string',
+        ]);
 
-        $user = User::where('email', $credentials['email'])->first();
+        $identifier = $request->input('email_or_phone');
+        $password = $request->input('password');
 
-        if ($user && Hash::check($credentials['password'], $user->password)) {
+        // Find user by email or phone number
+        $user = User::findByEmailOrPhone($identifier);
+
+        if ($user && Hash::check($password, $user->password)) {
             Auth::login($user);
 
             if ($user->role === 'user') {
@@ -42,7 +49,7 @@ class LoginController extends Controller
             return redirect()->intended('dashboard');
         }
 
-        return redirect()->back()->withErrors(['email' => 'Email atau password salah.']);
+        return redirect()->back()->withErrors(['email_or_phone' => 'Email/nomor HP atau password salah.']);
     }
 
     public function logout(Request $request)

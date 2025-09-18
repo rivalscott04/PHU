@@ -6,6 +6,8 @@ use App\Models\CabangTravel;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use App\Imports\CabangTravelImport;
+use App\Exports\TravelPusatExport;
+use App\Exports\TravelCabangExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -315,5 +317,27 @@ class KanwilController extends Controller
         }
 
         return back()->with('error', 'Template file tidak ditemukan');
+    }
+
+    /**
+     * Export Travel Pusat to Excel
+     */
+    public function exportTravelPusat()
+    {
+        $user = auth()->user();
+        $filename = 'Data_Travel_Pusat_' . date('Y-m-d_H-i-s') . '.xlsx';
+        
+        return Excel::download(new TravelPusatExport($user), $filename);
+    }
+
+    /**
+     * Export Travel Cabang to Excel
+     */
+    public function exportTravelCabang()
+    {
+        $user = auth()->user();
+        $filename = 'Data_Travel_Cabang_' . date('Y-m-d_H-i-s') . '.xlsx';
+        
+        return Excel::download(new TravelCabangExport($user), $filename);
     }
 }

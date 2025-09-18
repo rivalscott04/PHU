@@ -4,7 +4,11 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\TravelCompany;
+use App\Imports\UserTravelImport;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserManagementController extends Controller
 {
@@ -111,16 +115,11 @@ class UserManagementController extends Controller
         $user = auth()->user();
         
         $request->validate([
-            'username' => 'required|string|max:255|unique:users',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'nomor_hp' => 'required|string|max:20|unique:users',
+            'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'postal' => 'required|string|max:10',
         ]);
 
         // Check if kabupaten user is trying to create travel user for different kabupaten
@@ -131,19 +130,19 @@ class UserManagementController extends Controller
             }
         }
 
+        // Get travel company data for auto-fill
+        $travelCompany = TravelCompany::find($request->travel_id);
+        
         User::create([
-            'username' => $request->username,
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
+            'nama' => $request->nama,
             'email' => $request->email,
+            'nomor_hp' => $request->nomor_hp,
             'password' => Hash::make($request->password),
             'role' => 'user',
             'travel_id' => $request->travel_id,
-            'address' => $request->address,
-            'city' => $request->city,
-            'country' => $request->country,
-            'postal' => $request->postal,
-            'is_password_changed' => 0,
+            'kabupaten' => $travelCompany->kab_kota,
+            'country' => 'Indonesia', // Default value
+            'is_password_changed' => false,
         ]);
 
         return redirect()->route('travels.index')->with('success', 'User Travel berhasil ditambahkan!');
@@ -183,21 +182,19 @@ class UserManagementController extends Controller
         }
         
         $request->validate([
-            'username' => 'required|string|max:255|unique:users,username,' . $id,
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'postal' => 'required|string|max:10',
+            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $id,
+            'address' => 'nullable|string',
+            'city' => 'nullable|string|max:255',
+            'country' => 'nullable|string|max:255',
+            'postal' => 'nullable|string|max:10',
         ]);
 
         $updateData = [
-            'username' => $request->username,
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
+            'nama' => $request->nama,
             'email' => $request->email,
+            'nomor_hp' => $request->nomor_hp,
             'address' => $request->address,
             'city' => $request->city,
             'country' => $request->country,
@@ -241,5 +238,97 @@ class UserManagementController extends Controller
 
         $route = $user->role === 'kabupaten' ? 'kabupaten.index' : 'travels.index';
         return redirect()->route($route)->with('success', 'User berhasil dihapus!');
+    }
+
+    /**
+     * Show the form for importing travel users via Excel
+     */
+    public function importTravelForm()
+    {
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            // Admin can see all travel companies
+            $travelCompanies = TravelCompany::all();
+        } else if ($user->role === 'kabupaten') {
+            // Kabupaten can only see travel companies from their kabupaten
+            $travelCompanies = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+        } else {
+            // Other roles see empty data
+            $travelCompanies = collect();
+        }
+        
+        return view('admin.travel.import', compact('travelCompanies'));
+    }
+
+    /**
+     * Handle Excel import for travel users
+     */
+    public function importTravelUsers(Request $request)
+    {
+        $request->validate([
+            'travel_id' => 'required|exists:travels,id',
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
+        ]);
+
+        $user = auth()->user();
+        
+        // Check if kabupaten user is trying to import for different kabupaten
+        if ($user->role === 'kabupaten') {
+            $travelCompany = TravelCompany::find($request->travel_id);
+            if ($travelCompany->kab_kota !== $user->kabupaten) {
+                return redirect()->back()->with('error', 'Anda hanya bisa import user untuk travel di kabupaten Anda sendiri.');
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Create import instance with travel_id
+            $import = new UserTravelImport($request->travel_id);
+            
+            // Import the Excel file
+            Excel::import($import, $request->file('excel_file'));
+
+            DB::commit();
+
+            // Get import results
+            $successCount = $import->getSuccessCount();
+            $errors = $import->getErrors();
+
+            // Prepare success message
+            $message = "Import berhasil! {$successCount} user berhasil dibuat.";
+            
+            // Add errors to message if any
+            if (!empty($errors)) {
+                $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
+            }
+
+            return redirect()->route('travels.index')
+                ->with('success', $message);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            \Log::error('UserTravelImport error: ' . $e->getMessage());
+            
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Download Excel template for travel users import
+     */
+    public function downloadTravelUserTemplate()
+    {
+        $filePath = public_path('template/templateuser.xlsx');
+        
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'Template file tidak ditemukan.');
+        }
+        
+        return response()->download($filePath, 'Template_Import_User_Travel.xlsx');
     }
 }

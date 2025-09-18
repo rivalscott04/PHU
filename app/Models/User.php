@@ -20,10 +20,9 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'travel_id',
-        'username',
-        'firstname',
-        'lastname',
+        'nama',
         'email',
+        'nomor_hp',
         'password',
         'address',
         'city',
@@ -72,5 +71,31 @@ class User extends Authenticatable
     public function canBeImpersonated()
     {
         return in_array($this->role, ['user', 'kabupaten']);
+    }
+
+    /**
+     * Find user by email or phone number
+     */
+    public static function findByEmailOrPhone($identifier)
+    {
+        // Check if identifier is email format
+        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+            return static::where('email', $identifier)->first();
+        }
+        
+        // Check if identifier is phone number format (basic check)
+        if (preg_match('/^[0-9+\-\s()]+$/', $identifier)) {
+            return static::where('nomor_hp', $identifier)->first();
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get display name for user
+     */
+    public function getDisplayName()
+    {
+        return $this->nama ?: $this->email;
     }
 }

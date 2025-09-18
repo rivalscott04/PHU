@@ -8,6 +8,9 @@
                     <h6>Data Travel</h6>
                     <div>
                         <a href="{{ route('form.travel') }}" class="btn btn-primary me-2">Tambah</a>
+                        <a href="{{ route('travel.export') }}" class="btn btn-info me-2">
+                            <i class="bx bx-download me-1"></i> Export Excel
+                        </a>
                         <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
