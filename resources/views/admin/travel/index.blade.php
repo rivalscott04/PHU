@@ -25,11 +25,11 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 5%">No.</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 15%">Username</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 20%">Nama Lengkap</th>
+                                        style="width: 20%">Nama</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 20%">Email</th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                        style="width: 15%">Nomor HP</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 15%">Travel Company</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
@@ -40,9 +40,9 @@
                                 @foreach ($travelUsers as $user)
                                     <tr class="text-center">
                                         <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $user->username }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $user->firstname }} {{ $user->lastname }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $user->nama }}</td>
                                         <td class="text-sm font-weight-bold">{{ $user->email }}</td>
+                                        <td class="text-sm font-weight-bold">{{ $user->nomor_hp }}</td>
                                         <td class="text-sm font-weight-bold">
                                             @if($user->travel)
                                                 <span class="badge bg-info">{{ $user->travel->Penyelenggara }}</span>
@@ -54,7 +54,7 @@
                                             <div class="d-flex justify-content-center gap-2">
                                                 <a href="{{ route('impersonate.take', $user->id) }}" 
                                                    class="btn btn-success btn-sm waves-effect waves-light"
-                                                   onclick="return confirmImpersonate(event, '{{ $user->username }}')"
+                                                   onclick="return confirmImpersonate(event, '{{ $user->nama }}')"
                                                    title="Impersonate User">
                                                     <i class="bx bx-user-check me-1"></i>
                                                     Impersonate
@@ -66,7 +66,7 @@
                                                     Edit
                                                 </a>
                                                 <button type="button" class="btn btn-danger btn-sm waves-effect waves-light"
-                                                    onclick="confirmDelete({{ $user->id }}, '{{ $user->username }}')" 
+                                                    onclick="confirmDelete({{ $user->id }}, '{{ $user->nama }}')" 
                                                     title="Delete User">
                                                     <i class="bx bx-trash me-1"></i>
                                                     Delete

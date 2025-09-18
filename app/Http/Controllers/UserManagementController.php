@@ -83,10 +83,6 @@ class UserManagementController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:8',
-            'address' => 'required|string',
-            'city' => 'required|string|max:255',
-            'country' => 'required|string|max:255',
-            'postal' => 'required|string|max:10',
         ]);
 
         User::create([
@@ -95,10 +91,7 @@ class UserManagementController extends Controller
             'nomor_hp' => $request->nomor_hp,
             'password' => Hash::make($request->password),
             'role' => 'kabupaten',
-            'address' => $request->address,
-            'city' => $request->city,
-            'country' => $request->country,
-            'postal' => $request->postal,
+            'country' => 'Indonesia', // Default value
             'is_password_changed' => 0,
         ]);
 

@@ -39,9 +39,11 @@ class AuthController extends Controller
     {
         // Validasi input dari request
         $validator = Validator::make($request->all(), [
-            'travel_id' => 'required|exists:travels,id',
+            'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'role' => 'required|string|in:user'
+            'nomor_hp' => 'required|string|max:20|unique:users',
+            'password' => 'required|string|min:5',
+            'travel_id' => 'required|exists:travels,id',
         ]);
 
         // Jika validasi gagal, kembalikan ke form dengan pesan error
@@ -60,10 +62,15 @@ class AuthController extends Controller
         }
 
         $user = User::create([
-            'username' => $travel->Penyelenggara,
+            'nama' => $request->nama,
             'email' => $request->email,
-            'password' => $this->defaultPassword,
-            'travel_id' => $travel->id
+            'nomor_hp' => $request->nomor_hp,
+            'password' => Hash::make($request->password),
+            'role' => 'user',
+            'travel_id' => $travel->id,
+            'kabupaten' => $travel->kab_kota,
+            'country' => 'Indonesia',
+            'is_password_changed' => false,
         ]);
 
         // Kembalikan response sukses

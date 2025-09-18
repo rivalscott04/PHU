@@ -20,7 +20,7 @@
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 20%">Email</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 15%">Role</th>
+                                        style="width: 15%">Nomor HP</th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         style="width: 40%">Aksi</th>
                                 </tr>
@@ -30,20 +30,14 @@
                                     @if ($user->role === 'user')
                                         <tr class="text-center">
                                             <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $user->username }}</td>
+                                            <td class="text-sm font-weight-bold">{{ $user->nama }}</td>
                                             <td class="text-sm font-weight-bold">{{ $user->email }}</td>
-                                            <td class="text-sm font-weight-bold">
-                                                @if ($user->role === 'user')
-                                                    <span class="badge bg-info">Travel</span>
-                                                @else
-                                                    <span class="badge bg-secondary">{{ $user->role }}</span>
-                                                @endif
-                                            </td>
+                                            <td class="text-sm font-weight-bold">{{ $user->nomor_hp }}</td>
                                             <td class="text-sm font-weight-bold">
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('impersonate.take', $user->id) }}" 
                                                        class="btn btn-success btn-sm waves-effect waves-light"
-                                                       onclick="return confirmImpersonate(event, '{{ $user->username }}')"
+                                                       onclick="return confirmImpersonate(event, '{{ $user->nama }}')"
                                                        title="Impersonate User">
                                                         <i class="bx bx-user-check me-1"></i>
                                                         Impersonate

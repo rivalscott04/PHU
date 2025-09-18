@@ -24,4 +24,8 @@ class CabangTravel extends Model
         'alamat_cabang',
         'telepon',
     ];
+
+    protected $casts = [
+        'tanggal' => 'date',
+    ];
 }
