@@ -37,26 +37,6 @@
                             <div class="card-body">
                                 <form method="POST" action="{{ route('travels.import') }}" enctype="multipart/form-data">
                                     @csrf
-                                    
-                                    <!-- Travel Selection -->
-                                    <div class="mb-3">
-                                        <label for="travel_id" class="form-label">Travel Company <span class="text-danger">*</span></label>
-                                        <select class="form-control @error('travel_id') is-invalid @enderror" 
-                                                id="travel_id" name="travel_id" required>
-                                            <option value="">Pilih Travel Company</option>
-                                            @foreach($travelCompanies as $travel)
-                                                <option value="{{ $travel->id }}" {{ old('travel_id') == $travel->id ? 'selected' : '' }}>
-                                                    {{ $travel->Penyelenggara }} - {{ $travel->kab_kota }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('travel_id')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <small class="form-text text-muted">
-                                            Semua user yang diimport akan dikaitkan dengan travel company yang dipilih
-                                        </small>
-                                    </div>
 
                                     <!-- File Upload -->
                                     <div class="mb-3">
@@ -100,6 +80,7 @@
                                     <li><strong>email</strong> - Wajib diisi</li>
                                     <li><strong>nomor_hp</strong> - Wajib diisi</li>
                                     <li><strong>password</strong> - Wajib diisi</li>
+                                    <li><strong>travel_company</strong> - Wajib diisi</li>
                                 </ul>
 
                                 <hr>
@@ -108,7 +89,8 @@
                                 <ul class="list-unstyled small">
                                     <li>• Email dan nomor HP harus unik</li>
                                     <li>• Password minimal 5 karakter</li>
-                                    <li>• Semua user akan dikaitkan dengan travel yang dipilih</li>
+                                    <li>• Travel company akan dicocokkan dengan fuzzy matching (90% similarity)</li>
+                                    <li>• Toleransi typo pada nama travel company hingga 10%</li>
                                     <li>• Kabupaten akan otomatis terisi dari travel company</li>
                                     <li>• Role akan otomatis set ke "user"</li>
                                     <li>• User bisa login dengan email atau nomor HP</li>
@@ -142,6 +124,7 @@
                                                 <th>email</th>
                                                 <th>nomor_hp</th>
                                                 <th>password</th>
+                                                <th>travel_company</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -150,24 +133,28 @@
                                                 <td>john.doe@travel1.com</td>
                                                 <td>081234567890</td>
                                                 <td>password123</td>
+                                                <td>PT. BIRO PERJALANAN WISATA MUHSININ</td>
                                             </tr>
                                             <tr>
                                                 <td>Jane Smith</td>
                                                 <td>jane.smith@travel1.com</td>
                                                 <td>081234567891</td>
                                                 <td>password123</td>
+                                                <td>PT. MAYYASAH WISATA MULYA</td>
                                             </tr>
                                             <tr>
                                                 <td>Ahmad Wijaya</td>
                                                 <td>ahmad.wijaya@travel2.com</td>
                                                 <td>081234567892</td>
                                                 <td>password123</td>
+                                                <td>PT. MUDAHAN TILAH</td>
                                             </tr>
                                             <tr>
                                                 <td>Siti Rahayu</td>
                                                 <td>siti.rahayu@travel2.com</td>
                                                 <td>081234567893</td>
                                                 <td>password123</td>
+                                                <td>PT. FAUZA WISATA IHSANI</td>
                                             </tr>
                                         </tbody>
                                     </table>

@@ -242,20 +242,7 @@ class UserManagementController extends Controller
      */
     public function importTravelForm()
     {
-        $user = auth()->user();
-        
-        if ($user->role === 'admin') {
-            // Admin can see all travel companies
-            $travelCompanies = TravelCompany::all();
-        } else if ($user->role === 'kabupaten') {
-            // Kabupaten can only see travel companies from their kabupaten
-            $travelCompanies = TravelCompany::where('kab_kota', $user->kabupaten)->get();
-        } else {
-            // Other roles see empty data
-            $travelCompanies = collect();
-        }
-        
-        return view('admin.travel.import', compact('travelCompanies'));
+        return view('admin.travel.import');
     }
 
     /**
@@ -264,25 +251,14 @@ class UserManagementController extends Controller
     public function importTravelUsers(Request $request)
     {
         $request->validate([
-            'travel_id' => 'required|exists:travels,id',
             'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
         ]);
-
-        $user = auth()->user();
-        
-        // Check if kabupaten user is trying to import for different kabupaten
-        if ($user->role === 'kabupaten') {
-            $travelCompany = TravelCompany::find($request->travel_id);
-            if ($travelCompany->kab_kota !== $user->kabupaten) {
-                return redirect()->back()->with('error', 'Anda hanya bisa import user untuk travel di kabupaten Anda sendiri.');
-            }
-        }
 
         try {
             DB::beginTransaction();
 
-            // Create import instance with travel_id
-            $import = new UserTravelImport($request->travel_id);
+            // Create import instance without travel_id parameter
+            $import = new UserTravelImport();
             
             // Import the Excel file
             Excel::import($import, $request->file('excel_file'));

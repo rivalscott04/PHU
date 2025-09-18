@@ -8,9 +8,11 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting
 {
     protected $user;
 
@@ -50,7 +52,7 @@ class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, W
     public function map($cabang): array
     {
         return [
-            $cabang->id_cabang,
+            "'" . $cabang->id_cabang, // Add single quote to force text format
             $cabang->Penyelenggara,
             $cabang->kabupaten,
             $cabang->pusat,
@@ -60,7 +62,7 @@ class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, W
             $cabang->tanggal ? $cabang->tanggal->format('d/m/Y') : '',
             $cabang->pimpinan_cabang,
             $cabang->alamat_cabang,
-            $cabang->telepon
+            "'" . $cabang->telepon // Add single quote to force text format
         ];
     }
 
@@ -86,6 +88,14 @@ class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, W
             'I' => 20,  // Pimpinan Cabang
             'J' => 30,  // Alamat Cabang
             'K' => 15,  // Telepon
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'A' => NumberFormat::FORMAT_TEXT, // No - ID Cabang
+            'K' => NumberFormat::FORMAT_TEXT, // Telepon
         ];
     }
 }

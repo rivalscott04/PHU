@@ -8,9 +8,11 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths
+class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting
 {
     protected $user;
 
@@ -58,7 +60,7 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function map($travel): array
     {
         return [
-            $travel->id,
+            "'" . $travel->id, // Add single quote to force text format
             $travel->Penyelenggara,
             $travel->Pusat,
             $travel->Tanggal ? $travel->Tanggal->format('d/m/Y') : '',
@@ -68,14 +70,14 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
             $travel->Pimpinan,
             $travel->alamat_kantor_lama,
             $travel->alamat_kantor_baru,
-            $travel->Telepon,
+            "'" . $travel->Telepon, // Add single quote to force text format
             $travel->Status,
             $travel->kab_kota,
             $travel->capabilities ? implode(', ', $travel->capabilities) : '',
             $travel->can_haji ? 'Ya' : 'Tidak',
             $travel->can_umrah ? 'Ya' : 'Tidak',
             $travel->description,
-            $travel->license_number,
+            "'" . $travel->license_number, // Add single quote to force text format
             $travel->license_expiry ? $travel->license_expiry->format('d/m/Y') : ''
         ];
     }
@@ -110,6 +112,15 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
             'Q' => 30,  // Description
             'R' => 20,  // License Number
             'S' => 15,  // License Expiry
+        ];
+    }
+
+    public function columnFormats(): array
+    {
+        return [
+            'A' => NumberFormat::FORMAT_TEXT, // No - ID
+            'K' => NumberFormat::FORMAT_TEXT, // Telepon
+            'R' => NumberFormat::FORMAT_TEXT, // License Number
         ];
     }
 }

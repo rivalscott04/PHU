@@ -15,13 +15,14 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
 {
     use Importable;
 
-    protected $travelId;
     protected $errors = [];
     protected $successCount = 0;
+    protected $travelCompanies = [];
 
-    public function __construct($travelId)
+    public function __construct()
     {
-        $this->travelId = $travelId;
+        // Load all travel companies for fuzzy matching
+        $this->travelCompanies = TravelCompany::all();
     }
 
     public function model(array $row)
@@ -31,8 +32,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             $row = array_change_key_case($row, CASE_LOWER);
 
             // Validate required fields
-            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password'])) {
-                $this->errors[] = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, dan password wajib diisi";
+            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password']) || empty($row['travel_company'])) {
+                $this->errors[] = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, password, dan travel company wajib diisi";
                 return null;
             }
 
@@ -48,10 +49,10 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 return null;
             }
 
-            // Get travel company data for auto-fill
-            $travel = TravelCompany::find($this->travelId);
+            // Find travel company using fuzzy matching
+            $travel = $this->findTravelCompany($row['travel_company']);
             if (!$travel) {
-                $this->errors[] = "Travel company tidak ditemukan";
+                $this->errors[] = "Row " . ($this->successCount + count($this->errors) + 1) . ": Travel company '{$row['travel_company']}' tidak ditemukan atau tidak cocok dengan data yang ada";
                 return null;
             }
 
@@ -61,7 +62,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 'email' => $row['email'],
                 'nomor_hp' => $row['nomor_hp'],
                 'password' => Hash::make($row['password']),
-                'travel_id' => $this->travelId,
+                'travel_id' => $travel->id,
                 'role' => 'user',
                 'kabupaten' => $travel->kab_kota,
                 'country' => 'Indonesia', // Default value
@@ -80,6 +81,48 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
         }
     }
 
+    /**
+     * Find travel company using fuzzy matching with 90% similarity threshold
+     */
+    private function findTravelCompany($inputName)
+    {
+        $inputName = trim($inputName);
+        $bestMatch = null;
+        $bestSimilarity = 0;
+        $threshold = 90; // 90% similarity threshold
+
+        foreach ($this->travelCompanies as $travel) {
+            $similarity = $this->calculateSimilarity($inputName, $travel->Penyelenggara);
+            
+            if ($similarity >= $threshold && $similarity > $bestSimilarity) {
+                $bestMatch = $travel;
+                $bestSimilarity = $similarity;
+            }
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Calculate similarity percentage between two strings using Levenshtein distance
+     */
+    private function calculateSimilarity($str1, $str2)
+    {
+        $str1 = strtolower(trim($str1));
+        $str2 = strtolower(trim($str2));
+        
+        $maxLength = max(strlen($str1), strlen($str2));
+        
+        if ($maxLength === 0) {
+            return 100;
+        }
+        
+        $distance = levenshtein($str1, $str2);
+        $similarity = (($maxLength - $distance) / $maxLength) * 100;
+        
+        return round($similarity, 2);
+    }
+
     public function rules(): array
     {
         return [
@@ -87,6 +130,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.email' => 'required|email|max:255',
             '*.nomor_hp' => 'required|string|max:20|regex:/^08/',
             '*.password' => 'required|string|min:5',
+            '*.travel_company' => 'required|string|max:255',
         ];
     }
 
@@ -106,6 +150,9 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.password.required' => 'Password wajib diisi',
             '*.password.string' => 'Password harus berupa teks',
             '*.password.min' => 'Password minimal 5 karakter',
+            '*.travel_company.required' => 'Travel company wajib diisi',
+            '*.travel_company.string' => 'Travel company harus berupa teks',
+            '*.travel_company.max' => 'Travel company maksimal 255 karakter',
         ];
     }
 
