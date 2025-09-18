@@ -79,10 +79,9 @@ class UserManagementController extends Controller
     public function storeKabupaten(Request $request)
     {
         $request->validate([
-            'username' => 'required|string|max:255|unique:users',
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
+            'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
+            'nomor_hp' => 'required|string|max:20|unique:users',
             'password' => 'required|string|min:8',
             'address' => 'required|string',
             'city' => 'required|string|max:255',
@@ -91,10 +90,9 @@ class UserManagementController extends Controller
         ]);
 
         User::create([
-            'username' => $request->username,
-            'firstname' => $request->firstname,
-            'lastname' => $request->lastname,
+            'nama' => $request->nama,
             'email' => $request->email,
+            'nomor_hp' => $request->nomor_hp,
             'password' => Hash::make($request->password),
             'role' => 'kabupaten',
             'address' => $request->address,

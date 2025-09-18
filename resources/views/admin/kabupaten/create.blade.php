@@ -15,10 +15,10 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control @error('username') is-invalid @enderror" 
-                                       id="username" name="username" value="{{ old('username') }}" required>
-                                @error('username')
+                                <label for="nama" class="form-label">Nama</label>
+                                <input type="text" class="form-control @error('nama') is-invalid @enderror" 
+                                       id="nama" name="nama" value="{{ old('nama') }}" required>
+                                @error('nama')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -31,18 +31,10 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="firstname" class="form-label">Nama Depan</label>
-                                <input type="text" class="form-control @error('firstname') is-invalid @enderror" 
-                                       id="firstname" name="firstname" value="{{ old('firstname') }}" required>
-                                @error('firstname')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="lastname" class="form-label">Nama Belakang</label>
-                                <input type="text" class="form-control @error('lastname') is-invalid @enderror" 
-                                       id="lastname" name="lastname" value="{{ old('lastname') }}" required>
-                                @error('lastname')
+                                <label for="nomor_hp" class="form-label">Nomor HP</label>
+                                <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" 
+                                       id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" required>
+                                @error('nomor_hp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
