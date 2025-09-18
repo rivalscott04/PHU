@@ -26,6 +26,11 @@ class LoginController extends Controller
         $request->validate([
             'email_or_phone' => 'required|string',
             'password' => 'required|string',
+        ], [
+            'email_or_phone.required' => 'Email atau nomor HP wajib diisi.',
+            'email_or_phone.string' => 'Format email atau nomor HP tidak valid.',
+            'password.required' => 'Password wajib diisi.',
+            'password.string' => 'Format password tidak valid.',
         ]);
 
         $identifier = $request->input('email_or_phone');
