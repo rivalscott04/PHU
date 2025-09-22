@@ -27,20 +27,20 @@ class UserManagementController extends Controller
     public function indexTravel()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'admin') {
             // Admin can see all travel users
             $travelUsers = User::where('role', 'user')->with('travel')->get();
         } else {
             // Kabupaten can only see travel users from their kabupaten
             $travelUsers = User::where('role', 'user')
-                ->whereHas('travel', function($query) use ($user) {
+                ->whereHas('travel', function ($query) use ($user) {
                     $query->where('kab_kota', $user->kabupaten);
                 })
                 ->with('travel')
                 ->get();
         }
-        
+
         return view('admin.travel.index', compact('travelUsers'));
     }
 
@@ -58,7 +58,7 @@ class UserManagementController extends Controller
     public function createTravel()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'admin') {
             // Admin can see all travel companies
             $travelCompanies = \App\Models\TravelCompany::all();
@@ -69,7 +69,7 @@ class UserManagementController extends Controller
             // Other roles see empty data
             $travelCompanies = collect();
         }
-        
+
         return view('admin.travel.create', compact('travelCompanies'));
     }
 
@@ -106,7 +106,7 @@ class UserManagementController extends Controller
     public function storeTravel(Request $request)
     {
         $user = auth()->user();
-        
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -127,7 +127,7 @@ class UserManagementController extends Controller
 
         // Get travel company data for auto-fill
         $travelCompany = TravelCompany::find($request->travel_id);
-        
+
         User::create([
             'nama' => $request->nama,
             'email' => $request->email,
@@ -150,14 +150,14 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
         $currentUser = auth()->user();
-        
+
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
             if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
-        
+
         return view('admin.users.edit', compact('user'));
     }
 
@@ -168,14 +168,14 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
         $currentUser = auth()->user();
-        
+
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
             if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
-        
+
         $request->validate([
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
@@ -223,14 +223,14 @@ class UserManagementController extends Controller
     {
         $user = User::findOrFail($id);
         $currentUser = auth()->user();
-        
+
         // Check if kabupaten user is trying to delete travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
             if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
                 return redirect()->back()->with('error', 'Anda hanya bisa menghapus user travel dari kabupaten Anda sendiri.');
             }
         }
-        
+
         $user->delete();
 
         $route = $user->role === 'kabupaten' ? 'kabupaten.index' : 'travels.index';
@@ -257,11 +257,20 @@ class UserManagementController extends Controller
         try {
             DB::beginTransaction();
 
-            // Create import instance without travel_id parameter
+            \Log::info('ImportTravelUsers: Mulai proses import file.', [
+                'filename' => $request->file('excel_file')->getClientOriginalName(),
+                'size' => $request->file('excel_file')->getSize(),
+            ]);
+
+            // Create import instance
             $import = new UserTravelImport();
-            
+
+            \Log::info('ImportTravelUsers: Sebelum Excel::import dipanggil');
+
             // Import the Excel file
             Excel::import($import, $request->file('excel_file'));
+
+            \Log::info('ImportTravelUsers: Sesudah Excel::import dipanggil');
 
             DB::commit();
 
@@ -269,27 +278,35 @@ class UserManagementController extends Controller
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
 
-            // Prepare success message
+            \Log::info('ImportTravelUsers: Hasil import', [
+                'successCount' => $successCount,
+                'errors' => $errors,
+            ]);
+
             $message = "Import berhasil! {$successCount} user berhasil dibuat.";
-            
-            // Add errors to message if any
+
             if (!empty($errors)) {
                 $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
             }
 
             return redirect()->route('travels.index')
                 ->with('success', $message);
-
         } catch (\Exception $e) {
             DB::rollBack();
-            
-            \Log::error('UserTravelImport error: ' . $e->getMessage());
-            
+
+            \Log::error('UserTravelImport error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage())
                 ->withInput();
         }
     }
+
 
     /**
      * Download Excel template for travel users import
@@ -297,11 +314,11 @@ class UserManagementController extends Controller
     public function downloadTravelUserTemplate()
     {
         $filePath = public_path('template/templateuser.xlsx');
-        
+
         if (!file_exists($filePath)) {
             return redirect()->back()->with('error', 'Template file tidak ditemukan.');
         }
-        
+
         return response()->download($filePath, 'Template_Import_User_Travel.xlsx');
     }
 }
