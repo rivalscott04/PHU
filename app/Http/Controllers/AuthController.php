@@ -155,15 +155,18 @@ class AuthController extends Controller
 
         // Add these counts
         $stats = [
-            'travelCount' => TravelCompany::count(),
+            'travelCount' => TravelCompany::count() + \App\Models\CabangTravel::count(),
             'jamaahHajiCount' =>  $jamaahHaji,
             'jamaahUmrahCount' =>  $jamaahUmrah,
             'airlineCount' => Bap::distinct('airlines')->count()
         ];
 
-        $travels = TravelCompany::all();
+        // Get all travels (pusat + cabang) for form pengaduan
+        $travelPusat = TravelCompany::all();
+        $travelCabang = \App\Models\CabangTravel::all();
+        $travels = $travelPusat->concat($travelCabang);
 
-        return view('welcome', compact('bapData', 'travelData', 'stats', 'travels'));
+        return view('welcome', compact('bapData', 'travelData', 'stats', 'travels', 'travelPusat', 'travelCabang'));
     }
 
     public function showListTravel()
@@ -187,8 +190,10 @@ class AuthController extends Controller
 
     public function showPublicListTravel()
     {
-        // Public access - show all travel companies without authentication
-        $data = TravelCompany::all();
+        // Public access - show all travel companies (pusat + cabang) without authentication
+        $travelPusat = TravelCompany::all();
+        $travelCabang = \App\Models\CabangTravel::all();
+        $data = $travelPusat->concat($travelCabang);
         
         return view('travel-list-public', compact('data'));
     }

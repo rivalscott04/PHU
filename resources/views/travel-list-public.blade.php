@@ -56,6 +56,11 @@
             color: white;
         }
 
+        .status-cabang {
+            background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+            color: white;
+        }
+
         .travel-header {
             background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             padding: 1.5rem;
@@ -225,44 +230,61 @@
             <!-- Travel Cards -->
             <div class="row" id="travelCards">
                 @foreach($data as $travel)
+                @php
+                    // Check if this is TravelCompany (pusat) or CabangTravel (cabang)
+                    $isTravelPusat = isset($travel->Status);
+                    $isTravelCabang = isset($travel->pimpinan_cabang);
+                @endphp
                 <div class="col-lg-6 col-xl-4 mb-4 travel-item" 
-                     data-status="{{ $travel->Status }}" 
-                     data-kabupaten="{{ $travel->kab_kota }}"
+                     data-status="{{ $isTravelPusat ? $travel->Status : 'CABANG' }}" 
+                     data-kabupaten="{{ $isTravelPusat ? $travel->kab_kota : $travel->kabupaten }}"
                      data-name="{{ strtolower($travel->Penyelenggara) }}">
                     <div class="card travel-card h-100" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="travel-header">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title mb-0">{{ $travel->Penyelenggara }}</h5>
+                                @if($isTravelPusat)
                                 <span class="status-badge {{ $travel->Status === 'PPIU' ? 'status-ppiu' : 'status-pihk' }}">
                                     {{ $travel->Status }}
                                 </span>
+                                @else
+                                <span class="status-badge status-cabang">
+                                    CABANG
+                                </span>
+                                @endif
                             </div>
                             <p class="text-muted mb-0">
-                                <i class="fas fa-map-marker-alt me-1"></i>{{ $travel->kab_kota }}
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ $isTravelPusat ? $travel->kab_kota : $travel->kabupaten }}
                             </p>
                         </div>
                         <div class="travel-body">
                             <div class="info-item">
                                 <i class="fas fa-user"></i>
-                                <span><strong>Pimpinan:</strong> {{ $travel->Pimpinan }}</span>
+                                <span><strong>Pimpinan:</strong> {{ $isTravelPusat ? $travel->Pimpinan : $travel->pimpinan_cabang }}</span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-phone"></i>
-                                <span><strong>Telepon:</strong> {{ $travel->Telepon }}</span>
+                                <span><strong>Telepon:</strong> {{ $travel->telepon ?? $travel->Telepon }}</span>
                             </div>
                             <div class="info-item">
                                 <i class="fas fa-map-marker-alt"></i>
-                                <span><strong>Alamat:</strong> {{ $travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama }}</span>
+                                <span><strong>Alamat:</strong> {{ $isTravelPusat ? ($travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama) : $travel->alamat_cabang }}</span>
                             </div>
-                            @if($travel->nilai_akreditasi)
+                            @if($isTravelPusat && $travel->nilai_akreditasi)
                             <div class="info-item">
                                 <i class="fas fa-certificate"></i>
                                 <span><strong>Akreditasi:</strong> {{ $travel->nilai_akreditasi }}</span>
                             </div>
                             @endif
+                            @if($isTravelCabang && $travel->SK_BA)
+                            <div class="info-item">
+                                <i class="fas fa-file-alt"></i>
+                                <span><strong>SK/BA:</strong> {{ $travel->SK_BA }}</span>
+                            </div>
+                            @endif
                             <div class="info-item">
                                 <i class="fas fa-calendar"></i>
-                                <span><strong>Tanggal SK:</strong> {{ $travel->Tanggal ? $travel->Tanggal->format('d/m/Y') : '-' }}</span>
+                                <span><strong>Tanggal SK:</strong> {{ $isTravelPusat ? ($travel->Tanggal ? $travel->Tanggal->format('d/m/Y') : '-') : ($travel->tanggal ? $travel->tanggal->format('d/m/Y') : '-') }}</span>
                             </div>
                         </div>
                     </div>

@@ -771,7 +771,7 @@
                                             <i class="fas fa-map-marker-alt text-warning"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $travels->groupBy('kab_kota')->count() }}</h3>
+                                            <h3 class="stat-number">{{ $travelPusat->groupBy('kab_kota')->count() + $travelCabang->groupBy('kabupaten')->count() }}</h3>
                                             <p class="stat-label">Kabupaten</p>
                                         </div>
                                     </div>
@@ -1230,31 +1230,42 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="stat-detail-card">
-                                <h6 class="text-primary">PPIU (Penyelenggara Perjalanan Ibadah Umrah)</h6>
-                                <h3 class="text-success">{{ $travels->where('Status', 'PPIU')->count() }}</h3>
-                                <p class="text-muted">Travel khusus umrah</p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="stat-detail-card">
+                                    <h6 class="text-primary">Travel Pusat</h6>
+                                    <h3 class="text-success">{{ $travelPusat->count() }}</h3>
+                                    <p class="text-muted">Travel pusat berizin</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="stat-detail-card">
+                                    <h6 class="text-primary">Travel Cabang</h6>
+                                    <h3 class="text-info">{{ $travelCabang->count() }}</h3>
+                                    <p class="text-muted">Travel cabang berizin</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="stat-detail-card">
-                                <h6 class="text-primary">PIHK (Penyelenggara Ibadah Haji Khusus)</h6>
-                                <h3 class="text-info">{{ $travels->where('Status', 'PIHK')->count() }}</h3>
-                                <p class="text-muted">Travel haji & umrah</p>
-                            </div>
-                        </div>
-                    </div>
                     <hr>
                     <div class="mt-3">
-                        <h6>Distribusi per Kabupaten/Kota:</h6>
+                        <h6>Distribusi Travel Pusat per Kabupaten/Kota:</h6>
                         <div class="row">
-                            @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
+                            @foreach($travelPusat->groupBy('kab_kota') as $kabupaten => $travelList)
                             <div class="col-md-6 mb-2">
                                 <small class="text-muted">
                                     <i class="fas fa-map-marker-alt me-1"></i>
-                                    {{ $kabupaten }}: <strong>{{ $travelList->count() }} travel</strong>
+                                    {{ $kabupaten }}: <strong>{{ $travelList->count() }} travel pusat</strong>
+                                </small>
+                            </div>
+                            @endforeach
+                        </div>
+                        <h6 class="mt-3">Distribusi Travel Cabang per Kabupaten/Kota:</h6>
+                        <div class="row">
+                            @foreach($travelCabang->groupBy('kabupaten') as $kabupaten => $travelList)
+                            <div class="col-md-6 mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-map-marker-alt me-1"></i>
+                                    {{ $kabupaten }}: <strong>{{ $travelList->count() }} travel cabang</strong>
                                 </small>
                             </div>
                             @endforeach
@@ -1349,17 +1360,29 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <h3 class="text-primary">{{ $travels->groupBy('kab_kota')->count() }}</h3>
+                        <h3 class="text-primary">{{ $travelPusat->groupBy('kab_kota')->count() + $travelCabang->groupBy('kabupaten')->count() }}</h3>
                         <p class="text-muted">Kabupaten/Kota yang terlayani</p>
                     </div>
                     <hr>
-                    <h6>Daftar Kabupaten/Kota:</h6>
+                    <h6>Travel Pusat:</h6>
                     <div class="row">
-                        @foreach($travels->groupBy('kab_kota') as $kabupaten => $travelList)
+                        @foreach($travelPusat->groupBy('kab_kota') as $kabupaten => $travelList)
                         <div class="col-md-6 mb-2">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ $kabupaten }}</span>
-                                <span class="badge bg-primary">{{ $travelList->count() }} travel</span>
+                                <span><i class="fas fa-building me-2 text-success"></i>{{ $kabupaten }}</span>
+                                <span class="badge bg-success">{{ $travelList->count() }} pusat</span>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                    <hr>
+                    <h6>Travel Cabang:</h6>
+                    <div class="row">
+                        @foreach($travelCabang->groupBy('kabupaten') as $kabupaten => $travelList)
+                        <div class="col-md-6 mb-2">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span><i class="fas fa-sitemap me-2 text-info"></i>{{ $kabupaten }}</span>
+                                <span class="badge bg-info">{{ $travelList->count() }} cabang</span>
                             </div>
                         </div>
                         @endforeach
