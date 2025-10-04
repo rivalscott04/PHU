@@ -1041,15 +1041,17 @@
             <!-- End Section Title -->
 
             <div class="container" data-aos="fade" data-aos-delay="100">
-                @if ($errors->any())
-                    <div class="alert alert-danger" data-aos="fade-up" data-aos-delay="150">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+                <!-- Validation Summary - will be shown dynamically -->
+                <div id="validation-summary-welcome" class="alert alert-danger d-none" data-aos="fade-up" data-aos-delay="150" role="alert">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-exclamation-triangle me-2" style="font-size: 1.2rem;"></i>
+                        <div>
+                            <strong>Mohon lengkapi data berikut:</strong>
+                            <ul id="validation-errors-list-welcome" class="mb-0 mt-2">
+                            </ul>
+                        </div>
                     </div>
-                @endif
+                </div>
 
                 <!-- Tab Navigation -->
                 <div class="row mb-4" data-aos="fade-up" data-aos-delay="150">
@@ -1107,13 +1109,14 @@
                                     @csrf
                                     <div class="row gy-4">
                                         <div class="col-md-6">
-                                            <input type="text" name="nama_pengadu" class="form-control"
+                                            <input type="text" name="nama_pengadu" id="nama_pengadu_welcome" class="form-control"
                                                 placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" 
                                                 style="background-color: white;" />
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-6">
-                                            <select class="form-control" name="travels_id" required style="background-color: white;">
+                                            <select class="form-control" name="travels_id" id="travels_id_welcome" required style="background-color: white;">
                                                 <option value="">-- Pilih Travel --</option>
                                                 @foreach ($travels as $travel)
                                                     <option value="{{ $travel->id }}"
@@ -1122,16 +1125,19 @@
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-12">
-                                            <textarea class="form-control" name="hal_aduan" rows="6" placeholder="Hal yang Diadukan" required 
+                                            <textarea class="form-control" name="hal_aduan" id="hal_aduan_welcome" rows="6" placeholder="Hal yang Diadukan" required 
                                                       style="background-color: white;">{{ old('hal_aduan') }}</textarea>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-12">
-                                            <input type="file" class="form-control" name="berkas_aduan" style="background-color: white;" />
-                                            <small class="text-muted mt-1">File maksimal 300KB</small>
+                                            <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" style="background-color: white;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                                            <small class="text-muted mt-1">File maksimal 300KB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
+                                            <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-12 text-center">
@@ -1647,6 +1653,19 @@
         }
 
         function confirmSubmit() {
+            // Reset validation states first
+            resetWelcomeValidationStates();
+            
+            // Validate form
+            const validationErrors = validateWelcomeForm();
+            
+            if (validationErrors.length > 0) {
+                showWelcomeValidationErrors(validationErrors);
+                scrollToFirstWelcomeError();
+                return;
+            }
+            
+            // If validation passes, show confirmation dialog
             Swal.fire({
                 title: 'Apakah anda yakin mengirim aduan?',
                 icon: 'warning',
@@ -1662,7 +1681,99 @@
             })
         }
 
-        // Tab navigation handler
+        function validateWelcomeForm() {
+            const errors = [];
+            
+            // Required fields
+            const requiredFields = [
+                { id: 'nama_pengadu_welcome', name: 'Nama Pengadu' },
+                { id: 'travels_id_welcome', name: 'Travel' },
+                { id: 'hal_aduan_welcome', name: 'Hal yang Diadukan' }
+            ];
+            
+            // Validate required fields
+            requiredFields.forEach(field => {
+                const element = document.getElementById(field.id);
+                const value = element.value.trim();
+                
+                if (!value) {
+                    errors.push({
+                        field: field.id,
+                        message: `${field.name} wajib diisi`,
+                        element: element
+                    });
+                }
+            });
+            
+            // Validate file size if uploaded
+            const fileInput = document.getElementById('berkas_aduan_welcome');
+            if (fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const maxSize = 300 * 1024; // 300KB
+                
+                if (file.size > maxSize) {
+                    errors.push({
+                        field: 'berkas_aduan_welcome',
+                        message: 'Ukuran file maksimal 300KB',
+                        element: fileInput
+                    });
+                }
+            }
+            
+            return errors;
+        }
+
+        function showWelcomeValidationErrors(errors) {
+            // Show validation summary
+            const validationErrorsList = document.getElementById('validation-errors-list-welcome');
+            validationErrorsList.innerHTML = '';
+            errors.forEach(error => {
+                const li = document.createElement('li');
+                li.textContent = error.message;
+                validationErrorsList.appendChild(li);
+            });
+            document.getElementById('validation-summary-welcome').classList.remove('d-none');
+            
+            // Mark fields as invalid
+            errors.forEach(error => {
+                const element = error.element;
+                element.classList.add('is-invalid');
+                
+                const feedback = element.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.textContent = error.message;
+                }
+            });
+        }
+
+        function resetWelcomeValidationStates() {
+            // Hide validation summary
+            document.getElementById('validation-summary-welcome').classList.add('d-none');
+            
+            // Remove validation classes from all fields
+            const form = document.getElementById('pengaduanForm');
+            form.querySelectorAll('.form-control').forEach(field => {
+                field.classList.remove('is-invalid', 'is-valid');
+            });
+            
+            // Clear error messages
+            form.querySelectorAll('.invalid-feedback').forEach(feedback => {
+                feedback.textContent = '';
+            });
+        }
+
+        function scrollToFirstWelcomeError() {
+            const firstError = document.getElementById('pengaduanForm').querySelector('.is-invalid');
+            if (firstError) {
+                firstError.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                firstError.focus();
+            }
+        }
+
+        // Tab navigation handler and form validation
         document.addEventListener('DOMContentLoaded', function() {
             const riwayatTab = document.getElementById('riwayat-tab');
             if (riwayatTab) {
@@ -1670,7 +1781,79 @@
                     loadRiwayatPengaduan();
                 });
             }
+
+            // Add real-time validation for welcome form
+            const welcomeForm = document.getElementById('pengaduanForm');
+            if (welcomeForm) {
+                welcomeForm.querySelectorAll('.form-control').forEach(field => {
+                    field.addEventListener('blur', function() {
+                        validateWelcomeField(this);
+                    });
+                    
+                    field.addEventListener('input', function() {
+                        if (this.classList.contains('is-invalid')) {
+                            validateWelcomeField(this);
+                        }
+                    });
+                });
+            }
         });
+
+        function validateWelcomeField(field) {
+            const value = field.value.trim();
+            const fieldId = field.id;
+            
+            // Required fields
+            const requiredFields = [
+                { id: 'nama_pengadu_welcome', name: 'Nama Pengadu' },
+                { id: 'travels_id_welcome', name: 'Travel' },
+                { id: 'hal_aduan_welcome', name: 'Hal yang Diadukan' }
+            ];
+            
+            // Check if it's a required field
+            const isRequired = requiredFields.some(f => f.id === fieldId);
+            
+            if (isRequired && !value) {
+                field.classList.add('is-invalid');
+                field.classList.remove('is-valid');
+                
+                const feedback = field.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    const fieldName = requiredFields.find(f => f.id === fieldId).name;
+                    feedback.textContent = `${fieldName} wajib diisi`;
+                }
+            } else if (fieldId === 'berkas_aduan_welcome' && field.files.length > 0) {
+                // Validate file size
+                const file = field.files[0];
+                const maxSize = 300 * 1024; // 300KB
+                
+                if (file.size > maxSize) {
+                    field.classList.add('is-invalid');
+                    field.classList.remove('is-valid');
+                    
+                    const feedback = field.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.textContent = 'Ukuran file maksimal 300KB';
+                    }
+                } else {
+                    field.classList.remove('is-invalid');
+                    field.classList.add('is-valid');
+                    
+                    const feedback = field.parentNode.querySelector('.invalid-feedback');
+                    if (feedback) {
+                        feedback.textContent = '';
+                    }
+                }
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+                
+                const feedback = field.parentNode.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.textContent = '';
+                }
+            }
+        }
 
         function loadRiwayatPengaduan() {
             const riwayatContent = document.getElementById('riwayatContent');

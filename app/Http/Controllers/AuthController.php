@@ -192,11 +192,76 @@ class AuthController extends Controller
 
     public function showPublicListTravel()
     {
-        // Public access - show all travel companies (pusat + cabang) without authentication - optimized queries
-        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status', 'Pimpinan')->get();
-        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang')->get();
-        $data = $travelPusat->concat($travelCabang);
+        // Public access - show all travel companies (pusat + cabang) without authentication - optimized queries with pagination
+        // Get all data in single queries to prevent N+1 issues
+        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status', 'Pimpinan', 'telepon', 'alamat_kantor_baru', 'alamat_kantor_lama', 'nilai_akreditasi', 'Tanggal')
+            ->get()
+            ->map(function($item) {
+                $item->type = 'pusat';
+                // Ensure Tanggal is properly cast to Carbon
+                if ($item->Tanggal && is_string($item->Tanggal)) {
+                    $item->Tanggal = \Carbon\Carbon::parse($item->Tanggal);
+                }
+                return $item;
+            });
+            
+        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang', 'telepon', 'alamat_cabang', 'SK_BA', 'tanggal')
+            ->get()
+            ->map(function($item) {
+                $item->type = 'cabang';
+                $item->id = $item->id_cabang; // Normalize ID field
+                // Ensure tanggal is properly cast to Carbon
+                if ($item->tanggal && is_string($item->tanggal)) {
+                    $item->tanggal = \Carbon\Carbon::parse($item->tanggal);
+                }
+                return $item;
+            });
         
-        return view('travel-list-public', compact('data'));
+        // Pre-calculate unique kabupatens to avoid N+1 in view
+        $allKabupatens = $travelPusat->pluck('kab_kota')
+            ->merge($travelCabang->pluck('kabupaten'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
+        
+        // Calculate stats efficiently
+        $stats = [
+            'total' => $travelPusat->count() + $travelCabang->count(),
+            'ppiu' => $travelPusat->where('Status', 'PPIU')->count(),
+            'pihk' => $travelPusat->where('Status', 'PIHK')->count(),
+            'pusat' => $travelPusat->count(),
+            'cabang' => $travelCabang->count(),
+            'kabupaten' => $allKabupatens->count()
+        ];
+        
+        // Combine and paginate
+        $allTravels = $travelPusat->concat($travelCabang);
+        
+        // Create a custom paginator
+        $perPage = 6; // Show 6 items per page
+        $currentPage = request()->get('page', 1);
+        $total = $allTravels->count();
+        $items = $allTravels->forPage($currentPage, $perPage);
+        
+        // Create pagination data
+        $pagination = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            [
+                'path' => request()->url(),
+                'pageName' => 'page',
+            ]
+        );
+        
+        return view('travel-list-public', [
+            'data' => $pagination->items(),
+            'pagination' => $pagination,
+            'totalCount' => $total,
+            'allKabupatens' => $allKabupatens,
+            'stats' => $stats
+        ]);
     }
 }
