@@ -164,7 +164,7 @@ class AuthController extends Controller
 
         // Get all travels (pusat + cabang) for form pengaduan - optimized queries
         $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
-        $travelCabang = \App\Models\CabangTravel::select('id', 'Penyelenggara', 'kabupaten')->get();
+        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
         $travels = $travelPusat->concat($travelCabang);
 
         return view('welcome', compact('bapData', 'travelData', 'stats', 'travels', 'travelPusat', 'travelCabang'));
@@ -194,7 +194,7 @@ class AuthController extends Controller
     {
         // Public access - show all travel companies (pusat + cabang) without authentication - optimized queries
         $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status', 'Pimpinan')->get();
-        $travelCabang = \App\Models\CabangTravel::select('id', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang')->get();
+        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang')->get();
         $data = $travelPusat->concat($travelCabang);
         
         return view('travel-list-public', compact('data'));
