@@ -15,33 +15,161 @@ class UserManagementController extends Controller
     /**
      * Display a listing of kabupaten users
      */
-    public function indexKabupaten()
+    public function indexKabupaten(Request $request)
     {
-        $kabupatenUsers = User::where('role', 'kabupaten')->get();
+        // Base query for kabupaten users
+        $query = User::where('role', 'kabupaten');
+        
+        // Apply search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nomor_hp', 'like', "%{$search}%")
+                  ->orWhere('kabupaten', 'like', "%{$search}%");
+            });
+        }
+        
+        // Apply sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['nama', 'email', 'nomor_hp', 'kabupaten', 'created_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Get all results (no pagination needed for small dataset)
+        $kabupatenUsers = $query->get();
+
+        // Handle AJAX requests
+        if ($request->ajax()) {
+            $tableBody = view('admin.kabupaten.partials.table-body', compact('kabupatenUsers'))->render();
+            
+            return response()->json([
+                'success' => true,
+                'tableBody' => $tableBody,
+                'pagination' => '', // No pagination needed
+                'pagination_info' => [
+                    'from' => $kabupatenUsers->count() > 0 ? 1 : 0,
+                    'to' => $kabupatenUsers->count(),
+                    'total' => $kabupatenUsers->count(),
+                    'current_page' => 1,
+                    'last_page' => 1,
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                ]
+            ]);
+        }
+
         return view('admin.kabupaten.index', compact('kabupatenUsers'));
     }
 
     /**
      * Display a listing of travel users
      */
-    public function indexTravel()
+    public function indexTravel(Request $request)
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
-            // Admin can see all travel users
-            $travelUsers = User::where('role', 'user')->with('travel')->get();
-        } else {
+        // Base query for travel users
+        $query = User::where('role', 'user')->with('travel');
+        
+        // Apply role-based filtering
+        if ($user->role === 'kabupaten') {
             // Kabupaten can only see travel users from their kabupaten
-            $travelUsers = User::where('role', 'user')
-                ->whereHas('travel', function ($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })
-                ->with('travel')
-                ->get();
+            $query->whereHas('travel', function ($q) use ($user) {
+                $q->where('kab_kota', $user->kabupaten);
+            });
+        }
+        
+        // Apply search functionality
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nomor_hp', 'like', "%{$search}%")
+                  ->orWhereHas('travel', function ($travelQuery) use ($search) {
+                      $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
+                                  ->orWhere('Pimpinan', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Apply travel company filter
+        if ($request->filled('travel_company')) {
+            $query->whereHas('travel', function ($q) use ($request) {
+                $q->where('Penyelenggara', 'like', "%{$request->travel_company}%");
+            });
+        }
+        
+        // Apply kabupaten filter (only for admin)
+        if ($user->role === 'admin' && $request->filled('kabupaten')) {
+            $query->whereHas('travel', function ($q) use ($request) {
+                $q->where('kab_kota', $request->kabupaten);
+            });
+        }
+        
+        // Apply travel status filter
+        if ($request->filled('travel_status')) {
+            $query->whereHas('travel', function ($q) use ($request) {
+                $q->where('Status', $request->travel_status);
+            });
+        }
+        
+        // Apply sorting
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        
+        // Validate sort fields
+        $allowedSortFields = ['nama', 'email', 'nomor_hp', 'created_at'];
+        if (!in_array($sortBy, $allowedSortFields)) {
+            $sortBy = 'created_at';
+        }
+        
+        $query->orderBy($sortBy, $sortOrder);
+        
+        // Get paginated results
+        $perPage = $request->get('per_page', 15);
+        $travelUsers = $query->paginate($perPage)->withQueryString();
+        
+        // Get filter options for dropdowns - optimized to avoid N+1
+        $travelCompanies = TravelCompany::select('Penyelenggara')->distinct()->orderBy('Penyelenggara')->pluck('Penyelenggara');
+        $kabupatens = TravelCompany::select('kab_kota')->distinct()->orderBy('kab_kota')->pluck('kab_kota');
+        $travelStatuses = TravelCompany::select('Status')->distinct()->orderBy('Status')->pluck('Status');
+
+        // Handle AJAX requests
+        if ($request->ajax()) {
+            $tableBody = view('admin.travel.partials.table-body', compact('travelUsers'))->render();
+            $pagination = view('admin.travel.partials.pagination', compact('travelUsers'))->render();
+            
+            return response()->json([
+                'success' => true,
+                'tableBody' => $tableBody,
+                'pagination' => $pagination,
+                'pagination_info' => [
+                    'from' => $travelUsers->firstItem(),
+                    'to' => $travelUsers->lastItem(),
+                    'total' => $travelUsers->total(),
+                    'current_page' => $travelUsers->currentPage(),
+                    'last_page' => $travelUsers->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                    'travel_company' => $request->get('travel_company'),
+                    'kabupaten' => $request->get('kabupaten'),
+                    'travel_status' => $request->get('travel_status'),
+                ]
+            ]);
         }
 
-        return view('admin.travel.index', compact('travelUsers'));
+        return view('admin.travel.index', compact('travelUsers', 'travelCompanies', 'kabupatens', 'travelStatuses'));
     }
 
     /**
@@ -82,6 +210,7 @@ class UserManagementController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
+            'kabupaten' => 'required|string|max:255',
             'password' => 'required|string|min:8',
         ], [
             'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
@@ -91,6 +220,7 @@ class UserManagementController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'nomor_hp' => $request->nomor_hp,
+            'kabupaten' => $request->kabupaten,
             'password' => Hash::make($request->password),
             'role' => 'kabupaten',
             'country' => 'Indonesia', // Default value
@@ -148,7 +278,7 @@ class UserManagementController extends Controller
      */
     public function edit($id)
     {
-        $user = User::findOrFail($id);
+        $user = User::with('travel')->findOrFail($id);
         $currentUser = auth()->user();
 
         // Check if kabupaten user is trying to edit travel user from different kabupaten
@@ -158,7 +288,17 @@ class UserManagementController extends Controller
             }
         }
 
-        return view('admin.users.edit', compact('user'));
+        // Get travel companies for dropdown - avoid N+1 by passing from controller
+        $travelCompanies = collect();
+        if ($currentUser->role === 'admin') {
+            $travelCompanies = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara')->get();
+        } else if ($currentUser->role === 'kabupaten') {
+            $travelCompanies = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')
+                ->where('kab_kota', $currentUser->kabupaten)
+                ->orderBy('Penyelenggara')->get();
+        }
+
+        return view('admin.users.edit', compact('user', 'travelCompanies'));
     }
 
     /**
@@ -176,7 +316,7 @@ class UserManagementController extends Controller
             }
         }
 
-        $request->validate([
+        $validationRules = [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $id . '|regex:/^08/',
@@ -184,7 +324,14 @@ class UserManagementController extends Controller
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal' => 'nullable|string|max:10',
-        ], [
+        ];
+
+        // Add kabupaten validation for kabupaten users
+        if ($user->role === 'kabupaten') {
+            $validationRules['kabupaten'] = 'required|string|max:255';
+        }
+
+        $request->validate($validationRules, [
             'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
@@ -197,6 +344,11 @@ class UserManagementController extends Controller
             'country' => $request->country,
             'postal' => $request->postal,
         ];
+
+        // Add kabupaten for kabupaten users
+        if ($user->role === 'kabupaten' && $request->filled('kabupaten')) {
+            $updateData['kabupaten'] = $request->kabupaten;
+        }
 
         // Add travel_id for travel users
         if ($user->role === 'user' && $request->filled('travel_id')) {

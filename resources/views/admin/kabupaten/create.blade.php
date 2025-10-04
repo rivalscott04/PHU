@@ -39,6 +39,15 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
+                                <label for="kabupaten" class="form-label">Kabupaten/Kota</label>
+                                <input type="text" class="form-control @error('kabupaten') is-invalid @enderror" 
+                                       id="kabupaten" name="kabupaten" value="{{ old('kabupaten') }}" 
+                                       placeholder="Contoh: Lombok Barat, Bima, Sumbawa" required>
+                                @error('kabupaten')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password</label>
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
                                        id="password" name="password" required>

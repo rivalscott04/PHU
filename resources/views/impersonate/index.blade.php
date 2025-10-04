@@ -44,15 +44,15 @@
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-xs me-3">
                                             <span class="avatar-title rounded-circle bg-primary">
-                                                {{ strtoupper(substr($user->username, 0, 1)) }}
+                                                {{ strtoupper(substr($user->nama, 0, 1)) }}
                                             </span>
                                         </div>
                                         <div>
-                                            <h6 class="mb-0">{{ $user->username }}</h6>
+                                            <h6 class="mb-0">{{ $user->nama }}</h6>
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $user->firstname }} {{ $user->lastname }}</td>
+                                <td>{{ $user->nama }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
                                     @if($user->travel)

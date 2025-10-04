@@ -47,6 +47,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 $row['email'] = $normalizedEmail;
             }
 
+            // Note: nomor_hp normalization is handled in prepareForValidation() method
+
             // Validate required fields
             if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password']) || empty($row['travel_company'])) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, password, dan travel company wajib diisi";
@@ -181,24 +183,36 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
 
         // --- Normalize nomor_hp: extract digits, handle country code and leading 0 ---
         if (!empty($normalized['nomor_hp'])) {
+            // Convert to string first to handle Excel number formatting
+            $phoneNumber = strval($normalized['nomor_hp']);
+            
             // remove everything except digits
-            $digits = preg_replace('/\D+/', '', $normalized['nomor_hp']);
+            $digits = preg_replace('/\D+/', '', $phoneNumber);
 
-            // change leading "62" to "0"
+            // Handle different phone number formats
             if (preg_match('/^62/', $digits)) {
+                // Change leading "62" to "0" (Indonesian country code)
                 $digits = preg_replace('/^62/', '0', $digits);
-            }
-            // if starts with 8 (no leading zero), add leading zero
-            elseif (preg_match('/^8/', $digits)) {
+            } elseif (preg_match('/^8/', $digits)) {
+                // If starts with 8 (no leading zero), add leading zero
                 $digits = '0' . $digits;
+            } elseif (preg_match('/^0/', $digits)) {
+                // If already starts with 0, keep it as is
+                $digits = $digits;
+            } else {
+                // For any other format, try to add leading zero if it looks like Indonesian number
+                if (strlen($digits) >= 10 && strlen($digits) <= 13) {
+                    $digits = '0' . $digits;
+                }
             }
 
-            // optional: limit length (example: max 15)
-            $digits = substr($digits, 0, 20);
+            // Limit length to reasonable phone number length
+            $digits = substr($digits, 0, 15);
 
             Log::debug('UserTravelImport: prepareForValidation - nomor_hp normalized', [
                 'index' => $index,
                 'original' => $normalized['nomor_hp'],
+                'phoneNumber' => $phoneNumber,
                 'normalized' => $digits,
             ]);
 

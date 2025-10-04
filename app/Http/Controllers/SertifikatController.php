@@ -47,15 +47,18 @@ class SertifikatController extends Controller
         $user = auth()->user();
         
         if ($user->role === 'admin') {
-            // Admin can see all PPIU travel companies
-            $travels = TravelCompany::where('Status', 'PPIU')->get();
-            $cabangs = CabangTravel::all();
+            // Admin can see all PPIU travel companies - optimized queries
+            $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+                ->where('Status', 'PPIU')->get();
+            $cabangs = CabangTravel::select('id', 'Penyelenggara', 'kabupaten')->get();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see PPIU travel companies in their area
-            $travels = TravelCompany::where('Status', 'PPIU')
+            // Kabupaten users can only see PPIU travel companies in their area - optimized queries
+            $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+                ->where('Status', 'PPIU')
                 ->where('kab_kota', $user->kabupaten)
                 ->get();
-            $cabangs = CabangTravel::where('kabupaten', $user->kabupaten)->get();
+            $cabangs = CabangTravel::select('id', 'Penyelenggara', 'kabupaten')
+                ->where('kabupaten', $user->kabupaten)->get();
         } else {
             // Other roles see empty data
             $travels = collect();

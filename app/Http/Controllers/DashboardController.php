@@ -101,7 +101,7 @@ class DashboardController extends Controller
             ->value('total_income') ?? 0;
 
         return view('pages.dashboard-admin', [
-            'username' => $user->username,
+            'username' => $user->nama,
             'role' => $user->role,
             'totalJamaah' => $totalJamaah,
             'totalBAP' => $totalBAP,
@@ -148,7 +148,7 @@ class DashboardController extends Controller
             ->count();
 
         return view('pages.dashboard-kabupaten', [
-            'username' => $user->username,
+            'username' => $user->nama,
             'role' => $user->role,
             'jamaahHaji' => $jamaahHaji,
             'jamaahUmrah' => $jamaahUmrah,
@@ -189,7 +189,7 @@ class DashboardController extends Controller
             ->value('total_income') ?? 0;
 
         return view('pages.dashboard-user', [
-            'username' => $user->username,
+            'username' => $user->nama,
             'role' => $user->role,
             'myTotalBAP' => $myTotalBAP,
             'myBAPDiajukan' => $myBAPDiajukan,

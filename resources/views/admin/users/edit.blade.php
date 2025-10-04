@@ -16,10 +16,10 @@
                         @method('PUT')
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control @error('username') is-invalid @enderror" 
-                                       id="username" name="username" value="{{ old('username', $user->username) }}" required>
-                                @error('username')
+                                <label for="nama" class="form-label">Nama</label>
+                                <input type="text" class="form-control @error('nama') is-invalid @enderror" 
+                                       id="nama" name="nama" value="{{ old('nama', $user->nama) }}" required>
+                                @error('nama')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -32,21 +32,24 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="firstname" class="form-label">Nama Depan</label>
-                                <input type="text" class="form-control @error('firstname') is-invalid @enderror" 
-                                       id="firstname" name="firstname" value="{{ old('firstname', $user->firstname) }}" required>
-                                @error('firstname')
+                                <label for="nomor_hp" class="form-label">Nomor HP</label>
+                                <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" 
+                                       id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp', $user->nomor_hp) }}" required>
+                                @error('nomor_hp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="lastname" class="form-label">Nama Belakang</label>
-                                <input type="text" class="form-control @error('lastname') is-invalid @enderror" 
-                                       id="lastname" name="lastname" value="{{ old('lastname', $user->lastname) }}" required>
-                                @error('lastname')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if($user->role === 'kabupaten')
+                                <div class="col-md-6 mb-3">
+                                    <label for="kabupaten" class="form-label">Kabupaten/Kota</label>
+                                    <input type="text" class="form-control @error('kabupaten') is-invalid @enderror" 
+                                           id="kabupaten" name="kabupaten" value="{{ old('kabupaten', $user->kabupaten) }}" 
+                                           placeholder="Contoh: Lombok Barat, Bima, Sumbawa" required>
+                                    @error('kabupaten')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
@@ -61,7 +64,7 @@
                                     <select class="form-control @error('travel_id') is-invalid @enderror" 
                                             id="travel_id" name="travel_id" required>
                                         <option value="">Pilih Travel Company</option>
-                                        @foreach(\App\Models\TravelCompany::all() as $travel)
+                                        @foreach($travelCompanies as $travel)
                                             <option value="{{ $travel->id }}" {{ old('travel_id', $user->travel_id) == $travel->id ? 'selected' : '' }}>
                                                 {{ $travel->Penyelenggara }} - {{ $travel->kab_kota }}
                                             </option>
@@ -72,14 +75,16 @@
                                     @enderror
                                 </div>
                             @endif
-                            <div class="col-md-6 mb-3">
-                                <label for="city" class="form-label">Kota</label>
-                                <input type="text" class="form-control @error('city') is-invalid @enderror" 
-                                       id="city" name="city" value="{{ old('city', $user->city) }}" required>
-                                @error('city')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
+                            @if($user->role !== 'kabupaten')
+                                <div class="col-md-6 mb-3">
+                                    <label for="city" class="form-label">Kota</label>
+                                    <input type="text" class="form-control @error('city') is-invalid @enderror" 
+                                           id="city" name="city" value="{{ old('city', $user->city) }}" required>
+                                    @error('city')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            @endif
                             <div class="col-md-6 mb-3">
                                 <label for="country" class="form-label">Negara</label>
                                 <input type="text" class="form-control @error('country') is-invalid @enderror" 

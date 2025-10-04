@@ -134,11 +134,12 @@ class AuthController extends Controller
         
         // Check if user is authenticated before accessing role
         if ($user && $user->role === 'admin') {
-            // Admin can see all travel companies
-            $travelData = TravelCompany::all();
+            // Admin can see all travel companies - optimized query
+            $travelData = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')->get();
         } else if ($user && $user->role === 'kabupaten') {
-            // Kabupaten users can only see travel companies in their area
-            $travelData = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+            // Kabupaten users can only see travel companies in their area - optimized query
+            $travelData = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+                ->where('kab_kota', $user->kabupaten)->get();
         } else {
             // Other roles or unauthenticated users see empty data
             $travelData = collect();
@@ -161,9 +162,9 @@ class AuthController extends Controller
             'airlineCount' => Bap::distinct('airlines')->count()
         ];
 
-        // Get all travels (pusat + cabang) for form pengaduan
-        $travelPusat = TravelCompany::all();
-        $travelCabang = \App\Models\CabangTravel::all();
+        // Get all travels (pusat + cabang) for form pengaduan - optimized queries
+        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
+        $travelCabang = \App\Models\CabangTravel::select('id', 'Penyelenggara', 'kabupaten')->get();
         $travels = $travelPusat->concat($travelCabang);
 
         return view('welcome', compact('bapData', 'travelData', 'stats', 'travels', 'travelPusat', 'travelCabang'));
@@ -173,13 +174,14 @@ class AuthController extends Controller
     {
         $user = auth()->user();
         
-        // Check if user is authenticated before accessing role
+        // Check if user is authenticated before accessing role - optimized queries
         if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
-            $data = TravelCompany::all();
+            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')->get();
         } else if ($user && $user->role === 'kabupaten') {
             // Kabupaten users can only see travel companies in their area
-            $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+                ->where('kab_kota', $user->kabupaten)->get();
         } else {
             // Other roles or unauthenticated users see empty data
             $data = collect();
@@ -190,9 +192,9 @@ class AuthController extends Controller
 
     public function showPublicListTravel()
     {
-        // Public access - show all travel companies (pusat + cabang) without authentication
-        $travelPusat = TravelCompany::all();
-        $travelCabang = \App\Models\CabangTravel::all();
+        // Public access - show all travel companies (pusat + cabang) without authentication - optimized queries
+        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status', 'Pimpinan')->get();
+        $travelCabang = \App\Models\CabangTravel::select('id', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang')->get();
         $data = $travelPusat->concat($travelCabang);
         
         return view('travel-list-public', compact('data'));

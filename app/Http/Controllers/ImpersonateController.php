@@ -42,7 +42,7 @@ class ImpersonateController extends Controller
 
         $this->impersonateManager->take(Auth::user(), $user);
 
-        return redirect()->route('home')->with('success', 'Now impersonating ' . $user->username);
+        return redirect()->route('home')->with('success', 'Now impersonating ' . $user->nama);
     }
 
     /**

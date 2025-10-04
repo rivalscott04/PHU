@@ -179,13 +179,14 @@ class KanwilController extends Controller
     {
         $user = auth()->user();
 
-        // Check if user is authenticated before accessing role
+        // Check if user is authenticated before accessing role - optimized queries
         if ($user && $user->role === 'admin') {
             // Admin can see all travel companies
-            $data = TravelCompany::all();
+            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')->get();
         } else if ($user && $user->role === 'kabupaten') {
             // Kabupaten users can only see travel companies in their area
-            $data = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+                ->where('kab_kota', $user->kabupaten)->get();
         } else {
             // Other roles or unauthenticated users see empty data
             $data = collect();
@@ -196,7 +197,7 @@ class KanwilController extends Controller
 
     public function createCabangTravel()
     {
-        $travels = TravelCompany::all();
+        $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
         return view('kanwil.formCabangTravel', compact('travels'));
     }
 
@@ -226,11 +227,12 @@ class KanwilController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'admin') {
-            // Admin can see all cabang travel
-            $data = CabangTravel::all();
+            // Admin can see all cabang travel - optimized query
+            $data = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon')->get();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see cabang travel in their area
-            $data = CabangTravel::where('kabupaten', $user->kabupaten)->get();
+            // Kabupaten users can only see cabang travel in their area - optimized query
+            $data = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon')
+                ->where('kabupaten', $user->kabupaten)->get();
         } else {
             // Other roles see empty data
             $data = collect();
@@ -275,7 +277,7 @@ class KanwilController extends Controller
     public function editCabangTravel($id_cabang)
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
-        $travels = TravelCompany::all();
+        $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
         return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
     }
 
