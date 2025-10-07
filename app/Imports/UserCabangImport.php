@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Models\User;
-use App\Models\TravelCompany;
+use App\Models\CabangTravel;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -11,18 +11,18 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
-class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
+class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
 {
     use Importable;
 
     protected $errors = [];
     protected $successCount = 0;
-    protected $travelCompanies = [];
+    protected $cabangTravels = [];
 
     public function __construct()
     {
-        // Load all travel companies for fuzzy matching
-        $this->travelCompanies = TravelCompany::all();
+        // Load all cabang travel companies for fuzzy matching
+        $this->cabangTravels = CabangTravel::all();
     }
 
     public function model(array $row)
@@ -32,7 +32,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             $row = array_change_key_case($row, CASE_LOWER);
 
             // Log setiap row sebelum diproses
-            Log::debug('UserTravelImport: Processing row', $row);
+            Log::debug('UserCabangImport: Processing row', $row);
 
             // 🔹 Normalisasi email dulu sebelum validasi
             if (!empty($row['email'])) {
@@ -52,13 +52,11 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 $row['password'] = strval($row['password']);
             }
 
-            // Note: nomor_hp normalization is handled in prepareForValidation() method
-
             // Validate required fields
             if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password']) || empty($row['travel_company'])) {
-                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, password, dan travel company wajib diisi";
+                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Semua field wajib diisi (nama, email, nomor_hp, password, travel_company)";
                 $this->errors[] = $msg;
-                Log::warning("UserTravelImport warning: $msg", $row);
+                Log::warning("UserCabangImport warning: $msg", $row);
                 return null;
             }
 
@@ -66,7 +64,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             if (User::where('email', $row['email'])->exists()) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Email '{$row['email']}' sudah digunakan";
                 $this->errors[] = $msg;
-                Log::warning("UserTravelImport warning: $msg");
+                Log::warning("UserCabangImport warning: $msg");
                 return null;
             }
 
@@ -74,24 +72,25 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             if (User::where('nomor_hp', $row['nomor_hp'])->exists()) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nomor HP '{$row['nomor_hp']}' sudah digunakan";
                 $this->errors[] = $msg;
-                Log::warning("UserTravelImport warning: $msg");
+                Log::warning("UserCabangImport warning: $msg");
                 return null;
             }
 
-            // Find travel company using fuzzy matching
-            $travel = $this->findTravelCompany($row['travel_company']);
-            if (!$travel) {
+            // Find cabang travel company using fuzzy matching
+            $cabang = $this->findCabangTravel($row['travel_company']);
+            if (!$cabang) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Travel company '{$row['travel_company']}' tidak ditemukan atau tidak cocok";
                 $this->errors[] = $msg;
-                Log::warning("UserTravelImport warning: $msg");
+                Log::warning("UserCabangImport warning: $msg");
                 return null;
             }
 
-            // Debug travel company yang ditemukan
-            Log::info('UserTravelImport: Travel company matched', [
+            // Debug cabang travel yang ditemukan
+            Log::info('UserCabangImport: Cabang travel matched', [
                 'input' => $row['travel_company'],
-                'matched' => $travel->Penyelenggara,
-                'id' => $travel->id
+                'matched' => $cabang->Penyelenggara,
+                'id_cabang' => $cabang->id_cabang,
+                'kabupaten' => $cabang->kabupaten
             ]);
 
             // Create user data
@@ -100,22 +99,23 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 'email' => $row['email'],
                 'nomor_hp' => $row['nomor_hp'],
                 'password' => Hash::make($row['password']),
-                'travel_id' => $travel->id,
+                'travel_id' => null, // No pusat reference
+                'cabang_id' => $cabang->id_cabang, // Use cabang ID
                 'role' => 'user',
-                'kabupaten' => $travel->kab_kota,
+                'kabupaten' => $cabang->kabupaten,
                 'country' => 'Indonesia',
                 'is_password_changed' => false,
             ];
 
             $this->successCount++;
-            Log::info("UserTravelImport: User berhasil dibuat (Row {$this->successCount})", $userData);
+            Log::info("UserCabangImport: User berhasil dibuat (Row {$this->successCount})", $userData);
 
             return new User($userData);
         } catch (\Exception $e) {
             $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": " . $e->getMessage();
             $this->errors[] = $msg;
 
-            Log::error('UserTravelImport exception', [
+            Log::error('UserCabangImport exception', [
                 'row' => $row,
                 'error' => $e->getMessage(),
                 'file' => $e->getFile(),
@@ -128,20 +128,20 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
     }
 
     /**
-     * Find travel company using fuzzy matching with 90% similarity threshold
+     * Find cabang travel company using fuzzy matching with 90% similarity threshold
      */
-    private function findTravelCompany($inputName)
+    private function findCabangTravel($inputName)
     {
         $inputName = trim($inputName);
         $bestMatch = null;
         $bestSimilarity = 0;
         $threshold = 90; // 90% similarity threshold
 
-        foreach ($this->travelCompanies as $travel) {
-            $similarity = $this->calculateSimilarity($inputName, $travel->Penyelenggara);
+        foreach ($this->cabangTravels as $cabang) {
+            $similarity = $this->calculateSimilarity($inputName, $cabang->Penyelenggara);
 
             if ($similarity >= $threshold && $similarity > $bestSimilarity) {
-                $bestMatch = $travel;
+                $bestMatch = $cabang;
                 $bestSimilarity = $similarity;
             }
         }
@@ -202,26 +202,19 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 // If starts with 8 (no leading zero), add leading zero
                 $digits = '0' . $digits;
             } elseif (preg_match('/^0/', $digits)) {
-                // If already starts with 0, keep it as is
+                // Already starts with 0, keep as is
                 $digits = $digits;
             } else {
-                // For any other format, try to add leading zero if it looks like Indonesian number
-                if (strlen($digits) >= 10 && strlen($digits) <= 13) {
-                    $digits = '0' . $digits;
-                }
+                // If no leading 0 or 62, add leading 0
+                $digits = '0' . $digits;
             }
 
-            // Limit length to reasonable phone number length
-            $digits = substr($digits, 0, 15);
-
-            Log::debug('UserTravelImport: prepareForValidation - nomor_hp normalized', [
-                'index' => $index,
-                'original' => $normalized['nomor_hp'],
-                'phoneNumber' => $phoneNumber,
-                'normalized' => $digits,
-            ]);
-
             $normalized['nomor_hp'] = $digits;
+        }
+
+        // --- Normalize password: convert to string to handle Excel number formatting ---
+        if (!empty($normalized['password'])) {
+            $normalized['password'] = strval($normalized['password']);
         }
 
         return $normalized;
@@ -231,9 +224,9 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             '*.nama' => 'required|string|max:255',
-            '*.email' => 'required|string|max:255',
-            '*.nomor_hp' => 'required|string|max:20|regex:/^08/',
-            '*.password' => 'required|min:5',
+            '*.email' => 'required|email|max:255',
+            '*.nomor_hp' => 'required|max:20',
+            '*.password' => 'required|min:6',
             '*.travel_company' => 'required|string|max:255',
         ];
     }
@@ -250,10 +243,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
             '*.nomor_hp.string' => 'Nomor HP harus berupa teks',
             '*.nomor_hp.max' => 'Nomor HP maksimal 20 karakter',
-            '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
             '*.password.required' => 'Password wajib diisi',
-            '*.password.string' => 'Password harus berupa teks',
-            '*.password.min' => 'Password minimal 5 karakter',
+            '*.password.min' => 'Password minimal 6 karakter',
             '*.travel_company.required' => 'Travel company wajib diisi',
             '*.travel_company.string' => 'Travel company harus berupa teks',
             '*.travel_company.max' => 'Travel company maksimal 255 karakter',

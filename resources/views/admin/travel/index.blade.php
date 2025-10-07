@@ -7,10 +7,20 @@
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
                     <h6>Data User Travel</h6>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('travels.import.form') }}" class="btn btn-success">
-                            <i class="bx bx-upload me-1"></i>
-                            Import Excel
-                        </a>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bx bx-upload me-1"></i>
+                                Import Excel
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ route('travels.import.form') }}">
+                                    <i class="bx bx-building me-2"></i>Import User Pusat
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ route('cabang.import.form') }}">
+                                    <i class="bx bx-building-house me-2"></i>Import User Cabang
+                                </a></li>
+                            </ul>
+                        </div>
                         <a href="{{ route('travels.create') }}" class="btn btn-primary">
                             <i class="bx bx-plus me-1"></i>
                             Tambah User Travel
@@ -181,19 +191,13 @@
                                             <td class="text-sm font-weight-bold">{{ $user->email }}</td>
                                             <td class="text-sm font-weight-bold">{{ $user->nomor_hp }}</td>
                                             <td class="text-sm font-weight-bold">
-                                                @if($user->travel)
-                                                    <span class="badge bg-info">{{ $user->travel->Penyelenggara }}</span>
-                                                @else
-                                                    <span class="badge bg-secondary">Tidak ada travel</span>
-                                                @endif
+                                                <span class="badge {{ $user->getTravelCompanyBadgeClass() }}">
+                                                    {{ $user->getTravelCompanyName() }}
+                                                </span>
                                             </td>
                                             @if(auth()->user()->role === 'admin')
                                             <td class="text-sm font-weight-bold">
-                                                @if($user->travel)
-                                                    <span class="badge bg-success">{{ $user->travel->kab_kota }}</span>
-                                                @else
-                                                    <span class="badge bg-secondary">-</span>
-                                                @endif
+                                                <span class="badge bg-success">{{ $user->getKabupaten() }}</span>
                                             </td>
                                             @endif
                                             <td class="text-sm font-weight-bold">

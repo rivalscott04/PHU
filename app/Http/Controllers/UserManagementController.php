@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\TravelCompany;
 use App\Imports\UserTravelImport;
+use App\Imports\UserCabangImport;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
@@ -397,8 +398,13 @@ class UserManagementController extends Controller
         return view('admin.travel.import');
     }
 
+    public function importCabangForm()
+    {
+        return view('admin.travel.import-cabang');
+    }
+
     /**
-     * Handle Excel import for travel users
+     * Handle Excel import for travel users (PUSAT)
      */
     public function importTravelUsers(Request $request)
     {
@@ -409,20 +415,20 @@ class UserManagementController extends Controller
         try {
             DB::beginTransaction();
 
-            \Log::info('ImportTravelUsers: Mulai proses import file.', [
+            \Log::info('ImportTravelUsers (PUSAT): Mulai proses import file.', [
                 'filename' => $request->file('excel_file')->getClientOriginalName(),
                 'size' => $request->file('excel_file')->getSize(),
             ]);
 
-            // Create import instance
+            // Create import instance for PUSAT
             $import = new UserTravelImport();
 
-            \Log::info('ImportTravelUsers: Sebelum Excel::import dipanggil');
+            \Log::info('ImportTravelUsers (PUSAT): Sebelum Excel::import dipanggil');
 
             // Import the Excel file
             Excel::import($import, $request->file('excel_file'));
 
-            \Log::info('ImportTravelUsers: Sesudah Excel::import dipanggil');
+            \Log::info('ImportTravelUsers (PUSAT): Sesudah Excel::import dipanggil');
 
             DB::commit();
 
@@ -430,12 +436,12 @@ class UserManagementController extends Controller
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
 
-            \Log::info('ImportTravelUsers: Hasil import', [
+            \Log::info('ImportTravelUsers (PUSAT): Hasil import', [
                 'successCount' => $successCount,
                 'errors' => $errors,
             ]);
 
-            $message = "Import berhasil! {$successCount} user berhasil dibuat.";
+            $message = "Import user PUSAT berhasil! {$successCount} user berhasil dibuat.";
 
             if (!empty($errors)) {
                 $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
@@ -446,7 +452,69 @@ class UserManagementController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
-            \Log::error('UserTravelImport error', [
+            \Log::error('UserTravelImport (PUSAT) error', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Handle Excel import for cabang travel users (CABANG)
+     */
+    public function importCabangUsers(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            \Log::info('ImportCabangUsers (CABANG): Mulai proses import file.', [
+                'filename' => $request->file('excel_file')->getClientOriginalName(),
+                'size' => $request->file('excel_file')->getSize(),
+            ]);
+
+            // Create import instance for CABANG
+            $import = new UserCabangImport();
+
+            \Log::info('ImportCabangUsers (CABANG): Sebelum Excel::import dipanggil');
+
+            // Import the Excel file
+            Excel::import($import, $request->file('excel_file'));
+
+            \Log::info('ImportCabangUsers (CABANG): Sesudah Excel::import dipanggil');
+
+            DB::commit();
+
+            // Get import results
+            $successCount = $import->getSuccessCount();
+            $errors = $import->getErrors();
+
+            \Log::info('ImportCabangUsers (CABANG): Hasil import', [
+                'successCount' => $successCount,
+                'errors' => $errors,
+            ]);
+
+            $message = "Import user CABANG berhasil! {$successCount} user berhasil dibuat.";
+
+            if (!empty($errors)) {
+                $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
+            }
+
+            return redirect()->route('travels.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            \Log::error('UserCabangImport (CABANG) error', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),
@@ -461,7 +529,7 @@ class UserManagementController extends Controller
 
 
     /**
-     * Download Excel template for travel users import
+     * Download Excel template for travel users import (PUSAT)
      */
     public function downloadTravelUserTemplate()
     {
@@ -471,6 +539,20 @@ class UserManagementController extends Controller
             return redirect()->back()->with('error', 'Template file tidak ditemukan.');
         }
 
-        return response()->download($filePath, 'Template_Import_User_Travel.xlsx');
+        return response()->download($filePath, 'Template_Import_User_Travel_PUSAT.xlsx');
+    }
+
+    /**
+     * Download Excel template for cabang users import (CABANG)
+     */
+    public function downloadCabangUserTemplate()
+    {
+        $filePath = public_path('template/templateuser.xlsx');
+
+        if (!file_exists($filePath)) {
+            return redirect()->back()->with('error', 'Template file tidak ditemukan.');
+        }
+
+        return response()->download($filePath, 'Template_Import_User_Travel_CABANG.xlsx');
     }
 }

@@ -5,19 +5,13 @@
         <td class="text-sm font-weight-bold">{{ $user->email }}</td>
         <td class="text-sm font-weight-bold">{{ $user->nomor_hp }}</td>
         <td class="text-sm font-weight-bold">
-            @if($user->travel)
-                <span class="badge bg-info">{{ $user->travel->Penyelenggara }}</span>
-            @else
-                <span class="badge bg-secondary">Tidak ada travel</span>
-            @endif
+            <span class="badge {{ $user->getTravelCompanyBadgeClass() }}">
+                {{ $user->getTravelCompanyName() }}
+            </span>
         </td>
         @if(auth()->user()->role === 'admin')
         <td class="text-sm font-weight-bold">
-            @if($user->travel)
-                <span class="badge bg-success">{{ $user->travel->kab_kota }}</span>
-            @else
-                <span class="badge bg-secondary">-</span>
-            @endif
+            <span class="badge bg-success">{{ $user->getKabupaten() }}</span>
         </td>
         @endif
         <td class="text-sm font-weight-bold">

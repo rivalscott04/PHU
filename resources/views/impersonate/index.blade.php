@@ -55,11 +55,9 @@
                                 <td>{{ $user->nama }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
-                                    @if($user->travel)
-                                        <span class="badge bg-info">{{ $user->travel->Penyelenggara }}</span>
-                                    @else
-                                        <span class="badge bg-secondary">No Travel Company</span>
-                                    @endif
+                                    <span class="badge {{ $user->getTravelCompanyBadgeClass() }}">
+                                        {{ $user->getTravelCompanyName() }}
+                                    </span>
                                 </td>
                                 <td>{{ $user->city ?? 'N/A' }}</td>
                                 <td>

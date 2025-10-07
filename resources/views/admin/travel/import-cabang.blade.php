@@ -5,7 +5,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Import User Travel Pusat via Excel</h5>
+                <h5 class="mb-0">Import User Travel Cabang via Excel</h5>
                 <a href="{{ route('travels.index') }}" class="btn btn-secondary">
                     <i class="bx bx-arrow-back"></i> Kembali
                 </a>
@@ -35,7 +35,7 @@
                                 <h6 class="mb-0">Upload File Excel</h6>
                             </div>
                             <div class="card-body">
-                                <form method="POST" action="{{ route('travels.import') }}" enctype="multipart/form-data">
+                                <form method="POST" action="{{ route('cabang.import') }}" enctype="multipart/form-data">
                                     @csrf
 
                                     <!-- File Upload -->
@@ -55,10 +55,10 @@
                                     <!-- Submit Button -->
                                     <div class="d-flex justify-content-between align-items-center">
                                         <button type="submit" class="btn btn-primary">
-                                            <i class="bx bx-upload"></i> Import User
+                                            <i class="bx bx-upload"></i> Import User Cabang
                                         </button>
                                         
-                                        <a href="{{ route('travels.template') }}" class="btn btn-outline-secondary">
+                                        <a href="{{ route('cabang.template') }}" class="btn btn-outline-secondary">
                                             <i class="bx bx-download"></i> Download Template
                                         </a>
                                     </div>
@@ -89,10 +89,10 @@
                                 <ul class="list-unstyled small">
                                     <li>• Email dan nomor HP harus unik</li>
                                     <li>• Password minimal 6 karakter</li>
-                                    <li>• Travel company akan dicocokkan dengan data PUSAT (bukan cabang)</li>
+                                    <li>• Travel company akan dicocokkan dengan data CABANG (bukan pusat)</li>
                                     <li>• Fuzzy matching dengan threshold 90% similarity</li>
                                     <li>• Toleransi typo pada nama travel company hingga 10%</li>
-                                    <li>• Kabupaten akan otomatis terisi dari travel company pusat</li>
+                                    <li>• Kabupaten akan otomatis terisi dari travel company cabang</li>
                                     <li>• Role akan otomatis set ke "user"</li>
                                     <li>• User bisa login dengan email atau nomor HP</li>
                                     <li>• Data profile lengkap dapat diisi nanti melalui halaman profile</li>
@@ -101,7 +101,7 @@
                                 <div class="alert alert-warning mt-3">
                                     <small>
                                         <i class="bx bx-info-circle"></i>
-                                        <strong>Perhatian:</strong> Ini untuk import user PUSAT, bukan cabang. Pastikan travel company yang dimasukkan adalah nama pusat yang sudah terdaftar.
+                                        <strong>Perhatian:</strong> Ini untuk import user CABANG, bukan pusat. Pastikan travel company yang dimasukkan adalah nama cabang yang sudah terdaftar.
                                     </small>
                                 </div>
 
@@ -121,7 +121,7 @@
                     <div class="col-12">
                         <div class="card">
                             <div class="card-header">
-                                <h6 class="mb-0">Contoh Data Excel (PUSAT)</h6>
+                                <h6 class="mb-0">Contoh Data Excel (CABANG)</h6>
                             </div>
                             <div class="card-body">
                                 <div class="table-responsive">
@@ -141,28 +141,28 @@
                                                 <td>john.doe@travel1.com</td>
                                                 <td>081234567890</td>
                                                 <td>password123</td>
-                                                <td>PT. BIRO PERJALANAN WISATA MUHSININ</td>
+                                                <td>PT. HIRA CAHAYA ILAHI</td>
                                             </tr>
                                             <tr>
                                                 <td>Jane Smith</td>
                                                 <td>jane.smith@travel1.com</td>
                                                 <td>081234567891</td>
                                                 <td>password123</td>
-                                                <td>PT. MAYYASAH WISATA MULYA</td>
+                                                <td>PT. AT TAYIBAH</td>
                                             </tr>
                                             <tr>
                                                 <td>Ahmad Wijaya</td>
                                                 <td>ahmad.wijaya@travel2.com</td>
                                                 <td>081234567892</td>
                                                 <td>password123</td>
-                                                <td>PT. MUDAHAN TILAH</td>
+                                                <td>PT. NABILA INTI PERSADA TOUR AND TRAVEL</td>
                                             </tr>
                                             <tr>
                                                 <td>Siti Rahayu</td>
                                                 <td>siti.rahayu@travel2.com</td>
                                                 <td>081234567893</td>
                                                 <td>password123</td>
-                                                <td>PT. FAUZA WISATA IHSANI</td>
+                                                <td>PT. MASYARIL HARAM TOUR & TRAVEL</td>
                                             </tr>
                                         </tbody>
                                     </table>

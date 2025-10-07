@@ -20,6 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'travel_id',
+        'cabang_id',
         'nama',
         'email',
         'nomor_hp',
@@ -56,6 +57,50 @@ class User extends Authenticatable
     public function travel()
     {
         return $this->belongsTo(TravelCompany::class, 'travel_id');
+    }
+
+    public function cabang()
+    {
+        return $this->belongsTo(\App\Models\CabangTravel::class, 'cabang_id', 'id_cabang');
+    }
+
+    /**
+     * Get travel company name (either pusat or cabang)
+     */
+    public function getTravelCompanyName()
+    {
+        if ($this->travel) {
+            return $this->travel->Penyelenggara . ' (Pusat)';
+        } elseif ($this->cabang) {
+            return $this->cabang->Penyelenggara . ' (Cabang)';
+        }
+        return 'Tidak ada travel';
+    }
+
+    /**
+     * Get travel company badge class
+     */
+    public function getTravelCompanyBadgeClass()
+    {
+        if ($this->travel) {
+            return 'bg-info';
+        } elseif ($this->cabang) {
+            return 'bg-warning';
+        }
+        return 'bg-secondary';
+    }
+
+    /**
+     * Get kabupaten (either from pusat or cabang)
+     */
+    public function getKabupaten()
+    {
+        if ($this->travel) {
+            return $this->travel->kab_kota;
+        } elseif ($this->cabang) {
+            return $this->cabang->kabupaten;
+        }
+        return $this->kabupaten;
     }
 
     /**

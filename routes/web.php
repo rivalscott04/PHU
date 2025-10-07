@@ -210,10 +210,15 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/travel-users/create', [UserManagementController::class, 'createTravel'])->name('travels.create');
         Route::post('/travel-users', [UserManagementController::class, 'storeTravel'])->name('travels.store');
         
-        // Travel User Import
+        // Travel User Import (PUSAT)
         Route::get('/travel-users/import', [UserManagementController::class, 'importTravelForm'])->name('travels.import.form');
         Route::post('/travel-users/import', [UserManagementController::class, 'importTravelUsers'])->name('travels.import');
         Route::get('/travel-users/template', [UserManagementController::class, 'downloadTravelUserTemplate'])->name('travels.template');
+        
+        // Travel User Import (CABANG)
+        Route::get('/cabang-users/import', [UserManagementController::class, 'importCabangForm'])->name('cabang.import.form');
+        Route::post('/cabang-users/import', [UserManagementController::class, 'importCabangUsers'])->name('cabang.import');
+        Route::get('/cabang-users/template', [UserManagementController::class, 'downloadCabangUserTemplate'])->name('cabang.template');
 
         // General User Management
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
