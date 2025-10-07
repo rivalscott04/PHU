@@ -644,6 +644,15 @@
             });
         @endif
 
+        @if(session('warning'))
+            Swal.fire({
+                title: "Peringatan!",
+                text: "{{ session('warning') }}",
+                icon: "warning",
+                confirmButtonColor: "#f7b731"
+            });
+        @endif
+
         @if(session('error'))
             Swal.fire({
                 title: "Error!",
@@ -651,6 +660,32 @@
                 icon: "error",
                 confirmButtonColor: "#f46a6a"
             });
+        @endif
+
+        @if(session('import_errors') && count(session('import_errors')) > 0)
+            // Show detailed errors in a collapsible section
+            setTimeout(function() {
+                const errorDetails = `
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#errorDetails" aria-expanded="false">
+                            <i class="bx bx-chevron-down me-1"></i> Lihat Detail Error
+                        </button>
+                        <div class="collapse mt-2" id="errorDetails">
+                            <div class="card card-body bg-light" style="max-height: 300px; overflow-y: auto;">
+                                @foreach(session('import_errors') as $error)
+                                    <small class="text-danger">• {{ $error }}</small><br>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // Add error details to the page
+                const alertContainer = document.querySelector('.alert, .swal2-container');
+                if (alertContainer) {
+                    alertContainer.insertAdjacentHTML('afterend', errorDetails);
+                }
+            }, 1000);
         @endif
     </script>
 @endpush

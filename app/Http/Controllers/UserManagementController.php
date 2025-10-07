@@ -441,14 +441,30 @@ class UserManagementController extends Controller
                 'errors' => $errors,
             ]);
 
-            $message = "Import user PUSAT berhasil! {$successCount} user berhasil dibuat.";
+            // Generate user-friendly message
+            if ($successCount > 0 && empty($errors)) {
+                $message = "✅ Import berhasil! {$successCount} user pusat berhasil ditambahkan.";
+                $messageType = 'success';
+            } elseif ($successCount > 0 && !empty($errors)) {
+                $errorCount = count($errors);
+                $message = "⚠️ Import sebagian berhasil! {$successCount} user berhasil ditambahkan, {$errorCount} data bermasalah.";
+                $messageType = 'warning';
+            } elseif ($successCount == 0 && !empty($errors)) {
+                $errorCount = count($errors);
+                $message = "❌ Import gagal! {$errorCount} data bermasalah. Silakan periksa data dan coba lagi.";
+                $messageType = 'error';
+            } else {
+                $message = "❌ Import gagal! Tidak ada data yang dapat diproses.";
+                $messageType = 'error';
+            }
 
+            // Store detailed errors in session for admin view (optional)
             if (!empty($errors)) {
-                $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
+                session()->flash('import_errors', $errors);
             }
 
             return redirect()->route('travels.index')
-                ->with('success', $message);
+                ->with($messageType, $message);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -503,14 +519,30 @@ class UserManagementController extends Controller
                 'errors' => $errors,
             ]);
 
-            $message = "Import user CABANG berhasil! {$successCount} user berhasil dibuat.";
+            // Generate user-friendly message
+            if ($successCount > 0 && empty($errors)) {
+                $message = "✅ Import berhasil! {$successCount} user cabang berhasil ditambahkan.";
+                $messageType = 'success';
+            } elseif ($successCount > 0 && !empty($errors)) {
+                $errorCount = count($errors);
+                $message = "⚠️ Import sebagian berhasil! {$successCount} user berhasil ditambahkan, {$errorCount} data bermasalah.";
+                $messageType = 'warning';
+            } elseif ($successCount == 0 && !empty($errors)) {
+                $errorCount = count($errors);
+                $message = "❌ Import gagal! {$errorCount} data bermasalah. Silakan periksa data dan coba lagi.";
+                $messageType = 'error';
+            } else {
+                $message = "❌ Import gagal! Tidak ada data yang dapat diproses.";
+                $messageType = 'error';
+            }
 
+            // Store detailed errors in session for admin view (optional)
             if (!empty($errors)) {
-                $message .= "\n\nError yang ditemukan:\n" . implode("\n", $errors);
+                session()->flash('import_errors', $errors);
             }
 
             return redirect()->route('travels.index')
-                ->with('success', $message);
+                ->with($messageType, $message);
         } catch (\Exception $e) {
             DB::rollBack();
 
