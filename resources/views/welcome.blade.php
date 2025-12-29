@@ -701,11 +701,16 @@
             background-color: #1acc8d !important;
             color: #ffffff !important;
             border: none !important;
-            padding: 10px 25px !important;
+            padding: 12px 30px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             transition: all 0.3s ease !important;
             box-shadow: 0 4px 15px rgba(26, 204, 141, 0.2) !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+            width: fit-content !important;
         }
 
         .btn-card:hover {
