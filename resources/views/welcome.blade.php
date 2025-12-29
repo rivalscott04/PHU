@@ -723,10 +723,11 @@
         }
 
         .btn-card:hover {
-            background-color: #1acc8d !important;
-            color: #ffffff !important;
+            background-color: rgba(26, 204, 141, 0.08) !important;
+            color: #1acc8d !important;
+            border-color: #15b37b !important;
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.15) !important;
         }
     </style>
 </head>
