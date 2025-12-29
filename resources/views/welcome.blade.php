@@ -1500,21 +1500,21 @@
                         <div class="col-md-6">
                             <div class="stat-detail-card">
                                 <h6 class="text-primary">Jamaah Haji</h6>
-                                <h3 class="text-warning">{{ $stats['jamaahHajiCount'] }}</h3>
+                                <h3 class="text-warning">{{ $stats['jamaahHajiCount'] > 0 ? $stats['jamaahHajiCount'] : 'Belum Ada Data' }}</h3>
                                 <p class="text-muted">Jamaah haji khusus</p>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="stat-detail-card">
                                 <h6 class="text-primary">Jamaah Umrah</h6>
-                                <h3 class="text-success">{{ $stats['jamaahUmrahCount'] }}</h3>
+                                <h3 class="text-success">{{ $stats['jamaahUmrahCount'] > 0 ? $stats['jamaahUmrahCount'] : 'Belum Ada Data' }}</h3>
                                 <p class="text-muted">Jamaah umrah</p>
                             </div>
                         </div>
                     </div>
                     <hr>
                     <div class="text-center">
-                        <h4 class="text-primary">Total Jamaah: {{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h4>
+                        <h4 class="text-primary">Total Jamaah: {{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) > 0 ? ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) : 'Belum Ada Data' }}</h4>
                         <p class="text-muted">Terdaftar dalam sistem PHU Kanwil NTB</p>
                     </div>
                 </div>
@@ -1537,7 +1537,7 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <h3 class="text-primary">{{ $stats['airlineCount'] }}</h3>
+                        <h3 class="text-primary">{{ $stats['airlineCount'] > 0 ? $stats['airlineCount'] : 'Belum Ada Data' }}</h3>
                         <p class="text-muted">Maskapai yang bekerja sama</p>
                     </div>
                     <hr>
