@@ -760,7 +760,7 @@
                         </p>
                         <div class="d-flex flex-wrap gap-3">
                             <a href="{{ route('login') }}" class="btn-get-started">Masuk</a>
-                            <a href="#about" class="btn-check-travel">Cek Travel</a>
+                            <a href="#stats" class="btn-check-travel">Cek Travel</a>
                         </div>
                     </div>
                 </div>
@@ -881,7 +881,7 @@
         </section>
 
         <!-- Stats Section -->
-        <section class="stats-section section light-background">
+        <section id="stats" class="stats-section section light-background">
             <!-- Section Title -->
             <div class="container section-title" data-aos="fade-up">
                 <h2>Statistik</h2>
