@@ -537,8 +537,8 @@
         .scrolled .header {
             padding: 5px 0 !important;
             background: rgba(16, 5, 140, 0.9) !important;
-            backdrop-filter: blur(8px) !important;
-            -webkit-backdrop-filter: blur(8px) !important;
+            backdrop-filter: blur(5px) !important;
+            -webkit-backdrop-filter: blur(5px) !important;
         }
 
         .hero {
@@ -664,11 +664,36 @@
             transition: all 0.3s ease !important;
             background: #ffffff !important;
             box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05) !important;
+            padding: 60px 45px !important;
+            height: 100% !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .icon-box i {
+            margin-bottom: 25px !important;
+            display: inline-block !important;
+        }
+
+        .icon-box h3 {
+            margin-bottom: 20px !important;
+            font-weight: 700 !important;
+        }
+
+        .icon-box p {
+            margin-bottom: 25px !important;
+            line-height: 1.7 !important;
+            color: #555 !important;
         }
 
         .icon-box:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        /* About Section Spacing */
+        .about .icon-box {
+            padding: 60px 45px !important;
         }
     </style>
 </head>
@@ -775,7 +800,7 @@
                     </div>
 
                     <div class="col-xl-7">
-                        <div class="row gy-4 icon-boxes">
+                        <div class="row gy-5 icon-boxes">
                             <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
                                 <div class="icon-box">
                                     <i class="bi bi-airplane"></i>
@@ -937,7 +962,7 @@
             <!-- End Section Title -->
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
-                <div class="row gy-4 icon-boxes">
+                <div class="row gy-5 icon-boxes">
                     <!-- FAQ Section -->
                     <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="icon-box">
