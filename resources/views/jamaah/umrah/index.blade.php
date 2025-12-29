@@ -410,10 +410,8 @@
                             <div class="alert alert-info">
                                 <h6 class="alert-heading"><i class="bx bx-info-circle me-2"></i>Informasi Export</h6>
                                 <ul class="mb-0 small">
-                                    <li><strong>Export Global:</strong> Semua data jamaah dengan separator per PPIU</li>
-                                    <li><strong>Export Per PPIU:</strong> Data jamaah dari PPIU tertentu saja</li>
                                     <li><strong>Format Excel:</strong> File .xlsx dengan multiple sheets</li>
-                                    <li><strong>Format PDF:</strong> File .pdf dengan header resmi Kemenag</li>
+                                    <li><strong>Format PDF:</strong> File .pdf dengan header resmi Kementerian Haji</li>
                                 </ul>
                             </div>
                         </div>

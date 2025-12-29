@@ -668,27 +668,52 @@
             height: 100% !important;
             display: flex !important;
             flex-direction: column !important;
+            position: relative !important;
+            z-index: 1 !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(26, 204, 141, 0.05) !important;
+        }
+
+        .icon-box::before {
+            content: attr(data-number);
+            position: absolute;
+            top: -20px;
+            right: -10px;
+            font-size: 150px;
+            font-weight: 900;
+            color: rgba(26, 204, 141, 0.04);
+            z-index: -1;
+            font-family: var(--heading-font);
+            line-height: 1;
         }
 
         .icon-box i {
             margin-bottom: 25px !important;
             display: inline-block !important;
+            font-size: 2.5rem !important;
         }
 
         .icon-box h3 {
             margin-bottom: 20px !important;
-            font-weight: 700 !important;
+            font-weight: 800 !important;
+            font-size: 1.25rem !important;
+            color: var(--primary-color) !important;
+            min-height: 3rem;
+            display: flex;
+            align-items: center;
         }
 
         .icon-box p {
-            margin-bottom: 25px !important;
+            margin-bottom: 0 !important;
             line-height: 1.7 !important;
             color: #555 !important;
+            font-size: 0.95rem;
         }
 
         .icon-box:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1) !important;
+            border-color: rgba(26, 204, 141, 0.2) !important;
         }
 
         /* About Section Spacing */
@@ -822,62 +847,68 @@
 
         <!-- About Section -->
         <section id="about" class="about section">
+            <div class="container section-title" data-aos="fade-up">
+                <h2>5 Pasti Umroh</h2>
+                <div>
+                    <span>Jangan Tergiur Harga Murah</span>
+                    <span class="description-title">Pastikan 5 Hal Ini!</span>
+                </div>
+            </div>
+
             <div class="container" data-aos="fade-up" data-aos-delay="100">
-                <div class="row align-items-xl-center gy-5">
-                    <div class="col-xl-5 content">
-                        <h3>5 Pasti Umroh</h3>
-                        <h2>PASTIKAN Travel Umrah Berizin Kemenag.</h2>
-                        <p>
-                            Travel harus memiliki izin umrah agar terjamin perlindungan, pelayanan, dan bimbingan selama di Tanah Suci.
-                        </p>
-                        <a href="#" class="read-more"><span>Read More</span><i class="bi bi-arrow-right"></i></a>
+                <div class="row gy-4 justify-content-center">
+                    <!-- Pasti 1 -->
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
+                        <div class="icon-box" data-number="1">
+                            <h3>5 Pasti Umroh</h3>
+                        <h2>PASTIKAN Travel Umrah Berizin Kementerian Haji.</h2>
+                            <p>
+                                Travel harus memiliki izin umrah agar terjamin perlindungan, pelayanan, dan bimbingan selama di Tanah Suci.
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="col-xl-7">
-                        <div class="row gy-5 icon-boxes">
-                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
-                                <div class="icon-box">
-                                    <i class="bi bi-airplane"></i>
-                                    <h3>PASTIKAN Tiket Pesawat dan Jadwal Penerbangan.</h3>
-                                    <p>
-                                        Maskapai penerbangannya harus jelas, jadwal berangkatnya pasti, tiketnya harus pulang-pergi, dan hanya satu kali transit dengan maskapai penerbangan yang sama.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- End Icon Box -->
+                    <!-- Pasti 2 -->
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
+                        <div class="icon-box" data-number="2">
+                            <i class="bi bi-airplane"></i>
+                            <h3>PASTIKAN Tiket Pesawat dan Jadwal Penerbangan.</h3>
+                            <p>
+                                Maskapai penerbangannya harus jelas, jadwal berangkatnya pasti, tiketnya harus pulang-pergi, dan hanya satu kali transit dengan maskapai penerbangan yang sama.
+                            </p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="300">
-                                <div class="icon-box">
-                                    <i class="bi bi-clipboard-pulse"></i>
-                                    <h3>PASTIKAN Harga dan Paket Layanannya.</h3>
-                                    <p>
-                                        Jangan tergiur harga murah, cek rincian harga paket yang ditawarkan. Paket layanan terdiri dari konsumsi, transportasi, manasik, petugas yang mendampingi, dan asuransi perjalanan.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- End Icon Box -->
+                    <!-- Pasti 3 -->
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
+                        <div class="icon-box" data-number="3">
+                            <i class="bi bi-clipboard-pulse"></i>
+                            <h3>PASTIKAN Harga dan Paket Layanannya.</h3>
+                            <p>
+                                Jangan tergiur harga murah, rincian harga paket harus rasional. Layanan terdiri dari konsumsi, transportasi, manasik, petugas, dan asuransi.
+                            </p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="400">
-                                <div class="icon-box">
-                                    <i class="bi bi-buildings"></i>
-                                    <h3>PASTIKAN Akomodasi (Hotel) selama berada di Arab Saudi.</h3>
-                                    <p>
-                                        Hotel tempat menginap minimal hotel bintang 3 dan jarak dari tempat ibadah maksimal 1 km.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- End Icon Box -->
+                    <!-- Pasti 4 -->
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
+                        <div class="icon-box" data-number="4">
+                            <i class="bi bi-buildings"></i>
+                            <h3>PASTIKAN Akomodasi (Hotel) di Arab Saudi.</h3>
+                            <p>
+                                Hotel tempat menginap minimal bintang 3 dan jarak dari tempat ibadah maksimal 1 km (untuk hotel non-bintang/standar).
+                            </p>
+                        </div>
+                    </div>
 
-                            <div class="col-md-6" data-aos="fade-up" data-aos-delay="500">
-                                <div class="icon-box">
-                                    <i class="bi bi-graph-up-arrow"></i>
-                                    <h3>PASTIKAN Visanya</h3>
-                                    <p>
-                                        Visa harus selesai minimal 3 hari sebelum keberangkatan.
-                                    </p>
-                                </div>
-                            </div>
-                            <!-- End Icon Box -->
+                    <!-- Pasti 5 -->
+                    <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
+                        <div class="icon-box" data-number="5">
+                            <i class="bi bi-credit-card-2-front"></i>
+                            <h3>PASTIKAN Visanya</h3>
+                            <p>
+                                Visa harus selesai minimal 3 hari sebelum keberangkatan. Pastikan jenis visa sesuai dengan peruntukannya (Visa Umrah).
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -1138,7 +1169,7 @@
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Pengelolaan data travel berizin dan terverifikasi Kemenag</span>
+                                <span>Pengelolaan data travel berizin dan terverifikasi Kementerian Haji</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
@@ -1296,7 +1327,7 @@
                                     <i class="bi bi-envelope flex-shrink-0"></i>
                                     <div>
                                         <h3>Email</h3>
-                                        <p>ntb.kemenag@go.id</p>
+                                        <p>ntb.kemenhaji@go.id</p>
                                     </div>
                                 </div>
                             </div>
@@ -1384,7 +1415,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8 text-center">
                     <div class="footer-contact">
-                        <h5 class="mb-4 text-white">Kantor Wilayah Kementerian Agama Provinsi NTB</h5>
+                        <h5 class="mb-4 text-white">Kantor Wilayah Kementerian Haji Provinsi NTB</h5>
                         <div class="row justify-content-center">
                             <div class="col-md-4">
                                 <p class="mb-2 text-white-50">
@@ -1398,7 +1429,7 @@
                             </div>
                             <div class="col-md-4">
                                 <p class="mb-2 text-white-50">
-                                    <i class="bi bi-envelope me-2"></i>ntb.kemenag@kemenag.go.id
+                                    <i class="bi bi-envelope me-2"></i>ntb.kemenhaji@kemenhaji.go.id
                                 </p>
                             </div>
                         </div>
@@ -1412,11 +1443,11 @@
                 <div class="col-12">
                     <p class="mb-2 text-white-50">
                         © <script>document.write(new Date().getFullYear())</script> 
-                        <strong class="text-white">UHK Kanwil NTB</strong>. All Rights Reserved
+                        <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>. All Rights Reserved
                     </p>
                     <p class="mb-0 text-white-50 small">
                         Designed with <i class="bi bi-heart-fill text-danger"></i> by 
-                        <strong class="text-white">UHK Kanwil NTB</strong>
+                        <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>
                     </p>
                 </div>
             </div>

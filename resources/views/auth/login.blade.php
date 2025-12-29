@@ -115,7 +115,7 @@
                             <p>©
                                 <script>
                                     document.write(new Date().getFullYear())
-                                </script> Dibuat dengan <i class="mdi mdi-heart text-danger"></i> Kanwil Kemenag NTB.<br>
+                                </script> Dibuat dengan <i class="mdi mdi-heart text-danger"></i> Kanwil Kementerian Haji NTB.<br>
                             </p>
                         </div>
                     </div>

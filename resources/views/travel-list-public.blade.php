@@ -518,7 +518,7 @@
         <div class="container">
             <div class="section-title" data-aos="fade-up">
                 <h2>Daftar Travel Berizin</h2>
-                <p>Perusahaan Travel Terdaftar di Kanwil Kemenag NTB</p>
+                <p>Perusahaan Travel Terdaftar di Kanwil Kementerian Haji NTB</p>
             </div>
 
             <!-- Stats Summary -->
@@ -737,7 +737,7 @@
         <div class="container text-center py-3">
             <p class="mb-0 text-white-50">
                 © <script>document.write(new Date().getFullYear())</script> 
-                <strong class="text-white">UHK Kanwil NTB</strong>. All Rights Reserved
+                <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>. All Rights Reserved
             </p>
         </div>
     </footer>

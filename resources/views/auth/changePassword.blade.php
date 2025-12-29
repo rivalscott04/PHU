@@ -113,12 +113,7 @@
                         </div>
                     </div>
                     <div class="mt-5 text-center">
-                        <p>©
-                            <script>
-                                document.write(new Date().getFullYear())
-                            </script> UHK Kanwil NTB. Crafted with <i class="mdi mdi-heart text-danger"></i> by
-                            Kanwil Kemenag NTB
-                        </p>
+                        <p>© <script>document.write(new Date().getFullYear())</script> Kanwil Kementerian Haji NTB. Dibuat dengan <i class="mdi mdi-heart text-danger"></i></p>
                     </div>
                 </div>
             </div>

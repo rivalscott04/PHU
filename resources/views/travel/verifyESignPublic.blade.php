@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi E-Sign BAP - Kanwil Kemenag NTB</title>
+    <title>Verifikasi E-Sign BAP - Kanwil Kementerian Haji NTB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
     <style>
@@ -73,7 +73,7 @@
                     <div class="header-logo">
                         <i class="bx bx-qr-scan verification-icon"></i>
                         <h4 class="mb-0">Verifikasi Keaslian Dokumen BAP</h4>
-                        <p class="mb-0 mt-2">Kantor Wilayah Kementerian Agama Provinsi NTB</p>
+                        <p class="mb-0 mt-2">Kantor Wilayah Kementerian Haji Provinsi NTB</p>
                     </div>
                     
                     <div class="card-body p-4">
