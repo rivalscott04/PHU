@@ -12,11 +12,8 @@
     <link href="{{ asset('img/favicon.png') }}" rel="icon" />
     <link href="{{ asset('img/apple-touch-icon.png') }}" rel="apple-touch-icon" />
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com" rel="preconnect" />
-    <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
     <link
-        href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
         rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
@@ -539,8 +536,9 @@
 
         .scrolled .header {
             padding: 5px 0 !important;
-            background: rgba(16, 5, 140, 0.95) !important;
-            backdrop-filter: blur(10px);
+            background: rgba(16, 5, 140, 0.9) !important;
+            backdrop-filter: blur(8px) !important;
+            -webkit-backdrop-filter: blur(8px) !important;
         }
 
         .hero {
@@ -551,8 +549,8 @@
         .hero h1 {
             font-size: 3.5rem !important;
             font-weight: 800 !important;
-            letter-spacing: -1px;
-            margin-bottom: 20px;
+            letter-spacing: -2px;
+            margin-bottom: 25px;
             line-height: 1.1;
         }
 
@@ -569,18 +567,32 @@
         }
 
         .btn-get-started {
-            padding: 12px 35px !important;
+            padding: 14px 35px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease !important;
             box-shadow: 0 5px 15px rgba(26, 204, 141, 0.3);
+            margin-right: 15px;
         }
 
-        .btn-get-started:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(26, 204, 141, 0.4);
+        .btn-check-travel {
+            padding: 14px 35px !important;
+            border-radius: 50px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease !important;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: #fff;
+            background: transparent;
+        }
+
+        .btn-check-travel:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #fff;
+            color: #fff;
         }
 
         /* Form Improvements */
@@ -628,6 +640,35 @@
             .stats-bar {
                 padding: 20px 10px !important;
             }
+        }
+
+        /* Branding Colors & Spacing Overhaul */
+        .icon-box i, .info-item i, .stat-icon i, .detail-item i {
+            color: #1acc8d !important;
+        }
+
+        section, .section {
+            padding: 100px 0 !important;
+        }
+
+        .section-title {
+            padding-bottom: 70px !important;
+        }
+
+        .light-background {
+            background: linear-gradient(180deg, #f4f5fe 0%, #ffffff 100%) !important;
+        }
+
+        .icon-box {
+            border-radius: 15px !important;
+            transition: all 0.3s ease !important;
+            background: #ffffff !important;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05) !important;
+        }
+
+        .icon-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1) !important;
         }
     </style>
 </head>
@@ -692,8 +733,9 @@
                         <p>
                             Informasi Keberangkatan dan List Travel.
                         </p>
-                        <div class="d-flex">
+                        <div class="d-flex flex-wrap gap-3">
                             <a href="{{ route('login') }}" class="btn-get-started">Masuk</a>
+                            <a href="#about" class="btn-check-travel">Cek Travel</a>
                         </div>
                     </div>
                 </div>
@@ -836,7 +878,7 @@
                                             <i class="fas fa-building text-primary"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['travelCount'] }}</h3>
+                                            <h3 class="stat-number">{{ $stats['travelCount'] ?: 'Menunggu Data' }}</h3>
                                             <p class="stat-label">Travel Berizin</p>
                                         </div>
                                     </div>
@@ -847,7 +889,7 @@
                                             <i class="fas fa-users text-success"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['jamaahHajiCount'] + $stats['jamaahUmrahCount'] }}</h3>
+                                            <h3 class="stat-number">{{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) ?: 'Menunggu Data' }}</h3>
                                             <p class="stat-label">Total Jamaah</p>
                                         </div>
                                     </div>
@@ -858,7 +900,7 @@
                                             <i class="fas fa-plane text-info"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['airlineCount'] }}</h3>
+                                            <h3 class="stat-number">{{ $stats['airlineCount'] ?: 'Menunggu Data' }}</h3>
                                             <p class="stat-label">Maskapai</p>
                                         </div>
                                     </div>
@@ -1244,8 +1286,8 @@
                                             <div class="sent-message">Pengaduan Anda telah terkirim. Terima kasih!</div>
                                             <div class="mt-3">
                                                 <button type="button"
-                                                    class="btn btn-success rounded-pill px-3 py-2 border border-0"
-                                                    style="background-color: #1acc8d" onclick="confirmSubmit()">Kirim
+                                                    class="btn btn-success rounded-pill px-4 py-3"
+                                                    style="background-color: #1acc8d; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;" onclick="confirmSubmit()">Kirim
                                                     Pengaduan</button>
                                             </div>
                                         </div>
