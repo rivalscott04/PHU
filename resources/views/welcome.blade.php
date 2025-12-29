@@ -696,27 +696,37 @@
             padding: 60px 45px !important;
         }
 
-        /* Card Button Unification */
+        /* Card Button Redesign (Outline Style) */
         .btn-card {
-            background-color: #1acc8d !important;
-            color: #ffffff !important;
-            border: none !important;
-            padding: 12px 30px !important;
+            background-color: transparent !important;
+            color: #1acc8d !important;
+            border: 2px solid #1acc8d !important;
+            padding: 10px 25px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.2) !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
             line-height: 1 !important;
             width: fit-content !important;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem !important;
+        }
+
+        .btn-card i {
+            margin-left: 8px !important;
+            font-size: 1rem !important;
+            margin-bottom: 0 !important; /* Reset generic icon margin */
+            line-height: 0 !important;
         }
 
         .btn-card:hover {
-            background-color: #15b37b !important;
+            background-color: #1acc8d !important;
+            color: #ffffff !important;
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(26, 204, 141, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.3) !important;
         }
     </style>
 </head>
