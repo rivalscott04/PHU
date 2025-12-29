@@ -695,6 +695,24 @@
         .about .icon-box {
             padding: 60px 45px !important;
         }
+
+        /* Card Button Unification */
+        .btn-card {
+            background-color: #1acc8d !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 10px 25px !important;
+            border-radius: 50px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.2) !important;
+        }
+
+        .btn-card:hover {
+            background-color: #15b37b !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(26, 204, 141, 0.3) !important;
+        }
     </style>
 </head>
 
@@ -972,8 +990,8 @@
                                 Temukan jawaban untuk pertanyaan yang sering diajukan tentang sistem PHU Kanwil NTB, cara melihat jadwal keberangkatan, dan prosedur pengaduan.
                             </p>
                             <div class="mt-3">
-                                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse">
-                                    Lihat FAQ <i class="bi bi-chevron-down"></i>
+                                <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse">
+                                    Lihat FAQ <i class="bi bi-chevron-down ms-1"></i>
                                 </button>
                             </div>
                             <div class="collapse mt-3" id="faqCollapse">
@@ -1005,8 +1023,8 @@
                                 Pelajari cara mengajukan pengaduan dan jenis pengaduan yang dapat diajukan terkait layanan haji dan umroh.
                             </p>
                             <div class="mt-3">
-                                <button class="btn btn-outline-warning btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#pengaduanCollapse">
-                                    Lihat Detail <i class="bi bi-chevron-down"></i>
+                                <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#pengaduanCollapse">
+                                    Lihat Detail <i class="bi bi-chevron-down ms-1"></i>
                                 </button>
                             </div>
                             <div class="collapse mt-3" id="pengaduanCollapse">
@@ -1046,8 +1064,8 @@
                                 Pelajari cara menggunakan sistem PHU dengan panduan lengkap untuk setiap fitur yang tersedia.
                             </p>
                             <div class="mt-3">
-                                <button class="btn btn-outline-info btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panduanCollapse">
-                                    Lihat Panduan <i class="bi bi-chevron-down"></i>
+                                <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panduanCollapse">
+                                    Lihat Panduan <i class="bi bi-chevron-down ms-1"></i>
                                 </button>
                             </div>
                             <div class="collapse mt-3" id="panduanCollapse">
