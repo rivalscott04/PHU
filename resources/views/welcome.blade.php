@@ -9,8 +9,8 @@
     <meta name="keywords" content="" />
 
     <!-- Favicons -->
-    <link href="assets/img/favicon.png" rel="icon" />
-    <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
+    <link href="{{ asset('img/favicon.png') }}" rel="icon" />
+    <link href="{{ asset('img/apple-touch-icon.png') }}" rel="apple-touch-icon" />
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -531,6 +531,106 @@
                 right: 4px;
             }
         }
+        /* Visual Improvements */
+        .header {
+            padding: 10px 0 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .scrolled .header {
+            padding: 5px 0 !important;
+            background: rgba(16, 5, 140, 0.95) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #08005e 0%, #1a1a1a 100%) !important;
+            padding: 140px 0 100px 0 !important;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -1px;
+            margin-bottom: 20px;
+            line-height: 1.1;
+        }
+
+        .hero h1 span {
+            display: block;
+            color: var(--accent-color);
+            font-size: 2.5rem;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
+        }
+
+        .btn-get-started {
+            padding: 12px 35px !important;
+            border-radius: 50px !important;
+            font-weight: 600 !important;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 5px 15px rgba(26, 204, 141, 0.3);
+        }
+
+        .btn-get-started:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 204, 141, 0.4);
+        }
+
+        /* Form Improvements */
+        .form-control::placeholder {
+            color: #6c757d !important;
+            opacity: 1; /* Firefox */
+        }
+
+        .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(26, 204, 141, 0.25);
+        }
+
+        /* Micro-interactions */
+        .btn-success {
+            transition: all 0.3s ease !important;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        /* Logo Refinement */
+        .sitename {
+            font-family: var(--heading-font);
+            font-weight: 800 !important;
+            letter-spacing: 1px;
+            background: linear-gradient(45deg, #1acc8d, #2563eb);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            font-size: 1.5rem !important;
+        }
+
+        /* Statistik Mobile Refinement */
+        @media (max-width: 576px) {
+            .stat-item {
+                margin-bottom: 10px;
+                padding: 12px 8px !important;
+            }
+            .stat-icon i {
+                font-size: 1.8rem !important;
+            }
+            .stat-number {
+                font-size: 1.5rem !important;
+            }
+            .stats-bar {
+                padding: 20px 10px !important;
+            }
+        }
     </style>
 </head>
 
@@ -589,7 +689,7 @@
                     <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-in">
                         <h1>
                             Sistem Informasi Haji dan Umroh Khusus
-                            <span>Kanwil Kemenag NTB</span>
+                            <span>Kanwil Haji NTB</span>
                         </h1>
                         <p>
                             Informasi Keberangkatan dan List Travel.
@@ -602,19 +702,19 @@
             </div>
 
             <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 24 150 28 " preserveAspectRatio="none">
+                viewBox="0 24 150 28" preserveAspectRatio="none">
                 <defs>
                     <path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z">
                     </path>
                 </defs>
                 <g class="wave1">
-                    <use xlink:href="#wave-path" x="50" y="3"></use>
+                    <use xlink:href="#wave-path" x="50" y="3" fill="rgba(255,255,255, .1)"></use>
                 </g>
                 <g class="wave2">
-                    <use xlink:href="#wave-path" x="50" y="0"></use>
+                    <use xlink:href="#wave-path" x="50" y="0" fill="rgba(255,255,255, .2)"></use>
                 </g>
                 <g class="wave3">
-                    <use xlink:href="#wave-path" x="50" y="9"></use>
+                    <use xlink:href="#wave-path" x="50" y="9" fill="#fff"></use>
                 </g>
             </svg>
         </section>
@@ -715,6 +815,7 @@
             </div>
         </section>
 
+        @if(($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) > 0 || $stats['airlineCount'] > 0)
         <!-- Stats Section -->
         <section class="stats-section section light-background">
             <!-- Section Title -->
@@ -783,6 +884,7 @@
             </div>
         </section>
         <!-- /Stats Section -->
+        @endif
 
         <!-- Informasi Section -->
         <section id="informasi" class="informasi section light-background">
@@ -1136,7 +1238,7 @@
 
                                         <div class="col-md-12">
                                             <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" style="background-color: white;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
-                                            <small class="text-muted mt-1">File maksimal 300KB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
+                                            <small class="text-muted mt-1">File maksimal 2MB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
 
@@ -1522,13 +1624,6 @@
                 },
                 dayMaxEvents: true,
                 displayEventTime: false,
-                // Make title clickable for year selection
-                titleRender: function(info) {
-                    info.el.onclick = function() {
-                        setupYearGrid();
-                        yearSelectModal.style.display = 'flex';
-                    };
-                },
                 viewDidMount: function(info) {
                     // Trigger year selection modal when switching to multiMonth view
                     if (info.view.type === 'multiMonth') {
@@ -1709,12 +1804,12 @@
             const fileInput = document.getElementById('berkas_aduan_welcome');
             if (fileInput.files.length > 0) {
                 const file = fileInput.files[0];
-                const maxSize = 300 * 1024; // 300KB
+                const maxSize = 2 * 1024 * 1024; // 2MB
                 
                 if (file.size > maxSize) {
                     errors.push({
                         field: 'berkas_aduan_welcome',
-                        message: 'Ukuran file maksimal 300KB',
+                        message: 'Ukuran file maksimal 2MB',
                         element: fileInput
                     });
                 }
@@ -1825,7 +1920,7 @@
             } else if (fieldId === 'berkas_aduan_welcome' && field.files.length > 0) {
                 // Validate file size
                 const file = field.files[0];
-                const maxSize = 300 * 1024; // 300KB
+                const maxSize = 2 * 1024 * 1024; // 2MB
                 
                 if (file.size > maxSize) {
                     field.classList.add('is-invalid');
@@ -1833,7 +1928,7 @@
                     
                     const feedback = field.parentNode.querySelector('.invalid-feedback');
                     if (feedback) {
-                        feedback.textContent = 'Ukuran file maksimal 300KB';
+                        feedback.textContent = 'Ukuran file maksimal 2MB';
                     }
                 } else {
                     field.classList.remove('is-invalid');
