@@ -608,9 +608,7 @@
             font-family: var(--heading-font);
             font-weight: 800 !important;
             letter-spacing: 1px;
-            background: linear-gradient(45deg, #1acc8d, #2563eb);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #ffffff !important;
             text-transform: uppercase;
             font-size: 1.5rem !important;
         }
@@ -815,7 +813,6 @@
             </div>
         </section>
 
-        @if(($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) > 0 || $stats['airlineCount'] > 0)
         <!-- Stats Section -->
         <section class="stats-section section light-background">
             <!-- Section Title -->
@@ -884,7 +881,6 @@
             </div>
         </section>
         <!-- /Stats Section -->
-        @endif
 
         <!-- Informasi Section -->
         <section id="informasi" class="informasi section light-background">
