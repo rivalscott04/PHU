@@ -5144,7 +5144,7 @@ fieldset:disabled .btn {
     float: left;
     padding-right: 0.5rem;
     color: #74788d;
-    content: var(--bs-breadcrumb-divider, "https://themesbrand.com/");
+    content: var(--bs-breadcrumb-divider, "/");
 }
 .breadcrumb-item.active {
     color: #74788d;

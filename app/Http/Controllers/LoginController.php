@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\AuditLogService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +12,11 @@ use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
+    public function __construct(
+        private readonly AuditLogService $auditLogService,
+    ) {
+    }
+
     /**
      * Display login page.
      *
@@ -41,6 +47,7 @@ class LoginController extends Controller
 
         if ($user && Hash::check($password, $user->password)) {
             Auth::login($user);
+            $this->auditLogService->log('auth', 'login', 'masuk ke sistem', $user->id);
 
             if ($user->role === 'user') {
                 return redirect()->route('home');
@@ -59,10 +66,15 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
+        $userId = Auth::id();
         Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();
+
+        if ($userId) {
+            $this->auditLogService->log('auth', 'logout', 'keluar dari sistem', $userId);
+        }
 
         return redirect('/');
     }

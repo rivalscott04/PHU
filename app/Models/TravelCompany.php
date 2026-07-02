@@ -75,6 +75,16 @@ class TravelCompany extends Model
         return $this->hasMany(JamaahHajiKhusus::class, 'travel_id');
     }
 
+    public function inspections()
+    {
+        return $this->hasMany(Inspection::class, 'travel_id');
+    }
+
+    public function riskScore()
+    {
+        return $this->hasOne(RiskScore::class, 'travel_id');
+    }
+
     /**
      * Check if travel can handle haji
      */

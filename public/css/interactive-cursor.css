@@ -1,0 +1,47 @@
+/**
+ * UX: tampilkan cursor pointer pada elemen interaktif.
+ * Bootstrap memberi pointer ke button, tetapi tidak ke select / beberapa pola aksi.
+ */
+
+/* Dropdown & select (ubah status, filter, dll.) */
+select:not(:disabled),
+.form-select:not(:disabled),
+select.form-control:not(:disabled),
+.status-dropdown:not(:disabled),
+select[name="status"]:not(:disabled) {
+    cursor: pointer;
+}
+
+/* Tombol & tautan aksi */
+.btn:not(:disabled):not(.disabled),
+.btn-link:not(:disabled):not(.disabled),
+[role="button"]:not(:disabled):not(.disabled),
+[data-bs-toggle]:not(:disabled):not(.disabled),
+.dropdown-toggle:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
+
+/* Ikon aksi di tabel */
+td a,
+.table .btn,
+.table a {
+    cursor: pointer;
+}
+
+/* Elemen yang sengaja dibuat klik-able */
+.cursor-pointer,
+.stat-item[data-bs-toggle],
+.card-radio-label,
+label[for]:not(.disabled) {
+    cursor: pointer;
+}
+
+/* State non-interaktif */
+select:disabled,
+.form-select:disabled,
+.btn:disabled,
+.btn.disabled,
+a.disabled,
+[aria-disabled="true"] {
+    cursor: not-allowed;
+}

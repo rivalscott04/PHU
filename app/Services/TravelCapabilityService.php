@@ -342,6 +342,64 @@ class TravelCapabilityService
             ];
         }
 
+        $pengawasanItems = [
+            [
+                'name' => 'Dashboard V2',
+                'route' => 'v2.dashboard',
+                'icon' => 'bx bx-bar-chart-alt-2',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Monitoring',
+                'route' => 'v2.monitoring.index',
+                'icon' => 'bx bx-radar',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Pengawasan',
+                'route' => 'v2.pengawasan.index',
+                'icon' => 'bx bx-search-alt',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Master Checklist',
+                'route' => 'v2.checklist.index',
+                'icon' => 'bx bx-list-check',
+                'visible' => $user->role === 'admin',
+            ],
+            [
+                'name' => 'Tindak Lanjut',
+                'route' => 'v2.followup.index',
+                'icon' => 'bx bx-task',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Risk Score',
+                'route' => 'v2.risk.index',
+                'icon' => 'bx bx-error',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Profil Kepatuhan',
+                'route' => 'v2.compliance.index',
+                'icon' => 'bx bx-shield-quarter',
+                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
+            ],
+            [
+                'name' => 'Riwayat Aktivitas',
+                'route' => 'v2.audit-log.index',
+                'icon' => 'bx bx-history',
+                'visible' => in_array($user->role, ['admin', 'kabupaten']),
+            ],
+        ];
+
+        $menus[] = [
+            'name' => 'Pengawasan Digital',
+            'icon' => 'bx bx-analyse',
+            'hasSubmenu' => true,
+            'items' => array_values(array_filter($pengawasanItems, fn ($item) => $item['visible'])),
+        ];
+
         return $menus;
     }
 } 

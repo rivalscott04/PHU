@@ -16,5 +16,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+/guidev2
 /storage/logs/laravel.log
 

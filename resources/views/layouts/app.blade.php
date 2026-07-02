@@ -6,8 +6,8 @@
     <title>PHU</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
+    <meta content="Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
+    <meta content="Kanwil Kementerian Haji NTB" name="author" />
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}">
     <!-- Bootstrap Css -->
@@ -16,6 +16,7 @@
     <link href="{{ asset('css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css -->
     <link href="{{ asset('css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('css/interactive-cursor.css') }}" rel="stylesheet" type="text/css" />
     <!-- DataTables -->
     <link href="{{ asset('libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />

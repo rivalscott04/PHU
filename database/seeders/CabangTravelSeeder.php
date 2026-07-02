@@ -126,7 +126,13 @@ class CabangTravelSeeder extends Seeder
         ];
 
         foreach ($cabangTravels as $cabangData) {
-            CabangTravel::create($cabangData);
+            CabangTravel::updateOrCreate(
+                [
+                    'Penyelenggara' => $cabangData['Penyelenggara'],
+                    'kabupaten' => $cabangData['kabupaten'],
+                ],
+                $cabangData
+            );
         }
 
         $this->command->info('NTB Cabang Travel seeded successfully!');

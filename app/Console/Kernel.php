@@ -12,7 +12,17 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // $schedule->command('inspire')->hourly();
+        $schedule->command('risk:calculate')
+            ->dailyAt('00:30')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/risk-calculate.log'));
+
+        $schedule->command('followup:send-deadline-reminders')
+            ->dailyAt('08:00')
+            ->withoutOverlapping()
+            ->onOneServer()
+            ->appendOutputTo(storage_path('logs/deadline-reminders.log'));
     }
 
     /**

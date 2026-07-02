@@ -2,17 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\JamaahHajiKhusus;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     *
-     * @return void
-     */
-    public function run()
+    public function run(): void
     {
         $this->call([
             AdminSeeder::class,
@@ -24,6 +18,8 @@ class DatabaseSeeder extends Seeder
             BAPSeeder::class,
             JamaahUmrahSeeder::class,
             JamaahHajiKhususSeeder::class,
+            PengaduanSeeder::class,
+            V2MasterChecklistSeeder::class,
         ]);
     }
 }

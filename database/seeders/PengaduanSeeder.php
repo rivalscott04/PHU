@@ -19,8 +19,15 @@ class PengaduanSeeder extends Seeder
         $travelCompanies = TravelCompany::limit(5)->get();
         $adminUser = User::where('role', 'admin')->first();
 
-        if ($travelCompanies->isEmpty() || !$adminUser) {
+        if ($travelCompanies->isEmpty() || ! $adminUser) {
             $this->command->warn('Tidak dapat membuat data pengaduan: Travel companies atau admin user tidak ditemukan');
+
+            return;
+        }
+
+        if (Pengaduan::query()->exists()) {
+            $this->command->info('Pengaduan seeder dilewati: data sudah ada.');
+
             return;
         }
 

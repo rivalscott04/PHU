@@ -107,7 +107,7 @@
                 Swal.fire({
                     title: "<i>HTML</i> <u>example</u>",
                     icon: "info",
-                    html: 'You can use <b>bold text</b>, <a href="//Themesbrand.in/">links</a> and other HTML tags',
+                    html: 'You can use <b>bold text</b>, <a href="#">links</a> and other HTML tags',
                     showCloseButton: !0,
                     showCancelButton: !0,
                     confirmButtonClass: "btn btn-success",
