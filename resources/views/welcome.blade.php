@@ -537,63 +537,50 @@
         }
 
         .hero {
-            padding: clamp(100px, 12vw, 140px) 0 clamp(60px, 8vw, 100px) 0 !important;
+            padding: 140px 0 100px 0 !important;
         }
 
         .hero h1 {
+            font-size: 3.5rem !important;
+            font-weight: 800 !important;
+            letter-spacing: -2px;
+            margin-bottom: 25px;
+            line-height: 1.1;
             color: #ffffff !important;
-            font-size: clamp(28px, 4vw, 36px) !important;
-            font-weight: 700 !important;
-            letter-spacing: -0.5px;
-            margin-bottom: 16px;
-            line-height: 1.25;
         }
 
-        .hero-subtitle {
-            color: #ffffff;
-            font-size: 1.15rem;
-            font-weight: 500;
-            margin-bottom: 10px;
-        }
-
-        .hero-desc {
-            color: #ffffff;
-            font-size: 1.1rem;
-            opacity: 0.92;
-            margin-bottom: 30px;
-        }
-
+        .hero-subtitle,
+        .hero-desc,
         .hero p {
+            font-size: 1.25rem;
+            opacity: 0.9;
+            margin-bottom: 30px;
             color: #ffffff;
         }
 
-        .btn-get-started {
+        .hero .btn-get-started,
+        .hero .btn-check-travel {
             padding: 14px 35px !important;
             border-radius: 50px !important;
             font-weight: 600 !important;
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease !important;
-            box-shadow: 0 4px 14px rgba(226, 167, 18, 0.35);
+            border: 2px solid #ffffff !important;
+            color: #ffffff !important;
+            background: transparent !important;
+            box-shadow: none !important;
+        }
+
+        .hero .btn-get-started {
             margin-right: 15px;
         }
 
-        .btn-check-travel {
-            padding: 14px 35px !important;
-            border-radius: 50px !important;
-            font-weight: 600 !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: all 0.3s ease !important;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            color: #fff;
-            background: transparent;
-        }
-
-        .btn-check-travel:hover {
-            background: #ffffff;
-            border-color: #ffffff;
-            color: #c8940e;
+        .hero .btn-get-started:hover,
+        .hero .btn-check-travel:hover {
+            background: rgba(255, 255, 255, 0.12) !important;
+            border-color: #ffffff !important;
+            color: #ffffff !important;
         }
 
         /* Form Improvements */
@@ -626,8 +613,11 @@
         @media (max-width: 576px) {
             .hero h1 {
                 font-size: 2rem !important;
+                line-height: 1.2 !important;
+                letter-spacing: -1px;
             }
-            .hero-subtitle {
+            .hero-subtitle,
+            .hero p {
                 font-size: 1rem;
             }
             .stat-item {
@@ -725,10 +715,10 @@
                     </path>
                 </defs>
                 <g class="wave1">
-                    <use xlink:href="#wave-path" x="50" y="3" fill="rgba(255,255,255, .1)"></use>
+                    <use xlink:href="#wave-path" x="50" y="3" fill="rgba(226, 167, 18, .12)"></use>
                 </g>
                 <g class="wave2">
-                    <use xlink:href="#wave-path" x="50" y="0" fill="rgba(255,255,255, .2)"></use>
+                    <use xlink:href="#wave-path" x="50" y="0" fill="rgba(226, 167, 18, .22)"></use>
                 </g>
                 <g class="wave3">
                     <use xlink:href="#wave-path" x="50" y="9" fill="#fff"></use>
