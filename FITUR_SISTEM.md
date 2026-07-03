@@ -1,6 +1,6 @@
-# Dokumentasi Fitur Sistem PHU
+# Dokumentasi Fitur Sistem PANTAU
 
-**PHU** (Penyelenggara Perjalanan Ibadah Umrah/Haji) adalah sistem manajemen berbasis web untuk Kanwil Kementerian Agama Provinsi Nusa Tenggara Barat (NTB). Sistem ini mengelola data travel haji/umrah, jamaah, Berita Acara Pemeriksaan (BAP), sertifikat PPIU, pengaduan, dan pengunduran.
+**PANTAU** adalah sistem manajemen berbasis web untuk Kanwil Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat (NTB). Sistem ini mengelola data travel haji/umrah, jamaah, **BA Pemberangkatan** (persetujuan keberangkatan), **BA Pemeriksaan** (pengawasan PPIU), sertifikat PPIU, pengaduan, dan pengunduran.
 
 **Stack teknologi:** Laravel 10, PHP 8.1+, MySQL, Argon Dashboard UI
 
@@ -13,7 +13,7 @@
 3. [Dashboard](#3-dashboard)
 4. [Manajemen Travel (PPIU/PIHK)](#4-manajemen-travel-ppiupihk)
 5. [Manajemen Jamaah](#5-manajemen-jamaah)
-6. [BAP (Berita Acara Pemeriksaan)](#6-bap-berita-acara-pemeriksaan)
+6. [BA Pemberangkatan](#6-ba-pemberangkatan)
 7. [Sertifikat PPIU](#7-sertifikat-ppiu)
 8. [Pengaduan](#8-pengaduan)
 9. [Pengunduran](#9-pengunduran)
@@ -193,9 +193,11 @@ Modul lengkap untuk pendaftaran haji khusus dengan dokumen pendukung.
 
 ---
 
-## 6. BAP (Berita Acara Pemeriksaan)
+## 6. BA Pemberangkatan
 
-BAP adalah dokumen deklarasi keberangkatan jamaah yang diajukan travel ke Kanwil.
+**BA Pemberangkatan** (Berita Acara Pelaporan Keberangkatan) adalah dokumen deklarasi keberangkatan jamaah yang diajukan travel ke Kanwil. Modul ini **berbeda** dari **BA Pemeriksaan** di modul Pengawasan Digital (hasil inspeksi PPIU).
+
+> **Siapa yang memproses?** Persetujuan BA Pemberangkatan dilakukan oleh **Admin** atau **Kabupaten** — bukan Pimpinan.
 
 ### Alur Status BAP
 
@@ -228,12 +230,16 @@ pending → diajukan → diproses → diterima
 | Verifikasi e-sign | `GET /verify-e-sign` | Halaman verifikasi (login) |
 | Verifikasi publik | `GET /public/verify-e-sign` | Verifikasi tanpa login |
 
-**Data BAP:** nama penanggung jawab, jabatan, nama PPIU, alamat/telepon, kab/kota, jumlah jamaah, hari, harga, tanggal keberangkatan, maskapai, tanggal kembali, maskapai pulang
+**Data BA Pemberangkatan:** nama penanggung jawab, jabatan, nama PPIU, alamat/telepon, kab/kota, jumlah jamaah, hari, harga, tanggal keberangkatan, maskapai, tanggal kembali, maskapai pulang
 
 **Fitur khusus:**
 - Auto-generate `nomor_surat` saat status `diterima`
 - QR code e-signature pada BAP yang diterima
 - Command artisan: `php artisan bap:update-days` — hitung ulang field `days`
+
+### BA Pemeriksaan (modul terpisah)
+
+**BA Pemeriksaan** dicatat di menu **Pengawasan Digital → BA Pemeriksaan** (`/v2/pengawasan`). Alurnya: Pengawas/Admin menjadwalkan inspeksi → mencatat temuan → travel mengunggah tindak lanjut → Pengawas memverifikasi. Modul ini **tidak** menggantikan atau memproses BA Pemberangkatan.
 
 ---
 
@@ -420,7 +426,7 @@ Sistem menggunakan **Maatwebsite Excel** untuk operasi bulk:
 | `travel_cabang` | Kantor cabang travel |
 | `jamaah` | Data jamaah haji & umrah |
 | `jamaah_haji_khusus` | Pendaftaran haji khusus |
-| `bap` | Berita Acara Pemeriksaan |
+| `bap` | BA Pemberangkatan (pelaporan keberangkatan jamaah) |
 | `pengaduan` | Pengaduan masyarakat |
 | `pengunduran` | Pengunduran jamaah |
 | `sertifikat` | Sertifikat PPIU |
@@ -453,7 +459,7 @@ Admin buat data PPIU pusat
   → User mulai input jamaah & BAP
 ```
 
-### Alur BAP Keberangkatan
+### Alur BA Pemberangkatan
 
 ```
 Travel input jamaah
@@ -495,7 +501,7 @@ PIHK input pendaftar haji khusus + dokumen
 | Travel cabang | ✅ CRUD | ✅ CRUD | ❌ |
 | Jamaah umrah | ✅ | ❌ | ✅ (PPIU/PIHK) |
 | Jamaah haji khusus | ✅ | ❌ | ✅ (PIHK) |
-| BAP | ✅ | ✅ | ✅ |
+| BA Pemberangkatan | ✅ | ✅ | ✅ |
 | Keberangkatan | ✅ | ✅ | ✅ |
 | Pengaduan | ✅ | ❌ | ❌ |
 | Pengunduran | ✅ | ✅ lihat | ✅ ajukan |

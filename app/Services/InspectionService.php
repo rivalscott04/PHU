@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Enums\ChecklistInputType;
+use App\Enums\FindingStatus;
 use App\Enums\InspectionStatus;
 use App\Models\Inspection;
 use App\Models\InspectionChecklist;
@@ -50,6 +50,7 @@ class InspectionService
     public function create(array $data): Inspection
     {
         return DB::transaction(function () use ($data) {
+            $data['inspection_no'] = $this->generateInspectionNo();
             $inspection = $this->inspectionRepository->create($data);
             $this->generateChecklists($inspection);
             $inspection->load('travel');
@@ -97,8 +98,8 @@ class InspectionService
 
     public function generateInspectionNo(): string
     {
-        $prefix = 'PWG-'.now()->format('Y');
-        $latest = Inspection::where('inspection_no', 'like', "{$prefix}-%")
+        $prefix = 'PWG'.now()->format('Y');
+        $latest = Inspection::where('inspection_no', 'like', "{$prefix}%")
             ->orderByDesc('inspection_no')
             ->value('inspection_no');
 
@@ -107,7 +108,7 @@ class InspectionService
             $sequence = (int) substr($latest, -4) + 1;
         }
 
-        return sprintf('%s-%04d', $prefix, $sequence);
+        return sprintf('%s%04d', $prefix, $sequence);
     }
 
     private function generateChecklists(Inspection $inspection): void
@@ -146,7 +147,20 @@ class InspectionService
             $finding = $this->inspectionRepository->createFinding([
                 ...$data,
                 'inspection_id' => $inspection->id,
+                'status' => FindingStatus::WaitingResponse->value,
             ]);
+
+            $currentStatus = $inspection->status instanceof InspectionStatus
+                ? $inspection->status
+                : InspectionStatus::tryFrom((string) $inspection->status);
+
+            if ($currentStatus === InspectionStatus::OnProgress) {
+                $this->assertValidStatusTransition($inspection, InspectionStatus::WaitingFollowup->value);
+                $this->inspectionRepository->update($inspection, [
+                    'status' => InspectionStatus::WaitingFollowup->value,
+                ]);
+                $inspection->refresh();
+            }
 
             $this->auditLogService->log(
                 'pengawasan',

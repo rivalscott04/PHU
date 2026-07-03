@@ -9,7 +9,7 @@
         id="page-header-notifications-dropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         <i class="bx bx-bell font-size-20"></i>
         @if($unreadCount > 0)
-            <span class="badge bg-danger rounded-pill position-absolute top-0 end-0" style="font-size:10px;">
+            <span class="badge bg-danger rounded-pill position-absolute end-0" style="font-size:10px; top:6px;">
                 {{ $unreadCount > 9 ? '9+' : $unreadCount }}
             </span>
         @endif
@@ -27,8 +27,12 @@
         </div>
         <div data-simplebar style="max-height:280px;">
             @forelse ($recentNotifications as $notification)
-                @php $data = $notification->data; @endphp
-                <a href="{{ $data['url'] ?? route('v2.notifications.index') }}" class="dropdown-item notify-item py-2 border-bottom">
+                @php
+                    $data = $notification->data;
+                    $url = \App\Support\NotificationUrl::normalize($data['url'] ?? null)
+                        ?? route('v2.notifications.index');
+                @endphp
+                <a href="{{ $url }}" class="dropdown-item notify-item py-2 border-bottom">
                     <div class="d-flex">
                         <div class="flex-grow-1">
                             <h6 class="mb-1 fs-13">{{ $data['title'] ?? 'Notifikasi' }}</h6>

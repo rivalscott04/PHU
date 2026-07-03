@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Enums\UserRole;
+use App\Enums\PengawasScopeMode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -32,6 +35,8 @@ class User extends Authenticatable
         'about',
         'role',
         'kabupaten',
+        'pengawas_scope',
+        'pengawas_kabupatens',
         'is_password_changed',
     ];
 
@@ -52,6 +57,7 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'pengawas_kabupatens' => 'array',
     ];
 
     public function travel()
@@ -103,20 +109,151 @@ class User extends Authenticatable
         return $this->kabupaten;
     }
 
+    public function pengawasScopeMode(): PengawasScopeMode
+    {
+        return PengawasScopeMode::tryFrom((string) $this->pengawas_scope)
+            ?? PengawasScopeMode::Single;
+    }
+
+    /** @return list<string>|null Null means seluruh NTB (tanpa filter kabupaten). */
+    public function getScopedKabupatens(): ?array
+    {
+        if ($this->role === UserRole::Admin->value || $this->role === UserRole::Pimpinan->value) {
+            return null;
+        }
+
+        if ($this->role === UserRole::Kabupaten->value) {
+            return $this->kabupaten ? [$this->kabupaten] : [];
+        }
+
+        if ($this->role !== UserRole::Pengawas->value) {
+            return null;
+        }
+
+        return match ($this->pengawasScopeMode()) {
+            PengawasScopeMode::All => null,
+            PengawasScopeMode::Single => $this->kabupaten ? [$this->kabupaten] : [],
+            PengawasScopeMode::Custom => array_values(array_filter($this->pengawas_kabupatens ?? [])),
+        };
+    }
+
+    public function canAccessKabupaten(?string $kabupaten): bool
+    {
+        if (! $kabupaten) {
+            return false;
+        }
+
+        if ($this->role === UserRole::Admin->value || $this->role === UserRole::Pimpinan->value) {
+            return true;
+        }
+
+        if ($this->role === UserRole::Kabupaten->value) {
+            return $kabupaten === $this->kabupaten;
+        }
+
+        if ($this->role !== UserRole::Pengawas->value) {
+            return false;
+        }
+
+        $scoped = $this->getScopedKabupatens();
+
+        return $scoped === null || in_array($kabupaten, $scoped, true);
+    }
+
+    public function getWilayahKerjaLabel(): string
+    {
+        if ($this->role === UserRole::Pimpinan->value) {
+            return 'Seluruh NTB';
+        }
+
+        if ($this->role === UserRole::Pengawas->value) {
+            return match ($this->pengawasScopeMode()) {
+                PengawasScopeMode::All => 'Seluruh NTB',
+                PengawasScopeMode::Single => $this->kabupaten ?? 'Tidak ada',
+                PengawasScopeMode::Custom => implode(', ', $this->pengawas_kabupatens ?? []) ?: 'Tidak ada',
+            };
+        }
+
+        return $this->getKabupaten() ?? 'Tidak ada';
+    }
+
+    public function scopePengawasForKabupaten(Builder $query, string $kabupaten): Builder
+    {
+        return $query->where('role', UserRole::Pengawas->value)
+            ->where(function (Builder $scoped) use ($kabupaten): void {
+                $scoped->where('pengawas_scope', PengawasScopeMode::All->value)
+                    ->orWhere(function (Builder $single) use ($kabupaten): void {
+                        $single->where(function (Builder $legacy) use ($kabupaten): void {
+                            $legacy->where('pengawas_scope', PengawasScopeMode::Single->value)
+                                ->orWhereNull('pengawas_scope');
+                        })->where('kabupaten', $kabupaten);
+                    })
+                    ->orWhere(function (Builder $custom) use ($kabupaten): void {
+                        $custom->where('pengawas_scope', PengawasScopeMode::Custom->value)
+                            ->whereJsonContains('pengawas_kabupatens', $kabupaten);
+                    });
+            });
+    }
+
+    public function roleEnum(): ?UserRole
+    {
+        return UserRole::tryFromString($this->role);
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === UserRole::Admin->value;
+    }
+
+    public function isPimpinan(): bool
+    {
+        return $this->role === UserRole::Pimpinan->value;
+    }
+
+    public function isPengawas(): bool
+    {
+        return $this->role === UserRole::Pengawas->value;
+    }
+
+    public function isKabupatenScoped(): bool
+    {
+        return in_array($this->role, [UserRole::Kabupaten->value, UserRole::Pengawas->value], true);
+    }
+
     /**
      * Check if user can impersonate
      */
     public function canImpersonate()
     {
-        return $this->role === 'admin';
+        return $this->isAdmin();
+    }
+
+    /** @return list<string> */
+    public static function impersonatableRoles(): array
+    {
+        return [
+            UserRole::Pimpinan->value,
+            UserRole::Pengawas->value,
+            UserRole::Kabupaten->value,
+            UserRole::User->value,
+        ];
     }
 
     /**
      * Check if user can be impersonated
      */
-    public function canBeImpersonated()
+    public function canBeImpersonated(): bool
     {
-        return in_array($this->role, ['user', 'kabupaten']);
+        return in_array($this->role, self::impersonatableRoles(), true);
+    }
+
+    public function impersonationRedirectRoute(): string
+    {
+        return match ($this->role) {
+            UserRole::Pengawas->value => 'v2.antrian.index',
+            UserRole::Pimpinan->value => 'v2.dashboard',
+            default => 'home',
+        };
     }
 
     /**

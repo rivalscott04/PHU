@@ -9,12 +9,12 @@ class ChecklistPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten'], true);
+        return $user->role === 'admin';
     }
 
     public function view(User $user, Checklist $checklist): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten'], true);
+        return $user->role === 'admin';
     }
 
     public function create(User $user): bool

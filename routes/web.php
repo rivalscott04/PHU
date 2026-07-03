@@ -39,6 +39,7 @@ use App\Http\Controllers\JamaahHajiKhususController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\PublicTravelController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -47,11 +48,12 @@ Route::get('/jamaah/template-test', function () {
 Route::get('/', [AuthController::class, 'showLanding']);
 
 Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('list.travel')->middleware('auth');
-Route::get('/travel-public', [AuthController::class, 'showPublicListTravel'])->name('travel.public');
+Route::get('/travel-public', [PublicTravelController::class, 'index'])->name('travel.public');
+Route::get('/travel-public/{travel}', [PublicTravelController::class, 'show'])->name('travel.public.show');
 
-Route::post('/register', [RegisterController::class, 'store'])->middleware('guest')->name('register.perform');
+Route::post('/register', [RegisterController::class, 'store'])->middleware(['guest', 'throttle:auth'])->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
-Route::post('/login', [LoginController::class, 'login'])->middleware('guest')->name('login.perform');
+Route::post('/login', [LoginController::class, 'login'])->middleware(['guest', 'throttle:auth'])->name('login.perform');
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
 Route::get('/test', function () {
@@ -199,8 +201,12 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     });
 
     // User Management routes - Admin only
-    Route::middleware(['admin'])->group(function () {
-        // Kabupaten User Management
+    Route::middleware(['admin', 'throttle:sensitive'])->group(function () {
+        Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
+        Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
+        Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
+
+        // Legacy user listings (redirect-friendly)
         Route::get('/kabupaten', [UserManagementController::class, 'indexKabupaten'])->name('kabupaten.index');
         Route::get('/kabupaten/create', [UserManagementController::class, 'createKabupaten'])->name('kabupaten.create');
         Route::post('/kabupaten', [UserManagementController::class, 'storeKabupaten'])->name('kabupaten.store');
@@ -228,22 +234,22 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 });
 
 // API routes for province, city, and district selection
-Route::get('/api/provinces', [ApiController::class, 'getProvinces'])->name('api.provinces');
-Route::get('/api/cities', [ApiController::class, 'getCities'])->name('api.cities');
-Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.districts');
+Route::middleware('throttle:public')->group(function () {
+    Route::get('/api/provinces', [ApiController::class, 'getProvinces'])->name('api.provinces');
+    Route::get('/api/cities', [ApiController::class, 'getCities'])->name('api.cities');
+    Route::get('/api/districts', [ApiController::class, 'getDistricts'])->name('api.districts');
+});
 
 // Public verification routes (no authentication required)
-Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi');
-Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
-Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
-// Public verification for BAP - direct access without redirect
-Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');
+Route::middleware('throttle:public')->group(function () {
+    Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi')->whereUuid('uuid');
+    Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
+    Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');
+    Route::get('/public/verify-e-sign', [BAPController::class, 'showVerifyQRPublic'])->name('verify-e-sign.public');
 
-// Public download routes (no authentication required)
-Route::get('/public/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDFPublic'])->name('pengaduan.download-pdf.public');
-
-// Public pengaduan routes (no authentication required)
-Route::get('/pengaduan-public/{id}', [PengaduanController::class, 'publicView'])->name('pengaduan.public');
-Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');
+    Route::get('/public/pengaduan/{token}/download-pdf', [PengaduanController::class, 'downloadPDFPublic'])->name('pengaduan.download-pdf.public')->whereUuid('token');
+    Route::get('/pengaduan-public/{token}', [PengaduanController::class, 'publicView'])->name('pengaduan.public')->whereUuid('token');
+    Route::post('/pengaduan-public', [PengaduanController::class, 'storePublic'])->name('pengaduan.store-public');
+});
 
 Route::get('/storage-link', [UtilityController::class, 'storageLink'])->name('utility.storage-link');

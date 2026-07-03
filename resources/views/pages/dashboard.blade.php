@@ -54,7 +54,7 @@
                                             {{ $diajukan }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diajukan
+                                            BA Pbrg. Diajukan
                                         </p>
                                     </div>
                                     <div class="col-6">
@@ -62,7 +62,7 @@
                                             {{ $diproses }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diproses
+                                            BA Pbrg. Diproses
                                         </p>
                                     </div>
                                 </div>
@@ -123,7 +123,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">BAP Selesai</p>
+                                    <p class="text-muted fw-medium">BA Pbrg. Selesai</p>
                                     <h4 class="mb-0">{{ $selesai }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">

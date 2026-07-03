@@ -21,7 +21,7 @@ class FollowupRevisionNotification extends V2DatabaseNotification
             'message' => "Pengawas meminta revisi untuk temuan \"{$finding?->title}\".",
             'module' => 'followup',
             'action' => 'revision',
-            'url' => route('v2.followup.show', $this->followup),
+            'url' => $this->actionUrl('v2.followup.show', $this->followup),
             'meta' => [
                 'followup_id' => $this->followup->id,
                 'finding_id' => $finding?->id,

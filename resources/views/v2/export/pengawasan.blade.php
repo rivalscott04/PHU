@@ -33,8 +33,8 @@
                     <td>{{ $inspection->inspection_no }}</td>
                     <td>{{ $inspection->travel?->Penyelenggara }}</td>
                     <td>{{ $inspection->inspection_date?->format('d/m/Y') }}</td>
-                    <td>{{ $inspection->inspection_type?->value ?? $inspection->inspection_type }}</td>
-                    <td>{{ $inspection->status?->value ?? $inspection->status }}</td>
+                    <td>{{ $inspection->inspection_type?->label() ?? $inspection->inspection_type }}</td>
+                    <td>{{ $inspection->status?->label() ?? $inspection->status }}</td>
                     <td>{{ $inspection->findings_count ?? 0 }}</td>
                 </tr>
             @empty

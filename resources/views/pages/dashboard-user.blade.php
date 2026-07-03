@@ -54,7 +54,7 @@
                                             {{ $myBAPDiajukan }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diajukan
+                                            BA Pbrg. Diajukan
                                         </p>
                                     </div>
                                     <div class="col-6">
@@ -62,7 +62,7 @@
                                             {{ $myBAPDiproses }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diproses
+                                            BA Pbrg. Diproses
                                         </p>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">Total BAP</p>
+                                    <p class="text-muted fw-medium">Total BA Pemberangkatan</p>
                                     <h4 class="mb-0">{{ $myTotalBAP }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
@@ -104,7 +104,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">BAP Diterima</p>
+                                    <p class="text-muted fw-medium">BA Pbrg. Diterima</p>
                                     <h4 class="mb-0">{{ $myBAPSelesai }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">
@@ -144,7 +144,7 @@
                 <div class="card-body">
                     <div class="d-sm-flex flex-wrap">
                         <h4 class="card-title mb-4">
-                            Statistik BAP per Bulan
+                            Statistik BA Pemberangkatan per Bulan
                         </h4>
                     </div>
 
@@ -188,7 +188,7 @@
                 }
             },
             series: [{
-                name: "Total BAP",
+                name: "BA Pemberangkatan",
                 data: monthlyData.map(item => item.total)
             }],
             xaxis: {

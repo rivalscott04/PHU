@@ -54,7 +54,7 @@
                                     <option value="">Pilih Travel Company</option>
                                     @foreach($travelCompanies as $travel)
                                         <option value="{{ $travel->id }}" {{ old('travel_id') == $travel->id ? 'selected' : '' }}>
-                                            {{ $travel->Penyelenggara }} - {{ $travel->kab_kota }}
+                                            {{ $travel->Penyelenggara }}, {{ $travel->kab_kota }}
                                         </option>
                                     @endforeach
                                 </select>

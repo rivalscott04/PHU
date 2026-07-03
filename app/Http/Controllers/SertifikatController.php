@@ -81,7 +81,7 @@ class SertifikatController extends Controller
 
         return response()->json([
             'nama_ppiu' => $travel->Penyelenggara,
-            'nama_kepala' => $travel->Pimpinan ?: ($travel->Penyelenggara . ' - Kepala'),
+            'nama_kepala' => $travel->Pimpinan ?: ($travel->Penyelenggara . ', Kepala'),
             'alamat' => $alamat ?: 'Alamat tidak tersedia'
         ]);
     }
@@ -91,8 +91,8 @@ class SertifikatController extends Controller
         $cabang = CabangTravel::findOrFail($id);
         return response()->json([
             'nama_ppiu' => $cabang->Penyelenggara,
-            'nama_kepala' => $cabang->pimpinan_cabang ?: ($cabang->Penyelenggara . ' - Kepala Cabang'),
-            'alamat' => $cabang->alamat_cabang ?: ($cabang->kabupaten . ' - Alamat Kantor Cabang')
+            'nama_kepala' => $cabang->pimpinan_cabang ?: ($cabang->Penyelenggara . ', Kepala Cabang'),
+            'alamat' => $cabang->alamat_cabang ?: ($cabang->kabupaten . ', Alamat Kantor Cabang')
         ]);
     }
 
@@ -555,7 +555,7 @@ class SertifikatController extends Controller
         <div class="main-content">
             <div class="left-content">
                 <div class="keputusan">
-                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Agama Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
+                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
                 </div>
 
                 <table class="detail-table">
@@ -594,7 +594,7 @@ class SertifikatController extends Controller
                 </div>
 
                 <div class="signature-title">
-                    Kepala Kantor Wilayah Kementerian Agama<br>
+                    Kepala Kantor Wilayah Kementerian Haji dan Umroh<br>
                     Provinsi Nusa Tenggara Barat,
                 </div>
 

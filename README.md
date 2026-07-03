@@ -1,76 +1,192 @@
-# PHU — Sistem Manajemen Penyelenggara Umrah/Haji (NTB)
+# PANTAU
+### Sistem Pengawasan Haji dan Umrah Kanwil Kementerian Haji dan Umroh NTB
 
-Sistem manajemen berbasis **Laravel 10** untuk Kanwil Kemenag NTB: travel PPIU/PIHK, jamaah, BAP, sertifikat, pengaduan, dan modul **pengawasan V2**.
+PANTAU membantu Kanwil Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat mengelola penyelenggara perjalanan ibadah, data jamaah, persetujuan keberangkatan, sertifikat resmi, pengaduan masyarakat, dan pengawasan digital travel haji dan umrah.
 
-📋 **Setup, konfigurasi `.env`, artisan commands, cron & Redis:** lihat **[SETUP.md](./SETUP.md)**
-
-📖 Dokumentasi fitur: [FITUR_SISTEM.md](./FITUR_SISTEM.md) · Modul V2: [guidev2/](./guidev2/)
+Semua proses penting bisa dilacak dari satu tempat: mulai dari pendaftaran jamaah, pengajuan keberangkatan, hingga pemeriksaan dan tindak lanjut di lapangan.
 
 ---
 
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+## Untuk siapa aplikasi ini?
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+| Pengguna | Peran dalam sistem |
+|----------|-------------------|
+| Kanwil NTB | Mengawasi seluruh wilayah provinsi |
+| Kabupaten dan kota | Memproses keberangkatan jamaah di wilayah masing masing |
+| Pengawas lapangan | Melakukan pemeriksaan dan menindaklanjuti temuan |
+| Pimpinan Kanwil | Memantau gambaran besar tanpa turun ke detail operasional harian |
+| Travel PPIU dan PIHK | Mengelola jamaah, mengajukan keberangkatan, dan menanggapi hasil pengawasan |
+| Masyarakat | Melihat jadwal keberangkatan, mengirim pengaduan, dan memverifikasi dokumen resmi |
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Fitur utama
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Operasional harian
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Data travel**
+Mencatat perusahaan travel pusat dan cabang di seluruh NTB, lengkap dengan lisensi, akreditasi, dan status layanan (umrah, haji, atau haji khusus).
 
-## Learning Laravel
+**Data jamaah**
+Mengelola jamaah umrah, haji reguler, dan pendaftaran haji khusus beserta dokumen pendukungnya. Data bisa diinput manual atau diimpor dari Excel.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**BA Pemberangkatan**
+Travel mengajukan Berita Acara Pelaporan Keberangkatan sebagai deklarasi rencana keberangkatan jamaah. Admin atau admin kabupaten meninjau, memproses, lalu menyetujui. Setelah disetujui, dokumen mendapat nomor surat resmi dan tanda tangan elektronik yang bisa diverifikasi publik.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Jadwal keberangkatan**
+Kalender keberangkatan menampilkan rencana berangkat yang sudah disetujui, sehingga jadwal travel terbuka dan mudah dipantau.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Sertifikat PPIU**
+Penerbitan sertifikat resmi untuk travel, dilengkapi kode QR yang bisa dipindai siapa saja untuk memastikan keasliannya.
 
-## Laravel Sponsors
+**Pengaduan masyarakat**
+Warga bisa mengirim pengaduan dari halaman depan tanpa harus login. Admin Kanwil menindaklanjuti dan memberi tanggapan resmi.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
+**Pengunduran jamaah**
+Travel dapat mengajukan pengunduran jamaah beserta dokumen pendukung untuk diproses admin.
 
-### Premium Partners
+### Pengawasan Digital
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
+Modul ini khusus untuk memastikan travel berjalan sesuai aturan dan standar yang berlaku.
 
-## Contributing
+**Dashboard pengawasan**
+Ringkasan kondisi wilayah: jumlah pemeriksaan, temuan, risiko, dan kepatuhan travel dalam satu tampilan.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+**Antrian kerja**
+Daftar tugas yang perlu segera ditangani, seperti pengaduan baru, risiko tinggi, deadline tindak lanjut, atau verifikasi bukti perbaikan dari travel.
 
-## Code of Conduct
+**Monitoring PPIU**
+Memantau aktivitas tiap travel: keberangkatan, riwayat pengawasan, pengaduan, dan skor risiko.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**BA Pemeriksaan**
+Pengawas menjadwalkan inspeksi ke travel, mengisi checklist, mencatat temuan, lalu menunggu travel mengunggah tindak lanjut. Ini berbeda dari BA Pemberangkatan yang mengatur persetujuan keberangkatan jamaah.
 
-## Security Vulnerabilities
+**Tindak lanjut temuan**
+Travel mengunggah bukti perbaikan. Pengawas memverifikasi: disetujui atau diminta revisi sampai sesuai.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+**Skor risiko**
+Sistem menghitung prioritas travel yang perlu perhatian lebih, agar pengawasan bisa difokuskan ke yang paling penting.
 
-## License
+**Profil kepatuhan**
+Gambaran lengkap satu travel: sertifikat, temuan inspeksi, pengaduan, dan riwayat keberangkatan.
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+**Log aktivitas**
+Catatan jejak siapa melakukan apa dan kapan di modul pengawasan, untuk keperluan audit dan akuntabilitas.
+
+**Notifikasi**
+Pemberitahuan di dalam aplikasi untuk pengaduan baru, pengingat deadline, dan pembaruan tindak lanjut.
+
+### Halaman untuk publik
+
+Tanpa perlu masuk ke sistem, masyarakat bisa:
+
+1. Melihat jadwal keberangkatan di halaman depan
+2. Mengirim dan mengecek status pengaduan
+3. Melihat direktori travel terdaftar
+4. Memverifikasi sertifikat PPIU lewat pemindaian QR
+5. Memverifikasi tanda tangan elektronik pada BA Pemberangkatan
+
+---
+
+## Peran pengguna dan tugasnya
+
+Setiap akun masuk ke menu yang sesuai tugasnya. Berikut penjelasan singkat tiap peran.
+
+### Super Admin
+
+Wilayah kerja: seluruh NTB.
+
+Tugas utama:
+* Mengelola data travel pusat dan akun pengguna
+* Memproses pengaduan masyarakat
+* Menyetujui BA Pemberangkatan
+* Mengatur master checklist pemeriksaan
+* Mengawasi dan menindaklanjuti lewat modul Pengawasan Digital
+* Bisa masuk sementara sebagai akun travel atau kabupaten untuk membantu troubleshooting
+
+### Pimpinan Kanwil
+
+Wilayah kerja: seluruh NTB (tampilan eksekutif).
+
+Tugas utama:
+* Membaca dashboard pengawasan untuk gambaran besar kondisi wilayah
+* Memantau monitoring PPIU dan statistik keberangkatan
+* Melihat data travel dan jamaah untuk keperluan laporan
+* Tidak memproses BA Pemberangkatan, pengaduan, atau tugas operasional harian
+
+### Pengawas
+
+Wilayah kerja: bisa diatur per kabupaten, beberapa kabupaten, atau seluruh NTB.
+
+Tugas utama:
+* Menangani antrian kerja pengawasan
+* Menjadwalkan dan melaksanakan BA Pemeriksaan
+* Mencatat temuan dan memverifikasi tindak lanjut dari travel
+* Memantau skor risiko dan profil kepatuhan travel di wilayahnya
+* Melihat log aktivitas pengawasan
+
+### Admin Kabupaten
+
+Wilayah kerja: satu kabupaten atau kota.
+
+Tugas utama:
+* Memproses pengajuan BA Pemberangkatan di wilayahnya
+* Mengelola data cabang travel
+* Menerbitkan sertifikat PPIU untuk travel di wilayahnya
+* Melihat dan memproses pengunduran jamaah
+
+### User Travel
+
+Wilayah kerja: satu perusahaan travel (pusat atau cabang).
+
+Tugas utama:
+* Menginput dan mengelola data jamaah
+* Membuat dan mengajukan BA Pemberangkatan
+* Melihat jadwal keberangkatan yang sudah disetujui
+* Melihat sertifikat milik travel sendiri
+* Mengunggah tindak lanjut atas temuan pemeriksaan
+* Mengajukan pengunduran jamaah
+
+**Catatan:** PPIU melayani umrah. PIHK melayani haji, umrah, dan haji khusus. Menu yang tampil menyesuaikan jenis layanan travel.
+
+---
+
+## Alur kerja singkat
+
+**Keberangkatan jamaah**
+Travel input jamaah → buat BA Pemberangkatan → ajukan ke Kanwil → admin atau kabupaten tinjau dan setujui → jadwal muncul di kalender → dokumen bisa dicetak dengan tanda tangan elektronik.
+
+**Pengawasan travel**
+Pengawas jadwalkan pemeriksaan → isi checklist dan catat temuan → travel unggah bukti perbaikan → pengawas verifikasi → tutup pemeriksaan setelah semua temuan selesai.
+
+**Pengaduan warga**
+Warga kirim pengaduan dari halaman depan → admin Kanwil tanggapi → status bisa dicek oleh pelapor.
+
+---
+
+## Mulai menggunakan
+
+Untuk instalasi, konfigurasi server, perintah artisan, cron, dan Redis, lihat **[SETUP.md](./SETUP.md)**.
+
+Untuk dokumentasi fitur lengkap per modul, lihat **[FITUR_SISTEM.md](./FITUR_SISTEM.md)**.
+
+**Login awal** (setelah migrasi database):
+
+| Peran | Email contoh | Password |
+|-------|--------------|----------|
+| Super Admin | `admin@phu.com` | `admin123` |
+| Pengawas | `pengawas.lombokbarat@phu.local` | `password123` |
+| Admin Kabupaten | `kabupaten.lombokbarat@phu.com` | `password123` |
+| User Travel | (dari data seeder) | `password123` |
+
+Akun travel dan kabupaten baru wajib mengganti password saat pertama kali masuk.
+
+---
+
+## Teknologi
+
+Dibangun dengan Laravel 10, PHP 8.1+, dan MySQL. Antarmuka memakai Argon Dashboard.
+
+---
+
+*PANTAU · Kanwil Kementerian Haji dan Umroh NTB*

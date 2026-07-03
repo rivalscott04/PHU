@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
-use Dompdf\Options;
+use App\Support\KanwilContact;
 
 class JamaahController extends Controller
 {
@@ -531,20 +531,15 @@ class JamaahController extends Controller
     <body>
         <!-- Footer harus ditempatkan di awal body agar muncul di semua halaman -->
         <div class="footer">
-            Dokumen ini dibuat otomatis dari sistem PHU
+            Dokumen ini dibuat otomatis dari PANTAU
         </div>
 
         <div class="page-container first-page">
             <div class="letterhead">
                 <img src="' . $logoBase64 . '" alt="Logo" class="logo">
                 <div class="header">
-                    <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
-                        KANTOR WILAYAH KEMENTERIAN AGAMA<br>
-                        PROVINSI NUSA TENGGARA BARAT<br></strong>
-                    <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram<br>
-                        Telp. (0370) 622317 Faksimili (0370) 622317<br>
-                        Website : www.ntb.Kemenag.go.id
-                    </span>
+                    <strong>'.KanwilContact::letterheadTitleHtml().'<br></strong>
+                    <span style="font-size: 12pt;">'.KanwilContact::letterheadContactHtml().'</span>
                 </div>
             </div>
 

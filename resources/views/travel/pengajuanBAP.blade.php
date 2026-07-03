@@ -3,9 +3,11 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            @include('partials.bap-module-info', ['variant' => 'pemberangkatan'])
             <div class="card">
                 <div class="card-header ps-0">
-                    <h5 class="mb-0">Form Data BAP</h5>
+                    <h5 class="mb-0">Form BA Pemberangkatan</h5>
+                    <small class="text-muted d-block">Isi data pelaporan keberangkatan jamaah, lalu unggah surat pernyataan sebelum mengajukan.</small>
                 </div>
                 <div class="card-body">
                     <form method="POST" action="{{ route('post.bap') }}">

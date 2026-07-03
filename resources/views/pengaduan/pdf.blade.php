@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hasil Pengaduan - {{ $pengaduan->id }}</title>
+    <title>Hasil Pengaduan {{ $pengaduan->id }}</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -78,7 +78,7 @@
 <body>
     <div class="header">
         <h1>HASIL PENANGANAN PENGADUAN</h1>
-        <p>Kementerian Agama Republik Indonesia</p>
+        <p>Kementerian Haji dan Umroh Republik Indonesia</p>
         <p>Direktorat Jenderal Penyelenggaraan Haji dan Umrah</p>
         <p>Nomor: {{ $pengaduan->id }}/{{ date('Y') }}</p>
     </div>

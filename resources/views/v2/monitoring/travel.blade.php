@@ -70,7 +70,7 @@
                                             {{ $riskLabels[$risk] ?? $risk }}
                                         </span>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">Tidak ada</span>
                                     @endif
                                 </td>
                             </tr>

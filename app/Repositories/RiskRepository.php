@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Enums\RiskLevel;
 use App\Models\RiskScore;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -47,7 +48,9 @@ class RiskRepository
         return RiskScore::query()
             ->with('travel')
             ->when(isset($filters['risk_level']), fn ($q) => $q->where('risk_level', $filters['risk_level']))
-            ->when(isset($filters['kabupaten']), fn ($q) => $q->whereHas('travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten'])))
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters);
+            })
             ->orderByDesc('total_score')
             ->paginate($perPage);
     }
@@ -55,7 +58,9 @@ class RiskRepository
     public function countByRiskLevel(array $filters = []): array
     {
         return RiskScore::query()
-            ->when(isset($filters['kabupaten']), fn ($q) => $q->whereHas('travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten'])))
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters);
+            })
             ->when(isset($filters['travel_id']), fn ($q) => $q->where('travel_id', $filters['travel_id']))
             ->selectRaw('risk_level, COUNT(*) as total')
             ->groupBy('risk_level')

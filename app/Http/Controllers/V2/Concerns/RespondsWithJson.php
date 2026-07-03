@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V2\Concerns;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use App\Support\KabupatenScopeFilter;
 
 trait RespondsWithJson
 {
@@ -12,8 +13,8 @@ trait RespondsWithJson
         $filters = $request->only($keys);
         $user = $request->user();
 
-        if ($user->role === 'kabupaten') {
-            $filters['kabupaten'] = $user->getKabupaten();
+        if ($user->role === 'pengawas') {
+            $filters = array_merge($filters, KabupatenScopeFilter::pengawasFilters($user));
         }
 
         if ($user->role === 'user') {

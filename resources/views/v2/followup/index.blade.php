@@ -18,15 +18,15 @@
         'REJECTED' => 'dark',
         'CLOSED' => 'secondary',
     ];
-    $canVerify = auth()->user()->role !== 'user';
+    $canVerify = in_array(auth()->user()->role, ['admin', 'pengawas'], true);
 @endphp
 
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-start flex-wrap gap-2">
             <div>
-                <h4 class="mb-1 fw-semibold">Tindak Lanjut</h4>
-                <p class="text-muted mb-0">
+                <h4 class="mb-1 fw-semibold">Tindak Lanjut Temuan</h4>
+                <p class="text-muted mb-0 small">Bagian dari alur <strong>BA Pemeriksaan</strong>, respons travel atas temuan inspeksi pengawasan.
                     @if($canVerify)
                         Kelola dan verifikasi bukti tindak lanjut hasil pengawasan
                     @else
@@ -41,6 +41,10 @@
     </div>
 
     @include('v2.partials.wilayah-scope')
+
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_followup'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
 
     @include('v2.partials.kpi-cards', ['cards' => $cards, 'id' => 'followup-kpi'])
 
@@ -83,7 +87,7 @@
                                         {{ $statusLabels[$status] ?? $status }}
                                     </span>
                                 </td>
-                                <td class="text-muted">{{ optional($followup->submitted_at)->format('d M Y, H:i') ?? '—' }}</td>
+                                <td class="text-muted">{{ optional($followup->submitted_at)->format('d M Y, H:i') ?? 'Tidak ada' }}</td>
                                 <td class="text-end pe-3">
                                     <a href="{{ route('v2.followup.show', $followup) }}" class="btn btn-sm btn-outline-primary">
                                         Detail

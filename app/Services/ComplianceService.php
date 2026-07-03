@@ -37,6 +37,33 @@ class ComplianceService
         });
     }
 
+    /**
+     * Ringan untuk halaman publik — tanpa riwayat inspeksi & rekomendasi internal.
+     *
+     * @return array{travel?: TravelCompany, statistics?: array<string, mixed>}
+     */
+    public function getPublicProfile(int $travelId, ?TravelCompany $travel = null): array
+    {
+        $cacheKey = "compliance.public-profile.{$travelId}";
+
+        return Cache::remember($cacheKey, self::CACHE_TTL_SECONDS, function () use ($travelId, $travel) {
+            if ($travel === null || $travel->id !== $travelId) {
+                $travel = $this->complianceRepository->findTravel($travelId);
+            } elseif (! $travel->relationLoaded('riskScore')) {
+                $travel->load('riskScore');
+            }
+
+            if (! $travel) {
+                return [];
+            }
+
+            return [
+                'travel' => $travel,
+                'statistics' => $this->complianceRepository->getStatistics($travel),
+            ];
+        });
+    }
+
     /** @return array<int, string> */
     private function buildRecommendations(TravelCompany $travel): array
     {

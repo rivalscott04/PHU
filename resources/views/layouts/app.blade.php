@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>PHU</title>
+    <title>{{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta content="Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
-    <meta content="Kanwil Kementerian Haji NTB" name="author" />
+    <meta content="PANTAU, Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
+    <meta content="PANTAU" name="author" />
     <!-- App favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}">
     <!-- Bootstrap Css -->
     <link href="{{ asset('css/bootstrap.min.css') }}" id="bootstrap-style" rel="stylesheet" type="text/css" />
@@ -45,7 +46,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <strong><i class="bx bx-user-check me-2"></i>You are currently impersonating:
-                                {{ auth()->user()->username }}</strong>
+                                {{ auth()->user()->getDisplayName() }}</strong>
                             <small class="d-block">You can see the system from this user's perspective</small>
                         </div>
                         <div class="col-md-4 text-end">
@@ -100,8 +101,9 @@
     <!-- apexcharts -->
     <script src="{{ asset('libs/apexcharts/apexcharts.min.js') }}"></script>
 
-    <!-- Sweet Alerts js -->
-    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
+    <!-- Sweet Alerts js (must match CSS version above) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.js"></script>
+    <script src="{{ asset('js/confirm-dialogs.js') }}"></script>
 
     <!-- Sweet alert init js-->
     {{-- <script src="{{ asset('js/pages/sweet-alerts.init.js') }}"></script> --}}

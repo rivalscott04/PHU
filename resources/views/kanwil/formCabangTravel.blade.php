@@ -13,51 +13,52 @@
                     </div>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
 
                     <!-- Existing Manual Input Form -->
                     <form method="POST" action="{{ route('post.cabang_travel') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="Penyelenggara" class="form-label">Penyelenggara</label>
+                                <label for="Penyelenggara" class="form-label">Penyelenggara @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="kabupaten" class="form-label">Kabupaten</label>
+                                <label for="kabupaten" class="form-label">Kabupaten @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="kabupaten" name="kabupaten" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="pusat" class="form-label">Pusat</label>
-                                <input type="text" class="form-control" id="pusat" name="pusat" required>
+                                <input type="text" class="form-control" id="pusat" name="pusat">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="pimpinan_pusat" class="form-label">Pimpinan Pusat</label>
+                                <label for="pimpinan_pusat" class="form-label">Pimpinan Pusat @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="pimpinan_pusat" name="pimpinan_pusat"
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="alamat_pusat" class="form-label">Alamat Kantor Pusat</label>
+                                <label for="alamat_pusat" class="form-label">Alamat Kantor Pusat @include('partials.required-star')</label>
                                 <textarea class="form-control" id="alamat_pusat" name="alamat_pusat" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="SK_BA" class="form-label">No SK / BA</label>
-                                <input type="text" class="form-control" id="SK_BA" name="SK_BA" required>
+                                <input type="text" class="form-control" id="SK_BA" name="SK_BA">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="tanggal" class="form-label">Tanggal</label>
-                                <input type="date" class="form-control" id="tanggal" name="tanggal" required>
+                                <input type="date" class="form-control" id="tanggal" name="tanggal">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="pimpinan_cabang" class="form-label">Pimpinan Cabang</label>
+                                <label for="pimpinan_cabang" class="form-label">Pimpinan Cabang @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="pimpinan_cabang" name="pimpinan_cabang"
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="alamat_cabang" class="form-label">Alamat Kantor Cabang</label>
+                                <label for="alamat_cabang" class="form-label">Alamat Kantor Cabang @include('partials.required-star')</label>
                                 <textarea class="form-control" id="alamat_cabang" name="alamat_cabang" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="telepon" class="form-label">Telepon</label>
+                                <label for="telepon" class="form-label">Telepon @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="telepon" name="telepon" required>
                             </div>
                         </div>

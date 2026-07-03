@@ -5,15 +5,15 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">Verifikasi E-Sign BAP</h5>
+                <h5 class="mb-0">Verifikasi E-Sign BA Pemberangkatan</h5>
             </div>
             <div class="card-body">
                 <div class="row justify-content-center">
                     <div class="col-md-6">
                         <div class="text-center mb-4">
                             <i class="bx bx-qr-scan" style="font-size: 3rem; color: #6c757d;"></i>
-                            <h6 class="mt-2">Verifikasi Keaslian Dokumen BAP</h6>
-                            <p class="text-muted">Scan QR Code atau masukkan token yang ada di dokumen BAP</p>
+                            <h6 class="mt-2">Verifikasi Keaslian BA Pemberangkatan</h6>
+                            <p class="text-muted">Scan QR Code atau masukkan token pada dokumen BA Pemberangkatan</p>
                         </div>
                         
                         <!-- Tab Navigation -->
@@ -25,7 +25,7 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qr-tab-pane" type="button" role="tab">
-                                    <i class="bx bx-qr-scan me-2"></i>Scan E-Sign
+                                    <i class="bx bx-qr-scan me-2"></i>Scan E Sign
                                 </button>
                             </li>
                         </ul>
@@ -51,7 +51,7 @@
                             <div class="tab-pane fade" id="qr-tab-pane" role="tabpanel">
                                 <div class="text-center">
                                     <div id="qrScanner" style="width: 100%; height: 300px;"></div>
-                                    <p class="text-muted mt-2">Arahkan kamera ke E-Sign pada dokumen BAP</p>
+                                    <p class="text-muted mt-2">Arahkan kamera ke E-Sign pada dokumen BA Pemberangkatan</p>
                                 </div>
                             </div>
                         </div>
@@ -171,7 +171,7 @@
                     <div class="col-md-6">
                         <h6 class="fw-bold">Informasi Dokumen:</h6>
                         <table class="table table-sm">
-                            <tr><td><strong>Jenis Dokumen</strong></td><td>: ${result.data.jenis_dokumen || 'Berita Acara Pelaporan (BAP)'}</td></tr>
+                            <tr><td><strong>Jenis Dokumen</strong></td><td>: ${result.data.jenis_dokumen || 'BA Pemberangkatan'}</td></tr>
                             <tr><td><strong>Nomor Surat</strong></td><td>: ${result.data.nomor_surat}</td></tr>
                             <tr><td><strong>Nama Travel</strong></td><td>: ${result.data.nama_travel}</td></tr>
                             <tr><td><strong>Status Dokumen</strong></td><td>: ${result.data.status_dokumen}</td></tr>

@@ -13,6 +13,10 @@
     </div>
     <!-- end page title -->
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('home'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     <div class="row">
         <div class="col-xl-4">
             <div class="card overflow-hidden">
@@ -114,7 +118,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">Total BAP</p>
+                                    <p class="text-muted fw-medium">Total BA Pemberangkatan</p>
                                     <h4 class="mb-0">{{ $totalBAP }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">

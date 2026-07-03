@@ -18,4 +18,13 @@ yarn-error.log
 /.vscode
 /guidev2
 /storage/logs/laravel.log
+# E2E / Playwright
+/e2e
+/scripts
+/database/seeders/E2eScenarioSeeder.php
+/playwright-report
+/test-results
+/blob-report
 
+# PHPUnit tests
+/tests

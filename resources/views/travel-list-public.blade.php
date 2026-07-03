@@ -4,20 +4,18 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Daftar Travel Berizin | UHK Kanwil NTB</title>
+    <title>Daftar Travel Berizin | {{ config('app.name') }}</title>
     <meta name="description" content="Daftar lengkap perusahaan travel berizin di wilayah NTB" />
     <meta name="keywords" content="travel berizin, PPIU, PIHK, NTB, haji, umrah" />
 
     <!-- Favicons -->
-    <link href="assets/img/favicon.png" rel="icon" />
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon" />
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect" />
     <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
@@ -25,38 +23,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/public-theme.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/interactive-cursor.css') }}" rel="stylesheet" />
 
     <style>
-        :root {
-            --primary-color: #0d2735;
-            --secondary-color: #1acc8d; /* Brand Emerald Green */
-            --accent-color: #1acc8d;
-            --heading-font: "Raleway", sans-serif;
-            --default-font: "Poppins", sans-serif;
-            --light-bg: #f4f5fe;
-            --card-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
-            --hover-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
-        }
-
-        body {
-            background: linear-gradient(180deg, #f4f5fe 0%, #ffffff 100%) !important;
-            font-family: var(--default-font);
-            color: #444;
-            min-height: 100vh;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--heading-font);
-        }
-
         .travel-card {
             transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-            border: none;
+            border: 1px solid var(--phu-border, #CCCCCC);
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: var(--card-shadow);
-            background: white;
+            box-shadow: var(--phu-card-shadow);
+            background: var(--phu-surface, #FFFFFF);
             position: relative;
         }
 
@@ -74,7 +51,7 @@
 
         .travel-card:hover {
             transform: translateY(-8px) scale(1.02);
-            box-shadow: var(--hover-shadow);
+            box-shadow: var(--phu-hover-shadow);
         }
 
         .travel-card:hover::before {
@@ -91,42 +68,27 @@
         }
 
         .status-ppiu {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+            background: #e2a712;
             color: white;
         }
 
         .status-pihk {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            background: #555555;
             color: white;
         }
 
         .status-cabang {
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            background: #888888;
             color: white;
         }
 
         .travel-header {
-            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
             padding: 1.8rem;
-            border-bottom: 1px solid #e9ecef;
             position: relative;
-        }
-
-        .travel-header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--secondary-color);
-            border-radius: 2px;
         }
 
         .travel-body {
             padding: 1.8rem;
-            background: white;
         }
 
         .info-item {
@@ -138,20 +100,20 @@
 
         .info-item i {
             width: 24px;
-            color: var(--secondary-color);
+            color: var(--phu-accent, #e2a712);
             margin-right: 1rem;
             margin-top: 2px;
             font-size: 0.9rem;
         }
 
         .info-item span {
-            color: #2c3e50; /* Darker for better contrast */
-            line-height: 1.5;
+            color: var(--phu-text, #333333);
+            line-height: 1.6;
             font-weight: 500;
         }
 
         .info-item strong {
-            color: #1a252f;
+            color: var(--phu-text, #333333);
             font-weight: 700;
         }
 
@@ -160,54 +122,46 @@
             top: 25px;
             left: 25px;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(5px);
-            -webkit-backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 50px;
-            padding: 12px 24px;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
+            padding: 0.8em 1.5em;
+            font-size: clamp(14px, 2vw, 16px);
+            box-shadow: var(--phu-card-shadow);
             transition: all 0.3s ease;
-            color: var(--primary-color);
             font-weight: 600;
             text-decoration: none;
         }
 
         .back-btn:hover {
-            background: var(--secondary-color);
             transform: translateX(-5px);
-            color: white !important;
-            box-shadow: 0 8px 20px rgba(26, 204, 141, 0.3);
+            box-shadow: 0 8px 20px rgba(226, 167, 18, 0.2);
         }
 
         .filter-section {
-            background: white;
             border-radius: 20px;
-            padding: 2.5rem;
+            padding: min(4vw, 2.5rem);
             margin-bottom: 2rem;
-            box-shadow: var(--card-shadow);
-            border: 1px solid rgba(255, 255, 255, 0.8);
         }
 
         .filter-section .form-label {
             font-weight: 600;
-            color: var(--primary-color);
+            color: var(--phu-text, #333333);
             margin-bottom: 0.8rem;
         }
 
         .filter-section .form-select,
         .filter-section .form-control {
-            border: 2px solid #e9ecef;
+            border: 2px solid var(--phu-border, #CCCCCC);
             border-radius: 12px;
             padding: 0.8rem 1rem;
             transition: all 0.3s ease;
-            font-size: 0.95rem;
+            font-size: clamp(14px, 2vw, 16px);
+            background: var(--phu-surface, #FFFFFF);
         }
 
         .filter-section .form-select:focus,
         .filter-section .form-control:focus {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+            border-color: var(--phu-accent, #e2a712);
+            box-shadow: 0 0 0 0.2rem rgba(0, 102, 68, 0.2);
         }
 
         .section-title {
@@ -216,9 +170,9 @@
         }
 
         .section-title h2 {
-            font-size: 2.5rem;
+            font-size: clamp(22px, 3vw, 28px);
             font-weight: 800;
-            color: var(--primary-color);
+            color: var(--phu-text, #333333);
             margin-bottom: 1rem;
             line-height: 1.2;
             word-wrap: break-word;
@@ -227,32 +181,28 @@
         }
 
         .section-title p {
-            font-size: 1.1rem;
-            color: #666;
+            font-size: clamp(14px, 2vw, 16px);
+            color: var(--phu-text-muted, #5a5a5a);
             font-weight: 500;
             max-width: 600px;
             margin: 0 auto;
         }
 
         .stats-summary {
-            background: #ffffff;
-            color: var(--primary-color);
             border-radius: 20px;
-            padding: 2.5rem;
+            padding: min(4vw, 2.5rem);
             margin-bottom: 2rem;
             text-align: center;
             position: relative;
             overflow: hidden;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05);
-            border: 1px solid rgba(26, 204, 141, 0.1);
         }
 
         .stats-summary h3 {
-            font-size: 1.8rem;
+            font-size: clamp(18px, 2.5vw, 22px);
             margin-bottom: 2rem;
             position: relative;
             z-index: 1;
-            color: var(--primary-color);
+            color: var(--phu-text, #333333);
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -283,55 +233,22 @@
         }
 
         .stat-number {
-            font-size: 2.5rem;
+            font-size: clamp(28px, 4vw, 40px);
             font-weight: 800;
             display: block;
             margin-bottom: 0.5rem;
-            color: var(--secondary-color);
+            color: var(--phu-accent, #e2a712);
         }
 
         .stat-label {
-            font-size: 0.9rem;
-            color: #666;
+            font-size: clamp(12px, 2vw, 14px);
+            color: var(--phu-text-muted, #5a5a5a);
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
-        .pagination-wrapper {
-            margin-top: 2rem;
-        }
-
-        /* Custom Pagination Styling to match system theme */
-        .pagination {
-            margin-bottom: 0;
-        }
-        
-        .pagination .page-link {
-            color: #556ee6;
-            border-color: #dee2e6;
-            padding: 0.5rem 0.75rem;
-            font-size: 0.875rem;
-            transition: all 0.2s ease;
-        }
-        
-        .pagination .page-link:hover {
-            color: #ffffff;
-            background-color: #556ee6;
-            border-color: #556ee6;
-        }
-        
-        .pagination .page-item.active .page-link {
-            background-color: #556ee6;
-            border-color: #556ee6;
-            color: #ffffff;
-        }
-        
-        .pagination .page-item.disabled .page-link {
-            color: #6c757d;
-            background-color: #ffffff;
-            border-color: #dee2e6;
-        }
+        /* Pagination handled by public-theme.css */
 
         .loading-spinner {
             display: none;
@@ -347,10 +264,7 @@
 
         .no-results {
             text-align: center;
-            padding: 4rem 2rem;
-            background: white;
-            border-radius: 20px;
-            box-shadow: var(--card-shadow);
+            padding: min(5vw, 4rem) min(4vw, 2rem);
         }
 
         .no-results i {
@@ -360,12 +274,12 @@
         }
 
         .no-results h4 {
-            color: var(--primary-color);
+            color: var(--phu-text, #333333);
             margin-bottom: 1rem;
         }
 
         .no-results p {
-            color: #6c757d;
+            color: var(--phu-text-muted, #5a5a5a);
         }
 
         /* List View Styles */
@@ -400,61 +314,67 @@
         
         /* View Toggle Styles */
         .btn-check:checked + .btn-outline-secondary {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background-color: var(--phu-accent, #e2a712);
+            border-color: var(--phu-accent, #e2a712);
             color: white;
         }
         
         .btn-outline-secondary {
             border-radius: 50px;
             padding: 0.5rem 1rem;
-            border: 2px solid #dee2e6;
+            border: 2px solid var(--phu-border, #CCCCCC);
             font-weight: 600;
-            color: #666;
+            color: var(--phu-text-muted, #5a5a5a);
             transition: all 0.3s ease;
+            background: var(--phu-surface, #FFFFFF);
         }
 
         .btn-outline-secondary:hover {
-            background-color: #f8f9fa;
-            border-color: #ced4da;
-            color: #444;
+            background-color: var(--phu-gold, #c8940e);
+            border-color: var(--phu-gold, #c8940e);
+            color: var(--phu-text, #333333);
         }
         
         .btn-outline-primary {
             border-radius: 50px;
-            padding: 0.6rem 1.5rem;
-            border: 2px solid var(--secondary-color);
-            color: var(--secondary-color);
+            padding: 0.8em 1.5em;
+            border: 2px solid var(--phu-cta, #e2a712);
+            color: var(--phu-cta, #e2a712);
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
-            font-size: 0.85rem;
+            font-size: clamp(14px, 2vw, 16px);
             transition: all 0.3s ease;
+            background: transparent;
         }
 
         .btn-outline-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
+            background-color: var(--phu-cta, #e2a712);
+            border-color: var(--phu-cta, #e2a712);
             color: white;
-            box-shadow: 0 5px 15px rgba(26, 204, 141, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 68, 136, 0.25);
             transform: translateY(-2px);
         }
         
-        /* Export Dropdown */
         .dropdown-menu {
             border-radius: 10px;
-            box-shadow: var(--card-shadow);
-            border: none;
-        }
-        
-        .dropdown-item {
-            padding: 0.75rem 1rem;
-            transition: all 0.2s ease;
+            box-shadow: var(--phu-card-shadow);
+            border: 1px solid var(--phu-border, #CCCCCC);
+            background: var(--phu-surface, #FFFFFF);
         }
         
         .dropdown-item:hover {
-            background-color: var(--secondary-color);
+            background-color: var(--phu-accent, #e2a712);
             color: white;
+        }
+
+        .pagination-wrapper {
+            margin-top: 2rem;
+        }
+
+        .pagination-wrapper .bg-white {
+            background: var(--phu-surface, #FFFFFF) !important;
+            border: 1px solid var(--phu-border, #CCCCCC);
         }
 
         @media (max-width: 768px) {
@@ -506,6 +426,7 @@
             }
         }
     </style>
+    @include('partials.public-trust-styles')
 </head>
 
 <body>
@@ -519,7 +440,42 @@
         <div class="container">
             <div class="section-title" data-aos="fade-up">
                 <h2>Daftar Travel Berizin</h2>
-                <p>Perusahaan Travel Terdaftar di Kanwil Kementerian Haji NTB</p>
+                <p>Perusahaan Travel Terdaftar di Kanwil Kementerian Haji dan Umroh NTB</p>
+            </div>
+
+            <div class="trust-intro" data-aos="fade-up" data-aos-delay="50">
+                <div class="d-flex align-items-start gap-3 flex-wrap flex-md-nowrap">
+                    <div class="trust-intro__icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h3>Apa itu Indeks Kepercayaan?</h3>
+                        <p class="trust-intro__lead">
+                            Penilaian sederhana dari Kanwil untuk membantu Anda memilih travel yang lebih aman.
+                            Semakin banyak bintang, semakin baik catatannya.
+                        </p>
+                        <ul class="trust-intro__steps">
+                            <li>
+                                <i class="fas fa-circle-check"></i>
+                                <span>Lihat <strong>badge bintang</strong> di setiap kartu travel di bawah.</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-circle-check"></i>
+                                <span>Klik <strong>Lihat Detail Kepercayaan</strong> untuk penjelasan lengkap per travel.</span>
+                            </li>
+                            <li>
+                                <i class="fas fa-circle-check"></i>
+                                <span>Gunakan urutan <strong>Rating Terbaik Dulu</strong> untuk melihat yang paling dipercaya.</span>
+                            </li>
+                        </ul>
+                        <div class="trust-legend" aria-label="Panduan bintang kepercayaan">
+                            <span class="trust-legend__item"><span class="trust-legend__stars">★★★★★</span> Sangat Dipercaya</span>
+                            <span class="trust-legend__item"><span class="trust-legend__stars">★★★★☆</span> Dipercaya</span>
+                            <span class="trust-legend__item"><span class="trust-legend__stars">★★★☆☆</span> Perlu Dicek</span>
+                            <span class="trust-legend__item"><span class="trust-legend__stars">★★☆☆☆</span> Kurang Dipercaya</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- Stats Summary -->
@@ -542,6 +498,12 @@
                         <span class="stat-number">{{ $stats['kabupaten'] }}</span>
                         <span class="stat-label">Kabupaten</span>
                     </div>
+                    @if(($stats['with_trust_data'] ?? 0) > 0)
+                    <div class="stat-item">
+                        <span class="stat-number">{{ $stats['with_trust_data'] }}</span>
+                        <span class="stat-label">Sudah Dinilai</span>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -550,7 +512,7 @@
                 <div class="row">
                     <div class="col-md-3">
                         <label for="statusFilter" class="form-label">
-                            <i class="fas fa-filter me-2"></i>Filter Status:
+                            <i class="fas fa-filter me-2"></i>Jenis Layanan:
                         </label>
                         <select class="form-select" id="statusFilter">
                             <option value="">Semua Status</option>
@@ -560,7 +522,7 @@
                     </div>
                     <div class="col-md-3">
                         <label for="jenisFilter" class="form-label">
-                            <i class="fas fa-building me-2"></i>Filter Jenis:
+                            <i class="fas fa-building me-2"></i>Kantor:
                         </label>
                         <select class="form-select" id="jenisFilter">
                             <option value="">Semua Jenis</option>
@@ -570,7 +532,7 @@
                     </div>
                     <div class="col-md-3">
                         <label for="kabupatenFilter" class="form-label">
-                            <i class="fas fa-map-marker-alt me-2"></i>Filter Kabupaten:
+                            <i class="fas fa-map-marker-alt me-2"></i>Wilayah:
                         </label>
                         <select class="form-select" id="kabupatenFilter">
                             <option value="">Semua Kabupaten</option>
@@ -583,7 +545,7 @@
                         <label for="searchInput" class="form-label">
                             <i class="fas fa-search me-2"></i>Cari Travel:
                         </label>
-                        <input type="text" class="form-control" id="searchInput" placeholder="Nama travel...">
+                        <input type="text" class="form-control" id="searchInput" placeholder="Ketik nama travel...">
                     </div>
                 </div>
                 
@@ -595,6 +557,7 @@
                                 <i class="fas fa-sort me-2"></i>Urutkan:
                             </label>
                             <select class="form-select" id="sortSelect" style="width: auto;">
+                                <option value="trust-desc">Rating Terbaik Dulu</option>
                                 <option value="name-asc">Nama A-Z</option>
                                 <option value="name-desc">Nama Z-A</option>
                                 <option value="kabupaten-asc">Kabupaten A-Z</option>
@@ -638,19 +601,23 @@
             <div class="row" id="travelCards">
                 @foreach($data as $travel)
                 @php
-                    // Check if this is TravelCompany (pusat) or CabangTravel (cabang)
                     $isTravelPusat = isset($travel->Status);
                     $isTravelCabang = isset($travel->pimpinan_cabang);
+                    $trust = $travel->trust ?? ['has_data' => false, 'score' => -1];
+                    $profileUrl = $isTravelPusat
+                        ? route('travel.public.show', $travel->id)
+                        : ($travel->parent_travel_id ? route('travel.public.show', $travel->parent_travel_id) : null);
                 @endphp
                 <div class="col-lg-6 col-xl-4 mb-4 travel-item" 
                      data-status="{{ $isTravelPusat ? $travel->Status : '' }}" 
                      data-jenis="{{ $isTravelPusat ? 'pusat' : 'cabang' }}"
                      data-kabupaten="{{ $isTravelPusat ? $travel->kab_kota : $travel->kabupaten }}"
                      data-name="{{ strtolower($travel->Penyelenggara) }}"
+                     data-trust="{{ $trust['has_data'] ? $trust['score'] : -1 }}"
                      data-tanggal="{{ $isTravelPusat ? ($travel->Tanggal ? $travel->Tanggal->format('Y-m-d') : '') : ($travel->tanggal ? $travel->tanggal->format('Y-m-d') : '') }}">
                     <div class="card travel-card h-100" data-aos="fade-up" data-aos-delay="{{ $loop->index * 100 }}">
                         <div class="travel-header">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="d-flex justify-content-between align-items-start mb-2 gap-2">
                                 <h5 class="card-title mb-0">{{ $travel->Penyelenggara }}</h5>
                                 @if($isTravelPusat)
                                 <span class="status-badge {{ $travel->Status === 'PPIU' ? 'status-ppiu' : 'status-pihk' }}">
@@ -662,22 +629,27 @@
                                 </span>
                                 @endif
                             </div>
-                            <p class="text-muted mb-0">
+                            <p class="text-muted mb-2">
                                 <i class="fas fa-map-marker-alt me-1"></i>{{ $isTravelPusat ? $travel->kab_kota : $travel->kabupaten }}
                             </p>
+                            <div class="trust-card-row">
+                                <div class="trust-card-label">Tingkat Kepercayaan</div>
+                                @include('partials.public-trust-badge', ['trust' => $trust, 'compact' => false])
+                            </div>
+                            @if($isTravelCabang && $travel->pusat)
+                                <p class="text-muted small mb-0">
+                                    <i class="fas fa-link me-1"></i>Cabang dari <strong>{{ $travel->pusat }}</strong>
+                                </p>
+                            @endif
                         </div>
                         <div class="travel-body">
-                            <div class="info-item">
-                                <i class="fas fa-user"></i>
-                                <span><strong>Pimpinan:</strong> {{ $isTravelPusat ? $travel->Pimpinan : $travel->pimpinan_cabang }}</span>
-                            </div>
                             <div class="info-item">
                                 <i class="fas fa-phone"></i>
                                 <span><strong>Telepon:</strong> {{ $travel->telepon ?? $travel->Telepon ?? '-' }}</span>
                             </div>
                             <div class="info-item">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span><strong>Alamat:</strong> {{ $isTravelPusat ? ($travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama ?: '-') : ($travel->alamat_cabang ?: '-') }}</span>
+                                <i class="fas fa-user"></i>
+                                <span><strong>Pimpinan:</strong> {{ $isTravelPusat ? $travel->Pimpinan : $travel->pimpinan_cabang }}</span>
                             </div>
                             @if($isTravelPusat && $travel->nilai_akreditasi)
                             <div class="info-item">
@@ -696,6 +668,13 @@
                                 <span><strong>Tanggal SK:</strong> {{ $isTravelPusat ? ($travel->Tanggal ? $travel->Tanggal->format('d/m/Y') : '-') : ($travel->tanggal ? $travel->tanggal->format('d/m/Y') : '-') }}</span>
                             </div>
                         </div>
+                        @if($profileUrl)
+                            <div class="travel-card__footer">
+                                <a href="{{ $profileUrl }}" class="btn btn-trust-profile">
+                                    <i class="fas fa-shield-halved me-2"></i>Lihat Detail Kepercayaan
+                                </a>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 @endforeach
@@ -721,7 +700,7 @@
             <div class="pagination-wrapper">
                 <div class="d-flex justify-content-between align-items-center px-3 py-3 bg-white rounded">
                     <div class="text-muted">
-                        Menampilkan {{ $pagination->firstItem() ?? 0 }} - {{ $pagination->lastItem() ?? 0 }} 
+                        Menampilkan {{ $pagination->firstItem() ?? 0 }} sampai {{ $pagination->lastItem() ?? 0 }} 
                         dari {{ $pagination->total() }} data
                     </div>
                     <div>
@@ -733,15 +712,7 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer dark-background">
-        <div class="container text-center py-3">
-            <p class="mb-0 text-white-50">
-                © <script>document.write(new Date().getFullYear())</script> 
-                <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>. All Rights Reserved
-            </p>
-        </div>
-    </footer>
+    @include('partials.kanwil-contact', ['variant' => 'footer-compact'])
 
     <!-- Vendor JS Files -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
@@ -844,6 +815,13 @@
                     let aValue, bValue;
                     
                     switch(field) {
+                        case 'trust':
+                            aValue = parseInt(a.dataset.trust, 10);
+                            bValue = parseInt(b.dataset.trust, 10);
+                            if (direction === 'desc') {
+                                return bValue - aValue;
+                            }
+                            return aValue - bValue;
                         case 'name':
                             aValue = a.dataset.name;
                             bValue = b.dataset.name;
@@ -947,6 +925,9 @@
                 link.click();
             }
 
+            // Urutkan default: kepercayaan tertinggi
+            sortTravelItems();
+
             // Add event listeners with debouncing
             statusFilter.addEventListener('change', filterTravel);
             jenisFilter.addEventListener('change', filterTravel);
@@ -999,7 +980,8 @@
                 jenisFilter.value = '';
                 kabupatenFilter.value = '';
                 searchInput.value = '';
-                sortSelect.value = 'name-asc';
+                sortSelect.value = 'trust-desc';
+                sortTravelItems();
                 gridView.checked = true;
                 toggleView();
                 filterTravel();

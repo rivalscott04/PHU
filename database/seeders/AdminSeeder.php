@@ -23,7 +23,7 @@ class AdminSeeder extends Seeder
             'city' => 'Mataram',
             'country' => 'Indonesia',
             'postal' => '83111',
-            'about' => 'Super Administrator untuk sistem PHU',
+            'about' => 'Super Administrator untuk PANTAU',
             'is_password_changed' => true,
         ]);
 

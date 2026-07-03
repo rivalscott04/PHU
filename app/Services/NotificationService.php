@@ -24,8 +24,7 @@ class NotificationService
             ->where(function ($query) use ($travel) {
                 $query->where('role', 'admin')
                     ->orWhere(function ($scoped) use ($travel) {
-                        $scoped->where('role', 'kabupaten')
-                            ->where('kabupaten', $travel->kab_kota);
+                        $scoped->pengawasForKabupaten($travel->kab_kota);
                     });
             })
             ->get();

@@ -10,9 +10,9 @@ use App\Models\Jamaah;
 use App\Models\Pengaduan;
 use App\Models\Sertifikat;
 use App\Models\TravelCompany;
+use App\Support\SchemaTables;
 use App\Support\TravelMetrics;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 
 class ComplianceRepository
 {
@@ -20,6 +20,11 @@ class ComplianceRepository
         private readonly RiskRepository $riskRepository,
         private readonly InspectionRepository $inspectionRepository,
     ) {
+    }
+
+    private function tableExists(string $table): bool
+    {
+        return SchemaTables::has($table);
     }
 
     public function findTravel(int $travelId): ?TravelCompany
@@ -80,7 +85,7 @@ class ComplianceRepository
             'temuan_aktif' => 0,
         ];
 
-        if (Schema::hasTable('jamaah') && Schema::hasTable('pengaduan') && Schema::hasTable('sertifikat')) {
+        if ($this->tableExists('jamaah') && $this->tableExists('pengaduan') && $this->tableExists('sertifikat')) {
             $row = DB::selectOne('
                 SELECT
                     (SELECT COUNT(*) FROM jamaah WHERE travel_id = ?) AS total_jamaah,
@@ -92,18 +97,18 @@ class ComplianceRepository
             $counts['total_pengaduan'] = (int) ($row->total_pengaduan ?? 0);
             $counts['total_sertifikat'] = (int) ($row->total_sertifikat ?? 0);
         } else {
-            if (Schema::hasTable('jamaah')) {
+            if ($this->tableExists('jamaah')) {
                 $counts['total_jamaah'] = Jamaah::where('travel_id', $travelId)->count();
             }
-            if (Schema::hasTable('pengaduan')) {
+            if ($this->tableExists('pengaduan')) {
                 $counts['total_pengaduan'] = Pengaduan::where('travels_id', $travelId)->count();
             }
-            if (Schema::hasTable('sertifikat')) {
+            if ($this->tableExists('sertifikat')) {
                 $counts['total_sertifikat'] = Sertifikat::where('travel_id', $travelId)->count();
             }
         }
 
-        if (Schema::hasTable('bap')) {
+        if ($this->tableExists('bap')) {
             $counts['total_bap'] = BAP::where('ppiuname', $travel->Penyelenggara)->count();
         }
 

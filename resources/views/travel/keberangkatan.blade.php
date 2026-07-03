@@ -2,6 +2,13 @@
 
 @section('content')
     <div class="container">
+        <div class="mb-3">
+            <h5 class="mb-1">Jadwal Keberangkatan</h5>
+            <p class="text-muted small mb-0">Kalender keberangkatan jamaah dari BA Pemberangkatan yang telah disetujui.</p>
+        </div>
+        @if($guide = \App\Support\RoleWorkflowGuide::for('keberangkatan'))
+            @include('partials.workflow-guide', ['guide' => $guide])
+        @endif
         <div id='calendar'></div>
     </div>
 

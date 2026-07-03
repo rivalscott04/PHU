@@ -55,7 +55,7 @@
                                                 @foreach($travels as $travel)
                                                     <option value="{{ $travel->id }}" 
                                                             {{ old('travel_id') == $travel->id ? 'selected' : '' }}>
-                                                        {{ $travel->Penyelenggara }} - {{ $travel->Status }}
+                                                        {{ $travel->Penyelenggara }}, {{ $travel->Status }}
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -244,7 +244,7 @@
                                                   @foreach($cabangs as $cabang)
                                                       <option value="{{ $cabang->id_cabang }}" 
                                                               {{ old('cabang_id') == $cabang->id_cabang ? 'selected' : '' }}>
-                                                          {{ $cabang->Penyelenggara }} - {{ $cabang->kabupaten }}
+                                                          {{ $cabang->Penyelenggara }}, {{ $cabang->kabupaten }}
                                                       </option>
                                                   @endforeach
                                               </select>

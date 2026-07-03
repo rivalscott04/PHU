@@ -20,6 +20,8 @@ class DatabaseSeeder extends Seeder
             JamaahHajiKhususSeeder::class,
             PengaduanSeeder::class,
             V2MasterChecklistSeeder::class,
+            PengawasSeeder::class,
+            PimpinanSeeder::class,
         ]);
     }
 }

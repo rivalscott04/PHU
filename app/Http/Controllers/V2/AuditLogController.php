@@ -7,6 +7,7 @@ use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use App\Models\AuditLog;
 use App\Repositories\AuditLogRepository;
 use App\Support\AuditLogNarrator;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 
 class AuditLogController extends Controller
@@ -67,8 +68,8 @@ class AuditLogController extends Controller
         $filters = $request->only(['module', 'action', 'user_id', 'date_from', 'date_to', 'q']);
         $user = $request->user();
 
-        if ($user->role === 'kabupaten') {
-            $filters['kabupaten'] = $user->getKabupaten();
+        if ($user->role === 'pengawas') {
+            $filters = array_merge($filters, KabupatenScopeFilter::pengawasFilters($user));
         }
 
         return $filters;

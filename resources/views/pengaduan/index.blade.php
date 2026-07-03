@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @if($guide = \App\Support\RoleWorkflowGuide::for('pengaduan'))
+        <div class="container-fluid px-0 mb-3">
+            @include('partials.workflow-guide', ['guide' => $guide])
+        </div>
+    @endif
     <!-- Statistik Pengaduan Cards -->
     <div class="row mb-4">
         <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
@@ -156,7 +161,7 @@
                                                 <i class="bx bx-info-circle me-1"></i> Detail
                                             </a>
                                             @if($item->status === 'completed' && $item->pdf_output)
-                                                <a href="{{ route('pengaduan.download-pdf.public', $item->id) }}" class="btn btn-sm btn-success rounded-pill" target="_blank">
+                                                <a href="{{ $item->getPublicDownloadUrl() }}" class="btn btn-sm btn-success rounded-pill" target="_blank">
                                                     <i class="bx bx-download me-1"></i> PDF
                                                 </a>
                                             @endif

@@ -86,11 +86,34 @@ body .vertical-menu .metismenu .has-arrow[aria-expanded="true"]::after {
     border-radius: 6px;
     margin: 1px 4px;
     transition: all 0.2s ease;
+    padding-left: 1.75rem !important;
+    font-size: 0.8125rem;
+}
+
+.metismenu .sub-menu li a i {
+    display: none;
 }
 
 .metismenu .sub-menu li a:hover {
     background-color: rgba(255,255,255,0.1);
     transform: translateX(5px);
+}
+
+.metismenu .sub-menu .menu-heading {
+    padding: 0.65rem 1.25rem 0.25rem 1.75rem;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    user-select: none;
+}
+
+.metismenu .sub-menu .menu-heading:not(:first-child) {
+    margin-top: 0.35rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 </style>
 
@@ -109,16 +132,36 @@ body .vertical-menu .metismenu .has-arrow[aria-expanded="true"]::after {
                                 <span>{{ $menu['name'] }}</span>
                             </a>
                             <ul class="sub-menu" aria-expanded="false">
-                                @foreach($menu['items'] as $item)
-                                    @if($item['visible'])
-                                        <li>
-                                            <a href="{{ route($item['route']) }}">
-                                                <i class="{{ $item['icon'] }}"></i>
-                                                <span>{{ $item['name'] }}</span>
-                                            </a>
-                                        </li>
-                                    @endif
-                                @endforeach
+                                @if(isset($menu['groups']))
+                                    @foreach($menu['groups'] as $group)
+                                        @php
+                                            $visibleGroupItems = array_values(array_filter(
+                                                $group['items'],
+                                                fn ($item) => $item['visible']
+                                            ));
+                                        @endphp
+                                        @if($visibleGroupItems !== [])
+                                            <li class="menu-heading">{{ $group['label'] }}</li>
+                                            @foreach($visibleGroupItems as $item)
+                                                <li>
+                                                    <a href="{{ route($item['route']) }}">
+                                                        <span>{{ $item['name'] }}</span>
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        @endif
+                                    @endforeach
+                                @else
+                                    @foreach($menu['items'] as $item)
+                                        @if($item['visible'])
+                                            <li>
+                                                <a href="{{ route($item['route']) }}">
+                                                    <span>{{ $item['name'] }}</span>
+                                                </a>
+                                            </li>
+                                        @endif
+                                    @endforeach
+                                @endif
                             </ul>
                         </li>
 
@@ -128,9 +171,6 @@ body .vertical-menu .metismenu .has-arrow[aria-expanded="true"]::after {
                             <li>
                                 <a href="{{ route($menu['route']) }}" class="waves-effect">
                                     <i class="{{ $menu['icon'] }}"></i>
-                                    @if(isset($menu['badge']))
-                                        <span class="badge rounded-pill bg-info float-end">{{ $menu['badge'] }}</span>
-                                    @endif
                                     <span>{{ $menu['name'] }}</span>
                                 </a>
                             </li>
@@ -179,3 +219,21 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+
+@push('js')
+<script>
+    (function ($) {
+        var $menu = $('#side-menu');
+
+        if (!$menu.length || typeof $.fn.metisMenu !== 'function') {
+            return;
+        }
+
+        if ($menu.data('metisMenu')) {
+            $menu.metisMenu('dispose');
+        }
+
+        $menu.metisMenu({ toggle: true });
+    })(jQuery);
+</script>
+@endpush

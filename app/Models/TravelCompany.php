@@ -115,9 +115,9 @@ class TravelCompany extends Model
     public function getTravelTypeDescription()
     {
         if ($this->Status === 'PIHK') {
-            return 'PIHK - Penyelenggara Ibadah Haji Khusus (Haji & Umrah)';
+            return 'PIHK: Penyelenggara Ibadah Haji Khusus (Haji & Umrah)';
         } elseif ($this->Status === 'PPIU') {
-            return 'PPIU - Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)';
+            return 'PPIU: Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)';
         }
         return 'Unknown Type';
     }

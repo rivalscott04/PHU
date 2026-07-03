@@ -23,7 +23,7 @@
                 <h4 class="mb-1 fw-semibold">Profil Kepatuhan</h4>
                 <p class="text-muted mb-0">
                     @if(auth()->user()->role === 'kabupaten')
-                        Profil kepatuhan travel di wilayah {{ auth()->user()->getKabupaten() }}
+                        Profil kepatuhan travel di wilayah {{ auth()->user()->getWilayahKerjaLabel() }}
                     @elseif(auth()->user()->role === 'user')
                         Profil kepatuhan perusahaan Anda
                     @else
@@ -38,6 +38,10 @@
     </div>
 
     @include('v2.partials.wilayah-scope')
+
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_compliance'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
@@ -79,7 +83,7 @@
                                             {{ $riskLabels[$risk] ?? $risk }}
                                         </span>
                                     @else
-                                        <span class="text-muted">—</span>
+                                        <span class="text-muted">Tidak ada</span>
                                     @endif
                                 </td>
                                 <td class="text-end pe-3">

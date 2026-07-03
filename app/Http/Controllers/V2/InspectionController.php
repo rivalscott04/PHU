@@ -37,16 +37,21 @@ class InspectionController extends Controller
         return view('v2.pengawasan.index', compact('inspections'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
         $this->authorize('create', Inspection::class);
 
         $travels = $this->resolveTravels();
+        $preselectedTravelId = $request->integer('travel_id') ?: null;
+
+        if ($preselectedTravelId && ! $travels->contains('id', $preselectedTravelId)) {
+            $preselectedTravelId = null;
+        }
 
         return view('v2.pengawasan.form', [
             'inspection' => null,
             'travels' => $travels,
-            'inspectionNo' => $this->inspectionService->generateInspectionNo(),
+            'preselectedTravelId' => $preselectedTravelId,
         ]);
     }
 
@@ -92,7 +97,6 @@ class InspectionController extends Controller
         return view('v2.pengawasan.form', [
             'inspection' => $this->inspectionService->find($pengawasan->id),
             'travels' => $this->resolveTravels(),
-            'inspectionNo' => $pengawasan->inspection_no,
         ]);
     }
 
@@ -161,8 +165,14 @@ class InspectionController extends Controller
             return TravelCompany::orderBy('Penyelenggara')->get();
         }
 
-        if ($user->role === 'kabupaten') {
-            return TravelCompany::where('kab_kota', $user->getKabupaten())->orderBy('Penyelenggara')->get();
+        if ($user->role === 'pengawas') {
+            $scoped = $user->getScopedKabupatens();
+
+            if ($scoped === null) {
+                return TravelCompany::orderBy('Penyelenggara')->get();
+            }
+
+            return TravelCompany::whereIn('kab_kota', $scoped)->orderBy('Penyelenggara')->get();
         }
 
         return collect();

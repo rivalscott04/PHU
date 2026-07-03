@@ -9,7 +9,7 @@ class RiskPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten', 'user'], true);
+        return in_array($user->role, ['admin', 'pengawas', 'user'], true);
     }
 
     public function view(User $user, RiskScore $riskScore): bool
@@ -18,8 +18,8 @@ class RiskPolicy
             return true;
         }
 
-        if ($user->role === 'kabupaten') {
-            return $riskScore->travel?->kab_kota === $user->getKabupaten();
+        if ($user->role === 'pengawas') {
+            return $user->canAccessKabupaten($riskScore->travel?->kab_kota);
         }
 
         return $user->travel_id === $riskScore->travel_id;

@@ -4,17 +4,15 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>UHK KANWIL</title>
+    <title>{{ config('app.name') }}</title>
     <meta name="description" content="" />
     <meta name="keywords" content="" />
 
     <!-- Favicons -->
-    <link href="{{ asset('img/favicon.png') }}" rel="icon" />
-    <link href="{{ asset('img/apple-touch-icon.png') }}" rel="apple-touch-icon" />
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('img/apple-touch-icon.png') }}">
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
@@ -27,6 +25,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/public-theme.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/interactive-cursor.css') }}" rel="stylesheet" />
 
     <style>
@@ -44,7 +43,7 @@
         }
 
         .travel-stats-card .card-body {
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            background: #FFFFFF;
         }
 
         .travel-stats-card:hover .bi {
@@ -70,8 +69,7 @@
 
         .stats-item:hover i.bi {
             transform: scale(1.2);
-            color: #007bff;
-            /* Warna biru Bootstrap, bisa diganti */
+            color: #e2a712;
         }
 
 
@@ -96,7 +94,7 @@
 
         .company-icon i {
             font-size: 2rem;
-            color: #0d6efd;
+            color: #c8940e;
         }
 
         .accreditation {
@@ -111,8 +109,7 @@
 
         /* Updated icon colors */
         .detail-item i.bi-telephone-fill {
-            color: #29cc61;
-            /* Green color for telephone */
+            color: #e2a712;
         }
 
         .detail-item i.bi-geo-alt-fill {
@@ -192,27 +189,28 @@
         }
 
         .stats-bar {
-            background: #fff;
-            border-radius: 20px;
-            padding: 40px 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: #FFFFFF;
+            border-radius: 12px;
+            padding: min(4vw, 40px) min(3vw, 30px);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #E2E2E2;
         }
 
         .stat-item {
             text-align: center;
             padding: 20px 15px;
-            border-radius: 15px;
+            border-radius: 10px;
             transition: all 0.3s ease;
             cursor: pointer;
-            background: linear-gradient(145deg, #f8f9fa 0%, #ffffff 100%);
-            border: 1px solid rgba(0, 0, 0, 0.05);
+            background: #FAFAF8;
+            border: 1px solid #E2E2E2;
         }
 
         .stat-item:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
-            background: linear-gradient(145deg, #ffffff 0%, #f8f9fa 100%);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(226, 167, 18, 0.12);
+            background: #FFFFFF;
+            border-color: #e2a712;
         }
 
         .stat-icon {
@@ -231,16 +229,16 @@
         }
 
         .stat-number {
-            font-size: 2.2rem;
+            font-size: clamp(22px, 3vw, 35px);
             font-weight: 700;
-            color: #2c3e50;
+            color: #e2a712;
             margin-bottom: 5px;
             line-height: 1;
         }
 
         .stat-label {
-            font-size: 0.95rem;
-            color: #6c757d;
+            font-size: clamp(13px, 2vw, 15px);
+            color: #5a5a5a;
             margin: 0;
             font-weight: 500;
         }
@@ -272,30 +270,29 @@
             border: 1px solid #e9ecef;
         }
 
-        .modal-header {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-            color: white;
-            border-bottom: none;
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-
         .modal-content {
             border: none;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: #2B2B2B !important;
+            color: #ffffff !important;
+            border-bottom: none;
+            border-radius: 0 !important;
+            margin: 0;
         }
 
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --success-color: #059669;
-            --background-color: #f8fafc;
-            --card-background: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
+            --primary-color: #e2a712;
+            --secondary-color: #c8940e;
+            --success-color: #e2a712;
+            --background-color: #FFFFFF;
+            --card-background: #FFFFFF;
+            --text-primary: #333333;
+            --text-secondary: #5a5a5a;
             --border-radius: 12px;
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
@@ -537,34 +534,37 @@
 
         .scrolled .header {
             padding: 5px 0 !important;
-            background: rgba(16, 5, 140, 0.9) !important;
-            backdrop-filter: blur(5px) !important;
-            -webkit-backdrop-filter: blur(5px) !important;
         }
 
         .hero {
-            background: linear-gradient(135deg, #08005e 0%, #1a1a1a 100%) !important;
-            padding: 140px 0 100px 0 !important;
+            padding: clamp(100px, 12vw, 140px) 0 clamp(60px, 8vw, 100px) 0 !important;
         }
 
         .hero h1 {
-            font-size: 3.5rem !important;
-            font-weight: 800 !important;
-            letter-spacing: -2px;
-            margin-bottom: 25px;
-            line-height: 1.1;
+            color: #ffffff !important;
+            font-size: clamp(28px, 4vw, 36px) !important;
+            font-weight: 700 !important;
+            letter-spacing: -0.5px;
+            margin-bottom: 16px;
+            line-height: 1.25;
         }
 
-        .hero h1 span {
-            display: block;
-            color: var(--accent-color);
-            font-size: 2.5rem;
+        .hero-subtitle {
+            color: #ffffff;
+            font-size: 1.15rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .hero-desc {
+            color: #ffffff;
+            font-size: 1.1rem;
+            opacity: 0.92;
+            margin-bottom: 30px;
         }
 
         .hero p {
-            font-size: 1.25rem;
-            opacity: 0.9;
-            margin-bottom: 30px;
+            color: #ffffff;
         }
 
         .btn-get-started {
@@ -574,7 +574,7 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             transition: all 0.3s ease !important;
-            box-shadow: 0 5px 15px rgba(26, 204, 141, 0.3);
+            box-shadow: 0 4px 14px rgba(226, 167, 18, 0.35);
             margin-right: 15px;
         }
 
@@ -591,9 +591,9 @@
         }
 
         .btn-check-travel:hover {
-            background: rgba(255, 255, 255, 0.1);
-            border-color: #fff;
-            color: #fff;
+            background: #ffffff;
+            border-color: #ffffff;
+            color: #c8940e;
         }
 
         /* Form Improvements */
@@ -604,7 +604,7 @@
 
         .form-control:focus {
             border-color: var(--accent-color);
-            box-shadow: 0 0 0 0.25rem rgba(26, 204, 141, 0.25);
+            box-shadow: 0 0 0 0.25rem rgba(226, 167, 18, 0.2);
         }
 
         /* Micro-interactions */
@@ -617,17 +617,19 @@
             filter: brightness(1.1);
         }
         /* Logo Refinement */
-        .sitename {
-            font-family: var(--heading-font);
-            font-weight: 800 !important;
-            letter-spacing: 1px;
-            color: #ffffff !important;
-            text-transform: uppercase;
-            font-size: 1.5rem !important;
+        .site-logo {
+            height: 36px;
+            width: auto;
         }
 
         /* Statistik Mobile Refinement */
         @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2rem !important;
+            }
+            .hero-subtitle {
+                font-size: 1rem;
+            }
             .stat-item {
                 margin-bottom: 10px;
                 padding: 12px 8px !important;
@@ -643,128 +645,23 @@
             }
         }
 
-        /* Branding Colors & Spacing Overhaul */
-        .icon-box i, .info-item i, .stat-icon i, .detail-item i {
-            color: #1acc8d !important;
-        }
-
+        /* Branding — page-specific only; base tokens in public-theme.css */
         section, .section {
-            padding: 100px 0 !important;
+            padding: min(5vw, 60px) 0 !important;
         }
 
         .section-title {
-            padding-bottom: 70px !important;
-        }
-
-        .light-background {
-            background: linear-gradient(180deg, #f4f5fe 0%, #ffffff 100%) !important;
-        }
-
-        .icon-box {
-            border-radius: 15px !important;
-            transition: all 0.3s ease !important;
-            background: #ffffff !important;
-            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.05) !important;
-            padding: 60px 45px !important;
-            height: 100% !important;
-            display: flex !important;
-            flex-direction: column !important;
-            position: relative !important;
-            z-index: 1 !important;
-            overflow: hidden !important;
-            border: 1px solid rgba(26, 204, 141, 0.05) !important;
-        }
-
-        .icon-box::before {
-            content: attr(data-number);
-            position: absolute;
-            top: -20px;
-            right: -10px;
-            font-size: 150px;
-            font-weight: 900;
-            color: rgba(26, 204, 141, 0.04);
-            z-index: -1;
-            font-family: var(--heading-font);
-            line-height: 1;
-        }
-
-        .icon-box i {
-            margin-bottom: 25px !important;
-            display: inline-block !important;
-            font-size: 2.5rem !important;
-        }
-
-        .icon-box h3 {
-            margin-bottom: 20px !important;
-            font-weight: 800 !important;
-            font-size: 1.25rem !important;
-            color: var(--primary-color) !important;
-            min-height: 3rem;
-            display: flex;
-            align-items: center;
-        }
-
-        .icon-box p {
-            margin-bottom: 0 !important;
-            line-height: 1.7 !important;
-            color: #555 !important;
-            font-size: 0.95rem;
-        }
-
-        .icon-box:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.1) !important;
-            border-color: rgba(26, 204, 141, 0.2) !important;
-        }
-
-        /* About Section Spacing */
-        .about .icon-box {
-            padding: 60px 45px !important;
-        }
-
-        /* Card Button Redesign (Outline Style) */
-        .btn-card {
-            background-color: transparent !important;
-            color: #1acc8d !important;
-            border: 2px solid #1acc8d !important;
-            padding: 10px 25px !important;
-            border-radius: 50px !important;
-            font-weight: 600 !important;
-            transition: all 0.3s ease !important;
-            display: inline-flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            line-height: 1 !important;
-            width: fit-content !important;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 0.85rem !important;
-        }
-
-        .btn-card i {
-            margin-left: 8px !important;
-            font-size: 1rem !important;
-            margin-bottom: 0 !important; /* Reset generic icon margin */
-            line-height: 0 !important;
-        }
-
-        .btn-card:hover {
-            background-color: rgba(26, 204, 141, 0.08) !important;
-            color: #1acc8d !important;
-            border-color: #15b37b !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(26, 204, 141, 0.15) !important;
+            padding-bottom: min(4vw, 50px) !important;
         }
     </style>
+    @include('partials.public-trust-styles')
 </head>
 
 <body class="index-page">
     <header id="header" class="header d-flex align-items-center fixed-top">
         <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
-            <a href="index.html" class="logo d-flex align-items-center">
-                <!-- Uncomment the line below if you also wish to use an image logo -->
-                <!-- <img src="assets/img/logo.png" alt=""> -->
-                <h1 class="sitename">UHK Kanwil NTB</h1>
+            <a href="{{ url('/') }}" class="logo d-flex align-items-center">
+                <img src="{{ asset('images/logo-light.svg') }}" alt="{{ config('app.name') }}" class="site-logo" height="36">
             </a>
 
             <nav id="navmenu" class="navmenu">
@@ -811,13 +708,8 @@
                     </div>
 
                     <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-in">
-                        <h1>
-                            Sistem Informasi Haji dan Umroh Khusus
-                            <span>Kanwil Haji NTB</span>
-                        </h1>
-                        <p>
-                            Informasi Keberangkatan dan List Travel.
-                        </p>
+                        <h1>Mengawal Kepatuhan, Melindungi Jemaah.</h1>
+                        <p class="hero-subtitle">Sistem Pengawasan Haji dan Umrah Kanwil NTB</p>
                         <div class="d-flex flex-wrap gap-3">
                             <a href="{{ route('login') }}" class="btn-get-started">Masuk</a>
                             <a href="#stats" class="btn-check-travel">Cek Travel</a>
@@ -860,9 +752,12 @@
                 <div class="row gy-4 justify-content-center">
                     <!-- Pasti 1 -->
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="100">
-                        <div class="icon-box" data-number="1">
-                            <h3>5 Pasti Umroh</h3>
-                        <h2>PASTIKAN Travel Umrah Berizin Kementerian Haji.</h2>
+                        <div class="icon-box phu-pasti-card">
+                            <div class="phu-pasti-card__head">
+                                <span class="phu-pasti-card__num">01</span>
+                                <div class="phu-pasti-card__icon"><i class="bi bi-shield-check"></i></div>
+                            </div>
+                            <h3>PASTIKAN Travel Umrah Berizin Kementerian Haji.</h3>
                             <p>
                                 Travel harus memiliki izin umrah agar terjamin perlindungan, pelayanan, dan bimbingan selama di Tanah Suci.
                             </p>
@@ -871,8 +766,11 @@
 
                     <!-- Pasti 2 -->
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="200">
-                        <div class="icon-box" data-number="2">
-                            <i class="bi bi-airplane"></i>
+                        <div class="icon-box phu-pasti-card">
+                            <div class="phu-pasti-card__head">
+                                <span class="phu-pasti-card__num">02</span>
+                                <div class="phu-pasti-card__icon"><i class="bi bi-airplane"></i></div>
+                            </div>
                             <h3>PASTIKAN Tiket Pesawat dan Jadwal Penerbangan.</h3>
                             <p>
                                 Maskapai penerbangannya harus jelas, jadwal berangkatnya pasti, tiketnya harus pulang-pergi, dan hanya satu kali transit dengan maskapai penerbangan yang sama.
@@ -882,8 +780,11 @@
 
                     <!-- Pasti 3 -->
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="300">
-                        <div class="icon-box" data-number="3">
-                            <i class="bi bi-clipboard-pulse"></i>
+                        <div class="icon-box phu-pasti-card">
+                            <div class="phu-pasti-card__head">
+                                <span class="phu-pasti-card__num">03</span>
+                                <div class="phu-pasti-card__icon"><i class="bi bi-clipboard-pulse"></i></div>
+                            </div>
                             <h3>PASTIKAN Harga dan Paket Layanannya.</h3>
                             <p>
                                 Jangan tergiur harga murah, rincian harga paket harus rasional. Layanan terdiri dari konsumsi, transportasi, manasik, petugas, dan asuransi.
@@ -893,8 +794,11 @@
 
                     <!-- Pasti 4 -->
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="400">
-                        <div class="icon-box" data-number="4">
-                            <i class="bi bi-buildings"></i>
+                        <div class="icon-box phu-pasti-card">
+                            <div class="phu-pasti-card__head">
+                                <span class="phu-pasti-card__num">04</span>
+                                <div class="phu-pasti-card__icon"><i class="bi bi-buildings"></i></div>
+                            </div>
                             <h3>PASTIKAN Akomodasi (Hotel) di Arab Saudi.</h3>
                             <p>
                                 Hotel tempat menginap minimal bintang 3 dan jarak dari tempat ibadah maksimal 1 km (untuk hotel non-bintang/standar).
@@ -904,8 +808,11 @@
 
                     <!-- Pasti 5 -->
                     <div class="col-lg-4 col-md-6" data-aos="fade-up" data-aos-delay="500">
-                        <div class="icon-box" data-number="5">
-                            <i class="bi bi-credit-card-2-front"></i>
+                        <div class="icon-box phu-pasti-card">
+                            <div class="phu-pasti-card__head">
+                                <span class="phu-pasti-card__num">05</span>
+                                <div class="phu-pasti-card__icon"><i class="bi bi-credit-card-2-front"></i></div>
+                            </div>
                             <h3>PASTIKAN Visanya</h3>
                             <p>
                                 Visa harus selesai minimal 3 hari sebelum keberangkatan. Pastikan jenis visa sesuai dengan peruntukannya (Visa Umrah).
@@ -966,7 +873,7 @@
                                 <div class="col-md-3 col-6">
                                     <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal">
                                         <div class="stat-icon">
-                                            <i class="fas fa-building text-primary"></i>
+                                            <i class="fas fa-building"></i>
                                         </div>
                                         <div class="stat-content">
                                             <h3 class="stat-number">{{ $stats['travelCount'] ?: 'Menunggu Data' }}</h3>
@@ -977,7 +884,7 @@
                                 <div class="col-md-3 col-6">
                                     <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal">
                                         <div class="stat-icon">
-                                            <i class="fas fa-users text-success"></i>
+                                            <i class="fas fa-users"></i>
                                         </div>
                                         <div class="stat-content">
                                             <h3 class="stat-number">{{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) ?: 'Menunggu Data' }}</h3>
@@ -988,7 +895,7 @@
                                 <div class="col-md-3 col-6">
                                     <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal">
                                         <div class="stat-icon">
-                                            <i class="fas fa-plane text-info"></i>
+                                            <i class="fas fa-plane"></i>
                                         </div>
                                         <div class="stat-content">
                                             <h3 class="stat-number">{{ $stats['airlineCount'] ?: 'Menunggu Data' }}</h3>
@@ -999,10 +906,10 @@
                                 <div class="col-md-3 col-6">
                                     <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal">
                                         <div class="stat-icon">
-                                            <i class="fas fa-map-marker-alt text-warning"></i>
+                                            <i class="fas fa-map-marker-alt"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $travelPusat->groupBy('kab_kota')->count() + $travelCabang->groupBy('kabupaten')->count() }}</h3>
+                                            <h3 class="stat-number">{{ $allKabupatens->count() }}</h3>
                                             <p class="stat-label">Kabupaten</p>
                                         </div>
                                     </div>
@@ -1035,7 +942,7 @@
                             <i class="bi bi-question-circle"></i>
                             <h3>FAQ (Frequently Asked Questions)</h3>
                             <p>
-                                Temukan jawaban untuk pertanyaan yang sering diajukan tentang sistem PHU Kanwil NTB, cara melihat jadwal keberangkatan, dan prosedur pengaduan.
+                                Temukan jawaban untuk pertanyaan yang sering diajukan tentang PANTAU, cara melihat jadwal keberangkatan, dan prosedur pengaduan.
                             </p>
                             <div class="mt-3">
                                 <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse">
@@ -1045,8 +952,8 @@
                             <div class="collapse mt-3" id="faqCollapse">
                                 <div class="card card-body border-0 bg-light">
                                     <div class="mb-3">
-                                        <strong>Q: Apa itu Sistem PHU Kanwil NTB?</strong><br>
-                                        <small class="text-muted">A: Sistem Informasi Haji dan Umroh Khusus (PHU) Kanwil NTB adalah platform digital untuk mengelola dan memantau kegiatan haji dan umroh di wilayah NTB.</small>
+                                        <strong>Q: Apa itu PANTAU?</strong><br>
+                                        <small class="text-muted">A: PANTAU adalah platform digital Kanwil Kementerian Haji dan Umroh NTB untuk mengelola dan memantau kegiatan haji dan umrah di wilayah NTB.</small>
                                     </div>
                                     <div class="mb-3">
                                         <strong>Q: Bagaimana cara melihat jadwal keberangkatan?</strong><br>
@@ -1090,9 +997,7 @@
                                     <div class="mb-3">
                                         <strong>Kontak Darurat:</strong><br>
                                         <small class="text-muted">
-                                            <i class="bi bi-telephone me-1"></i>0370-123456<br>
-                                            <i class="bi bi-envelope me-1"></i>ntb.kemenag@go.id<br>
-                                            <i class="bi bi-geo-alt me-1"></i>Jl. Udayana No.6, Mataram
+                                            @include('partials.kanwil-contact', ['variant' => 'inline'])
                                         </small>
                                     </div>
                                 </div>
@@ -1109,7 +1014,7 @@
                             <i class="bi bi-book"></i>
                             <h3>Panduan Penggunaan</h3>
                             <p>
-                                Pelajari cara menggunakan sistem PHU dengan panduan lengkap untuk setiap fitur yang tersedia.
+                                Pelajari cara menggunakan PANTAU dengan panduan lengkap untuk setiap fitur yang tersedia.
                             </p>
                             <div class="mt-3">
                                 <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#panduanCollapse">
@@ -1141,10 +1046,10 @@
         <section id="details" class="details section">
             <!-- Section Title -->
             <div class="container section-title" data-aos="fade-up">
-                <h2>Details</h2>
+                <h2>Tentang</h2>
                 <div>
-                    <span>Check Our</span>
-                    <span class="description-title">Details</span>
+                    <span>Sistem</span>
+                    <span class="description-title">PANTAU</span>
                 </div>
             </div>
             <!-- End Section Title -->
@@ -1155,26 +1060,24 @@
                         <img src="{{ asset('img/hero-2.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7" data-aos="fade-up" data-aos-delay="100">
-                        <h3>
-                            Sistem Terpadu Pengelolaan Haji dan Umroh Khusus
-                            Kanwil NTB
-                        </h3>
-                        <p class="fst-italic">
-                            Platform digital yang mengintegrasikan seluruh proses pengelolaan haji dan umroh khusus 
-                            di wilayah Nusa Tenggara Barat dengan sistem yang terpusat dan terkoordinasi.
+                        <h3>Apa itu PANTAU?</h3>
+                        <p>
+                            <strong>PANTAU</strong> adalah sistem pengawasan digital Kanwil Kementerian Haji dan Umroh NTB.
+                            Platform ini membantu masyarakat, travel, dan petugas memantau kepatuhan penyelenggara
+                            perjalanan ibadah haji dan umrah di seluruh wilayah Nusa Tenggara Barat.
                         </p>
                         <ul>
                             <li>
-                                <i class="bi bi-check"></i><span>
-                                    Monitoring real-time keberangkatan jamaah haji dan umroh khusus</span>
+                                <i class="bi bi-check"></i>
+                                <span>Cek jadwal keberangkatan jamaah secara terbuka</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Pengelolaan data travel berizin dan terverifikasi Kementerian Haji</span>
+                                <span>Lihat daftar travel berizin dan indeks kepercayaan</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Sistem pengaduan terintegrasi untuk perlindungan jamaah</span>
+                                <span>Ajukan pengaduan jika ada masalah dengan travel</span>
                             </li>
                         </ul>
                     </div>
@@ -1187,17 +1090,25 @@
                         <img src="{{ asset('img/hero-3.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up" data-aos-delay="200">
-                        <h3>Pelayanan Terpadu dan Transparan</h3>
-                        <p class="fst-italic">
-                            Memberikan pelayanan yang terintegrasi dan transparan dalam pengelolaan 
-                            haji dan umroh khusus dengan standar pelayanan yang tinggi.
-                        </p>
+                        <h3>Untuk Siapa PANTAU Digunakan?</h3>
                         <p>
-                            Sistem ini dirancang untuk memastikan setiap jamaah mendapatkan pelayanan 
-                            yang optimal mulai dari pendaftaran, pembayaran, hingga keberangkatan. 
-                            Dengan teknologi yang modern, kami memastikan transparansi dalam setiap 
-                            tahap proses dan memberikan kemudahan akses informasi bagi semua pihak terkait.
+                            Sistem ini menghubungkan semua pihak yang terlibat dalam perjalanan ibadah,
+                            dari calon jamaah hingga petugas Kanwil, dalam satu platform yang sama.
                         </p>
+                        <ul>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span><strong>Masyarakat &amp; jamaah</strong>: cek travel, jadwal keberangkatan, dan ajukan pengaduan</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span><strong>Travel berizin</strong>: kelola data jamaah dan ajukan keberangkatan</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span><strong>Petugas Kanwil</strong>: pantau kepatuhan, pengawasan, dan tindak lanjut pengaduan</span>
+                            </li>
+                        </ul>
                     </div>
                 </div>
                 <!-- Features Item -->
@@ -1207,26 +1118,23 @@
                         <img src="{{ asset('img/hero-4.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7" data-aos="fade-up">
-                        <h3>
-                            Keamanan dan Perlindungan Jamaah
-                        </h3>
+                        <h3>Perlindungan Jamaah, Transparan</h3>
                         <p>
-                            Memprioritaskan keamanan dan kenyamanan jamaah dengan sistem monitoring 
-                            yang komprehensif dan mekanisme pengaduan yang responsif untuk memastikan 
-                            perlindungan hak-hak jamaah.
+                            PANTAU dirancang agar masyarakat bisa memilih travel dengan lebih aman
+                            dan petugas bisa mengawasi lebih cepat jika ada pelanggaran.
                         </p>
                         <ul>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Sistem verifikasi travel berizin dan terpercaya</span>
-                            </li>
-                            <li>
-                                <i class="bi bi-check"></i><span>
-                                    Monitoring real-time status keberangkatan jamaah</span>
+                                <span>Data travel hanya menampilkan penyelenggara berizin resmi</span>
                             </li>
                             <li>
                                 <i class="bi bi-check"></i>
-                                <span>Mekanisme pengaduan cepat dan terintegrasi</span>
+                                <span>Indeks kepercayaan membantu Anda menilai rekam jejak travel</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span>Pengaduan online dan bisa dilacak hingga selesai</span>
                             </li>
                         </ul>
                     </div>
@@ -1238,19 +1146,14 @@
                         <img src="{{ asset('img/hero-5.png') }}" class="img-fluid" alt="" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up">
-                        <h3>
-                            Teknologi Modern untuk Pelayanan Optimal
-                        </h3>
-                        <p class="fst-italic">
-                            Menggunakan teknologi terkini untuk memberikan pelayanan yang efisien, 
-                            akurat, dan mudah diakses oleh semua stakeholder dalam pengelolaan haji dan umroh khusus.
+                        <h3>Informasi Terbuka, Mudah Diakses</h3>
+                        <p>
+                            Semua informasi penting, dari statistik travel berizin, jadwal keberangkatan,
+                            hingga status pengaduan, tersedia di halaman ini tanpa perlu login.
                         </p>
                         <p>
-                            Platform ini dibangun dengan teknologi modern yang memungkinkan akses 
-                            real-time, pelaporan yang akurat, dan komunikasi yang efektif antara 
-                            jamaah, travel, dan pihak terkait. Dengan sistem yang terintegrasi, 
-                            kami memastikan setiap proses berjalan lancar dan transparan sesuai 
-                            dengan standar pelayanan yang telah ditetapkan.
+                            Untuk petugas dan travel, tersedia dashboard khusus setelah masuk ke sistem
+                            guna mengelola data, pengawasan, dan tindak lanjut sesuai peran masing-masing.
                         </p>
                     </div>
                 </div>
@@ -1303,34 +1206,12 @@
                 </div>
 
                 <!-- Tab Content -->
-                <div class="tab-content" id="pengaduanTabContent">
+                <div class="tab-content phu-form-panel" id="pengaduanTabContent">
                     <!-- Tab 1: Form Pengaduan -->
                     <div class="tab-pane fade show active" id="form-pengaduan" role="tabpanel">
                         <div class="row gy-4">
                             <div class="col-lg-4">
-                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="200">
-                                    <i class="bi bi-geo-alt flex-shrink-0"></i>
-                                    <div>
-                                        <h3>Alamat Kantor</h3>
-                                        <p>Jl. Udayana No.6, Mataram</p>
-                                    </div>
-                                </div>
-
-                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="300">
-                                    <i class="bi bi-telephone flex-shrink-0"></i>
-                                    <div>
-                                        <h3>Telephone</h3>
-                                        <p>0370-123456</p>
-                                    </div>
-                                </div>
-
-                                <div class="info-item d-flex" data-aos="fade-up" data-aos-delay="400">
-                                    <i class="bi bi-envelope flex-shrink-0"></i>
-                                    <div>
-                                        <h3>Email</h3>
-                                        <p>ntb.kemenhaji@go.id</p>
-                                    </div>
-                                </div>
+                                @include('partials.kanwil-contact', ['variant' => 'form-sidebar'])
                             </div>
 
                             <div class="col-lg-8">
@@ -1341,32 +1222,36 @@
                                     <div class="row gy-4">
                                         <div class="col-md-6">
                                             <input type="text" name="nama_pengadu" id="nama_pengadu_welcome" class="form-control"
-                                                placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" 
-                                                style="background-color: white;" />
+                                                placeholder="Nama Pengadu" required value="{{ old('nama_pengadu') }}" />
                                             <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-6">
-                                            <select class="form-control" name="travels_id" id="travels_id_welcome" required style="background-color: white;">
+                                            <select class="form-control" name="travels_id" id="travels_id_welcome" required>
                                                 <option value="">-- Pilih Travel --</option>
                                                 @foreach ($travels as $travel)
+                                                    @php $trust = $travel->trust ?? []; @endphp
                                                     <option value="{{ $travel->id }}"
+                                                        data-trust-label="{{ $trust['label'] ?? '' }}"
+                                                        data-trust-score="{{ $trust['score'] ?? '' }}"
+                                                        data-trust-has="{{ ($trust['has_data'] ?? false) ? '1' : '0' }}"
+                                                        data-profile-url="{{ route('travel.public.show', $travel->id) }}"
                                                         {{ old('travels_id') == $travel->id ? 'selected' : '' }}>
-                                                        {{ $travel->Penyelenggara }}
+                                                        {{ $travel->Penyelenggara }} ({{ $travel->kab_kota }})
                                                     </option>
                                                 @endforeach
                                             </select>
+                                            <div id="trustHintWelcome" class="trust-hint-box" aria-live="polite"></div>
                                             <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-12">
-                                            <textarea class="form-control" name="hal_aduan" id="hal_aduan_welcome" rows="6" placeholder="Hal yang Diadukan" required 
-                                                      style="background-color: white;">{{ old('hal_aduan') }}</textarea>
+                                            <textarea class="form-control" name="hal_aduan" id="hal_aduan_welcome" rows="6" placeholder="Hal yang Diadukan" required>{{ old('hal_aduan') }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
 
                                         <div class="col-md-12">
-                                            <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" style="background-color: white;" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                                            <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
                                             <small class="text-muted mt-1">File maksimal 2MB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
@@ -1378,7 +1263,7 @@
                                             <div class="mt-3">
                                                 <button type="button"
                                                     class="btn btn-success rounded-pill px-4 py-3"
-                                                    style="background-color: #1acc8d; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;" onclick="confirmSubmit()">Kirim
+                                                    style="font-weight: 600; text-transform: uppercase; letter-spacing: 1px;" onclick="confirmSubmit()">Kirim
                                                     Pengaduan</button>
                                             </div>
                                         </div>
@@ -1411,49 +1296,7 @@
         <!-- /Contact Section -->
     </main>
 
-    <footer id="footer" class="footer dark-background">
-        <div class="container py-4">
-            <div class="row justify-content-center">
-                <div class="col-lg-8 text-center">
-                    <div class="footer-contact">
-                        <h5 class="mb-4 text-white">Kantor Wilayah Kementerian Haji Provinsi NTB</h5>
-                        <div class="row justify-content-center">
-                            <div class="col-md-4">
-                                <p class="mb-2 text-white-50">
-                                    <i class="bi bi-geo-alt me-2"></i>Jl. Udayana No. 6, Mataram, NTB
-                                </p>
-                            </div>
-                            <div class="col-md-4">
-                                <p class="mb-2 text-white-50">
-                                    <i class="bi bi-telephone me-2"></i>0370-123456
-                                </p>
-                            </div>
-                            <div class="col-md-4">
-                                <p class="mb-2 text-white-50">
-                                    <i class="bi bi-envelope me-2"></i>ntb.kemenhaji@kemenhaji.go.id
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="container text-center py-3 border-top border-secondary">
-            <div class="row">
-                <div class="col-12">
-                    <p class="mb-2 text-white-50">
-                        © <script>document.write(new Date().getFullYear())</script> 
-                        <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>. All Rights Reserved
-                    </p>
-                    <p class="mb-0 text-white-50 small">
-                        Designed with <i class="bi bi-heart-fill text-danger"></i> by 
-                        <strong class="text-white">UHK Kanwil Kementerian Haji NTB</strong>
-                    </p>
-                </div>
-            </div>
-        </div>
-    </footer>
+    @include('partials.kanwil-contact', ['variant' => 'footer-full'])
 
     <!-- Stats Detail Modals -->
     <!-- Travel Modal -->
@@ -1547,7 +1390,7 @@
                     <hr>
                     <div class="text-center">
                         <h4 class="text-primary">Total Jamaah: {{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) > 0 ? ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) : 'Belum Ada Data' }}</h4>
-                        <p class="text-muted">Terdaftar dalam sistem PHU Kanwil NTB</p>
+                        <p class="text-muted">Terdaftar dalam PANTAU</p>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -1597,29 +1440,28 @@
                 </div>
                 <div class="modal-body">
                     <div class="text-center mb-4">
-                        <h3 class="text-primary">{{ $travelPusat->groupBy('kab_kota')->count() + $travelCabang->groupBy('kabupaten')->count() }}</h3>
+                        <h3 class="text-primary">{{ $allKabupatens->count() }}</h3>
                         <p class="text-muted">Kabupaten/Kota yang terlayani</p>
                     </div>
                     <hr>
-                    <h6>Travel Pusat:</h6>
+                    <h6>Wilayah Terlayani:</h6>
                     <div class="row">
-                        @foreach($travelPusat->groupBy('kab_kota') as $kabupaten => $travelList)
+                        @foreach($allKabupatens as $kabupaten)
+                        @php
+                            $pusatCount = $travelPusat->where('kab_kota', $kabupaten)->count();
+                            $cabangCount = $travelCabang->where('kabupaten', $kabupaten)->count();
+                        @endphp
                         <div class="col-md-6 mb-2">
                             <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-building me-2 text-success"></i>{{ $kabupaten }}</span>
-                                <span class="badge bg-success">{{ $travelList->count() }} pusat</span>
-                            </div>
-                        </div>
-                        @endforeach
-                    </div>
-                    <hr>
-                    <h6>Travel Cabang:</h6>
-                    <div class="row">
-                        @foreach($travelCabang->groupBy('kabupaten') as $kabupaten => $travelList)
-                        <div class="col-md-6 mb-2">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span><i class="fas fa-sitemap me-2 text-info"></i>{{ $kabupaten }}</span>
-                                <span class="badge bg-info">{{ $travelList->count() }} cabang</span>
+                                <span><i class="fas fa-map-marker-alt me-2 text-success"></i>{{ $kabupaten }}</span>
+                                <span>
+                                    @if($pusatCount > 0)
+                                        <span class="badge bg-success me-1">{{ $pusatCount }} pusat</span>
+                                    @endif
+                                    @if($cabangCount > 0)
+                                        <span class="badge bg-info">{{ $cabangCount }} cabang</span>
+                                    @endif
+                                </span>
                             </div>
                         </div>
                         @endforeach
@@ -1797,7 +1639,7 @@
             const formattedRawDate = rawDate.split('T')[0]; // Extract YYYY-MM-DD
 
             content.innerHTML = `
-        <h3 class="text-primary text-xl font-semibold mb-6">
+        <h3 class="mb-4">
             ${event.title}
             <button class="close-btn" onclick="closePopup()">×</button>
         </h3>
@@ -2021,6 +1863,42 @@
                     });
                 });
             }
+
+            const travelSelect = document.getElementById('travels_id_welcome');
+            const trustHint = document.getElementById('trustHintWelcome');
+
+            function updateTrustHint() {
+                if (!travelSelect || !trustHint) return;
+
+                const option = travelSelect.options[travelSelect.selectedIndex];
+                if (!option || !option.value) {
+                    trustHint.classList.remove('is-visible');
+                    trustHint.innerHTML = '';
+                    return;
+                }
+
+                if (option.dataset.trustHas !== '1') {
+                    trustHint.classList.add('is-visible');
+                    trustHint.innerHTML = '<span class="trust-hint-box__label">Info kepercayaan:</span> Data indeks kepercayaan untuk travel ini belum tersedia.';
+                    return;
+                }
+
+                const label = option.dataset.trustLabel || 'Belum diketahui';
+                const score = option.dataset.trustScore || 'Tidak ada';
+                const profileUrl = option.dataset.profileUrl || '#';
+
+                trustHint.classList.add('is-visible');
+                trustHint.innerHTML = `
+                    <span class="trust-hint-box__label">Indeks Kepercayaan:</span>
+                    ${label} (${score}/100).
+                    <a href="${profileUrl}" class="text-success fw-semibold" target="_blank" rel="noopener">Lihat penjelasan lengkap</a>
+                `;
+            }
+
+            if (travelSelect) {
+                travelSelect.addEventListener('change', updateTrustHint);
+                updateTrustHint();
+            }
         });
 
         function validateWelcomeField(field) {
@@ -2103,7 +1981,7 @@
                 .then(data => {
                     if (data.length > 0) {
                         let html = '<div class="table-responsive"><table class="table table-hover">';
-                        html += '<thead class="bg-light"><tr><th>No</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
+                        html += '<thead><tr><th>No</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
                         
                         data.forEach((item, index) => {
                             const travelName = item.travel ? item.travel.Penyelenggara : 'Tidak diketahui';
@@ -2112,11 +1990,11 @@
                             
                             html += `<tr>
                                 <td>${index + 1}</td>
-                                <td><span class="text-primary">${travelName}</span></td>
+                                <td><span class="phu-table-link">${travelName}</span></td>
                                 <td style="max-width: 300px; word-wrap: break-word; text-align: left;"><span class="text-muted">${halAduan}</span></td>
                                 <td><small class="text-muted">${completedDate}</small></td>
                                 <td>
-                                    <button type="button" class="btn btn-success btn-sm rounded-pill" 
+                                    <button type="button" class="btn btn-success btn-sm" 
                                             onclick="downloadPDF(${item.id})">
                                         <i class="bi bi-download me-1"></i> PDF
                                     </button>
@@ -2164,7 +2042,6 @@
             window.open(`/public/pengaduan/${id}/download-pdf`, '_blank', 'noopener,noreferrer');
         }
     </script>
-
 
 </body>
 

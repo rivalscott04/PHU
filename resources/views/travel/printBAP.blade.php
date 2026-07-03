@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Berita Acara</title>
+    <title>BA Pemberangkatan</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/paper-css/0.4.1/paper.css">
     <style>
         @media print {
@@ -136,11 +136,8 @@
         <div class="letterhead">
             <img src="{{ asset('images/kemenag.png') }}" alt="Logo" class="logo">
             <div class="header">
-                <strong>KEMENTERIAN AGAMA REPUBLIK INDONESIA<br>
-                    KANTOR WILAYAH KEMENTERIAN AGAMA<br>
-                    PROVINSI NUSA TENGGARA BARAT<br></strong>
-                <span style="font-size: 12pt;">JL. Udayana No. 6 Mataram Telp. (0370) 622317 Faksimili (0370) 622317<br>
-                    Website : www.ntb.Kemenag.go.id</span>
+                <strong>{!! \App\Support\KanwilContact::letterheadTitleHtml() !!}<br></strong>
+                <span style="font-size: 12pt;">{!! \App\Support\KanwilContact::letterheadContactHtml() !!}</span>
             </div>
         </div>
         <div class="title">
@@ -201,7 +198,7 @@
 
             <p>Menerangkan bahwa kami memberangkatkan jamaah umroh sesuai dengan 5 PASTI
                 UMROH
-                dan sudah terdaftar di Siskopatuh Kementerian Agama RI. Kami mengetahui Regulasi dan sanksi
+                dan sudah terdaftar di Siskopatuh Kementerian Haji dan Umroh RI. Kami mengetahui Regulasi dan sanksi
                 terkait
                 penyelenggaraan Umroh dan haji Khusus sesuai :</p>
 
@@ -226,7 +223,7 @@
         <div class="footer">
             <div class="signature">
                 Petugas Satgas Umrah<br>
-                Kanwil Kementerian Agama Prov. NTB<br><br>
+                Kanwil Kementerian Haji dan Umroh Provinsi NTB<br><br>
                 @if ($data->status === 'diterima' && $qrCodeData)
                     <img src="{{ $qrCodeData }}" alt="QR Code Tanda Tangan Digital"
                         style="width: 120px; height: 120px; margin: 0 auto; display: block;">

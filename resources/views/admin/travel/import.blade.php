@@ -76,11 +76,11 @@
                             <div class="card-body">
                                 <h6>Format Excel yang Diperlukan:</h6>
                                 <ul class="list-unstyled">
-                                    <li><strong>nama</strong> - Wajib diisi</li>
-                                    <li><strong>email</strong> - Wajib diisi</li>
-                                    <li><strong>nomor_hp</strong> - Wajib diisi</li>
-                                    <li><strong>password</strong> - Wajib diisi</li>
-                                    <li><strong>travel_company</strong> - Wajib diisi</li>
+                                    <li><strong>nama</strong>: Wajib diisi</li>
+                                    <li><strong>email</strong>: Wajib diisi</li>
+                                    <li><strong>nomor_hp</strong>: Wajib diisi</li>
+                                    <li><strong>password</strong>: Wajib diisi</li>
+                                    <li><strong>travel_company</strong>: Wajib diisi</li>
                                 </ul>
 
                                 <hr>

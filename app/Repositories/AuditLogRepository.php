@@ -51,19 +51,19 @@ class AuditLogRepository
             $query->where(function (Builder $scoped) use ($search) {
                 $scoped->where('description', 'like', "%{$search}%")
                     ->orWhereHas('user', function (Builder $userQuery) use ($search) {
-                        $userQuery->where('username', 'like', "%{$search}%")
+                        $userQuery->where('nama', 'like', "%{$search}%")
                             ->orWhere('email', 'like', "%{$search}%")
-                            ->orWhere('firstname', 'like', "%{$search}%")
-                            ->orWhere('lastname', 'like', "%{$search}%");
+                            ->orWhere('nomor_hp', 'like', "%{$search}%");
                     });
             });
         }
 
-        if ($kabupaten = $filters['kabupaten'] ?? null) {
-            $query->where(function (Builder $scoped) use ($kabupaten) {
-                $scoped->whereHas('user', function (Builder $userQuery) use ($kabupaten) {
-                    $userQuery->where('kabupaten', $kabupaten)
-                        ->orWhereHas('travel', fn (Builder $travelQuery) => $travelQuery->where('kab_kota', $kabupaten));
+        if (! empty($filters['kabupaten']) || ! empty($filters['kabupatens'])) {
+            $kabupatens = $filters['kabupatens'] ?? [$filters['kabupaten']];
+            $query->where(function (Builder $scoped) use ($kabupatens) {
+                $scoped->whereHas('user', function (Builder $userQuery) use ($kabupatens) {
+                    $userQuery->whereIn('kabupaten', $kabupatens)
+                        ->orWhereHas('travel', fn (Builder $travelQuery) => $travelQuery->whereIn('kab_kota', $kabupatens));
                 });
             });
         }

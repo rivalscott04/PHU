@@ -2,9 +2,13 @@
 
 @section('content')
 <div class="container-fluid">
+    @include('partials.bap-module-info', ['variant' => 'pemeriksaan'])
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Detail Pengawasan: {{ $inspection->inspection_no }}</h4>
+            <div>
+                <h4 class="mb-0">Detail BA Pemeriksaan: {{ $inspection->inspection_no }}</h4>
+                <small class="text-muted">Temuan dan tindak lanjut hasil pemeriksaan</small>
+            </div>
             <div>
                 @can('update', $inspection)
                     <a href="{{ route('v2.pengawasan.edit', $inspection) }}" class="btn btn-sm btn-warning">Edit Jadwal</a>
@@ -23,7 +27,11 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <p><strong>Travel:</strong> {{ $inspection->travel?->Penyelenggara }}</p>
-                    <p><strong>Status:</strong> {{ $inspection->status?->value ?? $inspection->status }}</p>
+                    <p><strong>Status:</strong>
+                        <span class="badge bg-{{ $inspection->status?->badgeColor() ?? 'secondary' }}">
+                            {{ $inspection->status?->label() ?? $inspection->status }}
+                        </span>
+                    </p>
                     <p><strong>Skor Kepatuhan:</strong> {{ $inspection->overall_score !== null ? number_format($inspection->overall_score, 0).'%' : 'Belum dihitung' }}</p>
                     <p class="mb-0"><strong>Catatan:</strong> {{ $inspection->notes ?? '-' }}</p>
                 </div>
@@ -54,8 +62,12 @@
                             @forelse ($inspection->findings as $finding)
                                 <tr>
                                     <td>{{ $finding->title }}</td>
-                                    <td>{{ $finding->severity?->value ?? $finding->severity }}</td>
-                                    <td>{{ $finding->status?->value ?? $finding->status }}</td>
+                                    <td>{{ $finding->severity?->label() ?? $finding->severity }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ $finding->status?->badgeColor() ?? 'secondary' }}">
+                                            {{ $finding->status?->label() ?? $finding->status }}
+                                        </span>
+                                    </td>
                                     <td>{{ optional($finding->deadline)->format('d/m/Y') }}</td>
                                 </tr>
                             @empty

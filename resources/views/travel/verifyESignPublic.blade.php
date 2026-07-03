@@ -3,26 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi E-Sign BAP - Kanwil Kementerian Haji NTB</title>
+    <title>Verifikasi E-Sign BA Pemberangkatan | Kanwil Kementerian Haji dan Umroh NTB</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="{{ asset('css/public-theme.css') }}" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #FAFAF8;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "Roboto", "Open Sans", sans-serif;
+            color: #333333;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4, h5 {
+            font-family: "Poppins", "Montserrat", sans-serif;
+            font-weight: 700;
         }
         .verification-card {
-            background: white;
+            background: #FFFFFF;
+            border: 1px solid #E2E2E2;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 102, 68, 0.08);
         }
         .header-logo {
-            background: linear-gradient(135deg, #28a745, #20c997);
-            color: white;
+            background: linear-gradient(135deg, #2B2B2B, #1a1a1a);
+            color: #FFFFFF;
             border-radius: 20px 20px 0 0;
-            padding: 2rem;
+            padding: min(4vw, 2rem);
             text-align: center;
         }
         .verification-icon {
@@ -30,9 +38,10 @@
             margin-bottom: 1rem;
         }
         .result-card {
-            border: none;
+            border: 1px solid #E2E2E2;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            background: #FFFFFF;
+            box-shadow: 0 5px 15px rgba(0, 102, 68, 0.06);
         }
         .status-badge {
             font-size: 0.9rem;
@@ -40,16 +49,22 @@
             border-radius: 25px;
         }
         .info-table {
-            background: #f8f9fa;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid #CCCCCC;
             border-radius: 10px;
             overflow: hidden;
         }
-        .info-table td {
-            padding: 0.75rem;
-            border: none;
-        }
         .info-table tr:nth-child(even) {
-            background: #e9ecef;
+            background: rgba(0, 102, 68, 0.04);
+        }
+        .btn-primary {
+            background-color: #e2a712;
+            border-color: #e2a712;
+        }
+        .btn-primary:hover {
+            background-color: #c8940e;
+            border-color: #c8940e;
+            color: #fff;
         }
         /* Mobile adjustments */
         @media (max-width: 575.98px) {
@@ -72,13 +87,14 @@
                 <div class="verification-card">
                     <div class="header-logo">
                         <i class="bx bx-qr-scan verification-icon"></i>
-                        <h4 class="mb-0">Verifikasi Keaslian Dokumen BAP</h4>
-                        <p class="mb-0 mt-2">Kantor Wilayah Kementerian Haji Provinsi NTB</p>
+                        <h4 class="mb-0">Verifikasi Keaslian BA Pemberangkatan</h4>
+                        <p class="mb-0 mt-2">Kanwil Kementerian Haji dan Umroh NTB</p>
                     </div>
                     
                     <div class="card-body p-4">
                         <div class="text-center mb-4">
-                            <p class="text-muted">Scan QR Code atau masukkan token yang ada di dokumen BAP</p>
+                            <p class="text-muted mb-1">Scan QR Code atau masukkan token pada dokumen <strong>BA Pemberangkatan</strong> (Berita Acara Pelaporan Keberangkatan Jamaah).</p>
+                            <small class="text-muted">Untuk hasil pengawasan/inspeksi, gunakan modul BA Pemeriksaan di sistem internal.</small>
                         </div>
                         
                         <!-- Tab Navigation -->
@@ -90,7 +106,7 @@
                             </li>
                             <li class="nav-item" role="presentation">
                                 <button class="nav-link" id="qr-tab" data-bs-toggle="tab" data-bs-target="#qr-tab-pane" type="button" role="tab">
-                                    <i class="bx bx-qr-scan me-2"></i>Scan E-Sign
+                                    <i class="bx bx-qr-scan me-2"></i>Scan E Sign
                                 </button>
                             </li>
                         </ul>
@@ -117,7 +133,7 @@
                             <div class="tab-pane fade" id="qr-tab-pane" role="tabpanel">
                                 <div class="text-center">
                                     <div id="qrScanner" style="width: 100%; height: 300px;"></div>
-                                    <p class="text-muted mt-2">Arahkan kamera ke E-Sign pada dokumen BAP</p>
+                                    <p class="text-muted mt-2">Arahkan kamera ke E-Sign pada dokumen BA Pemberangkatan</p>
                                 </div>
                             </div>
                         </div>
@@ -246,7 +262,7 @@
                                 <div class="card-body">
                                     <div class="table-responsive">
                                     <table class="table table-sm info-table mb-0">
-                                        <tr><td><strong>Jenis Dokumen</strong></td><td>: ${result.data.jenis_dokumen || 'Berita Acara Pelaporan (BAP)'}</td></tr>
+                                        <tr><td><strong>Jenis Dokumen</strong></td><td>: ${result.data.jenis_dokumen || 'BA Pemberangkatan'}</td></tr>
                                         <tr><td><strong>Nomor Surat</strong></td><td>: ${result.data.nomor_surat}</td></tr>
                                         <tr><td><strong>Nama Travel</strong></td><td>: ${result.data.nama_travel}</td></tr>
                                         <tr><td><strong>Status Dokumen</strong></td><td>: ${result.data.status_dokumen}</td></tr>
@@ -339,5 +355,7 @@
             }
         });
     </script>
+
+    @include('partials.kanwil-contact', ['variant' => 'footer-compact'])
 </body>
 </html>

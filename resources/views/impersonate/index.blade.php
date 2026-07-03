@@ -19,8 +19,8 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h4 class="card-title">Travel Users</h4>
-                <p class="card-title-desc">Click on a user to impersonate them and see the system from their perspective.</p>
+                <h4 class="card-title">Akun yang Dapat Di-impersonate</h4>
+                <p class="card-title-desc">Pilih user untuk melihat sistem dari perspektif role pimpinan, pengawas, kabupaten, atau travel.</p>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -28,16 +28,18 @@
                         <thead>
                             <tr>
                                 <th>No</th>
-                                <th>Username</th>
-                                <th>Name</th>
+                                <th>Nama</th>
                                 <th>Email</th>
-                                <th>Travel Company</th>
-                                <th>City</th>
+                                <th>Role</th>
+                                <th>Wilayah / Travel</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($users as $index => $user)
+                            @php
+                                $roleEnum = \App\Enums\UserRole::tryFromString($user->role);
+                            @endphp
                             <tr>
                                 <td>{{ $index + 1 }}</td>
                                 <td>
@@ -52,18 +54,24 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>{{ $user->nama }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>
-                                    <span class="badge {{ $user->getTravelCompanyBadgeClass() }}">
-                                        {{ $user->getTravelCompanyName() }}
-                                    </span>
+                                    <span class="badge bg-secondary">{{ $roleEnum?->label() ?? $user->role }}</span>
                                 </td>
-                                <td>{{ $user->city ?? 'N/A' }}</td>
                                 <td>
-                                    <a href="{{ route('impersonate.take', $user->id) }}" 
+                                    @if($user->role === \App\Enums\UserRole::User->value)
+                                        <span class="badge {{ $user->getTravelCompanyBadgeClass() }}">
+                                            {{ $user->getTravelCompanyName() }}
+                                        </span>
+                                        <small class="d-block text-muted mt-1">{{ $user->getKabupaten() }}</small>
+                                    @else
+                                        <span class="badge bg-success">{{ $user->getWilayahKerjaLabel() }}</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('impersonate.take', $user->id) }}"
                                        class="btn btn-primary btn-sm waves-effect waves-light"
-                                       onclick="return confirm('Are you sure you want to impersonate this user?')">
+                                       onclick="return confirmImpersonate(event, '{{ $user->nama }}')">
                                         <i class="bx bx-user-check me-1"></i>
                                         Impersonate
                                     </a>
@@ -71,10 +79,10 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="7" class="text-center">
+                                <td colspan="6" class="text-center">
                                     <div class="text-muted">
                                         <i class="bx bx-user-x font-size-24 mb-2"></i>
-                                        <p>No travel users found</p>
+                                        <p>Tidak ada user yang dapat di-impersonate</p>
                                     </div>
                                 </td>
                             </tr>
@@ -93,7 +101,7 @@
     <div class="container-fluid">
         <div class="row align-items-center">
             <div class="col-md-8">
-                <strong><i class="bx bx-user-check me-2"></i>You are currently impersonating: {{ auth()->user()->username }}</strong>
+                <strong><i class="bx bx-user-check me-2"></i>You are currently impersonating: {{ auth()->user()->nama }}</strong>
                 <small class="d-block">You can see the system from this user's perspective</small>
             </div>
             <div class="col-md-4 text-end">
@@ -114,7 +122,7 @@
     .impersonate-banner {
         animation: slideDown 0.3s ease-out;
     }
-    
+
     @keyframes slideDown {
         from {
             transform: translateY(-100%);
@@ -123,23 +131,23 @@
             transform: translateY(0);
         }
     }
-    
+
     .table th {
         background-color: #f8f9fa;
         border-color: #dee2e6;
         font-weight: 600;
     }
-    
+
     .avatar-xs {
         width: 32px;
         height: 32px;
         font-size: 14px;
         line-height: 32px;
     }
-    
+
     .badge {
         font-size: 11px;
         padding: 4px 8px;
     }
 </style>
-@endpush 
+@endpush

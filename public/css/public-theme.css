@@ -1,0 +1,684 @@
+/**
+ * PHU Public — minimal 2-tone system
+ * Putih + aksen Kemenhaj #e2a712 (CTA, link aktif, highlight)
+ */
+
+:root {
+  --phu-bg: #FFFFFF;
+  --phu-surface: #FFFFFF;
+  --phu-text: #333333;
+  --phu-text-muted: #666666;
+  --phu-accent: #e2a712;
+  --phu-accent-hover: #c8940e;
+  --phu-accent-soft: rgba(226, 167, 18, 0.12);
+  --phu-white: #FFFFFF;
+  --phu-border: #E5E5E5;
+  --phu-footer-bg: #2B2B2B;
+
+  --phu-heading-font: "Poppins", "Montserrat", sans-serif;
+  --phu-body-font: "Roboto", "Open Sans", sans-serif;
+  --phu-section-pad: min(5vw, 60px);
+  --phu-card-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  --phu-hover-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+
+  --background-color: var(--phu-bg);
+  --default-color: var(--phu-text);
+  --heading-color: var(--phu-text);
+  --accent-color: var(--phu-accent);
+  --surface-color: var(--phu-surface);
+  --contrast-color: var(--phu-white);
+  --nav-hover-color: var(--phu-accent);
+  --nav-dropdown-hover-color: var(--phu-accent);
+  --default-font: var(--phu-body-font);
+  --heading-font: var(--phu-heading-font);
+  --nav-font: var(--phu-body-font);
+  --primary-color: var(--phu-accent);
+  --secondary-color: var(--phu-accent);
+  --cta-color: var(--phu-accent);
+
+  --bs-primary: #e2a712;
+  --bs-primary-rgb: 226, 167, 18;
+  --bs-success: #e2a712;
+  --bs-success-rgb: 226, 167, 18;
+  --bs-info: #e2a712;
+  --bs-info-rgb: 226, 167, 18;
+  --bs-warning: #e2a712;
+  --bs-warning-rgb: 226, 167, 18;
+  --bs-body-bg: #FFFFFF;
+  --bs-body-color: #333333;
+  --bs-link-color: #e2a712;
+  --bs-link-hover-color: #c8940e;
+  --bs-border-color: #E5E5E5;
+}
+
+/* ── Base typography ─────────────────────────────────────────── */
+body {
+  background-color: var(--phu-bg) !important;
+  color: var(--phu-text);
+  font-family: var(--phu-body-font);
+  font-size: clamp(15px, 2vw, 16px);
+  line-height: 1.65;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--phu-heading-font);
+  font-weight: 700;
+  color: var(--phu-text);
+  line-height: 1.35;
+}
+
+h1 { font-size: clamp(28px, 4vw, 36px); }
+h2 { font-size: clamp(22px, 3vw, 28px); }
+h3 { font-size: clamp(18px, 2.5vw, 22px); }
+
+p, li { color: var(--phu-text); }
+
+a {
+  color: var(--phu-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+a:hover { color: var(--phu-accent-hover); }
+
+/* ── Bootstrap remap ─────────────────────────────────────────── */
+.text-primary, .text-success, .text-info { color: var(--phu-accent) !important; }
+.text-muted { color: var(--phu-text-muted) !important; }
+
+.btn-primary,
+.btn-success,
+.btn-get-started,
+.btn-phu-primary {
+  background-color: var(--phu-accent) !important;
+  border-color: var(--phu-accent) !important;
+  color: var(--phu-white) !important;
+  font-weight: 600;
+  font-size: clamp(14px, 2vw, 16px);
+  padding: 0.75em 1.5em;
+  border-radius: 8px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-get-started:hover,
+.btn-phu-primary:hover {
+  background-color: var(--phu-accent-hover) !important;
+  border-color: var(--phu-accent-hover) !important;
+  color: var(--phu-white) !important;
+}
+
+.btn-secondary {
+  background-color: #888 !important;
+  border-color: #888 !important;
+}
+
+.btn-card, .btn-outline-phu {
+  background: transparent !important;
+  color: var(--phu-accent) !important;
+  border: 1.5px solid var(--phu-accent) !important;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: clamp(13px, 1.8vw, 15px);
+  padding: 0.6em 1.2em;
+}
+
+.btn-card:hover, .btn-outline-phu:hover {
+  background: var(--phu-accent) !important;
+  color: var(--phu-white) !important;
+}
+
+.btn-outline-primary {
+  color: var(--phu-accent) !important;
+  border-color: var(--phu-accent) !important;
+  border-radius: 8px;
+}
+
+.btn-outline-primary:hover {
+  background: var(--phu-accent) !important;
+  color: var(--phu-white) !important;
+}
+
+.btn-check-travel, .btn-phu-cta {
+  background: transparent;
+  border: 2px solid var(--phu-white);
+  color: var(--phu-white);
+  padding: 0.75em 1.5em;
+  font-weight: 600;
+  border-radius: 8px;
+}
+
+.btn-check-travel:hover, .btn-phu-cta:hover {
+  background: var(--phu-accent) !important;
+  border-color: var(--phu-accent) !important;
+  color: var(--phu-white) !important;
+}
+
+.bg-light { background-color: #F7F7F7 !important; }
+
+/* ── Sections ────────────────────────────────────────────────── */
+section, .section,
+.contact.section, .about.section,
+.details.section, .calendar-section.section,
+.light-background, .stats-section.section, .informasi.section {
+  background-color: var(--phu-bg) !important;
+  color: var(--phu-text);
+  padding: var(--phu-section-pad) 0 !important;
+}
+
+.dark-background {
+  --background-color: var(--phu-footer-bg);
+  --default-color: var(--phu-white);
+  --heading-color: var(--phu-white);
+}
+
+/* ── Section titles — jelas untuk awam ───────────────────────── */
+.section-title { padding-bottom: min(4vw, 48px) !important; }
+
+.section-title h2 {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--phu-text-muted) !important;
+}
+
+.section-title h2::after {
+  background: var(--phu-accent) !important;
+}
+
+.section-title .description-title,
+.section-title div span:not(.description-title) {
+  font-family: var(--phu-heading-font);
+  font-size: clamp(22px, 3vw, 30px) !important;
+  font-weight: 700 !important;
+  color: var(--phu-text) !important;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.section-title p { color: var(--phu-text-muted); }
+
+/* ── Header ──────────────────────────────────────────────────── */
+.header {
+  --default-color: var(--phu-white);
+  --heading-color: var(--phu-white);
+  --nav-color: var(--phu-white);
+}
+
+.scrolled .header {
+  background: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.08);
+  --default-color: var(--phu-text);
+  --heading-color: var(--phu-text);
+  --nav-color: var(--phu-text);
+}
+
+.scrolled .header .navmenu a,
+.scrolled .header .navmenu a:focus {
+  color: var(--phu-text) !important;
+}
+
+.scrolled .header .site-logo {
+  filter: brightness(0) saturate(100%);
+}
+
+.navmenu a:hover, .navmenu .active { color: var(--phu-accent) !important; }
+.navmenu > ul > li > a:before { background-color: var(--phu-accent) !important; }
+
+/* ── Footer ──────────────────────────────────────────────────── */
+.footer.dark-background, .footer {
+  background-color: var(--phu-footer-bg) !important;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.footer a:hover { color: var(--phu-accent) !important; }
+
+/* ── Hero ────────────────────────────────────────────────────── */
+.hero {
+  background: #5a4208 !important;
+  padding: clamp(100px, 12vw, 140px) 0 clamp(60px, 8vw, 100px) 0 !important;
+  min-height: 70vh;
+}
+
+.hero::before,
+.hero:before {
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 2 !important;
+  background: linear-gradient(
+    125deg,
+    rgba(90, 62, 6, 0.92) 0%,
+    rgba(226, 167, 18, 0.78) 48%,
+    rgba(120, 86, 8, 0.88) 100%
+  ) !important;
+}
+
+.hero .hero-bg {
+  z-index: 1;
+}
+
+.hero .container,
+.hero .hero-waves {
+  position: relative;
+  z-index: 3;
+}
+
+.hero h1, .hero .hero-subtitle, .hero .hero-desc, .hero p {
+  color: var(--phu-white) !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.hero h1 {
+  font-size: clamp(28px, 4vw, 36px) !important;
+  line-height: 1.3 !important;
+}
+
+.hero-subtitle {
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.hero-desc { opacity: 0.92; font-size: clamp(15px, 2vw, 17px); }
+
+.hero .btn-get-started {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.hero .btn-check-travel {
+  border-color: rgba(255, 255, 255, 0.85);
+  color: var(--phu-white);
+}
+
+.hero .btn-check-travel:hover {
+  background: var(--phu-white) !important;
+  border-color: var(--phu-white) !important;
+  color: var(--phu-accent-hover) !important;
+}
+
+.hero .hero-waves .wave3 use {
+  fill: var(--phu-bg) !important;
+}
+
+/* ── Cards ───────────────────────────────────────────────────── */
+.phu-card, .icon-box, .travel-card, .filter-section,
+.stats-bar, .stats-summary, .no-results, .trust-intro,
+.event-popup, .year-select-content {
+  background: var(--phu-surface) !important;
+  border: 1px solid var(--phu-border) !important;
+  border-radius: 10px;
+  box-shadow: var(--phu-card-shadow);
+}
+
+/* ── 5 Pasti Umroh ───────────────────────────────────────────── */
+.about .phu-pasti-card {
+  padding: 1.5rem !important;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-left: 3px solid var(--phu-accent) !important;
+  border-top: none !important;
+  transition: box-shadow 0.2s ease;
+  overflow: hidden !important;
+}
+
+.about .phu-pasti-card::before { display: none !important; }
+.about .phu-pasti-card:hover { box-shadow: var(--phu-hover-shadow) !important; }
+
+.about .phu-pasti-card i,
+.about .phu-pasti-card:hover i {
+  width: auto !important;
+  height: auto !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--phu-accent) !important;
+  margin-bottom: 0 !important;
+  font-size: 1.2rem !important;
+}
+
+.phu-pasti-card__head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
+}
+
+.phu-pasti-card__num {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--phu-accent);
+  letter-spacing: 0.05em;
+}
+
+.phu-pasti-card__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: var(--phu-accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.about .phu-pasti-card h3 {
+  font-size: clamp(15px, 2vw, 17px) !important;
+  font-weight: 700 !important;
+  color: var(--phu-text) !important;
+  margin-bottom: 0.65rem !important;
+  line-height: 1.45 !important;
+}
+
+.about .phu-pasti-card p {
+  color: var(--phu-text-muted) !important;
+  font-size: clamp(14px, 1.9vw, 15px);
+  line-height: 1.65 !important;
+  margin: 0 !important;
+}
+
+/* ── Informasi boxes ─────────────────────────────────────────── */
+.icon-boxes .icon-box {
+  padding: 1.75rem !important;
+  border-left: 3px solid var(--phu-accent) !important;
+}
+
+.icon-boxes .icon-box::before { display: none !important; }
+
+.about .icon-boxes .icon-box i,
+.icon-boxes .icon-box i {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 8px !important;
+  background: var(--phu-accent-soft) !important;
+  border: none !important;
+  color: var(--phu-accent) !important;
+  font-size: 1.2rem !important;
+  margin-bottom: 0.85rem !important;
+}
+
+.about .icon-boxes .icon-box:hover i,
+.icon-boxes .icon-box:hover i {
+  background: var(--phu-accent-soft) !important;
+  color: var(--phu-accent) !important;
+}
+
+.icon-boxes .icon-box h3 {
+  font-size: clamp(16px, 2.2vw, 18px) !important;
+  color: var(--phu-text) !important;
+}
+
+.icon-boxes .icon-box p {
+  color: var(--phu-text-muted) !important;
+  font-size: clamp(14px, 1.9vw, 15px);
+  line-height: 1.65;
+}
+
+/* ── Stats ───────────────────────────────────────────────────── */
+.stats-bar { padding: min(4vw, 2rem) !important; }
+
+.stat-item {
+  background: var(--phu-bg);
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  padding: 1.25rem 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.stat-item:hover {
+  border-color: var(--phu-accent);
+  box-shadow: var(--phu-hover-shadow);
+}
+
+.stat-icon i, .stat-number { color: var(--phu-accent) !important; }
+.stat-label { color: var(--phu-text-muted); font-size: 0.85rem; font-weight: 500; }
+
+/* ── Contact / Pengaduan ─────────────────────────────────────── */
+.contact .info-item i {
+  color: var(--phu-accent) !important;
+  background: var(--phu-accent-soft) !important;
+  border: none !important;
+  width: 42px !important;
+  height: 42px !important;
+  border-radius: 8px !important;
+}
+
+.contact .info-item:hover i {
+  background: var(--phu-accent-soft) !important;
+  color: var(--phu-accent) !important;
+}
+
+.contact .info-item h3 { font-size: 0.95rem; font-weight: 600; }
+.contact .info-item p { color: var(--phu-text-muted); font-size: 0.9rem; }
+
+.phu-form-panel {
+  background: var(--phu-surface);
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  padding: min(4vw, 2rem);
+  box-shadow: var(--phu-card-shadow);
+}
+
+#pengaduanTab { border-bottom: 2px solid var(--phu-border); }
+
+#pengaduanTab .nav-link {
+  color: var(--phu-text-muted);
+  font-weight: 600;
+  font-size: clamp(14px, 2vw, 15px);
+  border: none;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  padding: 0.85rem 1.25rem;
+  background: transparent;
+}
+
+#pengaduanTab .nav-link:hover { color: var(--phu-text); }
+#pengaduanTab .nav-link.active {
+  color: var(--phu-accent) !important;
+  border-bottom-color: var(--phu-accent);
+  background: transparent !important;
+}
+
+/* ── Forms ───────────────────────────────────────────────────── */
+.form-control, .form-select {
+  background: var(--phu-surface) !important;
+  border: 1px solid var(--phu-border) !important;
+  border-radius: 8px;
+  color: var(--phu-text);
+  font-size: clamp(14px, 2vw, 16px);
+  padding: 0.7rem 1rem;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--phu-accent) !important;
+  box-shadow: 0 0 0 3px var(--phu-accent-soft) !important;
+}
+
+.contact .php-email-form input,
+.contact .php-email-form textarea,
+.contact .php-email-form select,
+.contact .php-email-form .form-control {
+  background: var(--phu-surface) !important;
+  border: 1px solid var(--phu-border) !important;
+  border-radius: 8px !important;
+}
+
+.contact .php-email-form input:focus,
+.contact .php-email-form textarea:focus,
+.contact .php-email-form .form-control:focus {
+  border-color: var(--phu-accent) !important;
+  box-shadow: 0 0 0 3px var(--phu-accent-soft) !important;
+}
+
+/* ── Tables ──────────────────────────────────────────────────── */
+.table {
+  --bs-table-bg: var(--phu-surface);
+  --bs-table-striped-bg: #FAFAFA;
+  --bs-table-hover-bg: var(--phu-accent-soft);
+}
+
+.table thead th {
+  background: #FAFAFA !important;
+  color: var(--phu-text);
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.table td .phu-table-link {
+  color: var(--phu-accent);
+  font-weight: 500;
+}
+
+/* ── Calendar ────────────────────────────────────────────────── */
+#calendar {
+  background: var(--phu-surface) !important;
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.fc .fc-button-primary {
+  background-color: var(--phu-accent) !important;
+  border-color: var(--phu-accent) !important;
+  border-radius: 6px !important;
+}
+
+.fc .fc-button-primary:hover,
+.fc .fc-button-primary:active,
+.fc .fc-button-primary.fc-button-active {
+  background-color: var(--phu-accent-hover) !important;
+  border-color: var(--phu-accent-hover) !important;
+}
+
+.fc .fc-daygrid-day-number { color: var(--phu-text-muted); text-decoration: none; }
+.fc .fc-col-header-cell-cushion { color: var(--phu-text); text-decoration: none; font-weight: 600; }
+
+.fc-event {
+  background-color: var(--phu-accent) !important;
+  border-color: var(--phu-accent-hover) !important;
+}
+
+.event-popup h3 {
+  color: var(--phu-text) !important;
+  border-bottom: 2px solid var(--phu-border);
+  padding-bottom: 0.75rem;
+}
+
+.detail-label { color: var(--phu-text-muted); font-size: 0.85rem; }
+.detail-label i { color: var(--phu-accent) !important; }
+
+/* ── Modal ───────────────────────────────────────────────────── */
+.modal-content {
+  background: var(--phu-surface) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  background: var(--phu-footer-bg) !important;
+  color: var(--phu-white) !important;
+  border-bottom: none;
+  border-radius: 0 !important;
+  margin: 0;
+  padding: 1rem 1.25rem;
+}
+
+.modal-header .modal-title,
+.modal-header h1,
+.modal-header h2,
+.modal-header h3,
+.modal-header h4,
+.modal-header h5,
+.modal-header h6,
+.modal-header i {
+  color: var(--phu-white) !important;
+}
+
+.modal-header .btn-close {
+  filter: brightness(0) invert(1);
+  opacity: 0.85;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+}
+
+.modal-body h3.text-primary,
+.modal-body h4.text-primary,
+.modal-body h6.text-primary { color: var(--phu-text) !important; }
+
+/* ── Travel list ───────────────────────────────────────────────── */
+.travel-card::before { background: var(--phu-accent); }
+
+.back-btn {
+  background: var(--phu-surface);
+  border: 1px solid var(--phu-border);
+  color: var(--phu-text);
+  border-radius: 8px;
+}
+
+.back-btn:hover {
+  background: var(--phu-accent);
+  color: var(--phu-white) !important;
+  border-color: var(--phu-accent);
+}
+
+.pagination .page-link { color: var(--phu-accent); }
+.pagination .page-link:hover,
+.pagination .page-item.active .page-link {
+  background-color: var(--phu-accent);
+  border-color: var(--phu-accent);
+  color: var(--phu-white);
+}
+
+.spinner-border.text-primary { color: var(--phu-accent) !important; }
+
+/* ── Details / Tentang PANTAU ────────────────────────────────── */
+.details .features-item h3 {
+  font-size: clamp(18px, 2.5vw, 22px);
+  color: var(--phu-text);
+  margin-bottom: 0.85rem;
+}
+
+.details .features-item p {
+  color: var(--phu-text-muted);
+  font-size: clamp(14px, 2vw, 16px);
+  line-height: 1.65;
+  margin-bottom: 1rem;
+}
+
+.details .features-item ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.details .features-item ul li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin-bottom: 0.65rem;
+  font-size: clamp(14px, 2vw, 15px);
+  line-height: 1.6;
+  color: var(--phu-text);
+}
+
+.details .features-item ul li i {
+  color: var(--phu-accent) !important;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+}
+
+/* ── Scroll top ────────────────────────────────────────────────── */
+.scroll-top {
+  background: var(--phu-accent) !important;
+}
+
+.scroll-top:hover {
+  background: var(--phu-accent-hover) !important;
+}

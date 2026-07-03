@@ -9,7 +9,7 @@ class AuditLogPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten'], true);
+        return in_array($user->role, ['admin', 'pengawas'], true);
     }
 
     public function view(User $user, AuditLog $auditLog): bool
@@ -18,7 +18,7 @@ class AuditLogPolicy
             return true;
         }
 
-        if ($user->role !== 'kabupaten') {
+        if ($user->role !== 'pengawas') {
             return false;
         }
 
@@ -27,12 +27,7 @@ class AuditLogPolicy
             return false;
         }
 
-        $kabupaten = $user->getKabupaten();
-
-        if ($actor->kabupaten === $kabupaten) {
-            return true;
-        }
-
-        return $actor->travel?->kab_kota === $kabupaten;
+        return $user->canAccessKabupaten($actor->kabupaten)
+            || $user->canAccessKabupaten($actor->travel?->kab_kota);
     }
 }

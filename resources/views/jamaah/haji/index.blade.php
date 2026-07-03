@@ -565,7 +565,7 @@
         printWindow.document.write(`
             <html>
                 <head>
-                    <title>Data Jamaah Haji - Print</title>
+                    <title>Data Jamaah Haji Cetak</title>
                     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
                 </head>
                 <body>

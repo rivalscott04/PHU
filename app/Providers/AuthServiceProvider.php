@@ -18,6 +18,7 @@ class AuthServiceProvider extends ServiceProvider
         \App\Models\Followup::class => \App\Policies\FollowupPolicy::class,
         \App\Models\RiskScore::class => \App\Policies\RiskPolicy::class,
         \App\Models\AuditLog::class => \App\Policies\AuditLogPolicy::class,
+        \App\Models\SupervisionWorkQueue::class => \App\Policies\WorkQueuePolicy::class,
     ];
 
     /**

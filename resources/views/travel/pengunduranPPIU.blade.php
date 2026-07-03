@@ -18,6 +18,12 @@
         </div>
     @endif
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('pengunduran'))
+        <div class="container-fluid px-0">
+            @include('partials.workflow-guide', ['guide' => $guide])
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card">

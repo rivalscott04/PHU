@@ -24,7 +24,7 @@
                 <h4 class="mb-1 fw-semibold">Risk Score</h4>
                 <p class="text-muted mb-0">
                     @if(auth()->user()->role === 'kabupaten')
-                        Prioritas risiko travel di wilayah {{ auth()->user()->getKabupaten() }} (baca saja)
+                        Prioritas risiko travel di wilayah {{ auth()->user()->getWilayahKerjaLabel() }} (baca saja)
                     @elseif(auth()->user()->role === 'user')
                         Skor risiko perusahaan Anda
                     @else
@@ -49,6 +49,10 @@
     </div>
 
     @include('v2.partials.wilayah-scope')
+
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_risk'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
 
     @include('v2.partials.kpi-cards', ['cards' => $cards, 'id' => 'risk-kpi'])
 
@@ -93,7 +97,7 @@
                                         {{ $riskLabels[$level] ?? $level }}
                                     </span>
                                 </td>
-                                <td class="text-muted">{{ optional($risk->last_calculated_at)->format('d M Y, H:i') ?? '—' }}</td>
+                                <td class="text-muted">{{ optional($risk->last_calculated_at)->format('d M Y, H:i') ?? 'Tidak ada' }}</td>
                                 <td class="text-end pe-3">
                                     <a href="{{ route('v2.risk.show', $risk->travel_id) }}" class="btn btn-sm btn-outline-primary">
                                         Detail

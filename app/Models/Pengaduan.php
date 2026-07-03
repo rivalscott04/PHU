@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Pengaduan extends Model
 {
@@ -11,6 +12,7 @@ class Pengaduan extends Model
     protected $table = 'pengaduan';
 
     protected $fillable = [
+        'public_token',
         'nama_pengadu',
         'travels_id',
         'hal_aduan',
@@ -25,6 +27,30 @@ class Pengaduan extends Model
     protected $casts = [
         'completed_at' => 'datetime',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (self $model): void {
+            if (! $model->public_token) {
+                $model->public_token = (string) Str::uuid();
+            }
+        });
+    }
+
+    public static function findByPublicToken(string $token): self
+    {
+        return static::query()->where('public_token', $token)->firstOrFail();
+    }
+
+    public function getPublicViewUrl(): string
+    {
+        return route('pengaduan.public', $this->public_token);
+    }
+
+    public function getPublicDownloadUrl(): string
+    {
+        return route('pengaduan.download-pdf.public', $this->public_token);
+    }
 
     public function travel()  // Note: singular form, not 'travels'
     {

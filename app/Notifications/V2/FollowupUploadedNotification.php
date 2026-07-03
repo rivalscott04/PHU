@@ -22,7 +22,7 @@ class FollowupUploadedNotification extends V2DatabaseNotification
             'message' => "{$travel?->Penyelenggara} mengunggah bukti tindak lanjut untuk temuan \"{$finding?->title}\".",
             'module' => 'followup',
             'action' => 'uploaded',
-            'url' => route('v2.followup.show', $this->followup),
+            'url' => $this->actionUrl('v2.followup.show', $this->followup),
             'meta' => [
                 'followup_id' => $this->followup->id,
                 'finding_id' => $finding?->id,

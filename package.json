@@ -2,9 +2,15 @@
     "private": true,
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "vite build",
+        "e2e:install": "playwright install chromium",
+        "e2e": "playwright test e2e/journey --config=e2e/playwright.config.ts",
+        "e2e:matrix": "playwright test e2e/role-login.spec.ts e2e/role-pages.spec.ts --config=e2e/playwright.config.ts",
+        "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
+        "e2e:prepare": "bash scripts/e2e-prepare.sh"
     },
     "devDependencies": {
+        "@playwright/test": "^1.49.0",
         "axios": "^1.1.2",
         "laravel-vite-plugin": "^0.7.2",
         "vite": "^4.0.0"

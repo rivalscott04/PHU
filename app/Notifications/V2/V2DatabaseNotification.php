@@ -18,6 +18,12 @@ abstract class V2DatabaseNotification extends Notification
     /** @return array<string, mixed> */
     abstract protected function payload(object $notifiable): array;
 
+    /** @param  array<string, mixed>|int|string  $parameters */
+    protected function actionUrl(string $name, mixed $parameters = []): string
+    {
+        return route($name, $parameters, absolute: false);
+    }
+
     /** @return array<string, mixed> */
     public function toArray(object $notifiable): array
     {

@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Inspection;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -33,8 +34,8 @@ class InspectionRepository
             ->when(isset($filters['travel_id']), fn ($q) => $q->where('travel_id', $filters['travel_id']))
             ->when(isset($filters['status']), fn ($q) => $q->where('status', $filters['status']))
             ->when(isset($filters['inspection_type']), fn ($q) => $q->where('inspection_type', $filters['inspection_type']))
-            ->when(isset($filters['kabupaten']), function ($q) use ($filters) {
-                $q->whereHas('travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten']));
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters);
             })
             ->when(isset($filters['date_from']), fn ($q) => $q->whereDate('inspection_date', '>=', $filters['date_from']))
             ->when(isset($filters['date_to']), fn ($q) => $q->whereDate('inspection_date', '<=', $filters['date_to']))
@@ -58,8 +59,8 @@ class InspectionRepository
             ->when(isset($filters['travel_id']), fn ($q) => $q->where('travel_id', $filters['travel_id']))
             ->when(isset($filters['status']), fn ($q) => $q->where('status', $filters['status']))
             ->when(isset($filters['inspection_type']), fn ($q) => $q->where('inspection_type', $filters['inspection_type']))
-            ->when(isset($filters['kabupaten']), function ($q) use ($filters) {
-                $q->whereHas('travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten']));
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters);
             })
             ->when(isset($filters['date_from']), fn ($q) => $q->whereDate('inspection_date', '>=', $filters['date_from']))
             ->when(isset($filters['date_to']), fn ($q) => $q->whereDate('inspection_date', '<=', $filters['date_to']))

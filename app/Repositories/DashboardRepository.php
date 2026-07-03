@@ -116,7 +116,7 @@ class DashboardRepository
                     'at' => $inspection->created_at,
                     'type' => 'pengawasan',
                     'title' => 'Pengawasan dibuat',
-                    'description' => "{$inspection->travel?->Penyelenggara} — {$inspection->inspection_no}",
+                    'description' => "{$inspection->travel?->Penyelenggara}, {$inspection->inspection_no}",
                     'url' => route('v2.pengawasan.show', $inspection),
                 ]);
             });
@@ -133,7 +133,7 @@ class DashboardRepository
                         'at' => $followup->submitted_at ?? $followup->created_at,
                         'type' => 'followup',
                         'title' => 'Tindak lanjut diunggah',
-                        'description' => $followup->finding?->inspection?->travel?->Penyelenggara.' — '.$followup->finding?->title,
+                        'description' => $followup->finding?->inspection?->travel?->Penyelenggara.', '.$followup->finding?->title,
                         'url' => route('v2.followup.show', $followup),
                     ]);
                 });
@@ -342,7 +342,7 @@ class DashboardRepository
         $regions = [];
 
         foreach (\App\Support\NtbKabupatenMap::centroids() as $kabupaten => $coords) {
-            if ($filter->kabupaten && $filter->kabupaten !== $kabupaten) {
+            if (! $filter->matchesKabupaten($kabupaten)) {
                 continue;
             }
 
@@ -366,7 +366,9 @@ class DashboardRepository
     private function travelQuery(DashboardFilter $filter): Builder
     {
         return TravelCompany::query()
-            ->when($filter->kabupaten, fn ($q) => $q->where('kab_kota', $filter->kabupaten))
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q);
+            })
             ->when($filter->jenisTravel, fn ($q) => $q->where('Status', $filter->jenisTravel))
             ->when($filter->travelId, fn ($q) => $q->where('id', $filter->travelId));
     }
@@ -524,7 +526,9 @@ class DashboardRepository
     {
         $rows = Inspection::query()
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
-            ->when($filter->kabupaten, fn ($q) => $q->where('travels.kab_kota', $filter->kabupaten))
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
             ->when($filter->travelId, fn ($q) => $q->where('pengawasan.travel_id', $filter->travelId))
             ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
             ->groupBy('travels.kab_kota')
@@ -562,7 +566,9 @@ class DashboardRepository
     {
         return RiskScore::query()
             ->join('travels', 'travels.id', '=', 'risk_scores.travel_id')
-            ->when($filter->kabupaten, fn ($q) => $q->where('travels.kab_kota', $filter->kabupaten))
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
             ->when($filter->travelId, fn ($q) => $q->where('risk_scores.travel_id', $filter->travelId))
             ->when($filter->riskLevel, fn ($q) => $q->where('risk_scores.risk_level', $filter->riskLevel))
             ->select('risk_scores.*', 'travels.Penyelenggara as travel_name')
@@ -654,7 +660,9 @@ class DashboardRepository
     {
         return Inspection::query()
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
-            ->when($filter->kabupaten, fn ($q) => $q->where('travels.kab_kota', $filter->kabupaten))
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
             ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
             ->groupBy('travels.kab_kota')
             ->orderByDesc('total')

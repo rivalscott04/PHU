@@ -78,6 +78,7 @@ class AuditLogNarrator
         return match ($user->role) {
             'admin' => 'Admin Kanwil',
             'kabupaten' => 'Admin Kabupaten',
+            'pengawas' => 'Pengawas',
             'user' => 'Penyelenggara Travel',
             default => 'Pengguna',
         };

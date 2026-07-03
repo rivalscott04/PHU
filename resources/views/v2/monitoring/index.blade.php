@@ -43,6 +43,10 @@
         </div>
     </div>
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_monitoring'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     @include('v2.partials.kpi-cards', ['cards' => $cards, 'id' => 'monitoring-kpi'])
 
     <div class="row">
@@ -87,7 +91,7 @@
                                                     {{ $riskLabels[$risk] ?? $risk }}
                                                 </span>
                                             @else
-                                                <span class="text-muted">—</span>
+                                                <span class="text-muted">Tidak ada</span>
                                             @endif
                                         </td>
                                     </tr>

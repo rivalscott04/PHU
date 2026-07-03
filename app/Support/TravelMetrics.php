@@ -11,6 +11,7 @@ use App\Models\JamaahHajiKhusus;
 use App\Models\Pengaduan;
 use App\Models\RiskScore;
 use App\Models\TravelCompany;
+use App\Support\SchemaTables;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -35,7 +36,7 @@ class TravelMetrics
     /** @param  Collection<int, int>|Builder  $travelScope */
     public static function activeFindingsCount(Collection|Builder $travelScope): int
     {
-        if (! Schema::hasTable('pengawasan_temuan')) {
+        if (! SchemaTables::has('pengawasan_temuan')) {
             return 0;
         }
 

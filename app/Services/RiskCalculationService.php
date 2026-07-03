@@ -22,6 +22,7 @@ class RiskCalculationService
     public function __construct(
         private readonly RiskRepository $riskRepository,
         private readonly AuditLogService $auditLogService,
+        private readonly WorkQueueService $workQueueService,
     ) {
     }
 
@@ -49,7 +50,10 @@ class RiskCalculationService
                 );
             }
 
-            return $riskScore->fresh(['travel']);
+            $riskScore = $riskScore->fresh(['travel']);
+            $this->workQueueService->handleRiskScoreUpdated($riskScore);
+
+            return $riskScore;
         });
     }
 
@@ -97,10 +101,10 @@ class RiskCalculationService
     public function getRecommendation(string $riskLevel): string
     {
         return match ($riskLevel) {
-            RiskLevel::Low->value, 'LOW' => 'Monitoring normal — tidak perlu tindakan khusus.',
+            RiskLevel::Low->value, 'LOW' => 'Monitoring normal, tidak perlu tindakan khusus.',
             RiskLevel::Medium->value, 'MEDIUM' => 'Masukkan ke monitoring intensif.',
             RiskLevel::High->value, 'HIGH' => 'Jadwalkan pengawasan dalam waktu dekat.',
-            RiskLevel::Critical->value, 'CRITICAL' => 'Prioritas pengawasan — tindakan segera diperlukan.',
+            RiskLevel::Critical->value, 'CRITICAL' => 'Prioritas pengawasan, tindakan segera diperlukan.',
             default => 'Monitoring normal.',
         };
     }

@@ -23,6 +23,7 @@ class FollowupService
         private readonly AuditLogService $auditLogService,
         private readonly RiskCalculationService $riskCalculationService,
         private readonly NotificationService $notificationService,
+        private readonly WorkQueueService $workQueueService,
     ) {
     }
 
@@ -103,6 +104,7 @@ class FollowupService
                     $travel,
                     new FollowupUploadedNotification($followup)
                 );
+                $this->workQueueService->handleFollowupSubmitted($followup);
             }
 
             DashboardCache::flush();
@@ -155,6 +157,7 @@ class FollowupService
             );
 
             $updated = $updated->fresh(['finding.inspection', 'logs']);
+            $this->workQueueService->resolveFollowupQueue($updated);
             $this->notificationService->notifyTravelUsers(
                 $travelId,
                 new FollowupApprovedNotification($updated)

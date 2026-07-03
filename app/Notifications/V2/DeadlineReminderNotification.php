@@ -23,7 +23,7 @@ class DeadlineReminderNotification extends V2DatabaseNotification
             'message' => $this->message($travel?->Penyelenggara, $deadline),
             'module' => 'followup',
             'action' => 'reminder',
-            'url' => route('v2.pengawasan.show', $this->finding->inspection_id),
+            'url' => $this->actionUrl('v2.pengawasan.show', $this->finding->inspection_id),
             'meta' => [
                 'finding_id' => $this->finding->id,
                 'travel_id' => $travel?->id,

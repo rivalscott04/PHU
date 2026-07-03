@@ -19,10 +19,14 @@ class TravelAccess
             return;
         }
 
+        if ($user->role === 'pengawas' && $user->canAccessKabupaten($travel->kab_kota)) {
+            return;
+        }
+
         if ($user->role === 'user' && $user->travel_id === $travel->id) {
             return;
         }
 
-        abort(403);
+        abort(404);
     }
 }

@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Laravel'),
+    'name' => env('APP_NAME', 'PANTAU'),
 
     /*
     |--------------------------------------------------------------------------
@@ -212,5 +212,21 @@ return [
     'aliases' => Facade::defaultAliases()->merge([
         // 'ExampleClass' => App\Example\ExampleClass::class,
     ])->toArray(),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kanwil NTB — kontak resmi (sumber tunggal untuk halaman publik & surat)
+    |--------------------------------------------------------------------------
+    */
+    'kanwil' => [
+        'short_name' => 'Kanwil KemenHaj NTB',
+        'office_name' => 'Kantor Wilayah Kementerian Haji Provinsi NTB',
+        'address' => 'Jl. Majapahit No. 56, Mataram',
+        'phone' => '0370-123456',
+        'email' => 'ntb@kemenhaj.go.id',
+        'letterhead_ministry' => 'KEMENTERIAN HAJI DAN UMROH REPUBLIK INDONESIA',
+        'letterhead_office' => 'KANTOR WILAYAH KEMENTERIAN HAJI DAN UMROH',
+        'letterhead_province' => 'PROVINSI NUSA TENGGARA BARAT',
+    ],
 
 ];

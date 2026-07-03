@@ -3,13 +3,20 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            @include('partials.bap-module-info', ['variant' => 'pemberangkatan'])
+            @if($guide = \App\Support\RoleWorkflowGuide::for('bap_list'))
+                @include('partials.workflow-guide', ['guide' => $guide])
+            @endif
             <div class="card">
                 <div class="card-header ps-0 d-flex justify-content-between align-items-center">
-                    <h6>Data Pengajuan</h6>
+                    <div>
+                        <h6 class="mb-0">BA Pemberangkatan</h6>
+                        <small class="text-muted">Daftar pengajuan keberangkatan jamaah</small>
+                    </div>
                     <div>
                         @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                             <a href="{{ route('verify-e-sign') }}" class="btn btn-info me-2">
-                                <i class="bx bx-qr-scan me-1"></i>Verifikasi E-Sign
+                                <i class="bx bx-qr-scan me-1"></i>Verifikasi E Sign
                             </a>
                         @endif
                         <a href="{{ route('form.bap') }}" onclick="return checkJamaah({{ $jamaahCount }});"

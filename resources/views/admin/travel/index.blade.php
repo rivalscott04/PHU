@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @if($guide = \App\Support\RoleWorkflowGuide::for('travel_master'))
+        <div class="container-fluid px-0 mb-3">
+            @include('partials.workflow-guide', ['guide' => $guide])
+        </div>
+    @endif
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -147,7 +152,7 @@
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div id="resultsInfo" class="text-muted">
                                         <i class="bx bx-info-circle me-1"></i>
-                                        Menampilkan {{ $travelUsers->firstItem() ?? 0 }} - {{ $travelUsers->lastItem() ?? 0 }} 
+                                        Menampilkan {{ $travelUsers->firstItem() ?? 0 }} sampai {{ $travelUsers->lastItem() ?? 0 }} 
                                         dari {{ $travelUsers->total() }} data
                                     </div>
                                     <div id="activeFilters" class="text-muted" style="display: none;">
@@ -272,7 +277,7 @@
                             @if($travelUsers->hasPages())
                             <div class="d-flex justify-content-between align-items-center px-3 py-3">
                                 <div class="text-muted">
-                                    Menampilkan {{ $travelUsers->firstItem() ?? 0 }} - {{ $travelUsers->lastItem() ?? 0 }} 
+                                    Menampilkan {{ $travelUsers->firstItem() ?? 0 }} sampai {{ $travelUsers->lastItem() ?? 0 }} 
                                     dari {{ $travelUsers->total() }} data
                                 </div>
                                 <div>
@@ -408,7 +413,6 @@
 @endpush
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Real-time search and filter functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -457,7 +461,7 @@
                 const info = data.pagination_info;
                 resultsInfo.innerHTML = `
                     <i class="bx bx-info-circle me-1"></i>
-                    Menampilkan ${info.from || 0} - ${info.to || 0} 
+                    Menampilkan ${info.from || 0} sampai ${info.to || 0} 
                     dari ${info.total} data
                 `;
             }
@@ -617,45 +621,6 @@
             // Initialize sort indicators
             updateSortIndicators();
         });
-
-        // Existing functions for modals and confirmations
-        function confirmImpersonate(event, username) {
-            event.preventDefault();
-            
-            Swal.fire({
-                title: "Impersonate User?",
-                text: `Anda akan masuk sebagai ${username}. Anda dapat melihat sistem dari perspektif user ini.`,
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#34c38f",
-                cancelButtonColor: "#f46a6a",
-                confirmButtonText: "Ya, impersonate!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = event.target.href;
-                }
-            });
-            
-            return false;
-        }
-
-        function confirmDelete(userId, username) {
-            Swal.fire({
-                title: "Apakah Anda yakin?",
-                text: `User ${username} akan dihapus secara permanen!`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#f46a6a",
-                cancelButtonColor: "#34c38f",
-                confirmButtonText: "Ya, hapus!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`delete-form-${userId}`).submit();
-                }
-            });
-        }
 
         @if(session('success'))
             Swal.fire({

@@ -68,7 +68,6 @@
 @endsection
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function confirmResetPassword(userId) {
             Swal.fire({
@@ -85,28 +84,6 @@
                     document.getElementById(`reset-password-form-${userId}`).submit();
                 }
             });
-        }
-
-        function confirmImpersonate(event, username) {
-            event.preventDefault(); // Prevent default link behavior
-            
-            Swal.fire({
-                title: "Impersonate User?",
-                text: `Anda akan masuk sebagai ${username}. Anda dapat melihat sistem dari perspektif user ini.`,
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#28a745",
-                cancelButtonColor: "#6c757d",
-                confirmButtonText: "Ya, Impersonate!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Navigate to impersonate URL
-                    window.location.href = event.target.href;
-                }
-            });
-            
-            return false; // Prevent default behavior
         }
     </script>
 @endpush

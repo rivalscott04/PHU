@@ -5,7 +5,8 @@
                 <script>
                     document.write(new Date().getFullYear());
                 </script>
-                © Kanwil Kementerian Haji NTB.
+                © {{ config('app.kanwil.short_name') }}.<br>
+                <span class="text-muted">{{ config('app.kanwil.address') }}</span>
             </div>
             <div class="col-sm-6">
                 <div class="text-sm-end d-none d-sm-block">

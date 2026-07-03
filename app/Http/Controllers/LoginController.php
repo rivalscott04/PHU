@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AuditLogService;
 use App\Models\User;
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -49,16 +50,13 @@ class LoginController extends Controller
             Auth::login($user);
             $this->auditLogService->log('auth', 'login', 'masuk ke sistem', $user->id);
 
-            if ($user->role === 'user') {
-                return redirect()->route('home');
-            } elseif ($user->role === 'kabupaten') {
-                return redirect()->route('home');
-            } elseif ($user->role === 'admin') {
-                return redirect()->route('home');
-            }
-
-            // Default redirect untuk role lainnya
-            return redirect()->intended('dashboard');
+            return match ($user->role) {
+                UserRole::User->value, UserRole::Kabupaten->value => redirect()->route('home'),
+                UserRole::Pengawas->value => redirect()->route('v2.antrian.index'),
+                UserRole::Pimpinan->value => redirect()->route('v2.dashboard'),
+                UserRole::Admin->value => redirect()->route('home'),
+                default => redirect()->intended('dashboard'),
+            };
         }
 
         return redirect()->back()->withErrors(['email_or_phone' => 'Email/nomor HP atau password salah.']);

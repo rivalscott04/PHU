@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pengaduan;
+use App\Services\WorkQueueService;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use PDF;
 
 class PengaduanController extends Controller
 {
+    public function __construct(
+        private readonly WorkQueueService $workQueueService,
+    ) {
+    }
+
     public function create()
     {
         $user = auth()->user();
@@ -41,13 +47,15 @@ class PengaduanController extends Controller
             $berkasPath = $request->file('berkas_aduan')->store('berkas_aduan', 'public');
         }
 
-        Pengaduan::create([
+        $pengaduan = Pengaduan::create([
             'nama_pengadu' => $request->nama_pengadu,
             'travels_id' => $request->travels_id,
             'hal_aduan' => $request->hal_aduan,
             'berkas_aduan' => $berkasPath,
             'status' => 'pending',
         ]);
+
+        $this->workQueueService->handlePengaduanCreated($pengaduan);
 
         return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
     }
@@ -69,13 +77,15 @@ class PengaduanController extends Controller
             $berkasPath = $request->file('berkas_aduan')->store('berkas_aduan', 'public');
         }
 
-        Pengaduan::create([
+        $pengaduan = Pengaduan::create([
             'nama_pengadu' => $request->nama_pengadu,
             'travels_id' => $request->travels_id,
             'hal_aduan' => $request->hal_aduan,
             'berkas_aduan' => $berkasPath,
             'status' => 'pending',
         ]);
+
+        $this->workQueueService->handlePengaduanCreated($pengaduan);
 
         return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
     }
@@ -137,6 +147,10 @@ class PengaduanController extends Controller
             'admin_notes' => $request->admin_notes ?? '',
             'processed_by' => auth()->id(),
         ]);
+
+        if (in_array($request->status, ['completed', 'rejected'], true)) {
+            $this->workQueueService->handlePengaduanResolved($pengaduan);
+        }
 
         // If status is completed, generate PDF
         if ($request->status === 'completed') {
@@ -201,12 +215,12 @@ class PengaduanController extends Controller
     /**
      * Public view for completed pengaduan
      */
-    public function publicView($id)
+    public function publicView(string $token)
     {
-        $pengaduan = Pengaduan::with('travel')->findOrFail($id);
+        $pengaduan = Pengaduan::with('travel')->where('public_token', $token)->firstOrFail();
         
         if ($pengaduan->status !== 'completed') {
-            abort(404, 'Pengaduan belum selesai diproses.');
+            abort(404);
         }
 
         return view('pengaduan.public-detail', compact('pengaduan'));
@@ -218,9 +232,10 @@ class PengaduanController extends Controller
     public function getCompletedPengaduan()
     {
         try {
-            $completedPengaduan = Pengaduan::with('travel')
+            $completedPengaduan = Pengaduan::with(['travel:id,Penyelenggara'])
+                ->select('id', 'travels_id', 'hal_aduan', 'completed_at', 'public_token')
                 ->where('status', 'completed')
-                ->orderBy('completed_at', 'desc')
+                ->orderByDesc('completed_at')
                 ->get();
 
             return response()->json($completedPengaduan);
@@ -236,25 +251,25 @@ class PengaduanController extends Controller
     /**
      * Public download PDF for completed pengaduan (no authentication required)
      */
-    public function downloadPDFPublic($id)
+    public function downloadPDFPublic(string $token)
     {
-        $pengaduan = Pengaduan::with('travel')->findOrFail($id);
+        $pengaduan = Pengaduan::with('travel')->where('public_token', $token)->firstOrFail();
         
         if ($pengaduan->status !== 'completed') {
-            abort(404, 'PDF hanya tersedia untuk pengaduan yang telah selesai.');
+            abort(404);
         }
 
         if (!$pengaduan->pdf_output) {
-            abort(404, 'PDF belum tersedia.');
+            abort(404);
         }
 
         $path = storage_path('app/public/' . $pengaduan->pdf_output);
         
         if (!file_exists($path)) {
-            abort(404, 'File PDF tidak ditemukan.');
+            abort(404);
         }
 
-        $filename = 'pengaduan_' . $pengaduan->id . '_' . date('Y-m-d') . '.pdf';
+        $filename = 'pengaduan_' . $pengaduan->public_token . '_' . date('Y-m-d') . '.pdf';
         
         return response()->download($path, $filename, [
             'Content-Type' => 'application/pdf',

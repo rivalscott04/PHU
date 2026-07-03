@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Models\TravelCompany;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class TravelCapabilityService
@@ -15,8 +17,7 @@ class TravelCapabilityService
         $user = Auth::user();
         $menus = [];
 
-        // Admin has access to all menus
-        if ($user->role === 'admin') {
+        if ($user->role === UserRole::Admin->value) {
             $menus = [
                 'dashboard' => true,
                 'jamaah_umrah' => true,
@@ -28,39 +29,65 @@ class TravelCapabilityService
                 'travel_management' => true,
                 'cabang_travel' => true,
                 'user_management' => true,
-                'sertifikat' => true, // Admin can create certificates
+                'sertifikat' => true,
             ];
-        } else if ($user->role === 'kabupaten') {
-            // Kabupaten has limited access
+        } elseif ($user->role === UserRole::Kabupaten->value) {
             $menus = [
                 'dashboard' => true,
                 'jamaah_umrah' => false,
                 'jamaah_haji_khusus' => false,
-                'bap' => true, // Kabupaten can access BAP
+                'bap' => true,
                 'pengaduan' => false,
                 'keberangkatan' => true,
                 'pengunduran' => true,
                 'travel_management' => false,
                 'cabang_travel' => true,
-                'user_management' => false, // Kabupaten cannot manage users
-                'sertifikat' => true, // Kabupaten can access certificates for impersonation testing
+                'user_management' => false,
+                'sertifikat' => true,
             ];
-        } else if ($user->role === 'user') {
-            // Travel user - check based on travel company capabilities
+        } elseif ($user->role === UserRole::Pengawas->value) {
+            $menus = [
+                'dashboard' => false,
+                'jamaah_umrah' => false,
+                'jamaah_haji_khusus' => false,
+                'bap' => false,
+                'pengaduan' => false,
+                'keberangkatan' => false,
+                'pengunduran' => false,
+                'travel_management' => false,
+                'cabang_travel' => false,
+                'user_management' => false,
+                'sertifikat' => false,
+            ];
+        } elseif ($user->role === UserRole::Pimpinan->value) {
+            $menus = [
+                'dashboard' => false,
+                'jamaah_umrah' => false,
+                'jamaah_haji_khusus' => false,
+                'bap' => false,
+                'pengaduan' => false,
+                'keberangkatan' => false,
+                'pengunduran' => false,
+                'travel_management' => false,
+                'cabang_travel' => false,
+                'user_management' => false,
+                'sertifikat' => false,
+            ];
+        } elseif ($user->role === UserRole::User->value) {
             $travel = $user->travel;
-            
+
             $menus = [
                 'dashboard' => true,
                 'jamaah_umrah' => $travel ? $travel->canHandleUmrah() : false,
                 'jamaah_haji_khusus' => $travel ? $travel->canHandleHajiKhusus() : false,
-                'bap' => true, // Travel users always have access to BAP
-                'pengaduan' => false, // Travel users cannot access pengaduan
+                'bap' => true,
+                'pengaduan' => false,
                 'keberangkatan' => true,
                 'pengunduran' => true,
                 'travel_management' => false,
                 'cabang_travel' => false,
                 'user_management' => false,
-                'sertifikat' => false, // Travel users cannot create certificates
+                'sertifikat' => false,
             ];
         }
 
@@ -73,6 +100,7 @@ class TravelCapabilityService
     public static function canAccess($feature)
     {
         $menus = self::getAvailableMenus();
+
         return $menus[$feature] ?? false;
     }
 
@@ -99,8 +127,8 @@ class TravelCapabilityService
     public static function getTravelTypeOptions()
     {
         return [
-            'PPIU' => 'PPIU - Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)',
-            'PIHK' => 'PIHK - Penyelenggara Ibadah Haji Khusus (Haji & Umrah)',
+            'PPIU' => 'PPIU: Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)',
+            'PIHK' => 'PIHK: Penyelenggara Ibadah Haji Khusus (Haji & Umrah)',
         ];
     }
 
@@ -123,18 +151,15 @@ class TravelCapabilityService
     {
         $errors = [];
 
-        // PPIU can only do Umrah
         if ($status === 'PPIU' && $canHaji) {
             $errors[] = 'PPIU travel companies can only handle Umrah services.';
         }
 
-        // PIHK can do both Haji and Umrah
-        if ($status === 'PIHK' && !$canHaji) {
+        if ($status === 'PIHK' && ! $canHaji) {
             $errors[] = 'PIHK travel companies must be able to handle Haji services.';
         }
 
-        // Must have at least one service
-        if (!$canHaji && !$canUmrah) {
+        if (! $canHaji && ! $canUmrah) {
             $errors[] = 'Travel company must be able to handle at least one service (Haji or Umrah).';
         }
 
@@ -147,119 +172,61 @@ class TravelCapabilityService
     public static function getSidebarMenus()
     {
         $user = Auth::user();
-        $menus = [];
 
-        // Dashboard
-        $menus[] = [
-            'name' => 'Dashboard',
+        return match ($user->role) {
+            UserRole::Pimpinan->value => self::pimpinanSidebarMenus(),
+            UserRole::Pengawas->value => self::pengawasSidebarMenus(),
+            UserRole::User->value => self::travelSidebarMenus($user),
+            UserRole::Kabupaten->value => self::kabupatenSidebarMenus(),
+            default => self::adminSidebarMenus(),
+        };
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function pimpinanSidebarMenus(): array
+    {
+        return [[
+            'name' => 'Ringkasan Eksekutif',
+            'icon' => 'bx bx-bar-chart-alt-2',
+            'hasSubmenu' => true,
+            'items' => [
+                ['name' => 'Dashboard Pengawasan', 'route' => 'v2.dashboard', 'visible' => true],
+                ['name' => 'Monitoring PPIU', 'route' => 'v2.monitoring.index', 'visible' => true],
+            ],
+        ]];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function pengawasSidebarMenus(): array
+    {
+        return [[
+            'name' => 'Pengawasan Digital',
+            'icon' => 'bx bx-analyse',
+            'hasSubmenu' => true,
+            'groups' => self::pengawasanGroups(forPengawas: true, forAdmin: false, forTravel: false),
+        ]];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function travelSidebarMenus(User $user): array
+    {
+        $menus = [[
+            'name' => 'Beranda',
             'route' => 'home',
             'icon' => 'bx bx-home-circle',
-            'badge' => '04',
             'visible' => true,
-        ];
+        ]];
 
-        // Master Data (Admin only)
-        if ($user->role === 'admin') {
-            $menus[] = [
-                'name' => 'Master Data',
-                'icon' => 'bx bx-data',
-                'hasSubmenu' => true,
-                'items' => [
-                                           [
-                           'name' => 'Data PPIU Pusat',
-                           'route' => 'travel',
-                           'icon' => 'bx bxs-plane-alt',
-                           'visible' => true,
-                       ],
-                       [
-                           'name' => 'Data PPIU Cabang',
-                           'route' => 'cabang.travel',
-                           'icon' => 'bx bxs-business',
-                           'visible' => true,
-                       ],
-                    [
-                        'name' => 'User Kabupaten',
-                        'route' => 'kabupaten.index',
-                        'icon' => 'bx bx-user-circle',
-                        'visible' => true,
-                    ],
-                                           [
-                           'name' => 'User PPIU',
-                           'route' => 'travels.index',
-                           'icon' => 'bx bx-user-plus',
-                           'visible' => true,
-                       ],
-                ],
-            ];
-        }
-
-        // Master Data (Kabupaten only - simplified accordion)
-        if ($user->role === 'kabupaten') {
-            $menus[] = [
-                'name' => 'Master Data',
-                'icon' => 'bx bx-data',
-                'hasSubmenu' => true,
-                'items' => [
-                    [
-                        'name' => 'Data PPIU Cabang',
-                        'route' => 'cabang.travel',
-                        'icon' => 'bx bxs-business',
-                        'visible' => true,
-                    ],
-                ],
-            ];
-        }
-
-        // Data Jamaah (Accordion)
+        $travel = $user->travel;
         $jamaahItems = [];
-        
-        // Add Data BAP for admin, kabupaten, and travel users
-        if (in_array($user->role, ['admin', 'kabupaten', 'user'])) {
-            $jamaahItems[] = [
-                'name' => 'Data BAP',
-                'route' => 'bap',
-                'icon' => 'bx bx-list-ul',
-                'visible' => true,
-            ];
+        if ($travel?->canHandleUmrah()) {
+            $jamaahItems[] = ['name' => 'Jamaah Umrah', 'route' => 'jamaah.umrah', 'visible' => true];
+        }
+        if ($travel?->canHandleHajiKhusus()) {
+            $jamaahItems[] = ['name' => 'Jamaah Haji Khusus', 'route' => 'jamaah.haji-khusus.index', 'visible' => true];
         }
 
-        // Add Jamaah menus based on capabilities
-        if ($user->role === 'admin') {
-            $jamaahItems[] = [
-                'name' => 'Jamaah Umrah',
-                'route' => 'jamaah.umrah',
-                'icon' => 'bx bxs-group',
-                'visible' => true,
-            ];
-            $jamaahItems[] = [
-                'name' => 'Jamaah Haji Khusus',
-                'route' => 'jamaah.haji-khusus.index',
-                'icon' => 'bx bxs-star',
-                'visible' => true,
-            ];
-        } else if ($user->role === 'user') {
-            $travel = $user->travel;
-            if ($travel) {
-                if ($travel->canHandleUmrah()) {
-                    $jamaahItems[] = [
-                        'name' => 'Jamaah Umrah',
-                        'route' => 'jamaah.umrah',
-                        'icon' => 'bx bxs-group',
-                        'visible' => true,
-                    ];
-                }
-                if ($travel->canHandleHajiKhusus()) {
-                    $jamaahItems[] = [
-                        'name' => 'Jamaah Haji Khusus',
-                        'route' => 'jamaah.haji-khusus.index',
-                        'icon' => 'bx bxs-star',
-                        'visible' => true,
-                    ];
-                }
-            }
-        }
-
-        if (!empty($jamaahItems)) {
+        if ($jamaahItems !== []) {
             $menus[] = [
                 'name' => 'Data Jamaah',
                 'icon' => 'bx bx-user-circle',
@@ -268,138 +235,223 @@ class TravelCapabilityService
             ];
         }
 
-        // Layanan (Accordion)
-        $layananItems = [];
-        
-        $layananItems[] = [
-            'name' => 'Keberangkatan',
-            'route' => 'keberangkatan',
-            'icon' => 'bx bx-calendar',
-            'visible' => true,
-        ];
-        
-        if ($user->role === 'admin') {
-            $layananItems[] = [
-                'name' => 'Pengunduran',
-                'route' => 'pengunduran',
-                'icon' => 'bx bx-send',
-                'visible' => true,
-            ];
-        }
-
-        if ($user->role === 'admin') {
-            $layananItems[] = [
-                'name' => 'Pengaduan',
-                'route' => 'pengaduan',
-                'icon' => 'bx bx-envelope',
-                'visible' => true,
-            ];
-        }
-
         $menus[] = [
-            'name' => 'Layanan',
+            'name' => 'Keberangkatan',
             'icon' => 'bx bx-cog',
             'hasSubmenu' => true,
-            'items' => $layananItems,
-        ];
-
-        // Sertifikat (Accordion)
-        $sertifikatItems = [];
-        
-        if ($user->role === 'admin') {
-            $sertifikatItems[] = [
-                'name' => 'Sertifikat PPIU',
-                'route' => 'sertifikat.index',
-                'icon' => 'bx bx-award',
-                'visible' => true,
-            ];
-        }
-        
-        if ($user->role === 'user') {
-            $sertifikatItems[] = [
-                'name' => 'Sertifikat Saya',
-                'route' => 'travel.certificates',
-                'icon' => 'bx bx-award',
-                'visible' => true,
-            ];
-        }
-        
-        if ($user->role === 'kabupaten') {
-            $sertifikatItems[] = [
-                'name' => 'Sertifikat',
-                'route' => 'sertifikat.index',
-                'icon' => 'bx bx-award',
-                'visible' => true,
-            ];
-        }
-
-        if (!empty($sertifikatItems)) {
-            $menus[] = [
-                'name' => 'Sertifikat',
-                'icon' => 'bx bx-award',
-                'hasSubmenu' => true,
-                'items' => $sertifikatItems,
-            ];
-        }
-
-        $pengawasanItems = [
-            [
-                'name' => 'Dashboard V2',
-                'route' => 'v2.dashboard',
-                'icon' => 'bx bx-bar-chart-alt-2',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Monitoring',
-                'route' => 'v2.monitoring.index',
-                'icon' => 'bx bx-radar',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Pengawasan',
-                'route' => 'v2.pengawasan.index',
-                'icon' => 'bx bx-search-alt',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Master Checklist',
-                'route' => 'v2.checklist.index',
-                'icon' => 'bx bx-list-check',
-                'visible' => $user->role === 'admin',
-            ],
-            [
-                'name' => 'Tindak Lanjut',
-                'route' => 'v2.followup.index',
-                'icon' => 'bx bx-task',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Risk Score',
-                'route' => 'v2.risk.index',
-                'icon' => 'bx bx-error',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Profil Kepatuhan',
-                'route' => 'v2.compliance.index',
-                'icon' => 'bx bx-shield-quarter',
-                'visible' => in_array($user->role, ['admin', 'kabupaten', 'user']),
-            ],
-            [
-                'name' => 'Riwayat Aktivitas',
-                'route' => 'v2.audit-log.index',
-                'icon' => 'bx bx-history',
-                'visible' => in_array($user->role, ['admin', 'kabupaten']),
+            'items' => [
+                ['name' => 'BA Pemberangkatan', 'route' => 'bap', 'visible' => true],
+                ['name' => 'Jadwal Keberangkatan', 'route' => 'keberangkatan', 'visible' => true],
             ],
         ];
 
         $menus[] = [
-            'name' => 'Pengawasan Digital',
-            'icon' => 'bx bx-analyse',
+            'name' => 'Sertifikat',
+            'icon' => 'bx bx-award',
             'hasSubmenu' => true,
-            'items' => array_values(array_filter($pengawasanItems, fn ($item) => $item['visible'])),
+            'items' => [
+                ['name' => 'Sertifikat Saya', 'route' => 'travel.certificates', 'visible' => true],
+            ],
         ];
+
+        $pengawasanGroups = self::pengawasanGroups(forPengawas: false, forAdmin: false, forTravel: true);
+        if ($pengawasanGroups !== []) {
+            $menus[] = [
+                'name' => 'Tugas Pengawasan',
+                'icon' => 'bx bx-task',
+                'hasSubmenu' => true,
+                'groups' => $pengawasanGroups,
+            ];
+        }
 
         return $menus;
     }
-} 
+
+    /** @return list<array<string, mixed>> */
+    private static function kabupatenSidebarMenus(): array
+    {
+        return [
+            [
+                'name' => 'Beranda',
+                'route' => 'home',
+                'icon' => 'bx bx-home-circle',
+                'visible' => true,
+            ],
+            [
+                'name' => 'Master Data',
+                'icon' => 'bx bx-data',
+                'hasSubmenu' => true,
+                'items' => [
+                    ['name' => 'Data PPIU Cabang', 'route' => 'cabang.travel', 'visible' => true],
+                ],
+            ],
+            [
+                'name' => 'Keberangkatan',
+                'icon' => 'bx bx-cog',
+                'hasSubmenu' => true,
+                'items' => [
+                    ['name' => 'BA Pemberangkatan', 'route' => 'bap', 'visible' => true],
+                    ['name' => 'Jadwal Keberangkatan', 'route' => 'keberangkatan', 'visible' => true],
+                    ['name' => 'Pengunduran', 'route' => 'pengunduran', 'visible' => true],
+                ],
+            ],
+            [
+                'name' => 'Sertifikat',
+                'icon' => 'bx bx-award',
+                'hasSubmenu' => true,
+                'items' => [
+                    ['name' => 'Sertifikat', 'route' => 'sertifikat.index', 'visible' => true],
+                ],
+            ],
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function adminSidebarMenus(): array
+    {
+        $menus = [[
+            'name' => 'Beranda',
+            'route' => 'home',
+            'icon' => 'bx bx-home-circle',
+            'visible' => true,
+        ]];
+
+        $menus[] = [
+            'name' => 'Master Data',
+            'icon' => 'bx bx-data',
+            'hasSubmenu' => true,
+            'items' => [
+                ['name' => 'Data PPIU Pusat', 'route' => 'travel', 'visible' => true],
+                ['name' => 'Data PPIU Cabang', 'route' => 'cabang.travel', 'visible' => true],
+                ['name' => 'Kelola Pengguna', 'route' => 'users.index', 'visible' => true],
+            ],
+        ];
+
+        $menus[] = [
+            'name' => 'Data Jamaah',
+            'icon' => 'bx bx-user-circle',
+            'hasSubmenu' => true,
+            'items' => [
+                ['name' => 'Jamaah Umrah', 'route' => 'jamaah.umrah', 'visible' => true],
+                ['name' => 'Jamaah Haji Khusus', 'route' => 'jamaah.haji-khusus.index', 'visible' => true],
+            ],
+        ];
+
+        $menus[] = [
+            'name' => 'Keberangkatan',
+            'icon' => 'bx bx-cog',
+            'hasSubmenu' => true,
+            'items' => [
+                ['name' => 'BA Pemberangkatan', 'route' => 'bap', 'visible' => true],
+                ['name' => 'Jadwal Keberangkatan', 'route' => 'keberangkatan', 'visible' => true],
+                ['name' => 'Pengunduran', 'route' => 'pengunduran', 'visible' => true],
+                ['name' => 'Pengaduan', 'route' => 'pengaduan', 'visible' => true],
+            ],
+        ];
+
+        $menus[] = [
+            'name' => 'Sertifikat',
+            'icon' => 'bx bx-award',
+            'hasSubmenu' => true,
+            'items' => [
+                ['name' => 'Sertifikat PPIU', 'route' => 'sertifikat.index', 'visible' => true],
+            ],
+        ];
+
+        $pengawasanGroups = self::pengawasanGroups(forPengawas: true, forAdmin: true, forTravel: false);
+        if ($pengawasanGroups !== []) {
+            $menus[] = [
+                'name' => 'Pengawasan Digital',
+                'icon' => 'bx bx-analyse',
+                'hasSubmenu' => true,
+                'groups' => $pengawasanGroups,
+            ];
+        }
+
+        return $menus;
+    }
+
+    /**
+     * @return list<array{label: string, items: list<array{name: string, route: string, visible: bool}>}>
+     */
+    private static function pengawasanGroups(bool $forPengawas, bool $forAdmin, bool $forTravel): array
+    {
+        $groups = [
+            [
+                'label' => 'Antrian',
+                'items' => [
+                    [
+                        'name' => 'Antrian Kerja',
+                        'route' => 'v2.antrian.index',
+                        'visible' => $forPengawas || $forAdmin,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Ringkasan',
+                'items' => [
+                    [
+                        'name' => 'Dashboard Pengawasan',
+                        'route' => 'v2.dashboard',
+                        'visible' => $forPengawas || $forAdmin,
+                    ],
+                    [
+                        'name' => 'Monitoring PPIU',
+                        'route' => 'v2.monitoring.index',
+                        'visible' => $forPengawas || $forAdmin,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Operasional',
+                'items' => [
+                    [
+                        'name' => 'BA Pemeriksaan',
+                        'route' => 'v2.pengawasan.index',
+                        'visible' => $forPengawas || $forAdmin,
+                    ],
+                    [
+                        'name' => 'Tindak Lanjut Temuan',
+                        'route' => 'v2.followup.index',
+                        'visible' => $forPengawas || $forAdmin || $forTravel,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Analisis',
+                'items' => [
+                    [
+                        'name' => 'Skor Risiko',
+                        'route' => 'v2.risk.index',
+                        'visible' => $forPengawas || $forAdmin || $forTravel,
+                    ],
+                    [
+                        'name' => 'Profil Kepatuhan PPIU',
+                        'route' => 'v2.compliance.index',
+                        'visible' => $forPengawas || $forAdmin || $forTravel,
+                    ],
+                ],
+            ],
+            [
+                'label' => 'Pengaturan',
+                'items' => [
+                    [
+                        'name' => 'Atur Checklist',
+                        'route' => 'v2.checklist.index',
+                        'visible' => $forAdmin,
+                    ],
+                    [
+                        'name' => 'Log Aktivitas',
+                        'route' => 'v2.audit-log.index',
+                        'visible' => $forPengawas || $forAdmin,
+                    ],
+                ],
+            ],
+        ];
+
+        return array_values(array_filter(
+            $groups,
+            fn (array $group) => collect($group['items'])->contains(fn (array $item) => $item['visible'])
+        ));
+    }
+}

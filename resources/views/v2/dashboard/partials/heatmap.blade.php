@@ -15,9 +15,9 @@
                 <div id="heatmap-legend" class="position-absolute bg-white border rounded shadow-sm p-2" style="bottom:24px;left:24px;z-index:1000;font-size:12px;line-height:1.4;">
                     <div class="fw-semibold mb-1">Pengawasan</div>
                     <div><span style="display:inline-block;width:12px;height:12px;background:#c0c9f6;border-radius:50%;margin-right:4px;"></span> 0</div>
-                    <div><span style="display:inline-block;width:12px;height:12px;background:#9cabf0;border-radius:50%;margin-right:4px;"></span> 1–2</div>
-                    <div><span style="display:inline-block;width:12px;height:12px;background:#798ceb;border-radius:50%;margin-right:4px;"></span> 3–5</div>
-                    <div><span style="display:inline-block;width:12px;height:12px;background:#556ee6;border-radius:50%;margin-right:4px;"></span> 6–10</div>
+                    <div><span style="display:inline-block;width:12px;height:12px;background:#9cabf0;border-radius:50%;margin-right:4px;"></span> 1 sampai 2</div>
+                    <div><span style="display:inline-block;width:12px;height:12px;background:#798ceb;border-radius:50%;margin-right:4px;"></span> 3 sampai 5</div>
+                    <div><span style="display:inline-block;width:12px;height:12px;background:#556ee6;border-radius:50%;margin-right:4px;"></span> 6 sampai 10</div>
                     <div><span style="display:inline-block;width:12px;height:12px;background:#435fe3;border-radius:50%;margin-right:4px;"></span> &gt; 10</div>
                 </div>
             </div>

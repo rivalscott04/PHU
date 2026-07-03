@@ -21,19 +21,20 @@
                         XLSX</button>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
                     <form method="POST" action="{{ route('post.travel') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="Penyelenggara" class="form-label">Penyelenggara</label>
+                                <label for="Penyelenggara" class="form-label">Penyelenggara @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" required>
+                                <input type="email" class="form-control" id="email" name="email">
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Status" class="form-label">Status</label>
+                                <label for="Status" class="form-label">Status @include('partials.required-star')</label>
                                 <select class="form-control" id="Status" name="Status" required>
                                     <option value="">Pilih Status</option>
                                     <option value="PPIU">PPIU</option>
@@ -41,46 +42,46 @@
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Pusat" class="form-label">No SK/NIB Pusat</label>
+                                <label for="Pusat" class="form-label">No SK/NIB Pusat @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="Pusat" name="Pusat" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Tanggal" class="form-label">Tanggal</label>
+                                <label for="Tanggal" class="form-label">Tanggal @include('partials.required-star')</label>
                                 <input type="date" class="form-control" id="Tanggal" name="Tanggal" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nilai_akreditasi" class="form-label">Nilai Akreditasi</label>
+                                <label for="nilai_akreditasi" class="form-label">Nilai Akreditasi @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="nilai_akreditasi" name="nilai_akreditasi"
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="tanggal_akreditasi" class="form-label">Tanggal Akreditasi</label>
+                                <label for="tanggal_akreditasi" class="form-label">Tanggal Akreditasi @include('partials.required-star')</label>
                                 <input type="date" class="form-control" id="tanggal_akreditasi" name="tanggal_akreditasi"
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="lembaga_akreditasi" class="form-label">Lembaga Akreditasi</label>
+                                <label for="lembaga_akreditasi" class="form-label">Lembaga Akreditasi @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="lembaga_akreditasi" name="lembaga_akreditasi"
                                     required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Pimpinan" class="form-label">Pimpinan</label>
+                                <label for="Pimpinan" class="form-label">Pimpinan @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="Pimpinan" name="Pimpinan" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="Telepon" class="form-label">Telepon</label>
+                                <label for="Telepon" class="form-label">Telepon @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="Telepon" name="Telepon" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="alamat_kantor_lama" class="form-label">Alamat Kantor Lama</label>
+                                <label for="alamat_kantor_lama" class="form-label">Alamat Kantor Lama @include('partials.required-star')</label>
                                 <textarea class="form-control" id="alamat_kantor_lama" name="alamat_kantor_lama" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="alamat_kantor_baru" class="form-label">Alamat Kantor Baru</label>
+                                <label for="alamat_kantor_baru" class="form-label">Alamat Kantor Baru @include('partials.required-star')</label>
                                 <textarea class="form-control" id="alamat_kantor_baru" name="alamat_kantor_baru" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="kab_kota" class="form-label">Kab/Kota</label>
+                                <label for="kab_kota" class="form-label">Kab/Kota @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="kab_kota" name="kab_kota" required>
                             </div>
                         </div>

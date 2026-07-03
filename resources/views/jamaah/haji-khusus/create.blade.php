@@ -314,10 +314,9 @@
 
                             <div class="col-md-4">
                                 <div class="mb-3 position-relative">
-                                    <label for="pergi_haji" class="form-label">Pergi Haji <span
-                                            class="text-danger">*</span></label>
+                                    <label for="pergi_haji" class="form-label">Pergi Haji</label>
                                     <select class="form-select @error('pergi_haji') is-invalid @enderror" id="pergi_haji"
-                                        name="pergi_haji" required>
+                                        name="pergi_haji">
                                         <option value="">Pilih Status</option>
                                         <option value="Belum" {{ old('pergi_haji') == 'Belum' ? 'selected' : '' }}>Belum
                                         </option>
@@ -543,12 +542,11 @@
                             <div class="col-md-6">
                                 <div class="mb-3 position-relative">
                                     <label for="bukti_setor_bank" class="form-label">
-                                        Bukti Setor Bank <span class="text-danger">*</span>
+                                        Bukti Setor Bank
                                     </label>
                                     <input type="file"
                                         class="form-control @error('bukti_setor_bank') is-invalid @enderror"
-                                        id="bukti_setor_bank" name="bukti_setor_bank" accept=".pdf,.jpg,.jpeg,.png"
-                                        required>
+                                        id="bukti_setor_bank" name="bukti_setor_bank" accept=".pdf,.jpg,.jpeg,.png">
                                     <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                     <div class="alert alert-info mt-2">
                                         <i class="bx bx-info-circle me-1"></i>

@@ -43,7 +43,7 @@ class JamaahHajiKhususSeeder extends Seeder
                 
                 JamaahHajiKhusus::create([
                     'travel_id' => $company->id,
-                    'nama_lengkap' => 'Jamaah ' . $i . ' - ' . $company->Penyelenggara,
+                    'nama_lengkap' => 'Jamaah ' . $i . ', ' . $company->Penyelenggara,
                     'no_ktp' => '520123456789' . str_pad($ktpCounter, 4, '0', STR_PAD_LEFT),
                     'tempat_lahir' => $city,
                     'tanggal_lahir' => '1980-01-01',

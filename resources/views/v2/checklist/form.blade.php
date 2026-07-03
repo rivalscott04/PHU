@@ -11,6 +11,7 @@
     </div>
     <div class="card">
         <div class="card-body">
+            <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
             <form method="POST" action="{{ $checklist ? route('v2.checklist.update', $checklist) : route('v2.checklist.store') }}">
                 @csrf
                 @if ($checklist) @method('PUT') @endif
@@ -29,11 +30,11 @@
                         </div>
                     @endif
                     <div class="col-12 mb-3">
-                        <label class="form-label">Judul</label>
+                        <label class="form-label">Judul @include('partials.required-star')</label>
                         <input type="text" name="title" class="form-control" value="{{ old('title', $checklist->title ?? '') }}" required>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label">Kategori</label>
+                        <label class="form-label">Kategori @include('partials.required-star')</label>
                         <select name="category_id" class="form-select" required>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}" @selected(old('category_id', $checklist->category_id ?? '') == $category->id)>{{ $category->name }}</option>
@@ -41,7 +42,7 @@
                         </select>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label class="form-label">Jenis Pertanyaan</label>
+                        <label class="form-label">Jenis Pertanyaan @include('partials.required-star')</label>
                         <select name="input_type" class="form-select" required id="input-type-select">
                             @foreach (ChecklistInputType::cases() as $type)
                                 <option value="{{ $type->value }}" @selected(old('input_type', $checklist->input_type?->value ?? ChecklistInputType::Boolean->value) === $type->value)>{{ $type->label() }}</option>
@@ -52,7 +53,7 @@
                         </div>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label class="form-label">Bobot</label>
+                        <label class="form-label">Bobot @include('partials.required-star')</label>
                         <input type="number" name="weight" class="form-control" value="{{ old('weight', $checklist->weight ?? 1) }}" min="1" max="100" required>
                         <div class="form-text">Semakin besar bobot, semakin berpengaruh ke skor kepatuhan.</div>
                     </div>

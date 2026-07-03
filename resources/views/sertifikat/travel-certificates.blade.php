@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Sertifikat PPIU - Travel Company')
+@section('title', 'Sertifikat PPIU Perusahaan Travel')
 
 @section('content')
 <div class="container-fluid">

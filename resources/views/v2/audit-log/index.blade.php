@@ -9,6 +9,10 @@
         </div>
     </div>
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_audit_log'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     <div class="card mb-3">
         <div class="card-body">
             <form method="GET" action="{{ route('v2.audit-log.index') }}" class="row g-2 align-items-end">

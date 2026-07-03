@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Followup;
 use App\Models\FollowupLog;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
@@ -28,8 +29,8 @@ class FollowupRepository
             ->when(isset($filters['travel_id']), function ($q) use ($filters) {
                 $q->whereHas('finding.inspection', fn ($inspection) => $inspection->where('travel_id', $filters['travel_id']));
             })
-            ->when(isset($filters['kabupaten']), function ($q) use ($filters) {
-                $q->whereHas('finding.inspection.travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten']));
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters, 'finding.inspection.travel');
             })
             ->orderByDesc('submitted_at');
 
@@ -68,8 +69,8 @@ class FollowupRepository
             ->when(isset($filters['travel_id']), function ($q) use ($filters) {
                 $q->whereHas('finding.inspection', fn ($inspection) => $inspection->where('travel_id', $filters['travel_id']));
             })
-            ->when(isset($filters['kabupaten']), function ($q) use ($filters) {
-                $q->whereHas('finding.inspection.travel', fn ($travel) => $travel->where('kab_kota', $filters['kabupaten']));
+            ->when(! empty($filters['kabupaten']) || ! empty($filters['kabupatens']), function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnTravelRelation($q, $filters, 'finding.inspection.travel');
             })
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')

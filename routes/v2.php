@@ -10,12 +10,19 @@ use App\Http\Controllers\V2\InspectionController;
 use App\Http\Controllers\V2\MonitoringController;
 use App\Http\Controllers\V2\NotificationController;
 use App\Http\Controllers\V2\RiskController;
+use App\Http\Controllers\V2\WorkQueueController;
 use App\Models\Inspection;
+use App\Models\SupervisionWorkQueue;
 use Illuminate\Support\Facades\Route;
 
 Route::bind('pengawasan', fn (string $value) => Inspection::findOrFail($value));
+Route::bind('antrian', fn (string $value) => SupervisionWorkQueue::findOrFail($value));
 
-Route::middleware(['auth', 'password.changed'])->prefix('v2')->name('v2.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v2')->name('v2.')->group(function () {
+    Route::get('/antrian', [WorkQueueController::class, 'index'])->name('antrian.index');
+    Route::post('/antrian/{antrian}/start', [WorkQueueController::class, 'start'])->name('antrian.start');
+    Route::post('/antrian/{antrian}/resolve', [WorkQueueController::class, 'resolve'])->name('antrian.resolve');
+
     Route::get('/dashboard/statistics', [ExecutiveDashboardController::class, 'statistics'])->name('dashboard.statistics');
     Route::get('/dashboard/charts', [ExecutiveDashboardController::class, 'charts'])->name('dashboard.charts');
     Route::get('/dashboard/ranking', [ExecutiveDashboardController::class, 'ranking'])->name('dashboard.ranking');

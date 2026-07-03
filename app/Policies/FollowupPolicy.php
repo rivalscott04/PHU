@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\FollowupStatus;
 use App\Models\Followup;
 use App\Models\User;
 
@@ -9,7 +10,7 @@ class FollowupPolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten', 'user'], true);
+        return in_array($user->role, ['admin', 'pengawas', 'user'], true);
     }
 
     public function view(User $user, Followup $followup): bool
@@ -20,8 +21,8 @@ class FollowupPolicy
             return true;
         }
 
-        if ($user->role === 'kabupaten') {
-            return $followup->finding?->inspection?->travel?->kab_kota === $user->getKabupaten();
+        if ($user->role === 'pengawas') {
+            return $user->canAccessKabupaten($followup->finding?->inspection?->travel?->kab_kota);
         }
 
         return $user->travel_id === $travelId;
@@ -38,8 +39,8 @@ class FollowupPolicy
             return true;
         }
 
-        if ($user->role === 'kabupaten') {
-            return $followup->finding?->inspection?->travel?->kab_kota === $user->getKabupaten();
+        if ($user->role === 'pengawas') {
+            return $user->canAccessKabupaten($followup->finding?->inspection?->travel?->kab_kota);
         }
 
         return $user->travel_id === $followup->finding?->inspection?->travel_id;
@@ -47,7 +48,15 @@ class FollowupPolicy
 
     public function approve(User $user, Followup $followup): bool
     {
-        return in_array($user->role, ['admin', 'kabupaten'], true)
-            && $this->view($user, $followup);
+        if (! in_array($user->role, ['admin', 'pengawas'], true) || ! $this->view($user, $followup)) {
+            return false;
+        }
+
+        $status = $followup->status?->value ?? $followup->status;
+
+        return in_array($status, [
+            FollowupStatus::Submitted->value,
+            FollowupStatus::Pending->value,
+        ], true);
     }
 }

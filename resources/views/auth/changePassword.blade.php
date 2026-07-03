@@ -4,11 +4,12 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Ganti Password | UHK Kanwil</title>
+    <title>Ganti Password | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
-    <meta content="Kanwil Kementerian Haji NTB" name="author" />
+    <meta content="PANTAU, Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
+    <meta content="PANTAU" name="author" />
     <!-- App favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
     <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}">
 
     <!-- Bootstrap Css -->
@@ -55,20 +56,20 @@
                         </div>
                         <div class="card-body pt-0">
                             <div class="auth-logo">
-                                <a href="index.html" class="auth-logo-light">
+                                <a href="{{ url('/') }}" class="auth-logo-light">
                                     <div class="avatar-md profile-user-wid mb-4">
                                         <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('images/logo-light.svg') }}" alt=""
-                                                class="rounded-circle" height="34">
+                                            <img src="{{ asset('images/logo-icon-light.svg') }}" alt="{{ config('app.name') }}"
+                                                height="34">
                                         </span>
                                     </div>
                                 </a>
 
-                                <a href="index.html" class="auth-logo-dark">
+                                <a href="{{ url('/') }}" class="auth-logo-dark">
                                     <div class="avatar-md profile-user-wid mb-4">
                                         <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('images/logo.svg') }}" alt=""
-                                                class="rounded-circle" height="34">
+                                            <img src="{{ asset('images/logo-icon.svg') }}" alt="{{ config('app.name') }}"
+                                                height="34">
                                         </span>
                                     </div>
                                 </a>
@@ -78,7 +79,7 @@
                                     method="POST">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="new-password" class="form-label">Password Baru</label>
+                                        <label for="new-password" class="form-label">Password Baru @include('partials.required-star')</label>
                                         <div class="input-group auth-pass-inputgroup">
                                             <input type="password" class="form-control" id="new-password"
                                                 name="password" placeholder="Enter new password" required>
@@ -88,7 +89,7 @@
                                     </div>
 
                                     <div class="mb-3">
-                                        <label for="confirm-password" class="form-label">Konfirmasi Password</label>
+                                        <label for="confirm-password" class="form-label">Konfirmasi Password @include('partials.required-star')</label>
                                         <div class="input-group auth-pass-inputgroup">
                                             <input type="password" class="form-control" id="confirm-password"
                                                 name="password_confirmation" placeholder="Confirm new password"
@@ -114,7 +115,9 @@
                         </div>
                     </div>
                     <div class="mt-5 text-center">
-                        <p>© <script>document.write(new Date().getFullYear())</script> Kanwil Kementerian Haji NTB. Dibuat dengan <i class="mdi mdi-heart text-danger"></i></p>
+                        <p>© <script>document.write(new Date().getFullYear())</script> {{ config('app.kanwil.short_name') }}.<br>
+                            <span class="text-muted">{{ config('app.kanwil.address') }}</span>
+                        </p>
                     </div>
                 </div>
             </div>

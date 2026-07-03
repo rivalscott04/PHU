@@ -18,7 +18,10 @@
         <div class="card-body p-0">
             <div class="list-group list-group-flush">
                 @forelse ($notifications as $notification)
-                    @php $data = $notification->data; @endphp
+                    @php
+                        $data = $notification->data;
+                        $url = \App\Support\NotificationUrl::normalize($data['url'] ?? null);
+                    @endphp
                     <div class="list-group-item {{ $notification->read_at ? '' : 'bg-light' }}">
                         <div class="d-flex justify-content-between align-items-start gap-3">
                             <div>
@@ -27,8 +30,8 @@
                                 <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                             </div>
                             <div class="d-flex flex-column gap-1">
-                                @if(!empty($data['url']))
-                                    <a href="{{ $data['url'] }}" class="btn btn-sm btn-outline-primary">Buka</a>
+                                @if($url)
+                                    <a href="{{ $url }}" class="btn btn-sm btn-outline-primary">Buka</a>
                                 @endif
                                 @unless($notification->read_at)
                                     <form method="POST" action="{{ route('v2.notifications.read') }}">

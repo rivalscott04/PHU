@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
+use App\Enums\PengawasScopeMode;
+use App\Support\NtbKabupatenMap;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\TravelCompany;
@@ -14,10 +17,214 @@ use Maatwebsite\Excel\Facades\Excel;
 class UserManagementController extends Controller
 {
     /**
+     * Unified user listing for super admin (tabbed by role).
+     */
+    public function index(Request $request)
+    {
+        $activeTab = $this->resolveUserTab($request->get('tab'));
+        $query = $this->buildManagedUserQuery($request, $activeTab);
+
+        $sortBy = $request->get('sort_by', 'created_at');
+        $sortOrder = $request->get('sort_order', 'desc');
+        $allowedSortFields = ['nama', 'email', 'nomor_hp', 'kabupaten', 'created_at'];
+
+        if (! in_array($sortBy, $allowedSortFields, true)) {
+            $sortBy = 'created_at';
+        }
+
+        $query->orderBy($sortBy, $sortOrder === 'asc' ? 'asc' : 'desc');
+
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $users = $query->paginate($perPage)->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('admin.users.partials.table-body', compact('users', 'activeTab'))->render(),
+                'pagination' => view('admin.users.partials.pagination', compact('users'))->render(),
+                'pagination_info' => [
+                    'from' => $users->firstItem(),
+                    'to' => $users->lastItem(),
+                    'total' => $users->total(),
+                    'current_page' => $users->currentPage(),
+                    'last_page' => $users->lastPage(),
+                ],
+                'filters' => [
+                    'tab' => $activeTab,
+                    'search' => $request->get('search'),
+                    'kabupaten' => $request->get('kabupaten'),
+                    'travel_company' => $request->get('travel_company'),
+                ],
+            ]);
+        }
+
+        $kabupatens = TravelCompany::select('kab_kota')->distinct()->orderBy('kab_kota')->pluck('kab_kota');
+        $travelCompanies = TravelCompany::select('Penyelenggara')->distinct()->orderBy('Penyelenggara')->pluck('Penyelenggara');
+        $tabCounts = $this->managedUserTabCounts();
+
+        return view('admin.users.index', compact(
+            'users',
+            'activeTab',
+            'kabupatens',
+            'travelCompanies',
+            'tabCounts',
+        ));
+    }
+
+    private function resolveUserTab(?string $tab): string
+    {
+        $allowed = [
+            UserRole::Pimpinan->value,
+            UserRole::Kabupaten->value,
+            UserRole::Pengawas->value,
+            UserRole::User->value,
+        ];
+
+        return in_array($tab, $allowed, true) ? $tab : UserRole::Pimpinan->value;
+    }
+
+    /** @return array<string, int> */
+    private function managedUserTabCounts(): array
+    {
+        return [
+            UserRole::Pimpinan->value => User::where('role', UserRole::Pimpinan->value)->count(),
+            UserRole::Kabupaten->value => User::where('role', UserRole::Kabupaten->value)->count(),
+            UserRole::Pengawas->value => User::where('role', UserRole::Pengawas->value)->count(),
+            UserRole::User->value => User::where('role', UserRole::User->value)->count(),
+        ];
+    }
+
+    private function buildManagedUserQuery(Request $request, string $activeTab)
+    {
+        $query = User::query()->with('travel')->where('role', $activeTab);
+
+        if ($request->filled('kabupaten')) {
+            if ($activeTab === UserRole::User->value) {
+                $query->whereHas('travel', fn ($travelQuery) => $travelQuery->where('kab_kota', $request->kabupaten));
+            } else {
+                $query->where('kabupaten', $request->kabupaten);
+            }
+        }
+
+        if ($activeTab === UserRole::User->value && $request->filled('travel_company')) {
+            $query->whereHas('travel', fn ($travelQuery) => $travelQuery->where('Penyelenggara', $request->travel_company));
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search, $activeTab) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('nomor_hp', 'like', "%{$search}%");
+
+                if ($activeTab !== UserRole::User->value && $activeTab !== UserRole::Pimpinan->value) {
+                    $q->orWhere('kabupaten', 'like', "%{$search}%");
+                }
+
+                if ($activeTab === UserRole::User->value) {
+                    $q->orWhereHas('travel', function ($travelQuery) use ($search) {
+                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
+                            ->orWhere('kab_kota', 'like', "%{$search}%");
+                    });
+                }
+            });
+        }
+
+        return $query;
+    }
+
+    /**
+     * Show unified create form with role assignment.
+     */
+    public function create()
+    {
+        return view('admin.users.create', $this->userFormViewData([
+            'roleOptions' => UserRole::assignableByAdmin(),
+            'travelCompanies' => TravelCompany::orderBy('Penyelenggara')->get(['id', 'Penyelenggara', 'kab_kota']),
+        ]));
+    }
+
+    /**
+     * Store a user with assigned role and domain.
+     */
+    public function store(Request $request)
+    {
+        $assignableRoles = array_map(fn (UserRole $role) => $role->value, UserRole::assignableByAdmin());
+
+        $rules = [
+            'nama' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
+            'password' => 'required|string|min:8',
+            'role' => 'required|in:'.implode(',', $assignableRoles),
+        ];
+
+        $role = UserRole::from($request->input('role'));
+
+        if ($role === UserRole::Kabupaten) {
+            $rules['kabupaten'] = 'required|string|max:255';
+        }
+
+        if ($role === UserRole::Pengawas) {
+            $rules = array_merge($rules, $this->pengawasScopeRules($request));
+        }
+
+        if ($role->requiresTravel()) {
+            $rules['travel_id'] = 'required|exists:travels,id';
+        }
+
+        $validated = $request->validate($rules, [
+            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
+        ]);
+
+        $payload = [
+            'nama' => $validated['nama'],
+            'email' => $validated['email'],
+            'nomor_hp' => $validated['nomor_hp'],
+            'password' => Hash::make($validated['password']),
+            'role' => $role->value,
+            'country' => 'Indonesia',
+            'is_password_changed' => false,
+            'travel_id' => null,
+            'kabupaten' => null,
+            'pengawas_scope' => null,
+            'pengawas_kabupatens' => null,
+        ];
+
+        if ($role === UserRole::Pengawas) {
+            $payload = array_merge($payload, $this->pengawasPayloadFromRequest($request));
+        } elseif ($role === UserRole::Kabupaten) {
+            $payload['kabupaten'] = $validated['kabupaten'];
+        }
+
+        if ($role->requiresTravel()) {
+            $travel = TravelCompany::findOrFail($validated['travel_id']);
+            $payload['travel_id'] = $travel->id;
+            $payload['kabupaten'] = $travel->kab_kota;
+        }
+
+        User::create($payload);
+
+        return redirect()
+            ->route('users.index', ['tab' => $role->value])
+            ->with('success', 'Pengguna '.$role->label().' berhasil ditambahkan.');
+    }
+
+    /**
      * Display a listing of kabupaten users
      */
     public function indexKabupaten(Request $request)
     {
+        if (! $request->ajax()) {
+            return redirect()->route('users.index', array_merge(
+                ['tab' => UserRole::Kabupaten->value],
+                $request->query()
+            ));
+        }
+
+        // Legacy AJAX fallback
         // Base query for kabupaten users
         $query = User::where('role', 'kabupaten');
         
@@ -76,6 +283,14 @@ class UserManagementController extends Controller
      */
     public function indexTravel(Request $request)
     {
+        if (! $request->ajax()) {
+            return redirect()->route('users.index', array_merge(
+                ['tab' => UserRole::User->value],
+                $request->query()
+            ));
+        }
+
+        // Legacy AJAX fallback
         $user = auth()->user();
 
         // Base query for travel users
@@ -299,7 +514,19 @@ class UserManagementController extends Controller
                 ->orderBy('Penyelenggara')->get();
         }
 
-        return view('admin.users.edit', compact('user', 'travelCompanies'));
+        $roleOptions = UserRole::assignableByAdmin();
+        $kabupatens = TravelCompany::select('kab_kota')->distinct()->orderBy('kab_kota')->pluck('kab_kota');
+
+        return view('admin.users.edit', $this->userFormViewData([
+            'user' => $user,
+            'travelCompanies' => $travelCompanies,
+            'roleOptions' => $roleOptions,
+            'isPengawas' => $user->role === UserRole::Pengawas->value,
+            'showPengawasScope' => $user->role === UserRole::Pengawas->value,
+            'pengawasScope' => $user->pengawas_scope ?? PengawasScopeMode::Single->value,
+            'pengawasKabupatens' => $user->pengawas_kabupatens ?? [],
+            'singleKabupaten' => $user->kabupaten,
+        ]));
     }
 
     /**
@@ -327,10 +554,21 @@ class UserManagementController extends Controller
             'postal' => 'nullable|string|max:10',
         ];
 
-        // Add kabupaten validation for kabupaten users
-        if ($user->role === 'kabupaten') {
+        // Add kabupaten validation for scoped roles
+        $role = UserRole::tryFromString($user->role);
+        if ($role === UserRole::Kabupaten) {
             $validationRules['kabupaten'] = 'required|string|max:255';
         }
+
+        if ($role === UserRole::Pengawas) {
+            $validationRules = array_merge($validationRules, $this->pengawasScopeRules($request));
+        }
+
+        if ($user->role === UserRole::User->value) {
+            $validationRules['travel_id'] = 'required|exists:travels,id';
+        }
+
+        $validationRules['password'] = 'nullable|string|min:8';
 
         $request->validate($validationRules, [
             'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
@@ -346,13 +584,15 @@ class UserManagementController extends Controller
             'postal' => $request->postal,
         ];
 
-        // Add kabupaten for kabupaten users
-        if ($user->role === 'kabupaten' && $request->filled('kabupaten')) {
+        if ($role === UserRole::Kabupaten && $request->filled('kabupaten')) {
             $updateData['kabupaten'] = $request->kabupaten;
         }
 
-        // Add travel_id for travel users
-        if ($user->role === 'user' && $request->filled('travel_id')) {
+        if ($role === UserRole::Pengawas) {
+            $updateData = array_merge($updateData, $this->pengawasPayloadFromRequest($request));
+        }
+
+        if ($user->role === UserRole::User->value) {
             $updateData['travel_id'] = $request->travel_id;
         }
 
@@ -365,8 +605,9 @@ class UserManagementController extends Controller
             ]);
         }
 
-        $route = $user->role === 'kabupaten' ? 'kabupaten.index' : 'travels.index';
-        return redirect()->route($route)->with('success', 'User berhasil diupdate!');
+        return redirect()
+            ->route('users.index', ['tab' => $user->role === UserRole::Admin->value ? UserRole::Kabupaten->value : $user->role])
+            ->with('success', 'User berhasil diupdate!');
     }
 
     /**
@@ -384,10 +625,16 @@ class UserManagementController extends Controller
             }
         }
 
+        if ($user->role === UserRole::Admin->value) {
+            return redirect()->back()->with('error', 'Akun super admin tidak dapat dihapus.');
+        }
+
+        $deletedRole = $user->role;
         $user->delete();
 
-        $route = $user->role === 'kabupaten' ? 'kabupaten.index' : 'travels.index';
-        return redirect()->route($route)->with('success', 'User berhasil dihapus!');
+        return redirect()
+            ->route('users.index', ['tab' => $deletedRole])
+            ->with('success', 'User berhasil dihapus!');
     }
 
     /**
@@ -586,5 +833,70 @@ class UserManagementController extends Controller
         }
 
         return response()->download($filePath, 'Template_Import_User_Travel_CABANG.xlsx');
+    }
+
+    /** @return array<string, mixed> */
+    private function userFormViewData(array $extra = []): array
+    {
+        return array_merge([
+            'kabupatens' => $this->kabupatenOptions(),
+            'pengawasScopeModes' => PengawasScopeMode::options(),
+        ], $extra);
+    }
+
+  /** @return \Illuminate\Support\Collection<int, string> */
+    private function kabupatenOptions()
+    {
+        $fromTravels = TravelCompany::select('kab_kota')->distinct()->orderBy('kab_kota')->pluck('kab_kota');
+        $fromMap = collect(array_keys(NtbKabupatenMap::centroids()));
+
+        return $fromMap->merge($fromTravels)->unique()->sort()->values();
+    }
+
+    /** @return array<string, string|array<int, string>> */
+    private function pengawasScopeRules(Request $request): array
+    {
+        $rules = [
+            'pengawas_scope' => 'required|in:'.implode(',', array_map(
+                fn (PengawasScopeMode $mode) => $mode->value,
+                PengawasScopeMode::options()
+            )),
+        ];
+
+        $mode = PengawasScopeMode::tryFrom((string) $request->input('pengawas_scope'));
+
+        if ($mode === PengawasScopeMode::Single) {
+            $rules['kabupaten'] = 'required|string|max:255';
+        }
+
+        if ($mode === PengawasScopeMode::Custom) {
+            $rules['pengawas_kabupatens'] = 'required|array|min:1';
+            $rules['pengawas_kabupatens.*'] = 'required|string|max:255';
+        }
+
+        return $rules;
+    }
+
+    /** @return array<string, mixed> */
+    private function pengawasPayloadFromRequest(Request $request): array
+    {
+        $mode = PengawasScopeMode::from((string) $request->input('pengawas_scope'));
+
+        $payload = [
+            'pengawas_scope' => $mode->value,
+            'pengawas_kabupatens' => null,
+            'kabupaten' => null,
+        ];
+
+        return match ($mode) {
+            PengawasScopeMode::All => $payload,
+            PengawasScopeMode::Single => array_merge($payload, [
+                'kabupaten' => $request->input('kabupaten'),
+            ]),
+            PengawasScopeMode::Custom => array_merge($payload, [
+                'pengawas_kabupatens' => array_values(array_unique($request->input('pengawas_kabupatens', []))),
+                'kabupaten' => $request->input('pengawas_kabupatens')[0] ?? null,
+            ]),
+        };
     }
 }

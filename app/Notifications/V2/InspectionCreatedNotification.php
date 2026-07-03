@@ -21,7 +21,7 @@ class InspectionCreatedNotification extends V2DatabaseNotification
             'message' => "Pengawasan {$this->inspection->inspection_no} dijadwalkan untuk {$travel?->Penyelenggara}.",
             'module' => 'pengawasan',
             'action' => 'created',
-            'url' => route('v2.pengawasan.show', $this->inspection),
+            'url' => $this->actionUrl('v2.pengawasan.show', $this->inspection),
             'meta' => [
                 'inspection_id' => $this->inspection->id,
                 'travel_id' => $this->inspection->travel_id,

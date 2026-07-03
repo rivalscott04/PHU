@@ -3,9 +3,16 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            @include('partials.bap-module-info', ['variant' => 'pemberangkatan'])
+            @if($guide = \App\Support\RoleWorkflowGuide::for('bap_detail', ['status' => $data->status ?? '']))
+                @include('partials.workflow-guide', ['guide' => $guide])
+            @endif
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Detail BAP</h5>
+                    <div>
+                        <h5 class="mb-0">Detail BA Pemberangkatan</h5>
+                        <small class="text-muted">Status persetujuan ditangani Admin/Kabupaten</small>
+                    </div>
                     @if (auth()->user()->role === 'admin' || auth()->user()->role === 'user')
                         <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
                             data-bs-target="#uploadPDFModal">Upload Surat Pernytaan PDF</button>

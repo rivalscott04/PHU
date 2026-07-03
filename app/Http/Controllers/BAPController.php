@@ -270,7 +270,6 @@ class BAPController extends Controller
             'kab_kota' => 'required|string|max:255',
             'people' => 'required|integer',
             'days' => 'required|integer|min:1',
-            'package' => 'required|string|max:255',
             'price' => 'required|numeric',
             'datetime' => 'required|date',
             'airlines' => 'required|string|max:255',
@@ -279,7 +278,7 @@ class BAPController extends Controller
         ]);
 
         // Ambil semua data dari request dan tambahkan user_id
-        $data = $request->all();
+        $data = $request->except(['package', 'price_display']);
         $data['user_id'] = auth()->id();
 
         // Simpan data ke dalam database
@@ -463,7 +462,7 @@ class BAPController extends Controller
     {
                         // Verifikasi data BAP
                 $verificationResult = [
-                    'jenis_dokumen' => 'Berita Acara Pelaporan (BAP)',
+                    'jenis_dokumen' => 'BA Pemberangkatan',
                     'nomor_surat' => $qrData['nomor_surat'] ?? 'Tidak ditemukan',
                     'nama_travel' => $qrData['nama_travel'] ?? 'Tidak ditemukan',
                     'nama_petugas' => $qrData['nama_petugas'] ?? 'Bidang PHU Kanwil NTB',
@@ -479,7 +478,7 @@ class BAPController extends Controller
         if (!$bap) {
             return response()->json([
                 'success' => false,
-                'message' => 'Dokumen BAP tidak ditemukan dalam database',
+                'message' => 'Dokumen BA Pemberangkatan tidak ditemukan dalam database',
                 'data' => $verificationResult
             ]);
         }
@@ -490,7 +489,7 @@ class BAPController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => $hashValid ? 'Tanda tangan digital BAP valid' : 'Tanda tangan digital BAP tidak valid',
+            'message' => $hashValid ? 'Tanda tangan digital BA Pemberangkatan valid' : 'Tanda tangan digital BA Pemberangkatan tidak valid',
             'data' => $verificationResult,
             'hash_valid' => $hashValid,
             'dokumen_valid' => $bap->status === 'diterima',
@@ -498,17 +497,34 @@ class BAPController extends Controller
         ]);
     }
 
-    private function verifyBAPByToken($token)
+    private function bapVerificationToken(BAP $bap): string
     {
-        // Cari BAP berdasarkan token
-        $baps = BAP::where('status', 'diterima')->get();
+        return strtoupper(substr(hash('sha256', $bap->id.$bap->nomor_surat.$bap->user_id.$bap->ppiuname), 0, 8));
+    }
+
+    private function verifyBAPByToken(string $token, ?int $bapId = null)
+    {
         $foundBap = null;
-        
-        foreach ($baps as $bap) {
-            $expectedToken = strtoupper(substr(hash('sha256', $bap->id . $bap->nomor_surat . $bap->user_id . $bap->ppiuname), 0, 8));
-            if ($token === $expectedToken) {
+
+        if ($bapId) {
+            $bap = BAP::query()
+                ->where('id', $bapId)
+                ->where('status', 'diterima')
+                ->first();
+
+            if ($bap && $this->bapVerificationToken($bap) === $token) {
                 $foundBap = $bap;
-                break;
+            }
+        }
+
+        if (! $foundBap) {
+            $baps = BAP::where('status', 'diterima')->get(['id', 'nomor_surat', 'user_id', 'ppiuname', 'status', 'created_at']);
+
+            foreach ($baps as $bap) {
+                if ($this->bapVerificationToken($bap) === $token) {
+                    $foundBap = $bap;
+                    break;
+                }
             }
         }
 
@@ -521,7 +537,7 @@ class BAPController extends Controller
 
                         // Verifikasi data BAP
                 $verificationResult = [
-                    'jenis_dokumen' => 'Berita Acara Pelaporan (BAP)',
+                    'jenis_dokumen' => 'BA Pemberangkatan',
                     'nomor_surat' => $foundBap->nomor_surat,
                     'nama_travel' => $foundBap->ppiuname,
                     'nama_petugas' => 'Bidang PHU Kanwil NTB',
@@ -533,7 +549,7 @@ class BAPController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Token valid - Dokumen BAP ditemukan',
+            'message' => 'Token valid. Dokumen BA Pemberangkatan ditemukan',
             'data' => $verificationResult,
             'hash_valid' => true,
             'dokumen_valid' => $foundBap->status === 'diterima',
@@ -548,7 +564,7 @@ class BAPController extends Controller
         
         // Jika ada token dan bap_id, langsung verifikasi
         if ($token && $bapId) {
-            $result = $this->verifyBAPByToken($token);
+            $result = $this->verifyBAPByToken($token, (int) $bapId);
             $verificationData = json_decode($result->getContent(), true);
             
             return view('travel.verifyESign', compact('verificationData', 'token', 'bapId'));
@@ -564,7 +580,7 @@ class BAPController extends Controller
         
         // Jika ada token dan bap_id, langsung verifikasi
         if ($token && $bapId) {
-            $result = $this->verifyBAPByToken($token);
+            $result = $this->verifyBAPByToken($token, (int) $bapId);
             $verificationData = json_decode($result->getContent(), true);
             
             return view('travel.verifyESignPublic', compact('verificationData', 'token', 'bapId'));

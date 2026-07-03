@@ -1,6 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
+    @if($guide = \App\Support\RoleWorkflowGuide::for('jamaah_umrah'))
+        <div class="container-fluid px-0 mb-3">
+            @include('partials.workflow-guide', ['guide' => $guide])
+        </div>
+    @endif
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -646,7 +651,7 @@
             printWindow.document.write(`
             <html>
                 <head>
-                    <title>Data Jamaah - Print</title>
+                    <title>Data Jamaah Cetak</title>
                     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
                 </head>
                 <body>

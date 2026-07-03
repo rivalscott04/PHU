@@ -13,6 +13,10 @@
     </div>
     <!-- end page title -->
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('home'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     <div class="row">
         <div class="col-xl-4">
             <div class="card overflow-hidden">
@@ -54,7 +58,7 @@
                                             {{ $diajukan }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diajukan
+                                            BA Pbrg. Diajukan
                                         </p>
                                     </div>
                                     <div class="col-6">
@@ -62,7 +66,7 @@
                                             {{ $diproses }}
                                         </h5>
                                         <p class="text-muted mb-0">
-                                            BAP Diproses
+                                            BA Pbrg. Diproses
                                         </p>
                                     </div>
                                 </div>
@@ -123,7 +127,7 @@
                         <div class="card-body">
                             <div class="d-flex">
                                 <div class="flex-grow-1">
-                                    <p class="text-muted fw-medium">BAP Diterima</p>
+                                    <p class="text-muted fw-medium">BA Pbrg. Diterima</p>
                                     <h4 class="mb-0">{{ $selesai }}</h4>
                                 </div>
                                 <div class="flex-shrink-0 align-self-center">

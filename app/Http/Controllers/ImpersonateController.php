@@ -21,7 +21,11 @@ class ImpersonateController extends Controller
      */
     public function index()
     {
-        $users = User::whereIn('role', ['user', 'kabupaten'])->get();
+        $users = User::whereIn('role', User::impersonatableRoles())
+            ->orderBy('role')
+            ->orderBy('nama')
+            ->get();
+
         return view('impersonate.index', compact('users'));
     }
 
@@ -40,9 +44,13 @@ class ImpersonateController extends Controller
             return redirect()->back()->with('error', 'You do not have permission to impersonate users.');
         }
 
-        $this->impersonateManager->take(Auth::user(), $user);
+        if (! $this->impersonateManager->take(Auth::user(), $user)) {
+            return redirect()->back()->with('error', 'Gagal memulai impersonasi. Silakan coba lagi.');
+        }
 
-        return redirect()->route('home')->with('success', 'Now impersonating ' . $user->nama);
+        return redirect()
+            ->route($user->impersonationRedirectRoute())
+            ->with('success', 'Sekarang masuk sebagai '.$user->nama);
     }
 
     /**
@@ -50,8 +58,12 @@ class ImpersonateController extends Controller
      */
     public function leave()
     {
+        $wasAdmin = $this->impersonateManager->getImpersonator()?->isAdmin() ?? false;
+
         $this->impersonateManager->leave();
 
-        return redirect()->route('home')->with('success', 'Impersonation ended.');
+        return redirect()
+            ->route($wasAdmin ? 'users.index' : 'home')
+            ->with('success', 'Impersonasi diakhiri.');
     }
 } 

@@ -19,27 +19,6 @@
         default => 'Belum dihitung',
     };
 
-    $statusLabels = [
-        'DRAFT' => 'Draf',
-        'SCHEDULED' => 'Terjadwal',
-        'ON_PROGRESS' => 'Berlangsung',
-        'WAITING_FOLLOWUP' => 'Menunggu TL',
-        'FOLLOWUP_UPLOADED' => 'TL Diunggah',
-        'VERIFIED' => 'Terverifikasi',
-        'CLOSED' => 'Selesai',
-        'CANCELLED' => 'Dibatalkan',
-    ];
-    $statusBadges = [
-        'DRAFT' => 'secondary',
-        'SCHEDULED' => 'info',
-        'ON_PROGRESS' => 'primary',
-        'WAITING_FOLLOWUP' => 'warning',
-        'FOLLOWUP_UPLOADED' => 'info',
-        'VERIFIED' => 'success',
-        'CLOSED' => 'success',
-        'CANCELLED' => 'dark',
-    ];
-
     $kpiCards = [
         ['key' => 'total_pengawasan', 'label' => 'Pengawasan', 'icon' => 'bx-search-alt', 'color' => '#556ee6'],
         ['key' => 'temuan_aktif', 'label' => 'Temuan Aktif', 'icon' => 'bx-error-circle', 'color' => '#f46a6a'],
@@ -121,11 +100,11 @@
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Pimpinan</p>
-                            <p class="mb-0 fw-medium">{{ $travel->Pimpinan ?: '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ $travel->Pimpinan ?: 'Tidak ada' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Telepon</p>
-                            <p class="mb-0 fw-medium">{{ $travel->Telepon ?: '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ $travel->Telepon ?: 'Tidak ada' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Jenis Layanan</p>
@@ -133,7 +112,7 @@
                                 @forelse ($travel->getAvailableServices() as $service)
                                     <span class="badge bg-light text-dark border me-1">{{ $service }}</span>
                                 @empty
-                                    <span class="text-muted">—</span>
+                                    <span class="text-muted">Tidak ada</span>
                                 @endforelse
                             </p>
                         </div>
@@ -202,13 +181,15 @@
                             <tbody>
                                 @forelse ($inspection_history as $item)
                                     @php
-                                        $status = $item->status?->value ?? $item->status;
-                                        $statusText = $statusLabels[$status] ?? $status;
-                                        $statusColor = $statusBadges[$status] ?? 'secondary';
+                                        $statusEnum = $item->status instanceof \App\Enums\InspectionStatus
+                                            ? $item->status
+                                            : \App\Enums\InspectionStatus::tryFrom((string) ($item->status?->value ?? $item->status));
+                                        $statusText = $statusEnum?->label() ?? ($item->status?->value ?? $item->status);
+                                        $statusColor = $statusEnum?->badgeColor() ?? 'secondary';
                                     @endphp
                                     <tr>
                                         <td class="ps-3 fw-medium">{{ $item->inspection_no }}</td>
-                                        <td class="text-muted">{{ optional($item->inspection_date)->format('d M Y') ?? '—' }}</td>
+                                        <td class="text-muted">{{ optional($item->inspection_date)->format('d M Y') ?? 'Tidak ada' }}</td>
                                         <td><span class="badge bg-{{ $statusColor }}">{{ $statusText }}</span></td>
                                         <td class="text-end pe-3">
                                             <a href="{{ route('v2.pengawasan.show', $item) }}" class="btn btn-sm btn-link text-primary p-0">

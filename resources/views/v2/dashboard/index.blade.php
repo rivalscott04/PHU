@@ -16,6 +16,10 @@
         </div>
     </div>
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_dashboard'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     <div class="card mb-3">
         <div class="card-body">
             <form id="dashboard-filter-form" class="row g-2">

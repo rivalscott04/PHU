@@ -185,8 +185,8 @@
                             <label for="statusSelect" class="form-label">Status <span class="text-danger">*</span></label>
                             <select class="form-select" id="statusSelect" name="Status" required>
                                 <option value="">Pilih Status</option>
-                                <option value="PPIU">PPIU - Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)</option>
-                                <option value="PIHK">PIHK - Penyelenggara Ibadah Haji Khusus (Haji & Umrah)</option>
+                                <option value="PPIU">PPIU: Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)</option>
+                                <option value="PIHK">PIHK: Penyelenggara Ibadah Haji Khusus (Haji & Umrah)</option>
                             </select>
                         </div>
                         

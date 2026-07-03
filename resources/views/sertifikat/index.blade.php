@@ -21,6 +21,10 @@
             </div>
         </div>
 
+        @if($guide = \App\Support\RoleWorkflowGuide::for('sertifikat'))
+            @include('partials.workflow-guide', ['guide' => $guide])
+        @endif
+
         <div class="row">
             <div class="col-12">
                 <div class="card">

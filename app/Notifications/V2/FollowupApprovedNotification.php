@@ -21,7 +21,7 @@ class FollowupApprovedNotification extends V2DatabaseNotification
             'message' => "Tindak lanjut untuk temuan \"{$finding?->title}\" telah disetujui.",
             'module' => 'followup',
             'action' => 'approved',
-            'url' => route('v2.followup.show', $this->followup),
+            'url' => $this->actionUrl('v2.followup.show', $this->followup),
             'meta' => [
                 'followup_id' => $this->followup->id,
                 'finding_id' => $finding?->id,

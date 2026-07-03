@@ -22,7 +22,7 @@ trait SeedsUsers
         if (empty($attributes['nama'])) {
             $attributes['nama'] = trim(
                 ($attributes['firstname'] ?? '').' '.($attributes['lastname'] ?? '')
-            ) ?: ($attributes['username'] ?? 'User PHU');
+            ) ?: ($attributes['username'] ?? 'User PANTAU');
         }
 
         unset($attributes['username'], $attributes['firstname'], $attributes['lastname'], $attributes['slug']);

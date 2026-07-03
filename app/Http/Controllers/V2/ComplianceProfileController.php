@@ -8,6 +8,7 @@ use App\Models\TravelCompany;
 use App\Policies\CompliancePolicy;
 use App\Services\ComplianceService;
 use App\Support\RequestScope;
+use App\Support\ResourceAccess;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -40,6 +41,8 @@ class ComplianceProfileController extends Controller
 
         if ($scope->kabupaten) {
             $query->where('kab_kota', $scope->kabupaten);
+        } elseif ($scope->kabupatens) {
+            $query->whereIn('kab_kota', $scope->kabupatens);
         }
 
         if ($scope->travelId) {
@@ -57,7 +60,7 @@ class ComplianceProfileController extends Controller
 
     public function show(Request $request, TravelCompany $travel)
     {
-        abort_unless((new CompliancePolicy())->view($request->user(), $travel), 403);
+        ResourceAccess::denyUnless((new CompliancePolicy())->view($request->user(), $travel));
 
         $profile = $this->complianceService->getProfile($travel->id);
 

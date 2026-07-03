@@ -11,11 +11,12 @@
                     </a>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
                     <form method="POST" action="{{ route('kabupaten.store') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nama" class="form-label">Nama</label>
+                                <label for="nama" class="form-label">Nama @include('partials.required-star')</label>
                                 <input type="text" class="form-control @error('nama') is-invalid @enderror" 
                                        id="nama" name="nama" value="{{ old('nama') }}" required>
                                 @error('nama')
@@ -23,7 +24,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="email" class="form-label">Email</label>
+                                <label for="email" class="form-label">Email @include('partials.required-star')</label>
                                 <input type="email" class="form-control @error('email') is-invalid @enderror" 
                                        id="email" name="email" value="{{ old('email') }}" required>
                                 @error('email')
@@ -31,7 +32,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nomor_hp" class="form-label">Nomor HP</label>
+                                <label for="nomor_hp" class="form-label">Nomor HP @include('partials.required-star')</label>
                                 <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" 
                                        id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" required>
                                 @error('nomor_hp')
@@ -39,7 +40,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="kabupaten" class="form-label">Kabupaten/Kota</label>
+                                <label for="kabupaten" class="form-label">Kabupaten/Kota @include('partials.required-star')</label>
                                 <input type="text" class="form-control @error('kabupaten') is-invalid @enderror" 
                                        id="kabupaten" name="kabupaten" value="{{ old('kabupaten') }}" 
                                        placeholder="Contoh: Lombok Barat, Bima, Sumbawa" required>
@@ -48,7 +49,7 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password</label>
+                                <label for="password" class="form-label">Password @include('partials.required-star')</label>
                                 <input type="password" class="form-control @error('password') is-invalid @enderror" 
                                        id="password" name="password" required>
                                 @error('password')

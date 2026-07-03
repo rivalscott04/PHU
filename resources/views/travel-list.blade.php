@@ -3,12 +3,13 @@
 
 <head>
     <meta charset="utf-8" />
-    <title>Data Tables | UHK Kanwil NTB - Admin & Dashboard Template</title>
+    <title>Data Tables | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta content="Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
-    <meta content="Kanwil Kementerian Haji NTB" name="author" />
+    <meta content="Kanwil Kementerian Haji dan Umroh NTB" name="author" />
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}" />
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/favicon.ico') }}">
 
     <!-- DataTables -->
     <link href="{{ asset('libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"

@@ -293,7 +293,6 @@
 @endpush
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Real-time search and filter functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -464,45 +463,6 @@
             // Initialize sort indicators
             updateSortIndicators();
         });
-
-        // Existing functions for modals and confirmations
-        function confirmImpersonate(event, username) {
-            event.preventDefault();
-            
-            Swal.fire({
-                title: "Impersonate User?",
-                text: `Anda akan masuk sebagai ${username}. Anda dapat melihat sistem dari perspektif user ini.`,
-                icon: "question",
-                showCancelButton: true,
-                confirmButtonColor: "#34c38f",
-                cancelButtonColor: "#f46a6a",
-                confirmButtonText: "Ya, impersonate!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = event.target.href;
-                }
-            });
-            
-            return false;
-        }
-
-        function confirmDelete(userId, username) {
-            Swal.fire({
-                title: "Apakah Anda yakin?",
-                text: `User ${username} akan dihapus secara permanen!`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#f46a6a",
-                cancelButtonColor: "#34c38f",
-                confirmButtonText: "Ya, hapus!",
-                cancelButtonText: "Batal"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`delete-form-${userId}`).submit();
-                }
-            });
-        }
 
         @if(session('success'))
             Swal.fire({

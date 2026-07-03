@@ -15,6 +15,11 @@ class DashboardController extends Controller
         if (!$user) {
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
+
+        $landingRoute = $user->impersonationRedirectRoute();
+        if ($landingRoute !== 'home') {
+            return redirect()->route($landingRoute);
+        }
         
         // Get monthly data for the stacked column chart
         $monthlyData = collect(range(1, 12))->map(function ($month) use ($user) {

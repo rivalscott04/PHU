@@ -21,23 +21,24 @@
                         XLSX</button>
                 </div>
                 <div class="card-body">
+                    <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
                     <form method="POST" action="{{ route('jamaah.umrah.store') }}">
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="nik" class="form-label">NIK</label>
+                                <label for="nik" class="form-label">NIK @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="nik" name="nik" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nama" class="form-label">Nama</label>
+                                <label for="nama" class="form-label">Nama @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="nama" name="nama" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="alamat" class="form-label">Alamat</label>
+                                <label for="alamat" class="form-label">Alamat @include('partials.required-star')</label>
                                 <textarea class="form-control" id="alamat" name="alamat" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="nomor_hp" class="form-label">Nomor HP</label>
+                                <label for="nomor_hp" class="form-label">Nomor HP @include('partials.required-star')</label>
                                 <input type="text" class="form-control" id="nomor_hp" name="nomor_hp" required>
                             </div>
                         </div>

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\BAP;
 use App\Models\User;
 use App\Models\Jamaah;
+use App\Models\CabangTravel;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use App\Support\PublicTrustIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -126,48 +128,39 @@ class AuthController extends Controller
 
     public function showLanding()
     {
-        $bapData = Bap::select('ppiuname', 'airlines', 'datetime', 'returndate', 'airlines2')
-            ->orderBy('datetime', 'asc')
+        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+            ->with('riskScore')
+            ->orderBy('Penyelenggara')
             ->get();
 
-        $user = auth()->user();
-        
-        // Check if user is authenticated before accessing role
-        if ($user && $user->role === 'admin') {
-            // Admin can see all travel companies - optimized query
-            $travelData = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')->get();
-        } else if ($user && $user->role === 'kabupaten') {
-            // Kabupaten users can only see travel companies in their area - optimized query
-            $travelData = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
-                ->where('kab_kota', $user->kabupaten)->get();
-        } else {
-            // Other roles or unauthenticated users see empty data
-            $travelData = collect();
-        }
+        $travels = $travelPusat->map(function ($travel) {
+            $travel->trust = PublicTrustIndex::fromRiskScore($travel->riskScore);
 
-        $jamaahHaji = DB::table('jamaah')
-            ->where('jenis_jamaah', 'haji')
-            ->count();
+            return $travel;
+        });
 
-        // Menghitung jumlah jamaah umrah
-        $jamaahUmrah = DB::table('jamaah')
-            ->where('jenis_jamaah', 'umrah')
-            ->count();
+        $travelCabang = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
 
-        // Add these counts
+        $jamaahCounts = DB::table('jamaah')
+            ->selectRaw("SUM(CASE WHEN jenis_jamaah = 'haji' THEN 1 ELSE 0 END) as haji")
+            ->selectRaw("SUM(CASE WHEN jenis_jamaah = 'umrah' THEN 1 ELSE 0 END) as umrah")
+            ->first();
+
         $stats = [
-            'travelCount' => TravelCompany::count() + \App\Models\CabangTravel::count(),
-            'jamaahHajiCount' =>  $jamaahHaji,
-            'jamaahUmrahCount' =>  $jamaahUmrah,
-            'airlineCount' => Bap::distinct('airlines')->count()
+            'travelCount' => $travelPusat->count() + $travelCabang->count(),
+            'jamaahHajiCount' => (int) ($jamaahCounts->haji ?? 0),
+            'jamaahUmrahCount' => (int) ($jamaahCounts->umrah ?? 0),
+            'airlineCount' => BAP::distinct('airlines')->count('airlines'),
         ];
 
-        // Get all travels (pusat + cabang) for form pengaduan - optimized queries
-        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
-        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
-        $travels = $travelPusat->concat($travelCabang);
+        $allKabupatens = $travelPusat->pluck('kab_kota')
+            ->merge($travelCabang->pluck('kabupaten'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
-        return view('welcome', compact('bapData', 'travelData', 'stats', 'travels', 'travelPusat', 'travelCabang'));
+        return view('welcome', compact('stats', 'travels', 'travelPusat', 'travelCabang', 'allKabupatens'));
     }
 
     public function showListTravel()
@@ -188,80 +181,5 @@ class AuthController extends Controller
         }
         
         return view('travel-list', compact('data'));
-    }
-
-    public function showPublicListTravel()
-    {
-        // Public access - show all travel companies (pusat + cabang) without authentication - optimized queries with pagination
-        // Get all data in single queries to prevent N+1 issues
-        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status', 'Pimpinan', 'telepon', 'alamat_kantor_baru', 'alamat_kantor_lama', 'nilai_akreditasi', 'Tanggal')
-            ->get()
-            ->map(function($item) {
-                $item->type = 'pusat';
-                // Ensure Tanggal is properly cast to Carbon
-                if ($item->Tanggal && is_string($item->Tanggal)) {
-                    $item->Tanggal = \Carbon\Carbon::parse($item->Tanggal);
-                }
-                return $item;
-            });
-            
-        $travelCabang = \App\Models\CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pimpinan_cabang', 'telepon', 'alamat_cabang', 'SK_BA', 'tanggal')
-            ->get()
-            ->map(function($item) {
-                $item->type = 'cabang';
-                $item->id = $item->id_cabang; // Normalize ID field
-                // Ensure tanggal is properly cast to Carbon
-                if ($item->tanggal && is_string($item->tanggal)) {
-                    $item->tanggal = \Carbon\Carbon::parse($item->tanggal);
-                }
-                return $item;
-            });
-        
-        // Pre-calculate unique kabupatens to avoid N+1 in view
-        $allKabupatens = $travelPusat->pluck('kab_kota')
-            ->merge($travelCabang->pluck('kabupaten'))
-            ->filter()
-            ->unique()
-            ->sort()
-            ->values();
-        
-        // Calculate stats efficiently
-        $stats = [
-            'total' => $travelPusat->count() + $travelCabang->count(),
-            'ppiu' => $travelPusat->where('Status', 'PPIU')->count(),
-            'pihk' => $travelPusat->where('Status', 'PIHK')->count(),
-            'pusat' => $travelPusat->count(),
-            'cabang' => $travelCabang->count(),
-            'kabupaten' => $allKabupatens->count()
-        ];
-        
-        // Combine and paginate
-        $allTravels = $travelPusat->concat($travelCabang);
-        
-        // Create a custom paginator
-        $perPage = 6; // Show 6 items per page
-        $currentPage = request()->get('page', 1);
-        $total = $allTravels->count();
-        $items = $allTravels->forPage($currentPage, $perPage);
-        
-        // Create pagination data
-        $pagination = new \Illuminate\Pagination\LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $currentPage,
-            [
-                'path' => request()->url(),
-                'pageName' => 'page',
-            ]
-        );
-        
-        return view('travel-list-public', [
-            'data' => $pagination->items(),
-            'pagination' => $pagination,
-            'totalCount' => $total,
-            'allKabupatens' => $allKabupatens,
-            'stats' => $stats
-        ]);
     }
 }

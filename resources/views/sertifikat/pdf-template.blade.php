@@ -167,7 +167,7 @@
             
             <div class="main-text">
                 <div class="keputusan">
-                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Agama Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
+                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
                 </div>
                 
                 <div class="detail-row">
@@ -205,7 +205,7 @@
                 </div>
                 
                 <div class="title">
-                    Kepala Kantor Wilayah Kementerian Agama<br>
+                    Kepala Kantor Wilayah Kementerian Haji dan Umroh<br>
                     Provinsi Nusa Tenggara Barat,
                 </div>
                 

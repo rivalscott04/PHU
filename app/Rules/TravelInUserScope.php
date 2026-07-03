@@ -16,10 +16,10 @@ class TravelInUserScope implements ValidationRule
             return;
         }
 
-        if ($user->role === 'kabupaten') {
+        if ($user->role === 'pengawas') {
             $travel = TravelCompany::find($value);
 
-            if (! $travel || $travel->kab_kota !== $user->getKabupaten()) {
+            if (! $travel || ! $user->canAccessKabupaten($travel->kab_kota)) {
                 $fail('Travel tidak berada dalam wilayah Anda.');
             }
 

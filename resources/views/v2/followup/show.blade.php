@@ -48,6 +48,22 @@
         </div>
     </div>
 
+    @can('approve', $followup)
+        <div class="alert alert-light border mb-3">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <span>
+                    <i class="bx bx-directions text-primary me-1"></i>
+                    <strong>Langkah verifikasi:</strong>
+                    periksa lampiran di bawah, lalu klik <strong>Setujui</strong> atau <strong>Minta Revisi</strong>.
+                    Antrian terkait selesai otomatis setelah disetujui.
+                </span>
+                <a href="{{ route('v2.antrian.index', ['type' => 'verifikasi_followup']) }}" class="btn btn-sm btn-outline-success">
+                    <i class="bx bx-list-check me-1"></i> Kembali ke Antrian
+                </a>
+            </div>
+        </div>
+    @endcan
+
     <div class="row mb-3">
         <div class="col-lg-8 mb-3 mb-lg-0">
             <div class="card border-0 shadow-sm h-100">
@@ -58,23 +74,23 @@
                     <div class="row g-3">
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">No. Pengawasan</p>
-                            <p class="mb-0 fw-medium">{{ $inspection?->inspection_no ?? '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ $inspection?->inspection_no ?? 'Tidak ada' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Tanggal Pengawasan</p>
-                            <p class="mb-0 fw-medium">{{ optional($inspection?->inspection_date)->format('d M Y') ?? '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ optional($inspection?->inspection_date)->format('d M Y') ?? 'Tidak ada' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Travel</p>
-                            <p class="mb-0 fw-medium">{{ $travel?->Penyelenggara ?? '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ $travel?->Penyelenggara ?? 'Tidak ada' }}</p>
                         </div>
                         <div class="col-sm-6">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Kabupaten</p>
-                            <p class="mb-0 fw-medium">{{ $travel?->kab_kota ?? '—' }}</p>
+                            <p class="mb-0 fw-medium">{{ $travel?->kab_kota ?? 'Tidak ada' }}</p>
                         </div>
                         <div class="col-12">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Rekomendasi</p>
-                            <p class="mb-0 text-body-secondary">{{ $followup->finding?->recommendation ?? '—' }}</p>
+                            <p class="mb-0 text-body-secondary">{{ $followup->finding?->recommendation ?? 'Tidak ada' }}</p>
                         </div>
                         <div class="col-12">
                             <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.04em;">Deskripsi Tindak Lanjut</p>
@@ -133,6 +149,41 @@
                     <i class="bx bx-revision me-1"></i> Minta Revisi
                 </button>
             </form>
+        </div>
+    </div>
+    @elseif(in_array($status, ['VERIFIED', 'CLOSED'], true))
+    @php
+        $inspectionStatus = $inspection?->status?->value ?? $inspection?->status;
+        $canCloseInspection = in_array(auth()->user()->role, ['admin', 'pengawas'], true)
+            && $inspection
+            && $inspectionStatus !== 'CLOSED';
+    @endphp
+    <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-transparent border-bottom">
+            <h5 class="mb-0 fw-semibold">Status Verifikasi</h5>
+        </div>
+        <div class="card-body">
+            @if($status === 'VERIFIED')
+                <div class="alert alert-success mb-0">
+                    <i class="bx bx-check-circle me-1"></i>
+                    Tindak lanjut ini sudah <strong>terverifikasi</strong> dan tidak dapat diubah lagi.
+                    @if($canCloseInspection)
+                        <hr class="my-2">
+                        <span class="d-block mb-2">Pengawasan belum ditutup. Untuk menyelesaikan alur, ubah status pengawasan menjadi <strong>Selesai</strong>:</span>
+                        <a href="{{ route('v2.pengawasan.edit', $inspection) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bx bx-edit me-1"></i> Tutup Pengawasan
+                        </a>
+                    @elseif($inspectionStatus === 'CLOSED')
+                        <hr class="my-2">
+                        Pengawasan terkait sudah ditutup. Alur tindak lanjut selesai.
+                    @endif
+                </div>
+            @else
+                <div class="alert alert-secondary mb-0">
+                    <i class="bx bx-archive me-1"></i>
+                    Tindak lanjut ini sudah <strong>selesai</strong> dan tidak dapat diubah lagi.
+                </div>
+            @endif
         </div>
     </div>
     @endcan
