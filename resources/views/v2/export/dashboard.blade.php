@@ -159,7 +159,7 @@
                     <tr>
                         <td>{{ $row['travel'] ?? '-' }}</td>
                         <td>{{ $row['total_score'] ?? '-' }}</td>
-                        <td>{{ $row['risk_level'] ?? '-' }}</td>
+                        <td>{{ \App\Enums\RiskLevel::labelFor($row['risk_level'] ?? null) }}</td>
                     </tr>
                 @endforeach
             </tbody>

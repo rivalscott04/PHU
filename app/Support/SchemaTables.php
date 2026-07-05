@@ -37,6 +37,12 @@ final class SchemaTables
         return self::$cache[$table] = Schema::hasTable($table);
     }
 
+    public static function resetCache(): void
+    {
+        self::$cache = [];
+        self::$booted = false;
+    }
+
     private static function boot(): void
     {
         if (self::$booted) {
@@ -44,6 +50,14 @@ final class SchemaTables
         }
 
         self::$booted = true;
+
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            foreach (self::KNOWN_TABLES as $table) {
+                self::$cache[$table] = Schema::hasTable($table);
+            }
+
+            return;
+        }
 
         $rows = DB::select(
             'SELECT TABLE_NAME AS table_name FROM information_schema.tables WHERE table_schema = ? AND TABLE_NAME IN ('.implode(', ', array_fill(0, count(self::KNOWN_TABLES), '?')).')',

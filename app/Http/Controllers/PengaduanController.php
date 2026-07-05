@@ -237,23 +237,38 @@ class PengaduanController extends Controller
     }
 
     /**
-     * API: Get completed pengaduan for modal
+     * API: Get completed pengaduan for public riwayat tab (paginated).
      */
-    public function getCompletedPengaduan()
+    public function getCompletedPengaduan(Request $request)
     {
         try {
-            $completedPengaduan = Pengaduan::with(['travel:id,Penyelenggara'])
+            $perPage = min(max((int) $request->integer('per_page', 6), 1), 20);
+            $page = max((int) $request->integer('page', 1), 1);
+
+            $paginator = Pengaduan::query()
+                ->with(['travel:id,Penyelenggara'])
                 ->select('id', 'travels_id', 'hal_aduan', 'completed_at', 'public_token')
                 ->where('status', 'completed')
                 ->orderByDesc('completed_at')
-                ->get();
+                ->paginate(perPage: $perPage, page: $page);
 
-            return response()->json($completedPengaduan);
+            return response()->json([
+                'data' => $paginator->items(),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'per_page' => $paginator->perPage(),
+                    'total' => $paginator->total(),
+                    'from' => $paginator->firstItem(),
+                    'to' => $paginator->lastItem(),
+                ],
+            ]);
         } catch (\Exception $e) {
-            \Log::error('Error in getCompletedPengaduan: ' . $e->getMessage());
+            \Log::error('Error in getCompletedPengaduan: '.$e->getMessage());
+
             return response()->json([
                 'error' => 'Terjadi kesalahan saat mengambil data pengaduan',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

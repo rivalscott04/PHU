@@ -126,6 +126,7 @@ class WorkQueueService
         $riskScore->loadMissing('travel');
         $travel = $riskScore->travel;
         $priority = $level === RiskLevel::Critical->value ? 90 : 70;
+        $levelLabel = RiskLevel::tryFrom($level)?->label() ?? $level;
 
         return $this->repository->upsert(
             [
@@ -137,7 +138,7 @@ class WorkQueueService
                 'priority' => $priority,
                 'travel_id' => $riskScore->travel_id,
                 'kabupaten' => $travel?->kab_kota,
-                'title' => 'Skor risiko '.$level.': '.($travel?->Penyelenggara ?? 'Travel'),
+                'title' => 'Skor risiko '.$levelLabel.': '.($travel?->Penyelenggara ?? 'Travel'),
                 'summary' => "Total skor {$riskScore->total_score} poin. Perlu monitoring intensif atau jadwalkan inspeksi.",
                 'action_url' => route('v2.risk.show', $riskScore->travel_id),
                 'status' => WorkQueueStatus::Open->value,

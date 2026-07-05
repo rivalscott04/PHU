@@ -7,7 +7,11 @@
         "e2e": "playwright test e2e/journey --config=e2e/playwright.config.ts",
         "e2e:matrix": "playwright test e2e/role-login.spec.ts e2e/role-pages.spec.ts --config=e2e/playwright.config.ts",
         "e2e:ui": "playwright test --config=e2e/playwright.config.ts --ui",
-        "e2e:prepare": "bash scripts/e2e-prepare.sh"
+        "e2e:prepare": "bash scripts/e2e-prepare.sh",
+        "demo:pengawasan:prepare": "bash scripts/demo-pengawasan-prepare.sh",
+        "demo:pengawasan:shots": "HEADLESS=1 playwright test e2e/journey/pengawasan-demo-pimpinan.spec.ts --config=e2e/playwright.config.ts",
+        "demo:pengawasan:ppt": "python3 scripts/build-pengawasan-ppt.py",
+        "demo:pengawasan": "npm run demo:pengawasan:shots && npm run demo:pengawasan:ppt"
     },
     "devDependencies": {
         "@playwright/test": "^1.49.0",

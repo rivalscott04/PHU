@@ -643,6 +643,78 @@
         .section-title {
             padding-bottom: min(4vw, 50px) !important;
         }
+
+        .riwayat-pengaduan-panel .table {
+            margin-bottom: 0;
+        }
+
+        .riwayat-pengaduan-panel .table thead th {
+            font-size: 0.72rem;
+            padding: 0.65rem 0.75rem;
+            border-bottom-width: 1px;
+        }
+
+        .riwayat-pengaduan-panel .table tbody td {
+            padding: 0.7rem 0.75rem;
+            vertical-align: middle;
+            font-size: 0.875rem;
+        }
+
+        .riwayat-pengaduan-panel .col-aksi {
+            width: 1%;
+            white-space: nowrap;
+            text-align: center;
+        }
+
+        .riwayat-pengaduan-panel .col-hal {
+            max-width: 320px;
+        }
+
+        .riwayat-pengaduan-panel .col-hal p {
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: var(--phu-text-muted, #6c757d);
+            line-height: 1.45;
+        }
+
+        .btn-riwayat-pdf {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.2rem 0.55rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            line-height: 1.2;
+            border-radius: 6px;
+            min-height: auto;
+            height: auto;
+        }
+
+        .riwayat-pengaduan-panel .pagination {
+            margin-bottom: 0;
+        }
+
+        .riwayat-pengaduan-panel .pagination .page-link {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.65rem;
+            color: var(--phu-accent, #e2a712);
+            border-color: var(--phu-border, #dee2e6);
+        }
+
+        .riwayat-pengaduan-panel .pagination .page-item.active .page-link {
+            background-color: var(--phu-accent, #e2a712);
+            border-color: var(--phu-accent, #e2a712);
+            color: #fff;
+        }
+
+        .riwayat-pengaduan-meta {
+            font-size: 0.8rem;
+            color: var(--phu-text-muted, #6c757d);
+        }
     </style>
     @include('partials.public-trust-styles')
 </head>
@@ -1267,13 +1339,15 @@
                     <div class="tab-pane fade" id="riwayat-pengaduan" role="tabpanel">
                         <div class="row">
                             <div class="col-12">
-                                <div class="card border-0 shadow-sm" data-aos="fade-up" data-aos-delay="200">
-                                    <div class="card-body p-4">
-                                        <div class="text-center" id="riwayatContent">
-                                            <div class="spinner-border text-primary" role="status">
-                                                <span class="visually-hidden">Loading...</span>
+                                <div class="card border-0 shadow-sm riwayat-pengaduan-panel" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="card-body p-3 p-md-4">
+                                        <div id="riwayatContent">
+                                            <div class="text-center py-4">
+                                                <div class="spinner-border text-primary" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <p class="mt-3 text-muted mb-0">Memuat data pengaduan...</p>
                                             </div>
-                                            <p class="mt-3 text-muted">Memuat data pengaduan...</p>
                                         </div>
                                     </div>
                                 </div>
@@ -1829,12 +1903,15 @@
             }
         }
 
+        const RIWAYAT_PER_PAGE = 6;
+        let riwayatCurrentPage = 1;
+
         // Tab navigation handler and form validation
         document.addEventListener('DOMContentLoaded', function() {
             const riwayatTab = document.getElementById('riwayat-tab');
             if (riwayatTab) {
-                riwayatTab.addEventListener('click', function() {
-                    loadRiwayatPengaduan();
+                riwayatTab.addEventListener('shown.bs.tab', function() {
+                    loadRiwayatPengaduan(riwayatCurrentPage);
                 });
             }
 
@@ -1947,59 +2024,74 @@
             }
         }
 
-        function loadRiwayatPengaduan() {
+        function loadRiwayatPengaduan(page = 1) {
             const riwayatContent = document.getElementById('riwayatContent');
-            
-            // Show loading state
+            riwayatCurrentPage = page;
+
             riwayatContent.innerHTML = `
-                <div class="text-center">
+                <div class="text-center py-4">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3 text-muted">Memuat data pengaduan...</p>
+                    <p class="mt-3 text-muted mb-0">Memuat data pengaduan...</p>
                 </div>
             `;
-            
-            // Fetch completed pengaduan data
-            fetch('/api/pengaduan-completed')
+
+            fetch(`/api/pengaduan-completed?page=${page}&per_page=${RIWAYAT_PER_PAGE}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
                     }
                     return response.json();
                 })
-                .then(data => {
+                .then(payload => {
+                    const data = payload.data || [];
+                    const meta = payload.meta || {};
+
                     if (data.length > 0) {
-                        let html = '<div class="table-responsive"><table class="table table-hover">';
-                        html += '<thead><tr><th>No</th><th>Travel</th><th>Hal Pengaduan</th><th>Tanggal Selesai</th><th>Aksi</th></tr></thead><tbody>';
-                        
+                        const rowOffset = meta.from ? meta.from - 1 : (page - 1) * RIWAYAT_PER_PAGE;
+                        let html = '<div class="table-responsive"><table class="table table-hover align-middle mb-0">';
+                        html += '<thead><tr>';
+                        html += '<th class="text-center" style="width:3rem;">No</th>';
+                        html += '<th>Travel</th>';
+                        html += '<th class="col-hal">Hal Pengaduan</th>';
+                        html += '<th style="width:7.5rem;">Tanggal Selesai</th>';
+                        html += '<th class="col-aksi">Aksi</th>';
+                        html += '</tr></thead><tbody>';
+
                         data.forEach((item, index) => {
                             const travelName = item.travel ? item.travel.Penyelenggara : 'Tidak diketahui';
                             const halAduan = item.hal_aduan ? item.hal_aduan : 'Tidak ada detail';
-                            const completedDate = item.completed_at ? new Date(item.completed_at).toLocaleDateString('id-ID') : 'Tidak diketahui';
-                            
+                            const completedDate = item.completed_at
+                                ? new Date(item.completed_at).toLocaleDateString('id-ID')
+                                : 'Tidak diketahui';
+                            const pdfUrl = item.public_token
+                                ? `/public/pengaduan/${item.public_token}/download-pdf`
+                                : '#';
+
                             html += `<tr>
-                                <td>${index + 1}</td>
+                                <td class="text-center text-muted">${rowOffset + index + 1}</td>
                                 <td><span class="phu-table-link">${travelName}</span></td>
-                                <td style="max-width: 300px; word-wrap: break-word; text-align: left;"><span class="text-muted">${halAduan}</span></td>
+                                <td class="col-hal"><p>${halAduan}</p></td>
                                 <td><small class="text-muted">${completedDate}</small></td>
-                                <td>
-                                    <button type="button" class="btn btn-success btn-sm" 
-                                            onclick="downloadPDF(${item.id})">
-                                        <i class="bi bi-download me-1"></i> PDF
-                                    </button>
+                                <td class="col-aksi">
+                                    <a href="${pdfUrl}" class="btn btn-outline-success btn-riwayat-pdf" target="_blank" rel="noopener noreferrer" title="Unduh PDF">
+                                        <i class="bi bi-file-earmark-pdf"></i>
+                                        <span>PDF</span>
+                                    </a>
                                 </td>
                             </tr>`;
                         });
-                        
+
                         html += '</tbody></table></div>';
+                        html += renderRiwayatPagination(meta);
                         riwayatContent.innerHTML = html;
                     } else {
                         riwayatContent.innerHTML = `
                             <div class="text-center py-4">
                                 <i class="bi bi-info-circle text-muted" style="font-size: 3rem;"></i>
                                 <h5 class="text-muted mt-3">Belum ada pengaduan yang selesai diproses</h5>
-                                <p class="text-muted">Pengaduan yang sudah selesai akan ditampilkan di sini</p>
+                                <p class="text-muted mb-0">Pengaduan yang sudah selesai akan ditampilkan di sini</p>
                             </div>
                         `;
                     }
@@ -2011,7 +2103,7 @@
                             <i class="bi bi-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
                             <h5 class="text-danger mt-3">Terjadi kesalahan</h5>
                             <p class="text-muted">Gagal memuat data pengaduan. Silakan coba lagi nanti.</p>
-                            <button type="button" class="btn btn-primary btn-sm" onclick="loadRiwayatPengaduan()">
+                            <button type="button" class="btn btn-primary btn-sm" onclick="loadRiwayatPengaduan(${page})">
                                 <i class="bi bi-arrow-clockwise me-1"></i>Coba Lagi
                             </button>
                         </div>
@@ -2019,17 +2111,56 @@
                 });
         }
 
-        // Keep the old function for backward compatibility (if needed)
-        function openPengaduanModal() {
-            // Redirect to riwayat tab
-            const riwayatTab = document.getElementById('riwayat-tab');
-            if (riwayatTab) {
-                riwayatTab.click();
+        function renderRiwayatPagination(meta) {
+            const current = meta.current_page || 1;
+            const last = meta.last_page || 1;
+            const total = meta.total || 0;
+            const from = meta.from || 0;
+            const to = meta.to || 0;
+
+            if (last <= 1) {
+                return total > 0
+                    ? `<div class="d-flex justify-content-between align-items-center mt-3 riwayat-pengaduan-meta">
+                            <span>Menampilkan ${from}–${to} dari ${total} pengaduan</span>
+                       </div>`
+                    : '';
             }
+
+            let pages = '';
+            const windowSize = 2;
+            const start = Math.max(1, current - windowSize);
+            const end = Math.min(last, current + windowSize);
+
+            if (current > 1) {
+                pages += `<li class="page-item"><button type="button" class="page-link" onclick="loadRiwayatPengaduan(${current - 1})" aria-label="Sebelumnya">&laquo;</button></li>`;
+            }
+
+            for (let i = start; i <= end; i++) {
+                pages += `<li class="page-item ${i === current ? 'active' : ''}">
+                    <button type="button" class="page-link" onclick="loadRiwayatPengaduan(${i})">${i}</button>
+                </li>`;
+            }
+
+            if (current < last) {
+                pages += `<li class="page-item"><button type="button" class="page-link" onclick="loadRiwayatPengaduan(${current + 1})" aria-label="Berikutnya">&raquo;</button></li>`;
+            }
+
+            return `
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3">
+                    <span class="riwayat-pengaduan-meta">Menampilkan ${from}–${to} dari ${total} pengaduan</span>
+                    <nav aria-label="Paginasi riwayat pengaduan">
+                        <ul class="pagination pagination-sm mb-0">${pages}</ul>
+                    </nav>
+                </div>
+            `;
         }
 
-        function downloadPDF(id) {
-            window.open(`/public/pengaduan/${id}/download-pdf`, '_blank', 'noopener,noreferrer');
+        // Keep the old function for backward compatibility (if needed)
+        function openPengaduanModal() {
+            const riwayatTab = document.getElementById('riwayat-tab');
+            if (riwayatTab) {
+                bootstrap.Tab.getOrCreateInstance(riwayatTab).show();
+            }
         }
     </script>
 

@@ -80,7 +80,7 @@ final class RoleRouteMatrix
                 'v2.notifications.index' => $allow,
             ],
             'pimpinan' => [
-                'home' => $allow,
+                'home' => 302,
                 'users.index' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,
@@ -99,7 +99,7 @@ final class RoleRouteMatrix
                 'v2.notifications.index' => $allow,
             ],
             'pengawas' => [
-                'home' => $allow,
+                'home' => 302,
                 'users.index' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,

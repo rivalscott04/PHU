@@ -4,7 +4,7 @@
             <div class="card-header"><h5 class="mb-0">Top 10 Travel Risiko Tinggi</h5></div>
             <div class="card-body p-0">
                 <table class="table table-striped mb-0">
-                    <thead><tr><th>Travel</th><th>Skor</th><th>Level</th></tr></thead>
+                    <thead><tr><th>Travel</th><th>Skor</th><th>Tingkat</th></tr></thead>
                     <tbody>
                         @forelse ($rankings['risk'] ?? [] as $row)
                             <tr>
@@ -16,7 +16,15 @@
                                     @endif
                                 </td>
                                 <td>{{ $row['total_score'] ?? 0 }}</td>
-                                <td><span class="badge bg-warning">{{ $row['risk_level'] ?? '-' }}</span></td>
+                                <td>
+                                    @if (!empty($row['risk_level']))
+                                        <span class="badge bg-{{ \App\Enums\RiskLevel::badgeFor($row['risk_level']) }}">
+                                            {{ \App\Enums\RiskLevel::labelFor($row['risk_level']) }}
+                                        </span>
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="3" class="text-center text-muted">Belum ada data.</td></tr>

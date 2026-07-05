@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ChecklistInputType;
 use App\Enums\FindingStatus;
 use App\Enums\InspectionStatus;
 use App\Models\Inspection;
