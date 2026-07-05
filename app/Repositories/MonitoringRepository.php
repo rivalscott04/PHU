@@ -31,25 +31,52 @@ class MonitoringRepository
             ->with('processedBy:id,nama,role,kabupaten')
             ->orderByDesc('created_at')
             ->get()
-            ->map(fn (Pengaduan $pengaduan) => [
-                'id' => $pengaduan->id,
-                'nama_pengadu' => $pengaduan->nama_pengadu,
-                'hal_aduan' => $pengaduan->hal_aduan,
-                'status' => $pengaduan->status,
-                'status_label' => $pengaduan->getStatusLabel(),
-                'status_badge' => match ($pengaduan->status) {
-                    'pending' => 'warning',
-                    'in_progress' => 'info',
-                    'completed' => 'success',
-                    'rejected' => 'danger',
-                    default => 'secondary',
-                },
-                'admin_notes' => $pengaduan->admin_notes,
-                'has_berkas' => (bool) $pengaduan->berkas_aduan,
-                'created_at' => $pengaduan->created_at?->format('d/m/Y H:i'),
-                'completed_at' => $pengaduan->completed_at?->format('d/m/Y H:i'),
-                'processed_by' => $pengaduan->processedBy?->pengaduanHandlerLabel(),
-            ])
+            ->map(fn (Pengaduan $pengaduan) => $this->formatPengaduanItem($pengaduan))
             ->all();
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getKabupatenPengaduanList(string $kabupaten): array
+    {
+        return Pengaduan::query()
+            ->whereHas('travel', fn ($query) => $query->where('kab_kota', $kabupaten))
+            ->with([
+                'travel:id,Penyelenggara,kab_kota',
+                'processedBy:id,nama,role,kabupaten',
+            ])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (Pengaduan $pengaduan) => $this->formatPengaduanItem($pengaduan, includeTravel: true))
+            ->all();
+    }
+
+    /** @return array<string, mixed> */
+    private function formatPengaduanItem(Pengaduan $pengaduan, bool $includeTravel = false): array
+    {
+        $item = [
+            'id' => $pengaduan->id,
+            'nama_pengadu' => $pengaduan->nama_pengadu,
+            'hal_aduan' => $pengaduan->hal_aduan,
+            'status' => $pengaduan->status,
+            'status_label' => $pengaduan->getStatusLabel(),
+            'status_badge' => match ($pengaduan->status) {
+                'pending' => 'warning',
+                'in_progress' => 'info',
+                'completed' => 'success',
+                'rejected' => 'danger',
+                default => 'secondary',
+            },
+            'admin_notes' => $pengaduan->admin_notes,
+            'has_berkas' => (bool) $pengaduan->berkas_aduan,
+            'created_at' => $pengaduan->created_at?->format('d/m/Y H:i'),
+            'completed_at' => $pengaduan->completed_at?->format('d/m/Y H:i'),
+            'processed_by' => $pengaduan->processedBy?->pengaduanHandlerLabel(),
+        ];
+
+        if ($includeTravel) {
+            $item['travel_name'] = $pengaduan->travel?->Penyelenggara;
+        }
+
+        return $item;
     }
 }

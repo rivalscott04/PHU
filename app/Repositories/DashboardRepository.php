@@ -193,7 +193,6 @@ class DashboardRepository
         if ($expiringCerts > 0) {
             $warnings[] = [
                 'level' => 'critical',
-                'icon' => '🔴',
                 'message' => "{$expiringCerts} travel memiliki izin/sertifikat akan habis dalam 30 hari.",
             ];
         }
@@ -212,7 +211,6 @@ class DashboardRepository
             if ($staleBap > 0) {
                 $warnings[] = [
                     'level' => 'warning',
-                    'icon' => '🟠',
                     'message' => "{$staleBap} BA Pemberangkatan pending lebih dari 7 hari.",
                 ];
             }
@@ -227,7 +225,6 @@ class DashboardRepository
         if ($waitingFollowup > 0) {
             $warnings[] = [
                 'level' => 'caution',
-                'icon' => '🟡',
                 'message' => "{$waitingFollowup} temuan belum ditindaklanjuti travel.",
             ];
         }
@@ -243,7 +240,6 @@ class DashboardRepository
         if ($highRisk > 0) {
             $warnings[] = [
                 'level' => 'critical',
-                'icon' => '🔴',
                 'message' => "{$highRisk} travel memiliki risk score tinggi (≥80).",
             ];
         }
@@ -869,7 +865,7 @@ class DashboardRepository
 
     private function getPengawasanKabupatenChart(DashboardFilter $filter): array
     {
-        $rows = Inspection::query()
+        $counts = Inspection::query()
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
             ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
                 $filter->applyTravelKabKota($q, 'travels.kab_kota');
@@ -877,13 +873,24 @@ class DashboardRepository
             ->when($filter->travelId, fn ($q) => $q->where('pengawasan.travel_id', $filter->travelId))
             ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
             ->groupBy('travels.kab_kota')
-            ->orderByDesc('total')
-            ->limit(10)
-            ->get();
+            ->pluck('total', 'kabupaten');
+
+        $entries = [];
+
+        foreach (\App\Support\NtbKabupatenMap::centroids() as $kabupaten => $coords) {
+            if (! $filter->matchesKabupaten($kabupaten)) {
+                continue;
+            }
+
+            $entries[] = [
+                'kabupaten' => $kabupaten,
+                'total' => (int) ($counts[$kabupaten] ?? 0),
+            ];
+        }
 
         return [
-            'labels' => $rows->pluck('kabupaten')->all(),
-            'series' => $rows->pluck('total')->map(fn ($v) => (int) $v)->all(),
+            'labels' => array_column($entries, 'kabupaten'),
+            'series' => array_column($entries, 'total'),
         ];
     }
 

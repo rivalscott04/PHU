@@ -32,7 +32,7 @@
     <div class="col-12 mb-3">
         <div class="card">
             <div class="card-header"><h5 class="mb-0">Pengawasan per Kabupaten</h5></div>
-            <div class="card-body"><div id="chart-pengawasan-kabupaten" style="min-height:300px;"></div></div>
+            <div class="card-body"><div id="chart-pengawasan-kabupaten" style="min-height:378px;"></div></div>
         </div>
     </div>
 </div>

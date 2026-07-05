@@ -18,7 +18,7 @@ class DashboardService
 
     public function getOverview(DashboardFilter $filter): array
     {
-        return Cache::remember($filter->cacheKey('overview'), self::CACHE_TTL_SECONDS, function () use ($filter) {
+        return Cache::remember($filter->cacheKey('overview_v2'), self::CACHE_TTL_SECONDS, function () use ($filter) {
             return [
                 'stats' => $this->dashboardRepository->getKpiStats($filter),
                 'charts' => $this->dashboardRepository->getCharts($filter),
@@ -44,7 +44,7 @@ class DashboardService
 
     public function getCharts(DashboardFilter $filter): array
     {
-        return Cache::remember($filter->cacheKey('charts'), self::CACHE_TTL_SECONDS, function () use ($filter) {
+        return Cache::remember($filter->cacheKey('charts_v2'), self::CACHE_TTL_SECONDS, function () use ($filter) {
             return $this->dashboardRepository->getCharts($filter);
         });
     }

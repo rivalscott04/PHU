@@ -367,9 +367,10 @@ class RoleWorkflowGuide
             'title' => 'Cara Membaca Dashboard Pengawasan',
             'hint' => 'Ringkasan eksekutif seluruh NTB. Gunakan untuk melihat gambaran besar, bukan untuk menyelesaikan tugas operasional.',
             'steps' => [
-                'Terapkan filter periode sesuai kebutuhan laporan',
-                'Identifikasi wilayah atau travel yang perlu perhatian (peringatan, risiko tinggi)',
-                'Buka Monitoring PPIU untuk detail per penyelenggara',
+                'Terapkan filter periode di bagian atas sesuai kebutuhan laporan',
+                'Tab Ringkasan: baca poin ringkasan eksekutif dan peringatan terlebih dahulu',
+                'Kartu KPI di tab Ringkasan menampilkan angka utama; tab Visualisasi/Kinerja/Detail untuk analisis lebih dalam',
+                'Buka Monitoring PPIU untuk snapshot per penyelenggara travel',
                 'Unduh PDF atau export data untuk keperluan laporan pimpinan',
             ],
             'actions' => [
@@ -386,9 +387,10 @@ class RoleWorkflowGuide
             'title' => 'Cara Menggunakan Monitoring',
             'hint' => 'Pantau ringkasan operasional travel seluruh NTB untuk keperluan laporan eksekutif.',
             'steps' => [
-                'Baca KPI di atas untuk gambaran cepat wilayah',
-                'Klik Data Travel untuk daftar lengkap per penyelenggara',
-                'Gunakan Export untuk unduh data laporan',
+                'Periksa kartu KPI di bawah panduan ini untuk gambaran cepat seluruh NTB',
+                'Baca tabel Data Travel Terbaru untuk snapshot per penyelenggara',
+                'Klik Data Travel untuk daftar lengkap, atau Dashboard untuk analisis eksekutif',
+                'Gunakan Export (Excel/CSV) di kanan atas untuk unduh data laporan',
                 'Untuk tindakan operasional, koordinasikan dengan tim Pengawas',
             ],
             'actions' => [
@@ -408,8 +410,9 @@ class RoleWorkflowGuide
             'title' => 'Cara Membaca Dashboard Pengawasan',
             'hint' => 'Ringkasan eksekutif, gunakan untuk melihat gambaran besar, bukan untuk menyelesaikan tugas harian.',
             'steps' => [
-                'Terapkan filter kabupaten / periode sesuai kebutuhan',
-                'Identifikasi wilayah atau travel yang perlu perhatian (peringatan, risiko tinggi)',
+                'Terapkan filter kabupaten / periode di bagian atas sesuai kebutuhan',
+                'Perhatikan peringatan dini, lalu kartu KPI di bawah filter untuk gambaran cepat',
+                'Grafik dan heatmap di bawah KPI untuk analisis tren dan sebaran wilayah',
                 $isAdmin
                     ? 'Turun ke Antrian Kerja untuk menindaklanjuti tugas spesifik'
                     : 'Turun ke Antrian Kerja Anda untuk menindaklanjuti tugas spesifik',
@@ -429,9 +432,9 @@ class RoleWorkflowGuide
             'title' => 'Cara Menggunakan Monitoring',
             'hint' => 'Pantau aktivitas operasional travel: keberangkatan, pengawasan, pengaduan, dan risiko.',
             'steps' => [
-                'Baca KPI di atas untuk gambaran cepat wilayah Anda',
+                'Periksa kartu KPI di bawah panduan ini untuk gambaran cepat wilayah Anda',
+                'Baca tabel Data Travel Terbaru; klik angka pengaduan (biru) untuk detail per travel',
                 'Klik Data Travel untuk daftar lengkap per penyelenggara',
-                'Klik baris travel untuk melihat Profil Kepatuhan',
                 'Jika ada risiko tinggi, buka Antrian Kerja atau jadwalkan pemeriksaan',
             ],
             'actions' => [

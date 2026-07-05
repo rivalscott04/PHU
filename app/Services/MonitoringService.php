@@ -42,4 +42,10 @@ class MonitoringService
     {
         return $this->monitoringRepository->getTravelPengaduanList($travel);
     }
+
+    /** @return list<array<string, mixed>> */
+    public function getKabupatenPengaduanList(string $kabupaten): array
+    {
+        return $this->monitoringRepository->getKabupatenPengaduanList($kabupaten);
+    }
 }

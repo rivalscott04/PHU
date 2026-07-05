@@ -2,6 +2,8 @@
 
 namespace App\Support;
 
+use App\Models\TravelCompany;
+
 /**
  * Matriks akses route V1 & V2 per role, dipakai seeder, PHPUnit, dan Playwright.
  */
@@ -69,6 +71,7 @@ final class RoleRouteMatrix
                 'v2.pengawasan.index' => $allow,
                 'v2.monitoring.index' => $allow,
                 'v2.monitoring.travel.pengaduan' => $allow,
+                'v2.monitoring.kabupaten.pengaduan' => $allow,
                 'v2.checklist.index' => $allow,
                 'v2.followup.index' => $allow,
                 'v2.risk.index' => $allow,
@@ -87,6 +90,7 @@ final class RoleRouteMatrix
                 'v2.pengawasan.index' => $deny,
                 'v2.monitoring.index' => $allow,
                 'v2.monitoring.travel.pengaduan' => $allow,
+                'v2.monitoring.kabupaten.pengaduan' => $allow,
                 'v2.checklist.index' => $deny,
                 'v2.followup.index' => $deny,
                 'v2.risk.index' => $deny,
@@ -105,6 +109,7 @@ final class RoleRouteMatrix
                 'v2.pengawasan.index' => $allow,
                 'v2.monitoring.index' => $allow,
                 'v2.monitoring.travel.pengaduan' => $allow,
+                'v2.monitoring.kabupaten.pengaduan' => $allow,
                 'v2.checklist.index' => $deny,
                 'v2.followup.index' => $allow,
                 'v2.risk.index' => $allow,
@@ -149,13 +154,35 @@ final class RoleRouteMatrix
         ];
     }
 
+    /**
+     * Parameter wajib untuk route yang punya placeholder URI (mis. {travel}).
+     *
+     * @return array<string, array<string, mixed>>
+     */
+    public static function routeParameters(): array
+    {
+        $travelId = TravelCompany::where('kab_kota', 'Lombok Barat')->value('id')
+            ?? TravelCompany::query()->value('id')
+            ?? 1;
+
+        return [
+            'v2.monitoring.travel.pengaduan' => ['travel' => $travelId],
+            'v2.monitoring.kabupaten.pengaduan' => ['kabupaten' => 'Lombok Barat'],
+        ];
+    }
+
+    public static function urlForRoute(string $routeName): string
+    {
+        return route($routeName, self::routeParameters()[$routeName] ?? []);
+    }
+
     /** @return array<string, mixed> */
     public static function toPlaywrightFixture(string $baseUrl): array
     {
         $paths = [];
 
         foreach (self::allRouteNames() as $routeName) {
-            $paths[$routeName] = parse_url(route($routeName), PHP_URL_PATH);
+            $paths[$routeName] = parse_url(self::urlForRoute($routeName), PHP_URL_PATH);
         }
 
         return [

@@ -25,7 +25,8 @@
     const titleEl = document.getElementById('pengaduanOffcanvasLabel');
     const subtitleEl = document.getElementById('pengaduanOffcanvasSubtitle');
     const bodyEl = document.getElementById('pengaduanOffcanvasBody');
-    const urlTemplate = @json(route('v2.monitoring.travel.pengaduan', ['travel' => '__ID__']));
+    const travelUrlTemplate = @json(route('v2.monitoring.travel.pengaduan', ['travel' => '__ID__']));
+    const kabupatenUrlTemplate = @json(route('v2.monitoring.kabupaten.pengaduan', ['kabupaten' => '__KAB__']));
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -53,7 +54,8 @@
         bodyEl.innerHTML = `<div class="text-center text-muted py-5 px-3">Belum ada pengaduan untuk travel ini.</div>`;
     }
 
-    function renderList(items) {
+    function renderList(items, options = {}) {
+        const showTravel = !!options.showTravel;
         bodyEl.innerHTML = items.map((item) => {
             const notes = item.admin_notes
                 ? `<p class="mb-0 mt-2 small text-muted"><strong>Catatan penyelesaian:</strong> ${escapeHtml(item.admin_notes)}</p>`
@@ -64,9 +66,13 @@
             const processedBy = item.processed_by
                 ? `<div class="small text-muted mt-1">Ditindaklanjuti: ${escapeHtml(item.processed_by)}</div>`
                 : '';
+            const travelName = showTravel && item.travel_name
+                ? `<div class="small text-primary fw-medium mb-1">${escapeHtml(item.travel_name)}</div>`
+                : '';
 
             return `
                 <div class="border-bottom px-3 py-3">
+                    ${travelName}
                     <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
                         <div>
                             <div class="fw-semibold">${escapeHtml(item.nama_pengadu)}</div>
@@ -89,7 +95,7 @@
         renderLoading();
         offcanvas.show();
 
-        fetch(urlTemplate.replace('__ID__', travelId), {
+        fetch(travelUrlTemplate.replace('__ID__', travelId), {
             headers: {
                 'Accept': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
@@ -124,7 +130,54 @@
             });
     }
 
+    function openKabupatenPengaduanPanel(kabupaten) {
+        titleEl.textContent = 'Pengaduan';
+        subtitleEl.textContent = kabupaten || '';
+        renderLoading();
+        offcanvas.show();
+
+        fetch(kabupatenUrlTemplate.replace('__KAB__', encodeURIComponent(kabupaten)), {
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Gagal memuat data pengaduan.');
+                }
+
+                return response.json();
+            })
+            .then((result) => {
+                if (!result.success) {
+                    throw new Error(result.message || 'Gagal memuat data pengaduan.');
+                }
+
+                titleEl.textContent = `Pengaduan (${result.data?.total ?? 0})`;
+                subtitleEl.textContent = result.data?.kabupaten || kabupaten || '';
+
+                const items = result.data?.pengaduan || [];
+                if (!items.length) {
+                    renderEmpty();
+                    return;
+                }
+
+                renderList(items, { showTravel: true });
+            })
+            .catch((error) => {
+                renderError(error.message || 'Terjadi kesalahan saat memuat pengaduan.');
+            });
+    }
+
     document.addEventListener('click', function (event) {
+        const kabupatenTrigger = event.target.closest('.pengaduan-kabupaten-drilldown');
+        if (kabupatenTrigger) {
+            event.preventDefault();
+            openKabupatenPengaduanPanel(kabupatenTrigger.dataset.kabupaten);
+            return;
+        }
+
         const trigger = event.target.closest('.pengaduan-drilldown');
         if (!trigger) return;
 

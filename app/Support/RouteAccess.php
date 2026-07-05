@@ -62,6 +62,18 @@ final class RouteAccess
     /** @param  array<string, mixed>  $parameters */
     public static function canAccessRoute(User $user, string $routeName, array $parameters = []): bool
     {
+        if (self::matches($routeName, 'v2.monitoring.travel.pengaduan')) {
+            return self::canAccessTravelPengaduan($user, $parameters);
+        }
+
+        if (self::matches($routeName, 'v2.monitoring.kabupaten.pengaduan')) {
+            $kabupaten = $parameters['kabupaten'] ?? null;
+
+            return is_string($kabupaten)
+                && $kabupaten !== ''
+                && (new MonitoringPolicy())->viewKabupatenPengaduan($user, $kabupaten);
+        }
+
         if (self::matches($routeName, 'v2.dashboard') || self::matches($routeName, 'v2.monitoring')) {
             return (new MonitoringPolicy())->view($user);
         }
@@ -153,6 +165,25 @@ final class RouteAccess
     private static function matches(string $routeName, string $prefix): bool
     {
         return $routeName === $prefix || str_starts_with($routeName, $prefix.'.');
+    }
+
+    /** @param  array<string, mixed>  $parameters */
+    private static function canAccessTravelPengaduan(User $user, array $parameters): bool
+    {
+        $travel = $parameters['travel'] ?? null;
+
+        if ($travel instanceof TravelCompany) {
+            return (new MonitoringPolicy())->viewTravelPengaduan($user, $travel);
+        }
+
+        if (is_numeric($travel)) {
+            $travel = TravelCompany::find((int) $travel);
+
+            return $travel instanceof TravelCompany
+                && (new MonitoringPolicy())->viewTravelPengaduan($user, $travel);
+        }
+
+        return false;
     }
 
     /** @param  array<string, mixed>  $parameters */

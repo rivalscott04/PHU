@@ -80,4 +80,19 @@ class MonitoringController extends Controller
             'total' => count($items),
         ]);
     }
+
+    public function kabupatenPengaduan(Request $request, string $kabupaten)
+    {
+        ResourceAccess::denyUnless(
+            (new MonitoringPolicy())->viewKabupatenPengaduan($request->user(), $kabupaten)
+        );
+
+        $items = $this->monitoringService->getKabupatenPengaduanList($kabupaten);
+
+        return $this->jsonSuccess([
+            'kabupaten' => $kabupaten,
+            'pengaduan' => $items,
+            'total' => count($items),
+        ]);
+    }
 }

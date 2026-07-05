@@ -229,8 +229,26 @@ final class DashboardExecutive
     {
         return match ($urgency) {
             'critical' => 'danger',
-            'high' => 'warning',
-            default => 'warning',
+            'high', 'medium' => 'warning text-dark',
+            default => 'warning text-dark',
+        };
+    }
+
+    public static function warningAlertClass(string $level): string
+    {
+        return match ($level) {
+            'critical' => 'danger',
+            'warning', 'caution' => 'warning',
+            default => 'info',
+        };
+    }
+
+    public static function warningDotClass(string $level): string
+    {
+        return match ($level) {
+            'critical' => 'danger',
+            'warning', 'caution' => 'warning',
+            default => 'info',
         };
     }
 

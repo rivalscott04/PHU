@@ -5,6 +5,11 @@
     use App\Support\RouteAccess;
 
     $isPimpinan = auth()->user()->role === UserRole::Pimpinan->value;
+    $canKabupatenPengaduanDrilldown = RouteAccess::canAccessRoute(
+        auth()->user(),
+        'v2.monitoring.kabupaten.pengaduan',
+        ['kabupaten' => 'Lombok Barat'],
+    );
 @endphp
 
 @section('content')
@@ -131,8 +136,34 @@
 (function () {
     const chartData = @json($charts ?? []);
     const isPimpinan = @json($isPimpinan);
+    const canKabupatenPengaduanDrilldown = @json($canKabupatenPengaduanDrilldown);
     const urgencyLabels = { critical: 'Segera', high: 'Prioritas', medium: 'Perlu Perhatian' };
-    const urgencyBadges = { critical: 'danger', high: 'warning', medium: 'warning' };
+    const urgencyBadges = { critical: 'danger', high: 'warning text-dark', medium: 'warning text-dark' };
+    const warningAlertClasses = { critical: 'danger', warning: 'warning', caution: 'warning' };
+    const warningDotClasses = { critical: 'danger', warning: 'warning', caution: 'warning' };
+
+    function escapeHtml(value) {
+        return String(value ?? '').replace(/[&<>"']/g, (char) => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;',
+        })[char]);
+    }
+
+    function renderKabupatenPengaduanCell(kabupaten, count) {
+        const total = Number(count || 0);
+        if (!canKabupatenPengaduanDrilldown || total <= 0 || !kabupaten) {
+            return String(total);
+        }
+
+        return `<button type="button" class="btn btn-link btn-sm p-0 text-primary text-decoration-none pengaduan-kabupaten-drilldown fw-semibold" data-kabupaten="${escapeHtml(kabupaten)}" title="Lihat daftar pengaduan">${total.toLocaleString('id-ID')}</button>`;
+    }
+
+    function warningLevelClass(level, map, fallback = 'info') {
+        return map[level] || fallback;
+    }
     let chartInstances = {};
     let cachedChartData = chartData;
 
@@ -155,11 +186,65 @@
         if (!el || typeof ApexCharts === 'undefined') return;
         if (chartInstances[elId]) chartInstances[elId].destroy();
         chartInstances[elId] = new ApexCharts(el, {
-            chart: { type: 'bar', height: horizontal ? 300 : 280, toolbar: { show: false } },
+            chart: { type: 'bar', height: horizontal ? Math.max(300, labels.length * 36) : 280, toolbar: { show: false } },
             plotOptions: { bar: { horizontal: !!horizontal, borderRadius: 4 } },
             series: [{ name: 'Jumlah', data: series }],
             xaxis: { categories: labels },
             colors: ['#34c38f'],
+        });
+        chartInstances[elId].render();
+    }
+
+    function renderPengawasanKabupatenChart(labels, series) {
+        const elId = '#chart-pengawasan-kabupaten';
+        const el = document.querySelector('#chart-pengawasan-kabupaten');
+        if (!el || typeof ApexCharts === 'undefined') return;
+        if (chartInstances[elId]) chartInstances[elId].destroy();
+
+        const values = series.map(v => Number(v) || 0);
+        const maxValue = Math.max(1, ...values);
+
+        chartInstances[elId] = new ApexCharts(el, {
+            chart: {
+                type: 'bar',
+                height: Math.max(360, labels.length * 42),
+                toolbar: { show: false },
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 4,
+                    barHeight: '65%',
+                    distributed: true,
+                    dataLabels: { position: 'center' },
+                },
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: (val) => String(val),
+                style: {
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    colors: ['#495057'],
+                },
+            },
+            series: [{ name: 'Pengawasan', data: values }],
+            xaxis: {
+                categories: labels,
+                min: 0,
+                max: maxValue,
+                tickAmount: maxValue,
+                labels: { formatter: (val) => Number.isInteger(Number(val)) ? String(Number(val)) : val },
+            },
+            yaxis: {
+                labels: {
+                    minWidth: 120,
+                    style: { fontSize: '12px' },
+                },
+            },
+            colors: values.map(val => (val > 0 ? '#34c38f' : '#e2e8f0')),
+            legend: { show: false },
+            grid: { padding: { left: 8, right: 16 } },
         });
         chartInstances[elId].render();
     }
@@ -185,7 +270,10 @@
         renderPieChart('#chart-pengaduan-category', data.pengaduan_category?.labels || [], data.pengaduan_category?.series || []);
         renderPieChart('#chart-risk-distribution', Object.keys(data.risk_distribution || {}), Object.values(data.risk_distribution || {}));
         renderBarChart('#chart-temuan-severity', data.temuan_severity?.labels || [], data.temuan_severity?.series || [], false);
-        renderBarChart('#chart-pengawasan-kabupaten', data.pengawasan_kabupaten?.labels || [], data.pengawasan_kabupaten?.series || [], true);
+        renderPengawasanKabupatenChart(
+            data.pengawasan_kabupaten?.labels || [],
+            data.pengawasan_kabupaten?.series || []
+        );
     }
 
     function isVisualisasiTabActive() {
@@ -268,7 +356,7 @@
                     <td>${row.total_travel || 0}</td>
                     <td>${row.pengawasan || 0}</td>
                     <td>${(row.temuan_aktif || 0) > 0 ? `<span class="badge bg-warning text-dark">${row.temuan_aktif}</span>` : (row.temuan_aktif || 0)}</td>
-                    <td>${row.pengaduan || 0}</td>
+                    <td>${renderKabupatenPengaduanCell(row.kabupaten, row.pengaduan)}</td>
                     <td>${row.avg_risk || 0}</td>
                     <td>${row.bap_pending || 0}</td>
                 </tr>`).join('')
@@ -323,7 +411,11 @@
                     if (!warnRes.data.length) {
                         box.innerHTML = '<p class="text-muted mb-0">Tidak ada peringatan saat ini.</p>';
                     } else {
-                        box.innerHTML = warnRes.data.map(w => `<div class="alert alert-${w.level === 'critical' ? 'danger' : (w.level === 'warning' ? 'warning' : 'info')} mb-2 py-2"><span class="me-2">${w.icon}</span>${w.message}</div>`).join('');
+                        box.innerHTML = warnRes.data.map(w => {
+                            const alertCls = warningLevelClass(w.level, warningAlertClasses);
+                            const dotCls = warningLevelClass(w.level, warningDotClasses);
+                            return `<div class="alert alert-${alertCls} border-0 mb-2 py-2 text-dark d-flex align-items-center"><i class="bx bxs-circle text-${dotCls} me-2"></i><span>${w.message}</span></div>`;
+                        }).join('');
                     }
                 }
             }
@@ -353,7 +445,11 @@
     document.getElementById('tab-visualisasi')?.addEventListener('shown.bs.tab', function () {
         setTimeout(function () {
             window.DashboardHeatmap?.resetView?.();
-            initCharts(cachedChartData);
+            fetchJson('{{ route('v2.dashboard.charts') }}').then(function (res) {
+                if (!res.success) return;
+                cachedChartData = res.data;
+                initCharts(res.data);
+            });
         }, 150);
     });
 

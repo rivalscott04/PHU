@@ -33,4 +33,21 @@ class MonitoringPolicy
 
         return false;
     }
+
+    public function viewKabupatenPengaduan(User $user, string $kabupaten): bool
+    {
+        if (! $this->view($user)) {
+            return false;
+        }
+
+        if (in_array($user->role, ['admin', 'pimpinan'], true)) {
+            return true;
+        }
+
+        if ($user->role === 'pengawas') {
+            return $user->canAccessKabupaten($kabupaten);
+        }
+
+        return false;
+    }
 }

@@ -37,6 +37,7 @@ Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v
         Route::get('/statistics', [MonitoringController::class, 'statistics'])->name('statistics');
         Route::get('/travel', [MonitoringController::class, 'travel'])->name('travel');
         Route::get('/travel/{travel}/pengaduan', [MonitoringController::class, 'travelPengaduan'])->name('travel.pengaduan');
+        Route::get('/kabupaten/{kabupaten}/pengaduan', [MonitoringController::class, 'kabupatenPengaduan'])->name('kabupaten.pengaduan');
     });
 
     Route::prefix('pengawasan')->name('pengawasan.')->group(function () {

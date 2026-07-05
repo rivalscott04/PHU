@@ -34,7 +34,12 @@
                                     {{ $row['temuan_aktif'] ?? 0 }}
                                 @endif
                             </td>
-                            <td>{{ $row['pengaduan'] ?? 0 }}</td>
+                            <td>
+                                @include('v2.partials.pengaduan-kabupaten-count', [
+                                    'kabupaten' => $row['kabupaten'] ?? null,
+                                    'count' => $row['pengaduan'] ?? 0,
+                                ])
+                            </td>
                             <td>{{ $row['avg_risk'] ?? 0 }}</td>
                             <td>{{ $row['bap_pending'] ?? 0 }}</td>
                         </tr>
