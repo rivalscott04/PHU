@@ -51,8 +51,8 @@
             <div class="collapse" id="trustIntroBody">
                 <div class="trust-intro__inner">
                     <p class="trust-intro__lead mb-2">
-                        Kanwil Kemenag NTB menampilkan <strong>indeks kepercayaan</strong> berdasarkan data
-                        pengawasan di sistem PANTAU — bukan sertifikat resmi, melainkan alat bantu
+                        Kanwil Kemenhaj NTB menampilkan <strong>indeks kepercayaan</strong> berdasarkan data
+                        pengawasan di sistem PANTAU, bukan sertifikat resmi, melainkan alat bantu
                         membandingkan travel sebelum Anda memilih. Semakin banyak bintang, semakin baik catatannya.
                     </p>
                     <ul class="trust-intro__steps">
@@ -77,7 +77,10 @@
                     </div>
                     <p class="trust-intro__note text-muted small mb-0 mt-3">
                         <i class="fas fa-info-circle me-1"></i>
-                        Indeks ini <strong>bukan jaminan</strong> kualitas layanan. Tetap periksa izin travel,
+                        Indeks ini
+                        <span class="trust-caveat">bukan sertifikat resmi, bukan akreditasi,
+                        dan bukan jaminan bahwa layanan travel pasti baik</span>.
+                        Tetap periksa izin travel,
                         kontrak, dan reputasinya sendiri sebelum memutuskan.
                     </p>
                 </div>

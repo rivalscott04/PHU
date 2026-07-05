@@ -29,7 +29,7 @@
                 <div class="travel-page-head__content">
                     <p class="travel-page-head__eyebrow">Profil Kepercayaan</p>
                     <h1>{{ $travel->Penyelenggara }}</h1>
-                    <p class="travel-page-head__subtitle">Ringkasan indeks kepercayaan dari data pengawasan Kanwil Kemenag NTB — bukan sertifikat resmi</p>
+                    <p class="travel-page-head__subtitle">Ringkasan indeks kepercayaan dari data pengawasan Kanwil Kemenhaj NTB, bukan sertifikat resmi</p>
                     <div class="travel-meta-bar">
                         <span class="info-pill"><i class="fas fa-map-marker-alt"></i> {{ $travel->kab_kota }}</span>
                         <span class="info-pill"><i class="fas fa-building"></i> {{ $travel->Status }}</span>
@@ -163,9 +163,9 @@
                                 </h2>
                                 <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
                                     <div class="accordion-body text-muted">
-                                        Indeks Kepercayaan Masyarakat adalah angka 0–100 (plus bintang) yang
+                                        Indeks Kepercayaan Masyarakat adalah angka 0 sampai 100 (plus bintang) yang
                                         menunjukkan seberapa baik catatan travel menurut data yang tercatat
-                                        di sistem PANTAU Kanwil Kemenag NTB — misalnya pengaduan, hasil
+                                        di sistem PANTAU Kanwil Kemenhaj NTB, misalnya pengaduan, hasil
                                         pengawasan, kelengkapan dokumen, dan aktivitas layanan.
                                         Semakin tinggi angkanya, semakin baik catatannya.
                                     </div>
@@ -181,14 +181,14 @@
                                     <div class="accordion-body text-muted">
                                         <p class="mb-2">Sistem PANTAU mengecek 6 hal berikut. Semakin banyak masalah yang ditemukan, semakin rendah indeks kepercayaannya:</p>
                                         <ul class="mb-2 ps-3">
-                                            <li><strong>Pengaduan masyarakat</strong> — semakin banyak pengaduan, semakin turun nilainya</li>
-                                            <li><strong>Temuan pengawasan</strong> — temuan serius menurunkan nilai</li>
-                                            <li><strong>Tindak lanjut</strong> — temuan yang belum diselesaikan menurunkan nilai</li>
-                                            <li><strong>BAP (Berita Acara Pemberangkatan)</strong> — yang belum dilaporkan menurunkan nilai</li>
-                                            <li><strong>Izin &amp; sertifikat</strong> — yang kedaluwarsa menurunkan nilai</li>
-                                            <li><strong>Aktivitas layanan</strong> — jarang melayani jamaah menurunkan nilai</li>
+                                            <li><strong>Pengaduan masyarakat</strong>: semakin banyak pengaduan, semakin turun nilainya</li>
+                                            <li><strong>Temuan pengawasan</strong>: temuan serius menurunkan nilai</li>
+                                            <li><strong>Tindak lanjut</strong>: temuan yang belum diselesaikan menurunkan nilai</li>
+                                            <li><strong>BAP (Berita Acara Pemberangkatan)</strong>: yang belum dilaporkan menurunkan nilai</li>
+                                            <li><strong>Izin &amp; sertifikat</strong>: yang kedaluwarsa menurunkan nilai</li>
+                                            <li><strong>Aktivitas layanan</strong>: jarang melayani jamaah menurunkan nilai</li>
                                         </ul>
-                                        <p class="mb-0">Hasil akhir ditampilkan sebagai angka <strong>0–100</strong> dan bintang. Travel tanpa masalah di atas akan mendapat nilai lebih tinggi.</p>
+                                        <p class="mb-0">Hasil akhir ditampilkan sebagai angka <strong>0 sampai 100</strong> dan bintang. Travel tanpa masalah di atas akan mendapat nilai lebih tinggi.</p>
                                     </div>
                                 </div>
                             </div>
@@ -200,9 +200,10 @@
                                 </h2>
                                 <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
                                     <div class="accordion-body text-muted">
-                                        <strong>Tidak.</strong> Data ini diterbitkan oleh Kanwil Kemenag NTB sebagai
-                                        informasi transparansi — bukan sertifikat resmi, bukan akreditasi,
-                                        dan bukan jaminan bahwa layanan travel pasti baik.
+                                        <strong>Tidak.</strong> Data ini diterbitkan oleh Kanwil Kemenhaj NTB sebagai
+                                        informasi transparansi,
+                                        <span class="trust-caveat">bukan sertifikat resmi, bukan akreditasi,
+                                        dan bukan jaminan bahwa layanan travel pasti baik</span>.
                                         Angka ini hanya rangkuman data pengawasan yang sudah tercatat.
                                         Tetap periksa sendiri izin travel, kontrak, dan reputasinya
                                         sebelum memutuskan.
@@ -217,8 +218,10 @@
             <div class="trust-disclaimer">
                 <i class="fas fa-info-circle me-1"></i>
                 <strong>Catatan penting:</strong>
-                Indeks ini dihitung otomatis dari data pengawasan dan pengaduan di sistem PANTAU Kanwil Kemenag NTB.
-                Informasi ini <strong>bukan sertifikat resmi</strong> dan <strong>bukan jaminan</strong> kualitas layanan travel.
+                Indeks ini dihitung otomatis dari data pengawasan dan pengaduan di sistem PANTAU Kanwil Kemenhaj NTB.
+                Informasi ini
+                <span class="trust-caveat">bukan sertifikat resmi, bukan akreditasi,
+                dan bukan jaminan bahwa layanan travel pasti baik</span>.
                 Selalu lakukan pengecekan mandiri sebelum memilih.
             </div>
 

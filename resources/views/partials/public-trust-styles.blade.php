@@ -322,4 +322,14 @@
         background: rgba(226, 167, 18, 0.08);
         color: var(--phu-accent, #e2a712);
     }
+
+    .trust-caveat {
+        font-weight: 700;
+        color: var(--phu-text, #333333);
+        background: var(--phu-accent-soft, rgba(226, 167, 18, 0.12));
+        padding: 0.12em 0.4em;
+        border-radius: 4px;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+    }
 </style>
