@@ -308,7 +308,7 @@
             <div class="signatures">
                 <div class="signature">
                     Petugas Satgas Umrah<br>
-                    Kanwil Kementerian Haji dan Umroh Provinsi NTB
+                    Kanwil Kemenhaj Provinsi NTB
                     @if ($data->status === 'diterima' && $kanwilQrCodeData)
                         <img src="{{ $kanwilQrCodeData }}" alt="QR Code Verifikasi Kanwil">
                     @else
