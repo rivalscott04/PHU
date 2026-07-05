@@ -24,12 +24,16 @@
                 </p>
             </div>
             <div class="d-flex gap-2 flex-wrap">
-                <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bx bx-bar-chart-alt-2 me-1"></i> Dashboard
-                </a>
-                <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bx bx-radar me-1"></i> Monitoring
-                </a>
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.dashboard'))
+                    <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-bar-chart-alt-2 me-1"></i> Dashboard
+                    </a>
+                @endif
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.index'))
+                    <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-radar me-1"></i> Monitoring
+                    </a>
+                @endif
             </div>
         </div>
     </div>

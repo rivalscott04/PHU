@@ -15,67 +15,32 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/public-theme.css') }}" rel="stylesheet" />
-
-    <style>
-        .profile-section { padding-top: 100px; padding-bottom: min(5vw, 60px); }
-
-        .info-pill {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0.35rem 0.85rem;
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.12);
-            font-size: 0.85rem;
-            margin-right: 0.35rem;
-            margin-bottom: 0.35rem;
-        }
-
-        .info-grid dt {
-            font-size: 0.72rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: var(--phu-text-muted, #5a5a5a);
-            margin-bottom: 0.2rem;
-        }
-
-        .info-grid dd {
-            font-weight: 600;
-            color: var(--phu-text, #333333);
-            margin-bottom: 1rem;
-        }
-    </style>
-
+    <link href="{{ asset('css/travel-profile-public.css') }}" rel="stylesheet" />
     @include('partials.public-trust-styles')
 </head>
 
 <body>
-    <a href="{{ route('travel.public') }}" class="back-btn">
-        <i class="fas fa-arrow-left me-2"></i>Kembali ke Daftar
-    </a>
-
-    <section class="profile-section">
-        <div class="container" style="max-width: 960px;">
-            {{-- Hero --}}
-            <div class="trust-hero">
-                <div class="trust-hero__top">
-                    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-                        <div>
-                            <p class="text-uppercase mb-2" style="font-size:0.72rem; letter-spacing:0.08em; opacity:0.75;">
-                                Profil Kepercayaan Masyarakat
-                            </p>
-                            <h1 class="h2 fw-bold mb-2">{{ $travel->Penyelenggara }}</h1>
-                            <div>
-                                <span class="info-pill"><i class="fas fa-map-marker-alt"></i> {{ $travel->kab_kota }}</span>
-                                <span class="info-pill"><i class="fas fa-building"></i> {{ $travel->Status }}</span>
-                                @if($travel->nilai_akreditasi)
-                                    <span class="info-pill"><i class="fas fa-award"></i> Akreditasi {{ $travel->nilai_akreditasi }}</span>
-                                @endif
-                            </div>
-                        </div>
+    <div class="travel-profile-page">
+        <div class="container">
+            <header class="travel-page-head">
+                <a href="{{ route('travel.public') }}" class="back-btn back-btn--inline">
+                    <i class="fas fa-arrow-left me-1"></i>Daftar
+                </a>
+                <div class="travel-page-head__content">
+                    <p class="travel-page-head__eyebrow">Profil Kepercayaan</p>
+                    <h1>{{ $travel->Penyelenggara }}</h1>
+                    <p class="travel-page-head__subtitle">Ringkasan indeks kepercayaan dari data pengawasan Kanwil Kemenag NTB — bukan sertifikat resmi</p>
+                    <div class="travel-meta-bar">
+                        <span class="info-pill"><i class="fas fa-map-marker-alt"></i> {{ $travel->kab_kota }}</span>
+                        <span class="info-pill"><i class="fas fa-building"></i> {{ $travel->Status }}</span>
+                        @if($travel->nilai_akreditasi)
+                            <span class="info-pill"><i class="fas fa-award"></i> Akreditasi {{ $travel->nilai_akreditasi }}</span>
+                        @endif
                     </div>
                 </div>
+            </header>
 
+            <div class="trust-hero">
                 <div class="row g-0">
                     <div class="col-md-5 border-end">
                         <div class="trust-hero__score-wrap">
@@ -92,28 +57,28 @@
                                 <span class="trust-gauge__label bg-{{ $trust['bg_class'] }} text-white">
                                     {{ $trust['label'] }}
                                 </span>
-                                <p class="text-muted mb-0 px-3" style="font-size:0.92rem; line-height:1.65;">
+                                <p class="text-muted mb-0 px-2">
                                     {{ $trust['description'] }}
                                 </p>
                                 @if($trust['updated_at'])
-                                    <p class="text-muted small mt-3 mb-0">
+                                    <p class="text-muted small mt-2 mb-0">
                                         <i class="far fa-clock me-1"></i>
                                         Diperbarui {{ \App\Support\PublicTrustIndex::formattedUpdatedAt($trust['updated_at']) }}
                                     </p>
                                 @endif
                             @else
-                                <div class="py-4">
-                                    <i class="fas fa-circle-info text-muted d-block mb-3" style="font-size:2.5rem;"></i>
-                                    <h5 class="fw-semibold">Data Belum Tersedia</h5>
-                                    <p class="text-muted mb-0 px-3" style="font-size:0.92rem;">
+                                <div class="py-3">
+                                    <i class="fas fa-circle-info text-muted d-block mb-2" style="font-size:1.75rem;"></i>
+                                    <h5 class="fw-semibold fs-6">Data Belum Tersedia</h5>
+                                    <p class="text-muted mb-0 px-2 small">
                                         Indeks kepercayaan untuk travel ini belum dihitung. Silakan cek kembali nanti.
                                     </p>
                                 </div>
                             @endif
                         </div>
                     </div>
-                    <div class="col-md-7 p-4">
-                        <h5 class="fw-bold mb-3">Informasi Travel</h5>
+                    <div class="col-md-7">
+                        <h5 class="fw-bold">Informasi Travel</h5>
                         <dl class="info-grid row mb-0">
                             <div class="col-sm-6">
                                 <dt>Pimpinan</dt>
@@ -162,63 +127,86 @@
                 </div>
             </div>
 
-            {{-- Sinyal kepercayaan --}}
-            <div class="mb-4">
-                <h4 class="fw-bold mb-1">Apa yang Membentuk Indeks Ini?</h4>
-                <p class="text-muted mb-4">Ringkasan sederhana berdasarkan data resmi di sistem PANTAU Kanwil NTB.</p>
-                <div class="row g-3">
+            <section class="profile-section-block">
+                <div class="profile-section-block__head">
+                    <h2>Apa yang Membentuk Indeks Ini?</h2>
+                    <p>Faktor-faktor di bawah ini mempengaruhi angka indeks kepercayaan travel ini.</p>
+                </div>
+                <div class="row g-2">
                     @foreach ($signals as $signal)
                         <div class="col-md-6">
-                            <div class="card signal-card p-3">
+                            <div class="card signal-card">
                                 <div class="signal-card__icon signal-card__icon--{{ $signal['tone'] }}">
                                     <i class="fas {{ $signal['icon'] }}"></i>
                                 </div>
-                                <h6 class="fw-bold mb-1">{{ $signal['title'] }}</h6>
-                                <p class="text-muted mb-0 small">{{ $signal['detail'] }}</p>
+                                <h6 class="fw-bold">{{ $signal['title'] }}</h6>
+                                <p class="text-muted mb-0">{{ $signal['detail'] }}</p>
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
+            </section>
 
-            {{-- FAQ / Metodologi --}}
-            <div class="card border-0 shadow-sm mb-4 trust-faq">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3"><i class="fas fa-circle-question me-2 text-success"></i>Pertanyaan yang Sering Diajukan</h5>
-                    <div class="accordion accordion-flush" id="trustFaq">
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
-                                    Apa itu Indeks Kepercayaan Masyarakat?
-                                </button>
-                            </h2>
-                            <div id="faq1" class="accordion-collapse collapse show" data-bs-parent="#trustFaq">
-                                <div class="accordion-body text-muted">
-                                    Indeks ini menunjukkan seberapa baik travel memenuhi standar pengawasan berdasarkan data pengaduan, pengawasan, kepatuhan administratif, dan aktivitas layanan. Semakin tinggi angkanya, semakin baik catatan travel di mata Kanwil.
+            <div class="profile-panel">
+                <button class="profile-panel-toggle collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#trustFaqPanel" aria-expanded="false" aria-controls="trustFaqPanel">
+                    <span><i class="fas fa-circle-question me-2"></i>Pertanyaan yang Sering Diajukan</span>
+                    <i class="fas fa-chevron-down profile-panel-toggle__chevron"></i>
+                </button>
+                <div class="collapse" id="trustFaqPanel">
+                    <div class="profile-panel__body trust-faq">
+                        <div class="accordion accordion-flush" id="trustFaq">
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">
+                                        Apa itu Indeks Kepercayaan Masyarakat?
+                                    </button>
+                                </h2>
+                                <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
+                                    <div class="accordion-body text-muted">
+                                        Indeks Kepercayaan Masyarakat adalah angka 0–100 (plus bintang) yang
+                                        menunjukkan seberapa baik catatan travel menurut data yang tercatat
+                                        di sistem PANTAU Kanwil Kemenag NTB — misalnya pengaduan, hasil
+                                        pengawasan, kelengkapan dokumen, dan aktivitas layanan.
+                                        Semakin tinggi angkanya, semakin baik catatannya.
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
-                                    Bagaimana angka ini dihitung?
-                                </button>
-                            </h2>
-                            <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
-                                <div class="accordion-body text-muted">
-                                    Sistem menghitung secara otomatis dari data operasional: jumlah pengaduan masyarakat, hasil pengawasan, kelengkapan dokumen (BA Pemberangkatan & sertifikat), status izin, dan aktivitas pelayanan jamaah. Angka ditampilkan dalam skala 0 sampai 100.
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">
+                                        Bagaimana angka ini dihitung?
+                                    </button>
+                                </h2>
+                                <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
+                                    <div class="accordion-body text-muted">
+                                        <p class="mb-2">Sistem PANTAU mengecek 6 hal berikut. Semakin banyak masalah yang ditemukan, semakin rendah indeks kepercayaannya:</p>
+                                        <ul class="mb-2 ps-3">
+                                            <li><strong>Pengaduan masyarakat</strong> — semakin banyak pengaduan, semakin turun nilainya</li>
+                                            <li><strong>Temuan pengawasan</strong> — temuan serius menurunkan nilai</li>
+                                            <li><strong>Tindak lanjut</strong> — temuan yang belum diselesaikan menurunkan nilai</li>
+                                            <li><strong>BAP (Berita Acara Pemberangkatan)</strong> — yang belum dilaporkan menurunkan nilai</li>
+                                            <li><strong>Izin &amp; sertifikat</strong> — yang kedaluwarsa menurunkan nilai</li>
+                                            <li><strong>Aktivitas layanan</strong> — jarang melayani jamaah menurunkan nilai</li>
+                                        </ul>
+                                        <p class="mb-0">Hasil akhir ditampilkan sebagai angka <strong>0–100</strong> dan bintang. Travel tanpa masalah di atas akan mendapat nilai lebih tinggi.</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="accordion-item">
-                            <h2 class="accordion-header">
-                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
-                                    Apakah ini penilaian resmi dari Kanwil?
-                                </button>
-                            </h2>
-                            <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
-                                <div class="accordion-body text-muted">
-                                    Bukan. Ini adalah informasi transparansi dari Kanwil Kementerian Haji dan Umroh NTB untuk membantu masyarakat membuat keputusan yang lebih terinformasi. Tetap lakukan pengecekan mandiri sebelum memilih travel.
+                            <div class="accordion-item">
+                                <h2 class="accordion-header">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq3">
+                                        Apakah ini sertifikat resmi atau jaminan dari Kanwil?
+                                    </button>
+                                </h2>
+                                <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#trustFaq">
+                                    <div class="accordion-body text-muted">
+                                        <strong>Tidak.</strong> Data ini diterbitkan oleh Kanwil Kemenag NTB sebagai
+                                        informasi transparansi — bukan sertifikat resmi, bukan akreditasi,
+                                        dan bukan jaminan bahwa layanan travel pasti baik.
+                                        Angka ini hanya rangkuman data pengawasan yang sudah tercatat.
+                                        Tetap periksa sendiri izin travel, kontrak, dan reputasinya
+                                        sebelum memutuskan.
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -226,24 +214,59 @@
                 </div>
             </div>
 
-            <div class="trust-disclaimer mb-4">
-                <i class="fas fa-info-circle me-2"></i>
+            <div class="trust-disclaimer">
+                <i class="fas fa-info-circle me-1"></i>
                 <strong>Catatan penting:</strong>
-                Indeks Kepercayaan dihitung otomatis dari data pengawasan dan pengaduan di sistem PANTAU.
-                Informasi ini bersifat informatif dan bukan jaminan mutu layanan travel.
-                Jika Anda mengalami masalah, silakan ajukan pengaduan melalui halaman utama.
+                Indeks ini dihitung otomatis dari data pengawasan dan pengaduan di sistem PANTAU Kanwil Kemenag NTB.
+                Informasi ini <strong>bukan sertifikat resmi</strong> dan <strong>bukan jaminan</strong> kualitas layanan travel.
+                Selalu lakukan pengecekan mandiri sebelum memilih.
             </div>
 
-            <div class="text-center">
-                <a href="{{ url('/') }}#pengaduan" class="btn btn-success rounded-pill px-4 py-2 fw-semibold" style="background:#1acc8d; border-color:#1acc8d;">
-                    <i class="fas fa-paper-plane me-2"></i>Ajukan Pengaduan
+            @if(session('success'))
+                <div class="profile-flash alert alert-success" role="alert">
+                    <i class="fas fa-circle-check me-1"></i>{{ session('success') }}
+                </div>
+            @endif
+
+            <div class="profile-actions">
+                <button type="button" class="btn btn-primary btn-profile-cta" data-bs-toggle="modal" data-bs-target="#pengaduanTravelModal">
+                    <i class="fas fa-paper-plane me-1"></i>Ajukan Pengaduan
+                </button>
+                <a href="{{ route('travel.public') }}" class="btn btn-outline-primary btn-profile-cta">
+                    <i class="fas fa-list me-1"></i>Lihat Travel Lain
                 </a>
             </div>
         </div>
-    </section>
+    </div>
+
+    <div class="modal fade" id="pengaduanTravelModal" tabindex="-1" aria-labelledby="pengaduanTravelModalLabel" aria-hidden="true"
+         @if($errors->any()) data-auto-open="1" @endif>
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content public-pengaduan-modal">
+                <div class="modal-header">
+                    <div>
+                        <h5 class="modal-title" id="pengaduanTravelModalLabel">Ajukan Pengaduan</h5>
+                        <p class="public-pengaduan-modal__subtitle mb-0">
+                            Laporkan masalah terkait <strong>{{ $travel->Penyelenggara }}</strong>
+                        </p>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    @include('partials.public-pengaduan-form', [
+                        'formId' => 'profile',
+                        'lockedTravel' => true,
+                        'travel' => $travel,
+                        'inModal' => true,
+                    ])
+                </div>
+            </div>
+        </div>
+    </div>
 
     @include('partials.kanwil-contact', ['variant' => 'footer-compact'])
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/public-pengaduan-form.js') }}"></script>
 </body>
 </html>

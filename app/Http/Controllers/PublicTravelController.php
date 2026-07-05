@@ -6,8 +6,6 @@ use App\Models\CabangTravel;
 use App\Models\TravelCompany;
 use App\Services\PublicTravelProfileService;
 use App\Support\PublicTrustIndex;
-use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
 
 class PublicTravelController extends Controller
 {
@@ -16,11 +14,12 @@ class PublicTravelController extends Controller
     ) {
     }
 
-    public function index(Request $request)
+    public function index()
     {
         $travelPusat = TravelCompany::query()
             ->select(
                 'id',
+                'public_uuid',
                 'Penyelenggara',
                 'kab_kota',
                 'Status',
@@ -59,6 +58,7 @@ class PublicTravelController extends Controller
 
                 $parent = $pusatByName->get($item->pusat);
                 $item->parent_travel_id = $parent?->id;
+                $item->parent_public_uuid = $parent?->public_uuid;
                 $item->trust = $parent
                     ? PublicTrustIndex::fromRiskScore($parent->riskScore)
                     : PublicTrustIndex::empty();
@@ -84,26 +84,10 @@ class PublicTravelController extends Controller
         ];
 
         $allTravels = $travelPusat->concat($travelCabang);
-        $perPage = 6;
-        $currentPage = (int) $request->get('page', 1);
-        $total = $allTravels->count();
-        $items = $allTravels->forPage($currentPage, $perPage);
-
-        $pagination = new LengthAwarePaginator(
-            $items,
-            $total,
-            $perPage,
-            $currentPage,
-            [
-                'path' => $request->url(),
-                'pageName' => 'page',
-            ]
-        );
 
         return view('travel-list-public', [
-            'data' => $pagination->items(),
-            'pagination' => $pagination,
-            'totalCount' => $total,
+            'data' => $allTravels,
+            'totalCount' => $allTravels->count(),
             'allKabupatens' => $allKabupatens,
             'stats' => $stats,
         ]);

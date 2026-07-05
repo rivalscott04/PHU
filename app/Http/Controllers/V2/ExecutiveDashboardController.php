@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V2;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use App\Policies\MonitoringPolicy;
@@ -24,6 +25,10 @@ class ExecutiveDashboardController extends Controller
 
         $filter = DashboardFilter::fromRequest($request);
         $overview = $this->dashboardService->getOverview($filter);
+
+        if ($request->user()->role === UserRole::Pimpinan->value) {
+            $overview['executive'] = $this->dashboardService->getExecutive($filter);
+        }
 
         if ($request->expectsJson()) {
             return $this->jsonSuccess($overview);
@@ -84,5 +89,15 @@ class ExecutiveDashboardController extends Controller
         $filter = DashboardFilter::fromRequest($request);
 
         return $this->jsonSuccess($this->dashboardService->getHeatmap($filter));
+    }
+
+    public function executive(Request $request)
+    {
+        abort_unless((new MonitoringPolicy())->view($request->user()), 403);
+        abort_unless($request->user()->role === UserRole::Pimpinan->value, 403);
+
+        $filter = DashboardFilter::fromRequest($request);
+
+        return $this->jsonSuccess($this->dashboardService->getExecutive($filter));
     }
 }

@@ -62,7 +62,7 @@
                     </p>
                 </div>
                 <div class="d-flex gap-2 flex-shrink-0">
-                    @if($risk)
+                    @if($risk && \App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.risk.show'))
                         <a href="{{ route('v2.risk.show', $travel) }}" class="btn btn-sm btn-outline-primary">
                             <i class="bx bx-shield-quarter me-1"></i> Detail Risiko
                         </a>
@@ -192,9 +192,13 @@
                                         <td class="text-muted">{{ optional($item->inspection_date)->format('d M Y') ?? 'Tidak ada' }}</td>
                                         <td><span class="badge bg-{{ $statusColor }}">{{ $statusText }}</span></td>
                                         <td class="text-end pe-3">
-                                            <a href="{{ route('v2.pengawasan.show', $item) }}" class="btn btn-sm btn-link text-primary p-0">
-                                                Lihat detail <i class="bx bx-chevron-right"></i>
-                                            </a>
+                                            @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.pengawasan.show', ['pengawasan' => $item]))
+                                                <a href="{{ route('v2.pengawasan.show', $item) }}" class="btn btn-sm btn-link text-primary p-0">
+                                                    Lihat detail <i class="bx bx-chevron-right"></i>
+                                                </a>
+                                            @else
+                                                <span class="text-muted">Tidak ada</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

@@ -51,7 +51,8 @@
 
                             <div class="col-md-12 mb-3">
                                 <label for="berkas_aduan" class="form-label">Berkas Pendukung</label>
-                                <input type="file" class="form-control" id="berkas_aduan" name="berkas_aduan" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                <input type="file" class="form-control" id="berkas_aduan" name="berkas_aduan" accept=".pdf,.jpg,.jpeg,.png">
+                                <div class="form-text">Maks. 2MB. PDF, JPG, atau PNG.</div>
                                 <small class="text-muted">File maksimal 2MB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
                                 <div class="invalid-feedback"></div>
                             </div>

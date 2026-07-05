@@ -13,7 +13,9 @@
                 <small class="text-muted">Jadwal dan hasil pemeriksaan pengawasan PPIU</small>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('v2.export.pengawasan', request()->query()) }}" class="btn btn-sm btn-outline-danger">Unduh PDF</a>
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.export.pengawasan'))
+                    <a href="{{ route('v2.export.pengawasan', request()->query()) }}" class="btn btn-sm btn-outline-danger">Unduh PDF</a>
+                @endif
                 @can('create', \App\Models\Inspection::class)
                     <a href="{{ route('v2.pengawasan.create') }}" class="btn btn-primary btn-sm">Buat Pemeriksaan</a>
                 @endcan

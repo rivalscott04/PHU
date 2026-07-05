@@ -4,9 +4,11 @@ namespace App\Http\Controllers\V2;
 
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
+use App\Models\TravelCompany;
 use App\Policies\MonitoringPolicy;
 use App\Services\MonitoringService;
 use App\Support\RequestScope;
+use App\Support\ResourceAccess;
 use Illuminate\Http\Request;
 
 class MonitoringController extends Controller
@@ -58,5 +60,24 @@ class MonitoringController extends Controller
         return $request->expectsJson()
             ? $this->jsonSuccess($travels)
             : view('v2.monitoring.travel', compact('travels'));
+    }
+
+    public function travelPengaduan(Request $request, TravelCompany $travel)
+    {
+        ResourceAccess::denyUnless(
+            (new MonitoringPolicy())->viewTravelPengaduan($request->user(), $travel)
+        );
+
+        $items = $this->monitoringService->getTravelPengaduanList($travel);
+
+        return $this->jsonSuccess([
+            'travel' => [
+                'id' => $travel->id,
+                'name' => $travel->Penyelenggara,
+                'kabupaten' => $travel->kab_kota,
+            ],
+            'pengaduan' => $items,
+            'total' => count($items),
+        ]);
     }
 }

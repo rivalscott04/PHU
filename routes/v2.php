@@ -29,12 +29,14 @@ Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v
     Route::get('/dashboard/timeline', [ExecutiveDashboardController::class, 'timeline'])->name('dashboard.timeline');
     Route::get('/dashboard/warning', [ExecutiveDashboardController::class, 'warning'])->name('dashboard.warning');
     Route::get('/dashboard/heatmap', [ExecutiveDashboardController::class, 'heatmap'])->name('dashboard.heatmap');
+    Route::get('/dashboard/executive', [ExecutiveDashboardController::class, 'executive'])->name('dashboard.executive');
     Route::get('/dashboard', [ExecutiveDashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('monitoring')->name('monitoring.')->group(function () {
         Route::get('/', [MonitoringController::class, 'index'])->name('index');
         Route::get('/statistics', [MonitoringController::class, 'statistics'])->name('statistics');
         Route::get('/travel', [MonitoringController::class, 'travel'])->name('travel');
+        Route::get('/travel/{travel}/pengaduan', [MonitoringController::class, 'travelPengaduan'])->name('travel.pengaduan');
     });
 
     Route::prefix('pengawasan')->name('pengawasan.')->group(function () {

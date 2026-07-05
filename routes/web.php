@@ -48,8 +48,12 @@ Route::get('/jamaah/template-test', function () {
 Route::get('/', [AuthController::class, 'showLanding']);
 
 Route::get('/list-travel', [AuthController::class, 'showListTravel'])->name('list.travel')->middleware('auth');
-Route::get('/travel-public', [PublicTravelController::class, 'index'])->name('travel.public');
-Route::get('/travel-public/{travel}', [PublicTravelController::class, 'show'])->name('travel.public.show');
+Route::middleware('throttle:public')->group(function () {
+    Route::get('/travel-public', [PublicTravelController::class, 'index'])->name('travel.public');
+    Route::get('/travel-public/{travel:public_uuid}', [PublicTravelController::class, 'show'])
+        ->name('travel.public.show')
+        ->whereUuid('travel');
+});
 
 Route::post('/register', [RegisterController::class, 'store'])->middleware(['guest', 'throttle:auth'])->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
@@ -126,6 +130,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
         Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
         Route::get('/pengaduan/{id}', [PengaduanController::class, 'detail'])->name('pengaduan.show');
+        Route::get('/pengaduan/{id}/berkas', [PengaduanController::class, 'downloadBerkas'])->name('pengaduan.download-berkas');
         Route::post('/pengaduan/{id}/status', [PengaduanController::class, 'updateStatus'])->name('pengaduan.update-status');
         Route::get('/pengaduan/{id}/download-pdf', [PengaduanController::class, 'downloadPDF'])->name('pengaduan.download-pdf');
     });

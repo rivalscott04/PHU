@@ -24,4 +24,9 @@ class KanwilContact
             .' Telp. '.e(self::get('phone'))
             .'<br>Email: '.e(self::get('email'));
     }
+
+    public static function exportSourceLabel(): string
+    {
+        return self::get('office_name');
+    }
 }

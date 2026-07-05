@@ -31,9 +31,11 @@
                     @endif
                 </p>
             </div>
-            <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
-                <i class="bx bx-radar me-1"></i> Monitoring
-            </a>
+            @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.index'))
+                <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bx bx-radar me-1"></i> Monitoring
+                </a>
+            @endif
         </div>
     </div>
 

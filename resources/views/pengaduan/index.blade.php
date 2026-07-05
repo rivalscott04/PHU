@@ -138,7 +138,7 @@
                                         <td style="max-width: 300px; word-wrap: break-word; text-align: left;">{{ $item->hal_aduan }}</td>
                                         <td>
                                             @if ($item->berkas_aduan)
-                                                <a href="{{ Storage::url($item->berkas_aduan) }}" target="_blank">
+                                                <a href="{{ route('pengaduan.download-berkas', $item->id) }}" target="_blank" rel="noopener noreferrer">
                                                     <i class="bx bx-file"></i>
                                                 </a>
                                             @else

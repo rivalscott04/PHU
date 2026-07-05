@@ -14,7 +14,7 @@
 </head>
 <body>
     <h1>Laporan Pengawasan</h1>
-    <p class="meta">Dicetak: {{ $generatedAt }} | {{ $filterSummary }}</p>
+    <p class="meta">{{ \App\Support\KanwilContact::exportSourceLabel() }}, Dicetak: {{ $generatedAt }} | {{ $filterSummary }}</p>
 
     <table>
         <thead>

@@ -1225,7 +1225,7 @@
                                                         data-trust-label="{{ $trust['label'] ?? '' }}"
                                                         data-trust-score="{{ $trust['score'] ?? '' }}"
                                                         data-trust-has="{{ ($trust['has_data'] ?? false) ? '1' : '0' }}"
-                                                        data-profile-url="{{ route('travel.public.show', $travel->id) }}"
+                                                        data-profile-url="{{ route('travel.public.show', $travel->public_uuid) }}"
                                                         {{ old('travels_id') == $travel->id ? 'selected' : '' }}>
                                                         {{ $travel->Penyelenggara }} ({{ $travel->kab_kota }})
                                                     </option>
@@ -1241,7 +1241,7 @@
                                         </div>
 
                                         <div class="col-md-12">
-                                            <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                                            <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" accept=".pdf,.jpg,.jpeg,.png" />
                                             <small class="text-muted mt-1">File maksimal 2MB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
                                             <div class="invalid-feedback"></div>
                                         </div>

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\DashboardRepository;
+use App\Support\DashboardExecutive;
 use App\Support\DashboardFilter;
 use Illuminate\Support\Facades\Cache;
 
@@ -73,6 +74,28 @@ class DashboardService
     {
         return Cache::remember($filter->cacheKey('heatmap'), self::CACHE_TTL_SECONDS, function () use ($filter) {
             return $this->dashboardRepository->getKabupatenHeatmap($filter);
+        });
+    }
+
+    /** @return array<string, mixed> */
+    public function getExecutive(DashboardFilter $filter): array
+    {
+        return Cache::remember($filter->cacheKey('executive_v4'), self::CACHE_TTL_SECONDS, function () use ($filter) {
+            $stats = $this->dashboardRepository->getKpiStats($filter);
+            $insights = $this->dashboardRepository->getExecutiveInsights($filter);
+            $summary = DashboardExecutive::buildSummaryPoints(
+                $stats,
+                $insights['completion_rates'],
+                $insights['intervention_priorities'],
+                $filter,
+                $insights['coverage_gaps'],
+            );
+
+            return [
+                ...$insights,
+                'summary' => $summary,
+                'summary_text' => DashboardExecutive::summaryToPlainText($summary),
+            ];
         });
     }
 }

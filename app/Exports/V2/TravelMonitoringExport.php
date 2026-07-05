@@ -3,13 +3,16 @@
 namespace App\Exports\V2;
 
 use App\Models\TravelCompany;
+use App\Support\KanwilContact;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class TravelMonitoringExport implements FromQuery, WithHeadings, WithMapping
+class TravelMonitoringExport implements FromQuery, WithEvents, WithHeadings, WithMapping
 {
     public function __construct(
         private readonly ?string $kabupaten = null,
@@ -63,6 +66,18 @@ class TravelMonitoringExport implements FromQuery, WithHeadings, WithMapping
             $travel->inspections_count ?? 0,
             $travel->pengaduan_count ?? 0,
             $travel->license_expiry?->format('d/m/Y') ?? '-',
+        ];
+    }
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event): void {
+                $sheet = $event->sheet->getDelegate();
+                $sheet->insertNewRowBefore(1, 2);
+                $sheet->setCellValue('A1', KanwilContact::exportSourceLabel());
+                $sheet->setCellValue('A2', 'Dicetak: '.now()->format('d/m/Y H:i'));
+            },
         ];
     }
 }

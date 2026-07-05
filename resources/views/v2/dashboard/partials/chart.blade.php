@@ -19,13 +19,13 @@
     </div>
     <div class="col-lg-4 mb-3">
         <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0">Distribusi Risk</h5></div>
+            <div class="card-header"><h5 class="mb-0">Sebaran Tingkat Risiko</h5></div>
             <div class="card-body"><div id="chart-risk-distribution" style="min-height:280px;"></div></div>
         </div>
     </div>
     <div class="col-lg-4 mb-3">
         <div class="card h-100">
-            <div class="card-header"><h5 class="mb-0">Temuan per Severity</h5></div>
+            <div class="card-header"><h5 class="mb-0">Temuan berdasarkan Tingkatan</h5></div>
             <div class="card-body"><div id="chart-temuan-severity" style="min-height:280px;"></div></div>
         </div>
     </div>

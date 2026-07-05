@@ -2,6 +2,7 @@
 
 namespace App\Exports\V2;
 
+use App\Support\KanwilContact;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithTitle;
 
@@ -28,7 +29,12 @@ class MonitoringSummarySheet implements FromArray, WithTitle
             'travel_risiko_tinggi' => 'Travel Berisiko Tinggi',
         ];
 
-        $rows = [['Indikator', 'Nilai']];
+        $rows = [
+            [KanwilContact::exportSourceLabel()],
+            ['Dicetak: '.now()->format('d/m/Y H:i')],
+            [],
+            ['Indikator', 'Nilai'],
+        ];
         foreach ($labels as $key => $label) {
             $rows[] = [$label, $this->kpi[$key] ?? 0];
         }

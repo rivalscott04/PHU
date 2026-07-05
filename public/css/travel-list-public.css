@@ -1,0 +1,475 @@
+/**
+ * Travel list public — compact directory layout (aligned with public-theme.css)
+ */
+
+.travel-list-page {
+  padding-top: 1.25rem;
+  padding-bottom: 1.5rem;
+}
+
+.travel-page-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.travel-page-head__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.travel-page-head__eyebrow {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--phu-text-muted);
+  margin: 0 0 0.25rem;
+}
+
+.travel-page-head h1 {
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  margin: 0 0 0.35rem;
+  line-height: 1.25;
+}
+
+.travel-page-head__subtitle {
+  font-size: 0.92rem;
+  color: var(--phu-text-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.back-btn--inline {
+  position: static;
+  flex-shrink: 0;
+  border-radius: 8px;
+  padding: 0.5rem 0.85rem;
+  font-size: 0.85rem;
+  box-shadow: none;
+}
+
+.back-btn--inline:hover {
+  transform: none;
+}
+
+/* Collapsible trust guide */
+.trust-intro-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  background: var(--phu-surface);
+  color: var(--phu-text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.trust-intro-toggle:hover {
+  border-color: var(--phu-accent);
+  background: var(--phu-accent-soft);
+}
+
+.trust-intro-toggle i.fa-handshake {
+  color: var(--phu-accent);
+}
+
+.trust-intro-toggle__chevron {
+  color: var(--phu-text-muted);
+  transition: transform 0.2s ease;
+}
+
+.trust-intro-toggle:not(.collapsed) .trust-intro-toggle__chevron {
+  transform: rotate(180deg);
+}
+
+.trust-intro--collapsible {
+  margin-bottom: 1rem;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+  background: transparent !important;
+}
+
+.trust-intro--collapsible .trust-intro__inner {
+  margin-top: 0.75rem;
+  padding: 1rem 1.15rem;
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  background: var(--phu-surface);
+  box-shadow: var(--phu-card-shadow);
+}
+
+.trust-intro--collapsible .trust-intro__steps {
+  margin-bottom: 0.85rem;
+}
+
+/* Inline stats */
+.travel-stats-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.35rem;
+  align-items: center;
+  padding: 0.65rem 0.85rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--phu-border);
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.travel-stats-bar__item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  font-size: 0.82rem;
+  color: var(--phu-text-muted);
+  white-space: nowrap;
+}
+
+.travel-stats-bar__item strong {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--phu-accent);
+}
+
+.travel-stats-bar__sep {
+  color: var(--phu-border);
+  user-select: none;
+}
+
+/* Filters */
+.filter-section {
+  padding: 1rem 1.15rem !important;
+  margin-bottom: 1.25rem !important;
+  border-radius: 10px !important;
+}
+
+.filter-section .form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+  color: var(--phu-text-muted);
+}
+
+.filter-section .form-label i {
+  font-size: 0.72rem;
+}
+
+.filter-section .form-select,
+.filter-section .form-control {
+  border-width: 1px !important;
+  border-radius: 8px !important;
+  padding: 0.45rem 0.75rem !important;
+  font-size: 0.88rem !important;
+}
+
+.filter-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--phu-border);
+}
+
+.filter-toolbar__sort {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-toolbar__sort .form-select {
+  width: auto;
+  min-width: 11rem;
+  font-size: 0.88rem;
+  padding: 0.4rem 0.75rem;
+}
+
+.filter-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-toolbar__label {
+  font-size: 0.82rem;
+  color: var(--phu-text-muted);
+}
+
+/* Travel cards */
+.travel-card {
+  border-radius: 10px !important;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.travel-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--phu-hover-shadow);
+}
+
+.travel-header {
+  padding: 1rem 1.15rem 0.75rem;
+}
+
+.travel-body {
+  padding: 0 1.15rem 0.85rem;
+}
+
+.travel-card .card-title {
+  font-size: 0.98rem;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.status-badge {
+  font-size: 0.62rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 999px;
+  font-weight: 600;image.png
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.status-ppiu {
+  background: var(--phu-accent);
+  color: white;
+}
+
+.status-pihk {
+  background: #555;
+  color: white;
+}
+
+.status-cabang {
+  background: #888;
+  color: white;
+}
+
+.info-item {
+  display: flex;
+  align-items: flex-start;
+}
+
+.loading-spinner {
+  display: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.travel-item {
+  animation-fill-mode: both;
+}
+
+.dropdown-menu {
+  border-radius: 8px;
+  box-shadow: var(--phu-card-shadow);
+  border: 1px solid var(--phu-border);
+  background: var(--phu-surface);
+}
+
+.dropdown-item:hover {
+  background-color: var(--phu-accent);
+  color: white;
+}
+
+.travel-header .text-muted {
+  font-size: 0.82rem;
+  margin-bottom: 0.5rem !important;
+}
+
+.travel-header .text-muted.small {
+  font-size: 0.76rem;
+}
+
+
+.info-item {
+  margin-bottom: 0.45rem;
+  padding: 0;
+  font-size: 0.84rem;
+}
+
+.info-item i {
+  width: 16px;
+  margin-right: 0.55rem;
+  font-size: 0.78rem;
+}
+
+.info-item span {
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.info-item strong {
+  font-weight: 600;
+}
+
+.trust-card-row {
+  padding: 0.55rem 0.7rem;
+  margin-bottom: 0.5rem;
+  border-radius: 8px;
+}
+
+.travel-card__footer {
+  padding: 0 1.15rem 1rem !important;
+  margin-top: 0 !important;
+}
+
+.btn-trust-profile {
+  border-radius: 8px !important;
+  font-size: 0.82rem !important;
+  padding: 0.5rem 0.75rem !important;
+  border-width: 1.5px !important;
+}
+
+.travel-item {
+  margin-bottom: 1rem !important;
+}
+
+/* View toggle & export */
+.btn-check:checked + .btn-outline-secondary {
+  background-color: var(--phu-accent);
+  border-color: var(--phu-accent);
+  color: white;
+}
+
+.btn-outline-secondary {
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  border-width: 1px;
+  font-size: 0.85rem;
+}
+
+.btn-outline-primary {
+  border-radius: 8px;
+  padding: 0.4rem 0.85rem;
+  border-width: 1.5px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.btn-outline-primary:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+#clearFiltersBtn {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+}
+
+.loading-spinner {
+  padding: 1.25rem;
+}
+
+.loading-spinner .spinner-border {
+  width: 2rem;
+  height: 2rem;
+}
+
+.no-results {
+  padding: 2rem 1rem;
+}
+
+.no-results i {
+  font-size: 2.5rem;
+}
+
+.pagination-wrapper {
+  margin-top: 1.25rem;
+}
+
+.pagination-wrapper .bg-white {
+  padding: 0.75rem 1rem !important;
+  font-size: 0.85rem;
+  border-radius: 10px !important;
+}
+
+/* List view */
+.list-view .travel-item {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+.list-view .travel-card {
+  display: flex;
+  flex-direction: row;
+  height: auto;
+}
+
+.list-view .travel-header {
+  flex: 0 0 260px;
+  border-right: 1px solid var(--phu-border);
+  border-bottom: none;
+}
+
+.list-view .travel-body {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding-top: 0.75rem;
+}
+
+.list-view .info-item {
+  flex: 0 0 50%;
+  margin-bottom: 0.35rem;
+}
+
+@media (max-width: 768px) {
+  .travel-page-head {
+    flex-direction: column;
+  }
+
+  .filter-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filter-toolbar__sort,
+  .filter-toolbar__actions {
+    justify-content: space-between;
+  }
+
+  .list-view .travel-card {
+    flex-direction: column;
+  }
+
+  .list-view .travel-header {
+    flex: none;
+    border-right: none;
+    border-bottom: 1px solid var(--phu-border);
+  }
+
+  .list-view .info-item {
+    flex: 0 0 100%;
+  }
+
+  .pagination-wrapper .d-flex {
+    flex-direction: column;
+    gap: 0.75rem;
+    text-align: center;
+  }
+}

@@ -3,7 +3,7 @@
         @php
             $color = $card['color'] ?? '#556ee6';
         @endphp
-        <div class="col-xl-3 col-md-4 col-sm-6 mb-3">
+        <div class="{{ $colClass ?? 'col-xl-3 col-md-4 col-sm-6' }} mb-3">
             <div class="card border-0 shadow-sm h-100" style="border-left: 4px solid {{ $color }} !important;">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start">

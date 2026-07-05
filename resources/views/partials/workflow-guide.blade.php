@@ -1,4 +1,5 @@
 @php
+    use App\Support\RouteAccess;
     use Illuminate\Support\Str;
 
     $compact = $compact ?? false;
@@ -47,9 +48,11 @@
                         <hr class="my-3">
                         <div class="d-flex flex-wrap gap-2">
                             @foreach ($guide['actions'] as $action)
-                                <a href="{{ $action['url'] }}" class="btn btn-sm btn-{{ $action['style'] }}">
-                                    <i class="bx {{ $action['icon'] }} me-1"></i>{{ $action['label'] }}
-                                </a>
+                                @if(RouteAccess::canAccessUrl($action['url']))
+                                    <a href="{{ $action['url'] }}" class="btn btn-sm btn-{{ $action['style'] }}">
+                                        <i class="bx {{ $action['icon'] }} me-1"></i>{{ $action['label'] }}
+                                    </a>
+                                @endif
                             @endforeach
                         </div>
                     @endif

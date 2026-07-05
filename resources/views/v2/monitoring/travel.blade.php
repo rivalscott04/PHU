@@ -35,6 +35,10 @@
         </div>
     </div>
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('v2_monitoring_travel'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
             <h5 class="mb-0 fw-semibold">Semua Travel</h5>
@@ -63,7 +67,7 @@
                                 <td class="text-muted">{{ $travel->kab_kota }}</td>
                                 <td><span class="badge bg-light text-dark border">{{ $travel->Status }}</span></td>
                                 <td>{{ number_format($travel->inspections_count) }}</td>
-                                <td>{{ number_format($travel->pengaduan_count) }}</td>
+                                <td>@include('v2.partials.pengaduan-count', ['travel' => $travel])</td>
                                 <td class="pe-3">
                                     @if($risk)
                                         <span class="badge bg-{{ $riskBadges[$risk] ?? 'secondary' }}">
@@ -90,4 +94,6 @@
         </div>
     </div>
 </div>
+
+@include('v2.partials.pengaduan-offcanvas')
 @endsection

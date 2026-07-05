@@ -4,7 +4,7 @@
             <div class="navbar-brand-box">
                 <a href="index.html" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="{{ asset('images/logo.svg') }}" alt="{{ config('app.name') }}" height="22" />
+                        <img src="{{ asset('images/logo-icon.svg') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
                     <span class="logo-lg">
                         <img src="{{ asset('images/logo-dark.png') }}" alt="{{ config('app.name') }}" height="17" />
@@ -12,7 +12,7 @@
                 </a>
                 <a href="index.html" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="{{ asset('images/logo-light.svg') }}" alt="{{ config('app.name') }}" height="22" />
+                        <img src="{{ asset('images/logo-icon-light.svg') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
                     <span class="logo-lg">
                         <img src="{{ asset('images/logo-light.png') }}" alt="{{ config('app.name') }}" height="19" />

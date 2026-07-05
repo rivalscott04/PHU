@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\TravelCompany;
 use App\Repositories\MonitoringRepository;
 use App\Support\DashboardCache;
 use Illuminate\Support\Facades\Cache;
@@ -34,5 +35,11 @@ class MonitoringService
     public function getTravelList(?string $kabupaten = null, int $perPage = 15, ?int $travelId = null)
     {
         return $this->monitoringRepository->getTravelMonitoringList($kabupaten, $perPage, $travelId);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getTravelPengaduanList(TravelCompany $travel): array
+    {
+        return $this->monitoringRepository->getTravelPengaduanList($travel);
     }
 }

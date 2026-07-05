@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -40,6 +41,20 @@ class TravelCompany extends Model
         'can_haji' => 'boolean',
         'can_umrah' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (TravelCompany $travel): void {
+            if (! $travel->public_uuid) {
+                $travel->public_uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    public function publicProfileUrl(): string
+    {
+        return route('travel.public.show', $this->public_uuid);
+    }
 
     public function model(array $row)
     {

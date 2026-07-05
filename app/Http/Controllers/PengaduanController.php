@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePengaduanRequest;
 use App\Models\Pengaduan;
-use App\Services\WorkQueueService;
-use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use App\Services\WorkQueueService;
+use App\Support\PengaduanAttachmentStorage;
+use Illuminate\Http\Request;
 use PDF;
+use Symfony\Component\HttpFoundation\Response;
 
 class PengaduanController extends Controller
 {
@@ -33,61 +36,41 @@ class PengaduanController extends Controller
         return view('pengaduan.create', compact('travels'));
     }
 
-    public function store(Request $request)
+    public function store(StorePengaduanRequest $request)
     {
-        $request->validate([
-            'nama_pengadu' => 'required|string|max:255',
-            'travels_id' => 'required|exists:travels,id',
-            'hal_aduan' => 'required|string',
-            'berkas_aduan' => 'nullable|file|max:2048',
-        ]);
 
-        $berkasPath = null;
-        if ($request->hasFile('berkas_aduan')) {
-            $berkasPath = $request->file('berkas_aduan')->store('berkas_aduan', 'public');
-        }
-
-        $pengaduan = Pengaduan::create([
-            'nama_pengadu' => $request->nama_pengadu,
-            'travels_id' => $request->travels_id,
-            'hal_aduan' => $request->hal_aduan,
-            'berkas_aduan' => $berkasPath,
-            'status' => 'pending',
-        ]);
-
-        $this->workQueueService->handlePengaduanCreated($pengaduan);
-
-        return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
+    return $this->persistPengaduan($request);
     }
 
     /**
      * Store pengaduan from public form (no authentication required)
      */
-    public function storePublic(Request $request)
+    public function storePublic(StorePengaduanRequest $request)
     {
-        $request->validate([
-            'nama_pengadu' => 'required|string|max:255',
-            'travels_id' => 'required|exists:travels,id',
-            'hal_aduan' => 'required|string',
-            'berkas_aduan' => 'nullable|file|max:2048',
-        ]);
+        return $this->persistPengaduan($request);
+    }
 
-        $berkasPath = null;
-        if ($request->hasFile('berkas_aduan')) {
-            $berkasPath = $request->file('berkas_aduan')->store('berkas_aduan', 'public');
-        }
+    private function persistPengaduan(StorePengaduanRequest $request)
+    {
+        $validated = $request->validated();
+
+        $berkasPath = PengaduanAttachmentStorage::store(
+            $request->file('berkas_aduan')
+        );
 
         $pengaduan = Pengaduan::create([
-            'nama_pengadu' => $request->nama_pengadu,
-            'travels_id' => $request->travels_id,
-            'hal_aduan' => $request->hal_aduan,
+            'nama_pengadu' => $validated['nama_pengadu'],
+            'travels_id' => $validated['travels_id'],
+            'hal_aduan' => $validated['hal_aduan'],
             'berkas_aduan' => $berkasPath,
             'status' => 'pending',
         ]);
 
         $this->workQueueService->handlePengaduanCreated($pengaduan);
 
-        return redirect()->back()->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
+        return redirect()
+            ->back()
+            ->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
     }
 
     public function index()
@@ -186,6 +169,33 @@ class PengaduanController extends Controller
         
         // Update database with PDF path
         $pengaduan->update(['pdf_output' => $pdfPath]);
+    }
+
+    /**
+     * Download lampiran pengaduan (admin only, tidak via /storage/ publik).
+     */
+    public function downloadBerkas(int $id): Response
+    {
+        $pengaduan = Pengaduan::findOrFail($id);
+
+        if (! $pengaduan->berkas_aduan) {
+            abort(404);
+        }
+
+        $path = PengaduanAttachmentStorage::resolvePath($pengaduan->berkas_aduan);
+
+        if ($path === null) {
+            abort(404);
+        }
+
+        $extension = pathinfo($path, PATHINFO_EXTENSION);
+        $filename = 'berkas_pengaduan_'.$pengaduan->id.'.'.$extension;
+
+        return response()->file($path, [
+            'Content-Type' => PengaduanAttachmentStorage::contentType($path),
+            'Content-Disposition' => 'inline; filename="'.$filename.'"',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**

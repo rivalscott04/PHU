@@ -1,0 +1,29 @@
+/* Dashboard app layout footer */
+.main-content > .footer.app-layout-footer {
+    height: auto !important;
+    min-height: 0 !important;
+    padding: 14px 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+.main-content > .footer.app-layout-footer .footer-bottom {
+    width: 100%;
+    text-align: center;
+    line-height: 1.6;
+}
+
+.main-content > .footer.app-layout-footer .footer-bottom p:last-child {
+    margin-bottom: 0;
+}
+
+.main-content .page-content {
+    padding-bottom: 88px !important;
+}
+
+@media (max-width: 575.98px) {
+    .main-content > .footer.app-layout-footer {
+        padding: 12px 16px !important;
+    }
+}

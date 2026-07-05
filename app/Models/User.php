@@ -281,4 +281,16 @@ class User extends Authenticatable
     {
         return $this->nama ?: $this->email;
     }
+
+    /** Label penanganan pengaduan untuk tampilan eksekutif (bukan nama akun internal). */
+    public function pengaduanHandlerLabel(): string
+    {
+        return match ($this->role) {
+            'pengawas' => 'Pengawas Kanwil',
+            'kabupaten' => $this->kabupaten
+                ? "Admin Kabupaten {$this->kabupaten}"
+                : 'Admin Kabupaten',
+            default => 'Tim Kanwil NTB',
+        };
+    }
 }

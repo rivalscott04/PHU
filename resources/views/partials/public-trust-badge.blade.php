@@ -21,6 +21,6 @@
 @else
     <div class="trust-badge trust-badge--muted {{ $compact ? 'trust-badge--compact' : '' }}" role="status">
         <i class="fas fa-circle-info me-1" aria-hidden="true"></i>
-        <span class="trust-badge__label">Belum ada penilaian</span>
+        <span class="trust-badge__label">Belum ada data indeks</span>
     </div>
 @endif

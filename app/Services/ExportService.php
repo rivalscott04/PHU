@@ -84,6 +84,7 @@ class ExportService
             'stats' => $overview['stats'] ?? [],
             'rankings' => $overview['rankings'] ?? [],
             'warnings' => $overview['warnings'] ?? [],
+            'executive' => $this->dashboardService->getExecutive($filter),
             'filters' => $overview['filters'] ?? [],
             'generatedAt' => now()->format('d/m/Y H:i'),
             'periodLabel' => $this->buildPeriodLabel($filter),

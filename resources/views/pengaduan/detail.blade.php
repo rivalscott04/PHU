@@ -29,8 +29,8 @@
                             <label class="form-label">Berkas Pendukung</label>
                             @if ($pengaduan->berkas_aduan)
                                 <div>
-                                    <a href="{{ asset('storage/' . $pengaduan->berkas_aduan) }}" class="btn btn-sm btn-info"
-                                        target="_blank">
+                                    <a href="{{ route('pengaduan.download-berkas', $pengaduan->id) }}" class="btn btn-sm btn-info"
+                                        target="_blank" rel="noopener noreferrer">
                                         <i class="fas fa-download"></i> Lihat Berkas
                                     </a>
                                 </div>

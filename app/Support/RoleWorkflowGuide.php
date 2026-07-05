@@ -45,11 +45,18 @@ class RoleWorkflowGuide
             'travel_master' => $role === UserRole::Admin->value ? self::travelMaster() : null,
             'users' => $role === UserRole::Admin->value ? self::usersAdmin() : null,
             'jamaah_umrah' => $role === UserRole::Admin->value ? self::jamaahUmrah() : null,
-            'v2_dashboard' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
-                ? self::v2Dashboard($role)
-                : null,
-            'v2_monitoring' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
-                ? self::v2Monitoring($role)
+            'v2_dashboard' => match ($role) {
+                UserRole::Pimpinan->value => self::v2DashboardPimpinan(),
+                UserRole::Admin->value, UserRole::Pengawas->value => self::v2Dashboard($role),
+                default => null,
+            },
+            'v2_monitoring' => match ($role) {
+                UserRole::Pimpinan->value => self::v2MonitoringPimpinan(),
+                UserRole::Admin->value, UserRole::Pengawas->value => self::v2Monitoring($role),
+                default => null,
+            },
+            'v2_monitoring_travel' => in_array($role, [UserRole::Pimpinan->value, UserRole::Admin->value, UserRole::Pengawas->value], true)
+                ? self::v2MonitoringTravel()
                 : null,
             'v2_pengawasan' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
                 ? self::v2Pengawasan($role)
@@ -354,6 +361,45 @@ class RoleWorkflowGuide
     }
 
     /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
+    private static function v2DashboardPimpinan(): array
+    {
+        return [
+            'title' => 'Cara Membaca Dashboard Pengawasan',
+            'hint' => 'Ringkasan eksekutif seluruh NTB. Gunakan untuk melihat gambaran besar, bukan untuk menyelesaikan tugas operasional.',
+            'steps' => [
+                'Terapkan filter periode sesuai kebutuhan laporan',
+                'Identifikasi wilayah atau travel yang perlu perhatian (peringatan, risiko tinggi)',
+                'Buka Monitoring PPIU untuk detail per penyelenggara',
+                'Unduh PDF atau export data untuk keperluan laporan pimpinan',
+            ],
+            'actions' => [
+                ['label' => 'Monitoring PPIU', 'url' => route('v2.monitoring.index'), 'style' => 'primary', 'icon' => 'bx-radar'],
+                ['label' => 'Export Data Travel', 'url' => route('v2.export.travel', ['format' => 'xlsx']), 'style' => 'outline-secondary', 'icon' => 'bx-export'],
+            ],
+        ];
+    }
+
+    /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
+    private static function v2MonitoringPimpinan(): array
+    {
+        return [
+            'title' => 'Cara Menggunakan Monitoring',
+            'hint' => 'Pantau ringkasan operasional travel seluruh NTB untuk keperluan laporan eksekutif.',
+            'steps' => [
+                'Baca KPI di atas untuk gambaran cepat wilayah',
+                'Klik Data Travel untuk daftar lengkap per penyelenggara',
+                'Gunakan Export untuk unduh data laporan',
+                'Untuk tindakan operasional, koordinasikan dengan tim Pengawas',
+            ],
+            'actions' => [
+                ['label' => 'Data Travel', 'url' => route('v2.monitoring.travel'), 'style' => 'primary', 'icon' => 'bx-list-ul'],
+                ['label' => 'Dashboard Pengawasan', 'url' => route('v2.dashboard'), 'style' => 'outline-primary', 'icon' => 'bx-bar-chart-alt-2'],
+                ['label' => 'Export Data Travel', 'url' => route('v2.export.travel', ['format' => 'xlsx']), 'style' => 'outline-secondary', 'icon' => 'bx-export'],
+            ],
+        ];
+    }
+
+    /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
     private static function v2Dashboard(string $role): array
     {
         $isAdmin = $role === UserRole::Admin->value;
@@ -392,6 +438,24 @@ class RoleWorkflowGuide
                 ['label' => 'Data Travel', 'url' => route('v2.monitoring.travel'), 'style' => 'primary', 'icon' => 'bx-list-ul'],
                 ['label' => 'Antrian Kerja', 'url' => route('v2.antrian.index'), 'style' => 'outline-primary', 'icon' => 'bx-list-check'],
                 ['label' => 'Profil Kepatuhan', 'url' => route('v2.compliance.index'), 'style' => 'outline-secondary', 'icon' => 'bx-shield-quarter'],
+            ],
+        ];
+    }
+
+    /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
+    private static function v2MonitoringTravel(): array
+    {
+        return [
+            'title' => 'Cara Membaca Tabel Data Travel',
+            'hint' => 'Angka biru pada kolom Pengaduan dapat diklik untuk melihat detail pengaduan per travel.',
+            'steps' => [
+                'Kolom Pengawasan menampilkan jumlah pemeriksaan yang pernah dilakukan',
+                'Klik angka biru di kolom Pengaduan untuk membuka panel detail pengaduan di samping',
+                'Angka 0 berarti tidak ada data, tidak dapat diklik',
+                'Kolom Risiko menampilkan tingkat risiko terakhir travel tersebut',
+            ],
+            'actions' => [
+                ['label' => 'Kembali ke Monitoring', 'url' => route('v2.monitoring.index'), 'style' => 'outline-primary', 'icon' => 'bx-radar'],
             ],
         ];
     }

@@ -128,7 +128,7 @@ class AuthController extends Controller
 
     public function showLanding()
     {
-        $travelPusat = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
+        $travelPusat = TravelCompany::select('id', 'public_uuid', 'Penyelenggara', 'kab_kota', 'Status')
             ->with('riskScore')
             ->orderBy('Penyelenggara')
             ->get();

@@ -4,6 +4,10 @@ namespace App\Repositories;
 
 use App\Models\AuditLog;
 use App\Support\AuditLogNarrator;
+use App\Enums\FindingSeverity;
+use App\Enums\FindingStatus;
+use App\Enums\InspectionStatus;
+use App\Enums\RiskLevel;
 use App\Models\BAP;
 use App\Models\Followup;
 use App\Models\Inspection;
@@ -49,8 +53,8 @@ class DashboardRepository
             'total_jamaah' => 'Total Jamaah',
             'total_jamaah_umrah' => 'Jamaah Umrah',
             'total_jamaah_haji_khusus' => 'Jamaah Haji Khusus',
-            'total_bap' => 'Total BAP',
-            'bap_pending' => 'BAP Pending',
+            'total_bap' => 'Total BA Pemberangkatan',
+            'bap_pending' => 'BA Pemberangkatan Pending',
             'pengawasan_berjalan' => 'Pengawasan Berjalan',
             'temuan_aktif' => 'Temuan Aktif',
             'total_pengaduan' => 'Pengaduan',
@@ -82,7 +86,9 @@ class DashboardRepository
             'keberangkatan_monthly' => $this->getKeberangkatanMonthlyChart($travelIds, $year),
             'pengaduan_category' => $this->getPengaduanCategoryChart($travelIds),
             'pengawasan_kabupaten' => $this->getPengawasanKabupatenChart($filter),
-            'risk_distribution' => $this->getRiskDistribution($filter->kabupaten, $filter->travelId),
+            'risk_distribution' => $this->labelRiskDistribution(
+                $this->getRiskDistribution($filter->kabupaten, $filter->travelId)
+            ),
             'temuan_severity' => $this->getTemuanSeverityChart($travelIds),
         ];
     }
@@ -207,7 +213,7 @@ class DashboardRepository
                 $warnings[] = [
                     'level' => 'warning',
                     'icon' => '🟠',
-                    'message' => "{$staleBap} BAP pending lebih dari 7 hari.",
+                    'message' => "{$staleBap} BA Pemberangkatan pending lebih dari 7 hari.",
                 ];
             }
         }
@@ -243,6 +249,345 @@ class DashboardRepository
         }
 
         return $warnings;
+    }
+
+    /** @return array<string, mixed> */
+    public function getExecutiveInsights(DashboardFilter $filter): array
+    {
+        $completion = $this->getCompletionRates($filter);
+
+        return [
+            'completion_rates' => $completion,
+            'intervention_priorities' => $this->getInterventionPriorities($filter),
+            'kabupaten_scorecard' => $this->getKabupatenScorecard($filter),
+            'coverage_gaps' => $this->getCoverageGaps($filter),
+        ];
+    }
+
+    /** @return array<string, array{total: int, selesai?: int, pending?: int, percent: float, label: string}> */
+    public function getCompletionRates(DashboardFilter $filter): array
+    {
+        $travelIds = $this->travelIdsFor($filter);
+        $closedStatuses = [FindingStatus::Closed->value, FindingStatus::Verified->value];
+
+        $temuanTotal = InspectionFinding::query()
+            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+            ->whereIn('pengawasan.travel_id', $travelIds)
+            ->count();
+
+        $temuanSelesai = InspectionFinding::query()
+            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+            ->whereIn('pengawasan.travel_id', $travelIds)
+            ->whereIn('pengawasan_temuan.status', $closedStatuses)
+            ->count();
+
+        $pengaduanTotal = 0;
+        $pengaduanSelesai = 0;
+        if (Schema::hasTable('pengaduan')) {
+            $pengaduanTotal = Pengaduan::query()
+                ->whereIn('travels_id', $travelIds)
+                ->count();
+            $pengaduanSelesai = Pengaduan::query()
+                ->whereIn('travels_id', $travelIds)
+                ->where('status', 'completed')
+                ->count();
+        }
+
+        $bapTotal = 0;
+        $bapDisetujui = 0;
+        if (Schema::hasTable('bap')) {
+            $bapQuery = BAP::query()
+                ->whereIn('user_id', function ($sub) use ($travelIds) {
+                    $sub->select('id')->from('users')->whereIn('travel_id', $travelIds);
+                });
+            $bapTotal = (clone $bapQuery)->count();
+            $bapDisetujui = (clone $bapQuery)->where('status', 'diterima')->count();
+        }
+
+        $pengawasanTotal = Inspection::query()
+            ->whereIn('travel_id', $travelIds)
+            ->where('status', '!=', InspectionStatus::Cancelled->value)
+            ->count();
+
+        $pengawasanSelesai = Inspection::query()
+            ->whereIn('travel_id', $travelIds)
+            ->whereIn('status', [InspectionStatus::Verified->value, InspectionStatus::Closed->value])
+            ->count();
+
+        return [
+            'temuan' => [
+                'label' => 'Penyelesaian Temuan',
+                'total' => $temuanTotal,
+                'selesai' => $temuanSelesai,
+                'percent' => $this->completionPercent($temuanSelesai, $temuanTotal),
+            ],
+            'pengaduan' => [
+                'label' => 'Penyelesaian Pengaduan',
+                'total' => $pengaduanTotal,
+                'selesai' => $pengaduanSelesai,
+                'percent' => $this->completionPercent($pengaduanSelesai, $pengaduanTotal),
+            ],
+            'ba_pemberangkatan' => [
+                'label' => 'BA Pemberangkatan Disetujui',
+                'total' => $bapTotal,
+                'selesai' => $bapDisetujui,
+                'percent' => $this->completionPercent($bapDisetujui, $bapTotal),
+            ],
+            'pengawasan' => [
+                'label' => 'Penyelesaian Pengawasan',
+                'total' => $pengawasanTotal,
+                'selesai' => $pengawasanSelesai,
+                'percent' => $this->completionPercent($pengawasanSelesai, $pengawasanTotal),
+            ],
+        ];
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getInterventionPriorities(DashboardFilter $filter, int $limit = 15): array
+    {
+        $priorities = [];
+        $travelQuery = $this->travelQuery($filter);
+
+        (clone $travelQuery)
+            ->whereNotNull('license_expiry')
+            ->whereDate('license_expiry', '<=', now()->addDays(30))
+            ->orderBy('license_expiry')
+            ->limit(8)
+            ->get(['id', 'Penyelenggara', 'kab_kota', 'license_expiry'])
+            ->each(function (TravelCompany $travel) use (&$priorities) {
+                $days = (int) now()->startOfDay()->diffInDays($travel->license_expiry, false);
+                $urgency = $days <= 7 ? 'critical' : ($days <= 14 ? 'high' : 'medium');
+
+                $priorities[] = [
+                    'travel' => $travel->Penyelenggara,
+                    'travel_id' => $travel->id,
+                    'kabupaten' => $travel->kab_kota,
+                    'issue' => $days < 0
+                        ? 'Izin/sertifikat sudah habis '.abs($days).' hari lalu'
+                        : "Izin/sertifikat habis dalam {$days} hari",
+                    'urgency' => $days < 0 ? 'critical' : $urgency,
+                    'category' => 'sertifikat',
+                ];
+            });
+
+        RiskScore::query()
+            ->join('travels', 'travels.id', '=', 'risk_scores.travel_id')
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
+            ->when($filter->travelId, fn ($q) => $q->where('risk_scores.travel_id', $filter->travelId))
+            ->where(function ($q) {
+                $q->where('risk_scores.total_score', '>=', 80)
+                    ->orWhereIn('risk_scores.risk_level', [RiskLevel::High->value, RiskLevel::Critical->value]);
+            })
+            ->select('risk_scores.*', 'travels.Penyelenggara as travel_name', 'travels.kab_kota')
+            ->orderByDesc('risk_scores.total_score')
+            ->limit(8)
+            ->get()
+            ->each(function ($risk) use (&$priorities) {
+                $level = RiskLevel::tryFrom($risk->risk_level?->value ?? $risk->risk_level);
+                $priorities[] = [
+                    'travel' => $risk->travel_name,
+                    'travel_id' => $risk->travel_id,
+                    'kabupaten' => $risk->kab_kota,
+                    'issue' => 'Skor risiko '.(int) $risk->total_score.' ('.($level?->label() ?? 'Tinggi').')',
+                    'urgency' => ($risk->risk_level?->value ?? $risk->risk_level) === RiskLevel::Critical->value ? 'critical' : 'high',
+                    'category' => 'risiko',
+                ];
+            });
+
+        InspectionFinding::query()
+            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+            ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
+            ->whereIn('pengawasan_temuan.status', [
+                FindingStatus::Open->value,
+                FindingStatus::WaitingResponse->value,
+                FindingStatus::RevisionRequired->value,
+            ])
+            ->whereIn('pengawasan_temuan.severity', [FindingSeverity::Major->value, FindingSeverity::Critical->value])
+            ->selectRaw('travels.id as travel_id, travels.Penyelenggara as travel_name, travels.kab_kota, COUNT(*) as open_count')
+            ->groupBy('travels.id', 'travels.Penyelenggara', 'travels.kab_kota')
+            ->orderByDesc('open_count')
+            ->limit(8)
+            ->get()
+            ->each(function ($row) use (&$priorities) {
+                $priorities[] = [
+                    'travel' => $row->travel_name,
+                    'travel_id' => $row->travel_id,
+                    'kabupaten' => $row->kab_kota,
+                    'issue' => "{$row->open_count} temuan berat/sedang belum selesai",
+                    'urgency' => 'high',
+                    'category' => 'temuan',
+                ];
+            });
+
+        if (Schema::hasTable('pengaduan')) {
+            Pengaduan::query()
+                ->join('travels', 'travels.id', '=', 'pengaduan.travels_id')
+                ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                    $filter->applyTravelKabKota($q, 'travels.kab_kota');
+                })
+                ->whereIn('pengaduan.status', ['pending', 'in_progress'])
+                ->selectRaw('travels.id as travel_id, travels.Penyelenggara as travel_name, travels.kab_kota, COUNT(*) as open_count')
+                ->groupBy('travels.id', 'travels.Penyelenggara', 'travels.kab_kota')
+                ->having('open_count', '>=', 2)
+                ->orderByDesc('open_count')
+                ->limit(5)
+                ->get()
+                ->each(function ($row) use (&$priorities) {
+                    $priorities[] = [
+                        'travel' => $row->travel_name,
+                        'travel_id' => $row->travel_id,
+                        'kabupaten' => $row->kab_kota,
+                        'issue' => "{$row->open_count} pengaduan belum selesai",
+                        'urgency' => 'medium',
+                        'category' => 'pengaduan',
+                    ];
+                });
+        }
+
+        $urgencyOrder = ['critical' => 0, 'high' => 1, 'medium' => 2];
+        usort($priorities, function (array $a, array $b) use ($urgencyOrder) {
+            $left = $urgencyOrder[$a['urgency'] ?? 'medium'] ?? 3;
+            $right = $urgencyOrder[$b['urgency'] ?? 'medium'] ?? 3;
+
+            return $left <=> $right;
+        });
+
+        $seen = [];
+        $deduped = [];
+        foreach ($priorities as $item) {
+            $key = ($item['travel_id'] ?? 0).'|'.($item['category'] ?? '');
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $deduped[] = $item;
+        }
+
+        return array_slice($deduped, 0, $limit);
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getKabupatenScorecard(DashboardFilter $filter): array
+    {
+        $kabupatens = $this->getKabupatenOptions();
+        $period = $this->resolvePeriod($filter);
+        $rows = [];
+
+        foreach ($kabupatens as $kabupaten) {
+            if (! $filter->matchesKabupaten($kabupaten)) {
+                continue;
+            }
+
+            $scopedFilter = new DashboardFilter(
+                kabupaten: $kabupaten,
+                tahun: $filter->tahun,
+                bulan: $filter->bulan,
+                jenisTravel: $filter->jenisTravel,
+                riskLevel: $filter->riskLevel,
+                travelId: $filter->travelId,
+                kabupatens: $filter->kabupatens,
+            );
+
+            $travelIds = $this->travelIdsFor($scopedFilter);
+            if ($travelIds->isEmpty()) {
+                continue;
+            }
+
+            $totalTravel = $travelIds->count();
+            $pengawasan = Inspection::query()
+                ->whereIn('travel_id', $travelIds)
+                ->whereBetween('created_at', [$period['start'], $period['end']])
+                ->count();
+
+            $temuanAktif = InspectionFinding::query()
+                ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+                ->whereIn('pengawasan.travel_id', $travelIds)
+                ->whereNotIn('pengawasan_temuan.status', [FindingStatus::Closed->value, FindingStatus::Verified->value])
+                ->count();
+
+            $pengaduan = Schema::hasTable('pengaduan')
+                ? Pengaduan::query()->whereIn('travels_id', $travelIds)->count()
+                : 0;
+
+            $avgRisk = (float) RiskScore::query()
+                ->whereIn('travel_id', $travelIds)
+                ->avg('total_score');
+
+            $bapPending = 0;
+            if (Schema::hasTable('bap')) {
+                $bapPending = BAP::query()
+                    ->where('status', 'pending')
+                    ->whereIn('user_id', function ($sub) use ($travelIds) {
+                        $sub->select('id')->from('users')->whereIn('travel_id', $travelIds);
+                    })
+                    ->count();
+            }
+
+            $rows[] = [
+                'kabupaten' => $kabupaten,
+                'total_travel' => $totalTravel,
+                'pengawasan' => $pengawasan,
+                'temuan_aktif' => $temuanAktif,
+                'pengaduan' => $pengaduan,
+                'avg_risk' => round($avgRisk, 1),
+                'bap_pending' => $bapPending,
+            ];
+        }
+
+        usort($rows, fn (array $a, array $b) => $b['temuan_aktif'] <=> $a['temuan_aktif']
+            ?: $b['pengaduan'] <=> $a['pengaduan']);
+
+        return $rows;
+    }
+
+    /** @return list<array<string, mixed>> */
+    public function getCoverageGaps(DashboardFilter $filter, int $limit = 12): array
+    {
+        $travelIds = $this->travelIdsFor($filter);
+        $cutoff = now()->subMonths(12);
+
+        $lastInspections = Inspection::query()
+            ->whereIn('travel_id', $travelIds)
+            ->selectRaw('travel_id, MAX(created_at) as last_inspection')
+            ->groupBy('travel_id')
+            ->pluck('last_inspection', 'travel_id');
+
+        return TravelCompany::query()
+            ->whereIn('id', $travelIds)
+            ->get(['id', 'Penyelenggara', 'kab_kota'])
+            ->map(function (TravelCompany $travel) use ($lastInspections, $cutoff) {
+                $last = $lastInspections[$travel->id] ?? null;
+                $lastCarbon = $last ? Carbon::parse($last) : null;
+                $isGap = $lastCarbon === null || $lastCarbon->lt($cutoff);
+
+                return [
+                    'travel' => $travel->Penyelenggara,
+                    'travel_id' => $travel->id,
+                    'kabupaten' => $travel->kab_kota,
+                    'last_inspection' => $lastCarbon?->format('d/m/Y'),
+                    'months_ago' => $lastCarbon ? (int) $lastCarbon->diffInMonths(now()) : null,
+                    'is_gap' => $isGap,
+                ];
+            })
+            ->filter(fn (array $row) => $row['is_gap'])
+            ->sortBy(fn (array $row) => $row['last_inspection'] ? ($row['months_ago'] ?? 0) : -1)
+            ->take($limit)
+            ->values()
+            ->all();
+    }
+
+    private function completionPercent(int $done, int $total): float
+    {
+        if ($total === 0) {
+            return 0.0;
+        }
+
+        return round(($done / $total) * 100, 1);
     }
 
     public function getOverviewStats(?string $kabupaten = null): array
@@ -553,13 +898,25 @@ class DashboardRepository
             ->pluck('total', 'severity');
 
         return [
-            'labels' => ['MINOR', 'MAJOR', 'CRITICAL'],
-            'series' => [
-                (int) ($rows['MINOR'] ?? 0),
-                (int) ($rows['MAJOR'] ?? 0),
-                (int) ($rows['CRITICAL'] ?? 0),
-            ],
+            'labels' => array_map(fn (FindingSeverity $case) => $case->label(), FindingSeverity::cases()),
+            'series' => array_map(
+                fn (FindingSeverity $case) => (int) ($rows[$case->value] ?? 0),
+                FindingSeverity::cases()
+            ),
         ];
+    }
+
+    /** @param  array<string, int>  $raw */
+    private function labelRiskDistribution(array $raw): array
+    {
+        $labeled = [];
+
+        foreach ($raw as $level => $total) {
+            $enum = RiskLevel::tryFrom($level);
+            $labeled[$enum?->label() ?? $level] = $total;
+        }
+
+        return $labeled;
     }
 
     private function getRiskRankingFiltered(DashboardFilter $filter, int $limit): array

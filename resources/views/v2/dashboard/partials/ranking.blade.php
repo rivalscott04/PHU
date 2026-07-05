@@ -9,7 +9,7 @@
                         @forelse ($rankings['risk'] ?? [] as $row)
                             <tr>
                                 <td>
-                                    @if (!empty($row['travel_id']))
+                                    @if (!empty($row['travel_id']) && \App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.risk.show'))
                                         <a href="{{ route('v2.risk.show', $row['travel_id']) }}">{{ $row['travel'] }}</a>
                                     @else
                                         {{ $row['travel'] ?? '-' }}
@@ -56,7 +56,13 @@
                         @forelse ($rankings['pengaduan'] ?? [] as $row)
                             <tr>
                                 <td>{{ $row['travel'] ?? '-' }}</td>
-                                <td>{{ $row['total'] ?? 0 }}</td>
+                                <td>
+                                    @include('v2.partials.pengaduan-count', [
+                                        'travelId' => $row['travel_id'] ?? null,
+                                        'travelName' => $row['travel'] ?? null,
+                                        'count' => $row['total'] ?? 0,
+                                    ])
+                                </td>
                             </tr>
                         @empty
                             <tr><td colspan="2" class="text-center text-muted">Belum ada data.</td></tr>

@@ -220,7 +220,7 @@ return [
     */
     'kanwil' => [
         'short_name' => 'Kanwil KemenHaj NTB',
-        'office_name' => 'Kantor Wilayah Kementerian Haji Provinsi NTB',
+        'office_name' => 'Kantor Wilayah Kementerian Haji dan Umroh Provinsi NTB',
         'address' => 'Jl. Majapahit No. 56, Mataram',
         'phone' => '0370-123456',
         'email' => 'ntb@kemenhaj.go.id',

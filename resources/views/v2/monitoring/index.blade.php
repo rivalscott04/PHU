@@ -2,6 +2,7 @@
 
 @section('content')
 @php
+    use App\Support\RouteAccess;
     $riskBadges = [
         'LOW' => 'success',
         'MEDIUM' => 'info',
@@ -24,18 +25,24 @@
                 <p class="text-muted mb-0">Ringkasan operasional travel, pengawasan, dan risiko</p>
             </div>
             <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
-                <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-primary">
-                    <i class="bx bx-list-ul me-1"></i> Data Travel
-                </a>
-                <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bx bx-line-chart me-1"></i> Dashboard
-                </a>
-                <a href="{{ route('v2.export.monitoring', ['format' => 'xlsx']) }}" class="btn btn-sm btn-outline-success">
-                    <i class="bx bx-spreadsheet me-1"></i> Excel
-                </a>
-                <a href="{{ route('v2.export.monitoring', ['format' => 'csv']) }}" class="btn btn-sm btn-outline-secondary">
-                    <i class="bx bx-download me-1"></i> CSV
-                </a>
+                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
+                    <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-primary">
+                        <i class="bx bx-list-ul me-1"></i> Data Travel
+                    </a>
+                @endif
+                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.dashboard'))
+                    <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-line-chart me-1"></i> Dashboard
+                    </a>
+                @endif
+                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.export.monitoring'))
+                    <a href="{{ route('v2.export.monitoring', ['format' => 'xlsx']) }}" class="btn btn-sm btn-outline-success">
+                        <i class="bx bx-spreadsheet me-1"></i> Excel
+                    </a>
+                    <a href="{{ route('v2.export.monitoring', ['format' => 'csv']) }}" class="btn btn-sm btn-outline-secondary">
+                        <i class="bx bx-download me-1"></i> CSV
+                    </a>
+                @endif
                 <button type="button" class="btn btn-sm btn-outline-primary" id="btn-refresh-kpi">
                     <i class="bx bx-refresh me-1"></i> Refresh KPI
                 </button>
@@ -57,9 +64,11 @@
                         <h5 class="mb-0 fw-semibold">Data Travel Terbaru</h5>
                         <small class="text-muted">Snapshot monitoring per penyelenggara</small>
                     </div>
-                    <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-link text-primary p-0">
-                        Lihat semua <i class="bx bx-chevron-right"></i>
-                    </a>
+                    @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
+                        <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-link text-primary p-0">
+                            Lihat semua <i class="bx bx-chevron-right"></i>
+                        </a>
+                    @endif
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
@@ -84,7 +93,7 @@
                                         <td class="text-muted">{{ $travel->kab_kota }}</td>
                                         <td><span class="badge bg-light text-dark border">{{ $travel->Status }}</span></td>
                                         <td>{{ number_format($travel->inspections_count) }}</td>
-                                        <td>{{ number_format($travel->pengaduan_count) }}</td>
+                                        <td>@include('v2.partials.pengaduan-count', ['travel' => $travel])</td>
                                         <td class="pe-3">
                                             @if($risk)
                                                 <span class="badge bg-{{ $riskBadges[$risk] ?? 'secondary' }}">
@@ -111,30 +120,7 @@
         </div>
 
         <div class="col-lg-4 mb-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-transparent border-bottom">
-                    <h5 class="mb-0 fw-semibold">Akses Cepat</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2">
-                        <a href="{{ route('v2.dashboard') }}" class="btn btn-outline-primary text-start">
-                            <i class="bx bx-line-chart me-2"></i> Dashboard Eksekutif
-                        </a>
-                        <a href="{{ route('v2.pengawasan.index') }}" class="btn btn-outline-primary text-start">
-                            <i class="bx bx-search-alt me-2"></i> Daftar Pengawasan
-                        </a>
-                        <a href="{{ route('v2.risk.index') }}" class="btn btn-outline-warning text-start">
-                            <i class="bx bx-shield-quarter me-2"></i> Skor Risiko
-                        </a>
-                        <a href="{{ route('v2.compliance.index') }}" class="btn btn-outline-success text-start">
-                            <i class="bx bx-check-shield me-2"></i> Profil Kepatuhan
-                        </a>
-                        <a href="{{ route('v2.export.travel', ['format' => 'xlsx']) }}" class="btn btn-outline-secondary text-start">
-                            <i class="bx bx-export me-2"></i> Export Data Travel
-                        </a>
-                    </div>
-                </div>
-            </div>
+            @include('v2.partials.quick-access')
 
             @php
                 $alertCount = ($cards['temuan_aktif']['value'] ?? 0) + ($cards['travel_risiko_tinggi']['value'] ?? 0);
@@ -156,6 +142,8 @@
         </div>
     </div>
 </div>
+
+@include('v2.partials.pengaduan-offcanvas')
 @endsection
 
 @push('js')

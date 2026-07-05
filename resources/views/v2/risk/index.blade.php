@@ -33,7 +33,7 @@
                 </p>
             </div>
             <div class="d-flex gap-2">
-                @if(auth()->user()->role === 'admin')
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.risk.recalculate'))
                     <form method="POST" action="{{ route('v2.risk.recalculate') }}">
                         @csrf
                         <button class="btn btn-sm btn-warning">
@@ -41,9 +41,11 @@
                         </button>
                     </form>
                 @endif
-                <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
-                    <i class="bx bx-radar me-1"></i> Monitoring
-                </a>
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.index'))
+                    <a href="{{ route('v2.monitoring.index') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="bx bx-radar me-1"></i> Monitoring
+                    </a>
+                @endif
             </div>
         </div>
     </div>
