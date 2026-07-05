@@ -26,9 +26,14 @@ yarn-error.log
 /test-results
 /blob-report
 
-# Demo pengawasan — generator + artefak keluaran (screenshot, pptx, pdf, manifest)
+# Demo artefak — hasil generator (screenshot, pptx, pdf, manifest), jangan di-commit
 /docs/demo-pengawasan/
+/docs/demo-public/
 /database/seeders/DemoPengawasanScreenshotSeeder.php
+/database/seeders/DemoPublicScreenshotSeeder.php
+
+.DS_Store
+**/.DS_Store
 
 # Python (build-pengawasan-ppt.py, generate-brand-assets.py, dll.)
 *.py

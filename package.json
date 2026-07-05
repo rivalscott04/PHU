@@ -11,7 +11,12 @@
         "demo:pengawasan:prepare": "bash scripts/demo-pengawasan-prepare.sh",
         "demo:pengawasan:shots": "HEADLESS=1 playwright test e2e/journey/pengawasan-demo-pimpinan.spec.ts --config=e2e/playwright.config.ts",
         "demo:pengawasan:ppt": "python3 scripts/build-pengawasan-ppt.py",
-        "demo:pengawasan": "npm run demo:pengawasan:shots && npm run demo:pengawasan:ppt"
+        "demo:pengawasan": "npm run demo:pengawasan:shots && npm run demo:pengawasan:ppt",
+        "demo:public:prepare": "bash scripts/demo-public-prepare.sh",
+        "demo:public:shots": "HEADLESS=1 playwright test e2e/journey/public-demo.spec.ts --config=e2e/playwright.config.ts",
+        "demo:public:ppt": "python3 scripts/build-public-ppt.py",
+        "demo:public:pdf": "bash scripts/public-ppt-to-pdf.sh",
+        "demo:public": "npm run demo:public:shots && npm run demo:public:ppt && npm run demo:public:pdf"
     },
     "devDependencies": {
         "@playwright/test": "^1.49.0",
