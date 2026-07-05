@@ -176,8 +176,6 @@ Warga kirim pengaduan dari halaman depan (dengan lampiran opsional) → masuk an
 
 Untuk instalasi, konfigurasi server, perintah artisan, cron, dan Redis, lihat **[SETUP.md](./SETUP.md)**.
 
-Untuk dokumentasi fitur lengkap per modul, lihat **[FITUR_SISTEM.md](./FITUR_SISTEM.md)**.
-
 **Login awal** (setelah migrasi database):
 
 | Peran | Email contoh | Password |

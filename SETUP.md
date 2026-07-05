@@ -442,6 +442,6 @@ Semua route V2 memakai prefix `/v2`, middleware `auth` + `password.changed`:
 
 ## Dokumentasi terkait
 
-- [FITUR_SISTEM.md](./FITUR_SISTEM.md) — fitur lengkap V1
+- [README.md](./README.md) — ringkasan fitur dan peran pengguna
 - [guidev2/](./guidev2/) — spesifikasi modul V2 (dashboard, pengawasan, risk, dll.)
 - [.env.example](./.env.example) — template variabel environment
