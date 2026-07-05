@@ -703,6 +703,15 @@
             padding: 0.35rem 0.65rem;
             color: var(--phu-accent, #e2a712);
             border-color: var(--phu-border, #dee2e6);
+            background-color: #fff;
+        }
+
+        .riwayat-pengaduan-panel .pagination .page-link:hover,
+        .riwayat-pengaduan-panel .pagination .page-link:focus,
+        .riwayat-pengaduan-panel .pagination .page-link:focus-visible {
+            background-color: var(--phu-accent, #e2a712);
+            border-color: var(--phu-accent, #e2a712);
+            color: #fff;
         }
 
         .riwayat-pengaduan-panel .pagination .page-item.active .page-link {
