@@ -18,13 +18,22 @@ yarn-error.log
 /.vscode
 /guidev2
 /storage/logs/laravel.log
-# E2E / Playwright
+# E2E / Playwright (termasuk pengawasan-demo-pimpinan.spec.ts)
 /e2e
 /scripts
 /database/seeders/E2eScenarioSeeder.php
 /playwright-report
 /test-results
 /blob-report
+
+# Demo pengawasan — generator + artefak keluaran (screenshot, pptx, pdf, manifest)
+/docs/demo-pengawasan/
+/database/seeders/DemoPengawasanScreenshotSeeder.php
+
+# Python (build-pengawasan-ppt.py, generate-brand-assets.py, dll.)
+*.py
+__pycache__/
+*.py[cod]
 
 # PHPUnit tests
 /tests
