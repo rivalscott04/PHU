@@ -50,7 +50,7 @@
 <script src="{{ asset('libs/leaflet/leaflet.js') }}"></script>
 <script>
     window.__dashboardHeatmapConfig = {
-        logoUrl: @json(asset('images/logo-icon.svg')),
+        logoUrl: @json(asset('images/logo_web.png')),
     };
     window.__dashboardHeatmapData = @json($heatmap ?? []);
 </script>

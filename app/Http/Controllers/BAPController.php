@@ -7,113 +7,218 @@ use App\Models\BAP;
 use App\Models\Jamaah;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use Barryvdh\DomPDF\Facade\Pdf;
+use App\Services\BapJamaahService;
+use App\Services\BapVerificationService;
+use Illuminate\Support\Facades\DB;
 
 class BAPController extends Controller
 {
+    public function __construct(
+        private BapJamaahService $bapJamaahService,
+        private BapVerificationService $bapVerificationService,
+    ) {}
     public function showFormBAP()
     {
         $user = auth()->user();
-        
-        // Check if user is authenticated
-        if (!$user) {
+
+        if (! $user) {
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
-        
-        $jamaahCount = 0;
-        $travelData = null;
 
-        // Handle admin role
-        if ($user->role === 'admin') {
-            $jamaahCount = Jamaah::count();
-            if ($jamaahCount == 0) {
-                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
-            }
-        }
-        // Handle non-admin/kabupaten users
-        else if ($user->role !== 'kabupaten') {
-            $travelData = TravelCompany::find($user->travel_id);
+        $context = $this->resolveBapFormContext();
 
-            if (!$travelData) {
-                return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
-            }
-
-            if ($travelData->Status === 'PPIU') {
-                // Hanya ambil jamaah umrah dari travel company ini
-                $jamaahCount = Jamaah::where('jenis_jamaah', 'umrah')
-                                    ->where('travel_id', $user->travel_id)
-                                    ->count();
-            } else if ($travelData->Status === 'PIHK') {
-                // Hanya ambil jamaah haji dari travel company ini
-                $jamaahCount = Jamaah::where('jenis_jamaah', 'haji')
-                                    ->where('travel_id', $user->travel_id)
-                                    ->count();
-            }
-
-            if ($jamaahCount == 0) {
-                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
-            }
+        if ($context instanceof \Illuminate\Http\RedirectResponse) {
+            return $context;
         }
 
-        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
+        return view('travel.pengajuanBAP', $context);
+    }
 
-        return view('travel.pengajuanBAP', compact('ppiuList', 'jamaahCount', 'travelData'));
+    public function editFormBAP($id)
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+
+        $bap = $this->findWizardBap($id)->load('jamaah');
+        $context = $this->resolveBapFormContext($bap);
+
+        if ($context instanceof \Illuminate\Http\RedirectResponse) {
+            return $context;
+        }
+
+        return view('travel.pengajuanBAP', $context);
+    }
+
+    public function downloadSuratPernyataanTemplate()
+    {
+        $user = auth()->user();
+        $travel = $user?->travel_id ? TravelCompany::find($user->travel_id) : null;
+
+        return Pdf::loadView('travel.pdf.template-surat-pernyataan', [
+            'pimpinan' => $travel?->Pimpinan ?? '________________',
+            'penyelenggara' => $travel?->Penyelenggara ?? '________________',
+            'kabKota' => $travel?->kab_kota ?? '________________',
+        ])->download('template-surat-pernyataan-bap.pdf');
+    }
+
+    public function jamaahPickerOptions(Request $request)
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403);
+        }
+
+        $travel = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $ignoreBapId = $request->filled('ignore_bap_id') ? (int) $request->ignore_bap_id : null;
+        $ppiuname = $request->string('ppiuname')->toString();
+
+        if ($request->boolean('available_only')) {
+            return response()->json([
+                'ids' => $this->bapJamaahService->availableIdsForPicker($user, $travel, [
+                    'ppiuname' => $ppiuname,
+                    'ignore_bap_id' => $ignoreBapId,
+                ]),
+            ]);
+        }
+
+        $paginator = $this->bapJamaahService->paginateForPicker($user, $travel, [
+            'search' => $request->string('search')->toString(),
+            'ppiuname' => $ppiuname,
+            'per_page' => min(50, max(10, (int) $request->input('per_page', 15))),
+            'ignore_bap_id' => $ignoreBapId,
+        ]);
+
+        $busyIds = array_flip($this->bapJamaahService->busyJamaahIds($ignoreBapId));
+
+        return response()->json([
+            'data' => collect($paginator->items())->map(fn (Jamaah $jamaah) => [
+                'id' => $jamaah->id,
+                'nama' => $jamaah->nama,
+                'nik' => $jamaah->nik,
+                'ppiuname' => $jamaah->travel?->Penyelenggara,
+                'is_busy' => isset($busyIds[$jamaah->id]),
+            ])->values(),
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
     }
 
     public function detail($id)
     {
         $data = BAP::findOrFail($id);
+        $user = auth()->user();
 
-        return view('travel.detailBAP', ['data' => $data]);
+        if ($user?->role === 'user' && $data->user_id === $user->id && $data->status === 'pending') {
+            $wizardRoute = \App\Support\BapWizardStatus::wizardRouteName($data);
+
+            if ($wizardRoute) {
+                return redirect()->route($wizardRoute, $data->id);
+            }
+        }
+
+        return view('travel.detailBAP', ['data' => $data->load('jamaah')]);
+    }
+
+    public function showWizardUpload($id)
+    {
+        $data = $this->findWizardBap($id)->load('jamaah');
+
+        return view('travel.bap-wizard-upload', compact('data'));
+    }
+
+    public function showWizardReview($id)
+    {
+        $data = $this->findWizardBap($id)->load('jamaah');
+
+        if (! $data->pdf_file_path) {
+            return redirect()
+                ->route('bap.wizard.upload', $data->id)
+                ->with('error', 'Unggah surat pernyataan PDF terlebih dahulu.');
+        }
+
+        return view('travel.bap-wizard-review', compact('data'));
+    }
+
+    private function findWizardBap($id): BAP
+    {
+        $data = BAP::findOrFail($id);
+        $this->authorizeWizardBap($data);
+
+        return $data;
+    }
+
+    private function authorizeWizardBap(BAP $bap): void
+    {
+        $this->authorizeBapAccess($bap);
+
+        if ($bap->status !== 'pending') {
+            abort(403, 'Pengajuan ini sudah tidak dapat diubah.');
+        }
+    }
+
+    private function authorizeBapAccess(BAP $bap): void
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            abort(403, 'Anda harus login terlebih dahulu.');
+        }
+
+        if (in_array($user->role, ['admin', 'kabupaten'], true)) {
+            return;
+        }
+
+        if ($user->role === 'user' && $bap->user_id === $user->id) {
+            return;
+        }
+
+        abort(403, 'Anda tidak memiliki akses ke pengajuan ini.');
     }
 
     public function printBAP($id)
     {
         $data = BAP::findOrFail($id);
-        
-        // Format tanggal untuk tampilan
+
         $formattedDate = \Carbon\Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = \Carbon\Carbon::parse($data->returndate)->translatedFormat('d F Y');
-        
-        // Generate QR Code untuk tanda tangan digital petugas
-        $qrPath = null;
+
+        $data = $this->bapVerificationService->ensureTravelToken($data);
+
+        $travelQrCodeData = $this->bapVerificationService->qrDataUri(
+            $this->bapVerificationService->verificationUrl($data->travel_token, $data->id)
+        );
+
+        $kanwilQrCodeData = null;
+        $token = null;
+
         if ($data->status === 'diterima') {
-            try {
-                // Generate token untuk verifikasi manual
-                $token = strtoupper(substr(hash('sha256', $data->id . $data->nomor_surat . $data->user_id . $data->ppiuname), 0, 8));
-                
-                // Generate QR Code dengan URL lengkap untuk verifikasi public tanpa navbar
-                $baseUrl = request()->getSchemeAndHttpHost();
-                $verificationUrl = $baseUrl . '/public/verify-e-sign?token=' . $token . '&bap_id=' . $data->id;
-                
-                $qrCode = \Endroid\QrCode\QrCode::create($verificationUrl)
-                ->setSize(300)
-                ->setMargin(10);
+            $data = $this->bapVerificationService->ensureKanwilToken($data);
+            $token = $this->bapVerificationService->combinedToken($data);
 
-                $writer = new \Endroid\QrCode\Writer\PngWriter();
-                $result = $writer->write($qrCode);
-
-                // Save QR Code to file in BAP_Sign folder
-                $qrPath = storage_path("app/public/BAP_Sign/bap_qrcode_{$data->id}.png");
-                
-                // Ensure directory exists
-                if (!file_exists(dirname($qrPath))) {
-                    mkdir(dirname($qrPath), 0755, true);
-                }
-
-                $result->saveToFile($qrPath);
-                
-                // Get the public URL for the QR code
-                $qrCodeData = asset('storage/BAP_Sign/bap_qrcode_' . $data->id . '.png');
-                
-            } catch (\Exception $e) {
-                \Log::error('QR Code generation failed:', ['error' => $e->getMessage()]);
-                $qrCodeData = null;
+            if ($token) {
+                $kanwilQrCodeData = $this->bapVerificationService->qrDataUri(
+                    $this->bapVerificationService->verificationUrl($token, $data->id)
+                );
             }
-        } else {
-            $qrCodeData = null;
         }
-        
-        return view('travel.printBAP', compact('data', 'qrCodeData', 'formattedDate', 'formattedReturnDate', 'token'));
+
+        return view('travel.printBAP', compact(
+            'data',
+            'travelQrCodeData',
+            'kanwilQrCodeData',
+            'formattedDate',
+            'formattedReturnDate',
+            'token'
+        ));
     }
 
 
@@ -239,21 +344,33 @@ class BAPController extends Controller
         }
 
         if ($user->role === 'user') {
-            // User (travel) hanya bisa melihat BAP yang mereka buat dan sesuai kabupatennya
-            $data = BAP::where('user_id', $user->id)
-                       ->where('kab_kota', $user->kabupaten)
-                       ->get();
-        } else if ($user->role === 'kabupaten') {
-            // Kabupaten hanya bisa melihat BAP dari kabupatennya
-            $data = BAP::where('kab_kota', $user->kabupaten)->get();
-        } else if ($user->role === 'admin') {
-            // Admin bisa melihat semua BAP
-            $data = BAP::all();
+            $data = BAP::query()
+                ->where('user_id', $user->id)
+                ->where('kab_kota', $user->kabupaten)
+                ->latest()
+                ->paginate(15)
+                ->withQueryString();
+        } elseif ($user->role === 'kabupaten') {
+            $data = BAP::query()
+                ->where('kab_kota', $user->kabupaten)
+                ->latest()
+                ->paginate(15)
+                ->withQueryString();
+        } elseif ($user->role === 'admin') {
+            $data = BAP::query()
+                ->latest()
+                ->paginate(15)
+                ->withQueryString();
         } else {
-            $data = collect();
+            $data = BAP::query()
+                ->whereRaw('1 = 0')
+                ->latest()
+                ->paginate(15)
+                ->withQueryString();
         }
 
-        $jamaahCount = Jamaah::count();
+        $travel = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $jamaahCount = $this->bapJamaahService->countForForm($user, $travel);
 
         return view('travel.listBAP', compact('data', 'jamaahCount'));
     }
@@ -261,14 +378,50 @@ class BAPController extends Controller
 
     public function simpan(Request $request)
     {
-        // Validasi input
+        $user = auth()->user();
+        $payload = $this->validatedBapPayload($request, $user);
+
+        $data = $payload['data'];
+        $data['user_id'] = $user->id;
+
+        $bap = BAP::create($data);
+        $bap->jamaah()->sync($payload['jamaah_ids']);
+        $this->bapVerificationService->ensureTravelToken($bap);
+
+        return redirect()
+            ->route('bap.wizard.upload', $bap->id)
+            ->with('success', 'Data keberangkatan tersimpan. Lanjutkan dengan mengunggah surat pernyataan PDF.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $bap = $this->findWizardBap($id);
+        $user = auth()->user();
+        $payload = $this->validatedBapPayload($request, $user, $bap->id);
+
+        $bap->update($payload['data']);
+        $bap->jamaah()->sync($payload['jamaah_ids']);
+
+        $nextRoute = $bap->fresh()->pdf_file_path ? 'bap.wizard.review' : 'bap.wizard.upload';
+
+        return redirect()
+            ->route($nextRoute, $bap->id)
+            ->with('success', 'Draft berhasil diperbarui.');
+    }
+
+    /**
+     * @return array{data: array<string, mixed>, jamaah_ids: list<int>}|void
+     */
+    private function validatedBapPayload(Request $request, $user, ?int $ignoreBapId = null): array
+    {
         $request->validate([
             'name' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'ppiuname' => 'required|string|max:255',
             'address_phone' => 'required|string|max:255',
             'kab_kota' => 'required|string|max:255',
-            'people' => 'required|integer',
+            'jamaah_ids' => 'required|array|min:1',
+            'jamaah_ids.*' => 'integer',
             'days' => 'required|integer|min:1',
             'price' => 'required|numeric',
             'datetime' => 'required|date',
@@ -277,15 +430,70 @@ class BAPController extends Controller
             'airlines2' => 'required|string|max:255',
         ]);
 
-        // Ambil semua data dari request dan tambahkan user_id
-        $data = $request->except(['package', 'price_display']);
-        $data['user_id'] = auth()->id();
+        $selected = $this->bapJamaahService->validateSelection(
+            $request->input('jamaah_ids', []),
+            $user,
+            $request->ppiuname,
+            $ignoreBapId
+        );
 
-        // Simpan data ke dalam database
-        BAP::create($data);
+        $data = $request->except(['package', 'price_display', 'jamaah_ids', 'people', '_method', '_token']);
+        $data['people'] = $selected->count();
 
-        // Redirect ke halaman yang diinginkan setelah data disimpan
-        return redirect()->route('bap')->with('success', 'Data berhasil disimpan.');
+        return [
+            'data' => $data,
+            'jamaah_ids' => $selected->pluck('id')->all(),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>|\Illuminate\Http\RedirectResponse
+     */
+    private function resolveBapFormContext(?BAP $bap = null)
+    {
+        $user = auth()->user();
+        $jamaahCount = 0;
+        $travelData = null;
+
+        if ($user->role === 'admin') {
+            $jamaahCount = Jamaah::count();
+            if ($jamaahCount === 0) {
+                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+            }
+        } elseif ($user->role !== 'kabupaten') {
+            $travelData = TravelCompany::find($user->travel_id);
+
+            if (! $travelData) {
+                return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
+            }
+
+            $jenis = $travelData->Status === 'PIHK' ? 'haji' : 'umrah';
+            $jamaahCount = Jamaah::where('jenis_jamaah', $jenis)
+                ->where('travel_id', $user->travel_id)
+                ->count();
+
+            if ($jamaahCount === 0) {
+                return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+            }
+        }
+
+        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
+        $jamaahTotalCount = $this->bapJamaahService->countForForm($user, $travelData);
+
+        if ($jamaahTotalCount === 0) {
+            return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
+        }
+
+        $selectedJamaah = collect();
+        if ($requestIds = old('jamaah_ids')) {
+            $selectedJamaah = Jamaah::query()
+                ->whereIn('id', $requestIds)
+                ->get(['id', 'nama', 'nik']);
+        } elseif ($bap) {
+            $selectedJamaah = $bap->jamaah()->get(['jamaah.id', 'nama', 'nik']);
+        }
+
+        return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap');
     }
 
     public function uploadPDF(Request $request, $id)
@@ -295,6 +503,7 @@ class BAPController extends Controller
         ]);
 
         $data = BAP::findOrFail($id);
+        $this->authorizeBapAccess($data);
 
         if ($request->hasFile('pdf_file')) {
             $pdfFile = $request->file('pdf_file');
@@ -303,18 +512,34 @@ class BAPController extends Controller
             $data->save();
         }
 
-        return redirect()->route('bap')->with('success', 'PDF berhasil diupload.');
+        $fromWizard = $request->boolean('wizard');
+
+        return redirect()
+            ->route($fromWizard ? 'bap.wizard.review' : 'bap', $fromWizard ? $id : [])
+            ->with('success', $fromWizard
+                ? 'PDF berhasil diunggah. Periksa kembali data sebelum mengajukan.'
+                : 'PDF berhasil diupload.');
     }
 
-    public function ajukan($id)
+    public function ajukan(Request $request, $id)
     {
         $data = BAP::findOrFail($id);
+        $this->authorizeWizardBap($data);
+
+        if (! $data->pdf_file_path) {
+            return redirect()
+                ->route('bap.wizard.upload', $data->id)
+                ->with('error', 'Unggah surat pernyataan PDF terlebih dahulu.');
+        }
+
         if ($data->status === 'pending') {
             $data->status = 'diajukan';
             $data->save();
         }
 
-        return redirect()->route('bap')->with('success', 'Berhasil mengajukan BAP');
+        return redirect()
+            ->route('bap')
+            ->with('success', 'Pengajuan BA Pemberangkatan berhasil dikirim. Pantau status persetujuan di daftar.');
     }
 
     public function updateStatus(Request $request, $id)
@@ -366,8 +591,12 @@ class BAPController extends Controller
             $nomorSuratLengkap = "B-{$nextNumber}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
             $data->nomor_surat = $nomorSuratLengkap;
         }
-        
+
         $data->save();
+
+        if ($request->status === 'diterima') {
+            $this->bapVerificationService->ensureKanwilToken($data->fresh());
+        }
 
         $message = 'Status berhasil diubah dari ' . ucfirst($oldStatus) . ' menjadi ' . ucfirst($request->status);
         if ($request->status === 'diterima') {
@@ -384,8 +613,10 @@ class BAPController extends Controller
 
     public function getEvents()
     {
-        // Hanya ambil BAP dengan status 'diterima' untuk ditampilkan di jadwal keberangkatan
-        $events = BAP::where('status', 'diterima')->get()->map(function ($event) {
+        $query = BAP::where('status', 'diterima');
+        $query = $this->scopeKeberangkatanQuery($query);
+
+        $events = $query->get()->map(function ($event) {
             return [
                 'title' => $event->ppiuname,
                 'start' => $event->datetime,
@@ -408,6 +639,36 @@ class BAPController extends Controller
         });
 
         return response()->json($events);
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<BAP>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<BAP>
+     */
+    private function scopeKeberangkatanQuery($query)
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return $query;
+        }
+
+        if ($user->role === 'user') {
+            $penyelenggara = $user->travel?->Penyelenggara ?? $user->cabang?->Penyelenggara;
+
+            if ($penyelenggara) {
+                return $query->where('ppiuname', $penyelenggara);
+            }
+
+            return $query->where('user_id', $user->id)
+                ->where('kab_kota', $user->kabupaten);
+        }
+
+        if ($user->role === 'kabupaten') {
+            return $query->where('kab_kota', $user->kabupaten);
+        }
+
+        return $query;
     }
 
     public function verifyQRCode(Request $request)
@@ -497,64 +758,92 @@ class BAPController extends Controller
         ]);
     }
 
-    private function bapVerificationToken(BAP $bap): string
-    {
-        return strtoupper(substr(hash('sha256', $bap->id.$bap->nomor_surat.$bap->user_id.$bap->ppiuname), 0, 8));
-    }
-
     private function verifyBAPByToken(string $token, ?int $bapId = null)
     {
         $foundBap = null;
+        $verificationLevel = null;
 
         if ($bapId) {
-            $bap = BAP::query()
-                ->where('id', $bapId)
-                ->where('status', 'diterima')
-                ->first();
+            $bap = BAP::query()->where('id', $bapId)->first();
 
-            if ($bap && $this->bapVerificationToken($bap) === $token) {
+            if ($bap && $this->bapVerificationService->matchesToken($bap, $token)) {
                 $foundBap = $bap;
+                $verificationLevel = $this->combinedTokenMatches($bap, $token) ? 'lengkap' : 'travel';
             }
         }
 
         if (! $foundBap) {
-            $baps = BAP::where('status', 'diterima')->get(['id', 'nomor_surat', 'user_id', 'ppiuname', 'status', 'created_at']);
+            $travelTokenQuery = BAP::query()->where('travel_token', $token);
 
-            foreach ($baps as $bap) {
-                if ($this->bapVerificationToken($bap) === $token) {
-                    $foundBap = $bap;
-                    break;
-                }
+            if ($bapId) {
+                $travelTokenQuery->where('id', $bapId);
+            }
+
+            $foundBap = $travelTokenQuery->first();
+
+            if ($foundBap) {
+                $verificationLevel = 'travel';
             }
         }
 
-        if (!$foundBap) {
+        if (! $foundBap) {
+            $tokenQuery = BAP::query()
+                ->whereNotNull('travel_token')
+                ->whereNotNull('kanwil_token');
+
+            if ($bapId) {
+                $tokenQuery->where('id', $bapId);
+            }
+
+            $combinedExpression = DB::getDriverName() === 'sqlite'
+                ? '(travel_token || kanwil_token)'
+                : 'CONCAT(travel_token, kanwil_token)';
+
+            $foundBap = $tokenQuery
+                ->whereRaw("{$combinedExpression} = ?", [$token])
+                ->first();
+
+            if ($foundBap) {
+                $verificationLevel = 'lengkap';
+            }
+        }
+
+        if (! $foundBap) {
             return response()->json([
                 'success' => false,
-                'message' => 'Token tidak valid atau dokumen tidak ditemukan'
+                'message' => 'Token tidak valid atau dokumen tidak ditemukan',
             ]);
         }
 
-                        // Verifikasi data BAP
-                $verificationResult = [
-                    'jenis_dokumen' => 'BA Pemberangkatan',
-                    'nomor_surat' => $foundBap->nomor_surat,
-                    'nama_travel' => $foundBap->ppiuname,
-                    'nama_petugas' => 'Bidang PHU Kanwil NTB',
-                    'jabatan_petugas' => 'Verifikator',
-                    'tanggal_dibuat' => $foundBap->created_at->format('Y-m-d H:i:s'),
-                    'status_dokumen' => $foundBap->status,
-                    'token' => $token
-                ];
+        $verificationResult = [
+            'jenis_dokumen' => 'BA Pemberangkatan',
+            'nomor_surat' => $foundBap->nomor_surat,
+            'nama_travel' => $foundBap->ppiuname,
+            'nama_petugas' => 'Bidang PHU Kanwil NTB',
+            'jabatan_petugas' => 'Verifikator',
+            'tanggal_dibuat' => $foundBap->created_at->format('Y-m-d H:i:s'),
+            'status_dokumen' => $foundBap->status,
+            'token' => $token,
+            'tingkat_verifikasi' => $verificationLevel === 'lengkap' ? 'Travel + Kanwil' : 'Travel',
+        ];
 
         return response()->json([
             'success' => true,
-            'message' => 'Token valid. Dokumen BA Pemberangkatan ditemukan',
+            'message' => $verificationLevel === 'lengkap'
+                ? 'Token valid. Dokumen BA Pemberangkatan telah diverifikasi Travel dan Kanwil.'
+                : 'Token valid. Tanda tangan Travel terverifikasi. Menunggu persetujuan Kanwil.',
             'data' => $verificationResult,
             'hash_valid' => true,
-            'dokumen_valid' => $foundBap->status === 'diterima',
-            'dokumen_aktif' => $foundBap->status !== 'pending'
+            'dokumen_valid' => $foundBap->status === 'diterima' && $verificationLevel === 'lengkap',
+            'dokumen_aktif' => $foundBap->status !== 'pending',
         ]);
+    }
+
+    private function combinedTokenMatches(BAP $bap, string $token): bool
+    {
+        $combined = $this->bapVerificationService->combinedToken($bap);
+
+        return $combined !== null && hash_equals($combined, $token);
     }
 
     public function showVerifyQR(Request $request)

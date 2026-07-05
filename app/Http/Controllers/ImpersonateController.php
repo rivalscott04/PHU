@@ -21,7 +21,9 @@ class ImpersonateController extends Controller
      */
     public function index()
     {
-        $users = User::whereIn('role', User::impersonatableRoles())
+        $users = User::query()
+            ->with(['travel', 'cabang'])
+            ->whereIn('role', User::impersonatableRoles())
             ->orderBy('role')
             ->orderBy('nama')
             ->get();

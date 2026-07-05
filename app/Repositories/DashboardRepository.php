@@ -470,75 +470,143 @@ class DashboardRepository
     /** @return list<array<string, mixed>> */
     public function getKabupatenScorecard(DashboardFilter $filter): array
     {
-        $kabupatens = $this->getKabupatenOptions();
-        $period = $this->resolvePeriod($filter);
-        $rows = [];
+        $kabupatens = collect($this->getKabupatenOptions())
+            ->filter(fn (string $kabupaten) => $filter->matchesKabupaten($kabupaten))
+            ->values();
 
-        foreach ($kabupatens as $kabupaten) {
-            if (! $filter->matchesKabupaten($kabupaten)) {
-                continue;
-            }
-
-            $scopedFilter = new DashboardFilter(
-                kabupaten: $kabupaten,
-                tahun: $filter->tahun,
-                bulan: $filter->bulan,
-                jenisTravel: $filter->jenisTravel,
-                riskLevel: $filter->riskLevel,
-                travelId: $filter->travelId,
-                kabupatens: $filter->kabupatens,
-            );
-
-            $travelIds = $this->travelIdsFor($scopedFilter);
-            if ($travelIds->isEmpty()) {
-                continue;
-            }
-
-            $totalTravel = $travelIds->count();
-            $pengawasan = Inspection::query()
-                ->whereIn('travel_id', $travelIds)
-                ->whereBetween('created_at', [$period['start'], $period['end']])
-                ->count();
-
-            $temuanAktif = InspectionFinding::query()
-                ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
-                ->whereIn('pengawasan.travel_id', $travelIds)
-                ->whereNotIn('pengawasan_temuan.status', [FindingStatus::Closed->value, FindingStatus::Verified->value])
-                ->count();
-
-            $pengaduan = Schema::hasTable('pengaduan')
-                ? Pengaduan::query()->whereIn('travels_id', $travelIds)->count()
-                : 0;
-
-            $avgRisk = (float) RiskScore::query()
-                ->whereIn('travel_id', $travelIds)
-                ->avg('total_score');
-
-            $bapPending = 0;
-            if (Schema::hasTable('bap')) {
-                $bapPending = BAP::query()
-                    ->where('status', 'pending')
-                    ->whereIn('user_id', function ($sub) use ($travelIds) {
-                        $sub->select('id')->from('users')->whereIn('travel_id', $travelIds);
-                    })
-                    ->count();
-            }
-
-            $rows[] = [
-                'kabupaten' => $kabupaten,
-                'total_travel' => $totalTravel,
-                'pengawasan' => $pengawasan,
-                'temuan_aktif' => $temuanAktif,
-                'pengaduan' => $pengaduan,
-                'avg_risk' => round($avgRisk, 1),
-                'bap_pending' => $bapPending,
-            ];
+        if ($kabupatens->isEmpty()) {
+            return [];
         }
+
+        $period = $this->resolvePeriod($filter);
+        $metrics = $this->scorecardMetricsByKabupaten($filter, $period);
+
+        $rows = $kabupatens
+            ->map(function (string $kabupaten) use ($metrics) {
+                $totalTravel = (int) ($metrics['travel_counts'][$kabupaten] ?? 0);
+
+                if ($totalTravel === 0) {
+                    return null;
+                }
+
+                return [
+                    'kabupaten' => $kabupaten,
+                    'total_travel' => $totalTravel,
+                    'pengawasan' => (int) ($metrics['pengawasan'][$kabupaten] ?? 0),
+                    'temuan_aktif' => (int) ($metrics['temuan_aktif'][$kabupaten] ?? 0),
+                    'pengaduan' => (int) ($metrics['pengaduan'][$kabupaten] ?? 0),
+                    'avg_risk' => round((float) ($metrics['avg_risk'][$kabupaten] ?? 0), 1),
+                    'bap_pending' => (int) ($metrics['bap_pending'][$kabupaten] ?? 0),
+                ];
+            })
+            ->filter()
+            ->values()
+            ->all();
 
         usort($rows, fn (array $a, array $b) => $b['temuan_aktif'] <=> $a['temuan_aktif']
             ?: $b['pengaduan'] <=> $a['pengaduan']);
 
         return $rows;
+    }
+
+    /**
+     * @param  array{start: Carbon, end: Carbon, prev_start: Carbon, prev_end: Carbon}  $period
+     * @return array{
+     *     travel_counts: \Illuminate\Support\Collection<string, int>,
+     *     pengawasan: \Illuminate\Support\Collection<string, int>,
+     *     temuan_aktif: \Illuminate\Support\Collection<string, int>,
+     *     pengaduan: \Illuminate\Support\Collection<string, int>,
+     *     avg_risk: \Illuminate\Support\Collection<string, float>,
+     *     bap_pending: \Illuminate\Support\Collection<string, int>
+     * }
+     */
+    private function scorecardMetricsByKabupaten(DashboardFilter $filter, array $period): array
+    {
+        $travelCounts = $this->travelQuery($filter)
+            ->selectRaw('kab_kota, COUNT(*) as total')
+            ->groupBy('kab_kota')
+            ->pluck('total', 'kab_kota')
+            ->map(fn ($count) => (int) $count);
+
+        $pengawasan = Inspection::query()
+            ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
+            ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
+            ->when($filter->travelId, fn ($q) => $q->where('pengawasan.travel_id', $filter->travelId))
+            ->whereBetween('pengawasan.created_at', [$period['start'], $period['end']])
+            ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
+            ->groupBy('travels.kab_kota')
+            ->pluck('total', 'kabupaten')
+            ->map(fn ($count) => (int) $count);
+
+        $temuanAktif = InspectionFinding::query()
+            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+            ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
+            ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
+            ->when($filter->travelId, fn ($q) => $q->where('pengawasan.travel_id', $filter->travelId))
+            ->whereNotIn('pengawasan_temuan.status', [FindingStatus::Closed->value, FindingStatus::Verified->value])
+            ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
+            ->groupBy('travels.kab_kota')
+            ->pluck('total', 'kabupaten')
+            ->map(fn ($count) => (int) $count);
+
+        $pengaduan = collect();
+        if (Schema::hasTable('pengaduan')) {
+            $pengaduan = Pengaduan::query()
+                ->join('travels', 'travels.id', '=', 'pengaduan.travels_id')
+                ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                    $filter->applyTravelKabKota($q, 'travels.kab_kota');
+                })
+                ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
+                ->when($filter->travelId, fn ($q) => $q->where('pengaduan.travels_id', $filter->travelId))
+                ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
+                ->groupBy('travels.kab_kota')
+                ->pluck('total', 'kabupaten')
+                ->map(fn ($count) => (int) $count);
+        }
+
+        $avgRisk = RiskScore::query()
+            ->join('travels', 'travels.id', '=', 'risk_scores.travel_id')
+            ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                $filter->applyTravelKabKota($q, 'travels.kab_kota');
+            })
+            ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
+            ->when($filter->travelId, fn ($q) => $q->where('risk_scores.travel_id', $filter->travelId))
+            ->selectRaw('travels.kab_kota as kabupaten, AVG(risk_scores.total_score) as avg_score')
+            ->groupBy('travels.kab_kota')
+            ->pluck('avg_score', 'kabupaten')
+            ->map(fn ($score) => (float) $score);
+
+        $bapPending = collect();
+        if (Schema::hasTable('bap')) {
+            $bapPending = BAP::query()
+                ->join('users', 'users.id', '=', 'bap.user_id')
+                ->join('travels', 'travels.id', '=', 'users.travel_id')
+                ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
+                    $filter->applyTravelKabKota($q, 'travels.kab_kota');
+                })
+                ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
+                ->when($filter->travelId, fn ($q) => $q->where('travels.id', $filter->travelId))
+                ->where('bap.status', 'pending')
+                ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
+                ->groupBy('travels.kab_kota')
+                ->pluck('total', 'kabupaten')
+                ->map(fn ($count) => (int) $count);
+        }
+
+        return [
+            'travel_counts' => $travelCounts,
+            'pengawasan' => $pengawasan,
+            'temuan_aktif' => $temuanAktif,
+            'pengaduan' => $pengaduan,
+            'avg_risk' => $avgRisk,
+            'bap_pending' => $bapPending,
+        ];
     }
 
     /** @return list<array<string, mixed>> */

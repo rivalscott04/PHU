@@ -382,7 +382,7 @@ class JamaahController extends Controller
         $title = "DATA JAMAAH {$jenisJamaah}";
 
         // Convert logo to base64
-        $logoPath = public_path('images/kemenag.png');
+        $logoPath = public_path('images/logo_web.png');
         $logoBase64 = '';
         if (file_exists($logoPath)) {
             $logoData = file_get_contents($logoPath);

@@ -78,31 +78,35 @@ class PengaduanController extends Controller
         $user = auth()->user();
         
         if ($user->role === 'admin') {
-            // Admin can see all pengaduan
-            $pengaduan = Pengaduan::with('travel')->get();
             $pengaduanQuery = Pengaduan::query();
-        } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see pengaduan from travel in their area
-            $pengaduan = Pengaduan::with('travel')
-                ->whereHas('travel', function($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
-            $pengaduanQuery = Pengaduan::whereHas('travel', function($query) use ($user) {
+        } elseif ($user->role === 'kabupaten') {
+            $pengaduanQuery = Pengaduan::query()->whereHas('travel', function ($query) use ($user) {
                 $query->where('kab_kota', $user->kabupaten);
             });
         } else {
-            // Other roles see empty data
-            $pengaduan = collect();
-            $pengaduanQuery = Pengaduan::whereRaw('1 = 0'); // Empty query
+            $pengaduanQuery = Pengaduan::query()->whereRaw('1 = 0');
         }
-        
-        // Calculate statistics
+
+        $pengaduan = $pengaduanQuery
+            ->with('travel')
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $statsRow = (clone $pengaduanQuery)->selectRaw("
+            COUNT(*) as total,
+            SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending,
+            SUM(CASE WHEN status = 'in_progress' THEN 1 ELSE 0 END) as in_progress,
+            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+            SUM(CASE WHEN status = 'rejected' THEN 1 ELSE 0 END) as rejected
+        ")->first();
+
         $stats = [
-            'total' => $pengaduanQuery->count(),
-            'pending' => $pengaduanQuery->where('status', 'pending')->count(),
-            'in_progress' => $pengaduanQuery->where('status', 'in_progress')->count(),
-            'completed' => $pengaduanQuery->where('status', 'completed')->count(),
-            'rejected' => $pengaduanQuery->where('status', 'rejected')->count(),
+            'total' => (int) ($statsRow->total ?? 0),
+            'pending' => (int) ($statsRow->pending ?? 0),
+            'in_progress' => (int) ($statsRow->in_progress ?? 0),
+            'completed' => (int) ($statsRow->completed ?? 0),
+            'rejected' => (int) ($statsRow->rejected ?? 0),
         ];
         
         return view('pengaduan.index', compact('pengaduan', 'stats'));
@@ -151,7 +155,8 @@ class PengaduanController extends Controller
      */
     private function generatePDF($pengaduan)
     {
-        // Generate PDF using DomPDF
+        $pengaduan->loadMissing('travel');
+
         $pdf = PDF::loadView('pengaduan.pdf', compact('pengaduan'));
         
         // Create directory if not exists

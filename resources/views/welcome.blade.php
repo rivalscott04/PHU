@@ -604,9 +604,17 @@
             filter: brightness(1.1);
         }
         /* Logo Refinement */
-        .site-logo {
-            height: 36px;
+        .header .logo .site-logo {
+            height: 85px;
+            max-height: 85px;
             width: auto;
+        }
+
+        @media (max-width: 576px) {
+            .header .logo .site-logo {
+                height: 64px;
+                max-height: 64px;
+            }
         }
 
         /* Statistik Mobile Refinement */
@@ -732,7 +740,7 @@
     <header id="header" class="header d-flex align-items-center fixed-top">
         <div class="container-fluid container-xl position-relative d-flex align-items-center justify-content-between">
             <a href="{{ url('/') }}" class="logo d-flex align-items-center">
-                <img src="{{ asset('images/logo-light.svg') }}" alt="{{ config('app.name') }}" class="site-logo" height="36">
+                <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" class="site-logo" height="85">
             </a>
 
             <nav id="navmenu" class="navmenu">

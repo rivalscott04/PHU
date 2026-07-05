@@ -131,9 +131,9 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($pengaduan as $key => $item)
+                                @foreach ($pengaduan as $item)
                                     <tr class="text-center">
-                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $pengaduan->firstItem() + $loop->index }}</td>
                                         <td>{{ $item->travel->Penyelenggara }}</td>
                                         <td style="max-width: 300px; word-wrap: break-word; text-align: left;">{{ $item->hal_aduan }}</td>
                                         <td>
@@ -171,6 +171,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if ($pengaduan->hasPages())
+                        <div class="px-3 pb-3">
+                            {{ $pengaduan->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -124,7 +124,7 @@
         return `
             <div style="min-width:180px;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
-                    <img src="${window.__dashboardHeatmapConfig?.logoUrl || '/images/logo-icon.svg'}" alt="PANTAU" width="22" height="22">
+                    <img src="${window.__dashboardHeatmapConfig?.logoUrl || '/images/logo_web.png'}" alt="PANTAU" width="22" height="22">
                     <strong style="color:${BRAND.text};">${region.kabupaten}</strong>
                 </div>
                 <hr class="my-2">

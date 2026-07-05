@@ -1,255 +1,187 @@
 @extends('layouts.app')
 
 @section('content')
+    @php
+        $role = auth()->user()->role;
+        $isApprover = in_array($role, ['admin', 'kabupaten'], true);
+        $isTravel = $role === 'user';
+        $meta = \App\Support\BapWizardStatus::detailMeta($data);
+        $statusOptions = $isApprover ? \App\Support\BapWizardStatus::approverStatusOptions($data->status) : [];
+    @endphp
     <div class="row">
         <div class="col-12">
             @include('partials.bap-module-info', ['variant' => 'pemberangkatan'])
-            @if($guide = \App\Support\RoleWorkflowGuide::for('bap_detail', ['status' => $data->status ?? '']))
+            @if ($guide = \App\Support\RoleWorkflowGuide::for('bap_detail', ['status' => $data->status ?? '']))
                 @include('partials.workflow-guide', ['guide' => $guide])
             @endif
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-3">
                     <div>
-                        <h5 class="mb-0">Detail BA Pemberangkatan</h5>
-                        <small class="text-muted">Status persetujuan ditangani Admin/Kabupaten</small>
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h5 class="mb-0">
+                                {{ $isTravel ? 'Status Pengajuan' : 'Detail BA Pemberangkatan' }}
+                            </h5>
+                            <span class="badge {{ $meta['class'] }}">{{ $meta['label'] }}</span>
+                        </div>
+                        @if ($meta['hint'])
+                            <small class="text-muted d-block">{{ $meta['hint'] }}</small>
+                        @endif
+                        @if ($data->status === 'diterima' && $data->nomor_surat)
+                            <small class="text-muted d-block mt-1">Nomor surat: <strong>{{ $data->nomor_surat }}</strong></small>
+                        @endif
                     </div>
-                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'user')
-                        <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
-                            data-bs-target="#uploadPDFModal">Upload Surat Pernytaan PDF</button>
-                    @endif
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('bap') }}" class="btn btn-sm btn-outline-secondary">
+                            <i class="bx bx-arrow-back me-1"></i>Kembali ke daftar
+                        </a>
+                        @if ($data->status === 'diterima')
+                            <a href="{{ route('cetak.bap', $data->id) }}" target="_blank" class="btn btn-sm btn-success">
+                                <i class="bx bx-printer me-1"></i>Cetak BAP
+                            </a>
+                        @endif
+                    </div>
                 </div>
                 <div class="card-body">
-                    <form>
-                        <div class="row">
+                    @if ($isTravel && in_array($data->status, ['diajukan', 'diproses'], true))
+                        <div class="alert alert-light border mb-4">
+                            <i class="bx bx-time-five me-1 text-primary"></i>
+                            Pengajuan Anda sedang diproses Kabupaten/Kanwil. Tidak perlu mengajukan ulang;
+                            pantau perubahan status di halaman ini atau di daftar BA Pemberangkatan.
+                        </div>
+                    @endif
+
+                    <div class="row">
+                        <div class="col-lg-6 mb-4">
+                            @include('travel.partials.bap-detail-summary', [
+                                'data' => $data,
+                                'jamaahMaxHeight' => '220px',
+                            ])
+                        </div>
+                        <div class="col-lg-6 mb-4">
+                            <h6 class="text-muted text-uppercase small mb-3">Surat pernyataan</h6>
                             @if ($data->pdf_file_path)
-                                <div class="col-md-6 mb-3">
-                                    <div class="row">
-                                        <div class="col-md-12 mb-3">
-                                            <label for="name" class="form-label">Nama</label>
-                                            <input type="text" class="form-control" id="name"
-                                                value="{{ $data->name }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="jabatan" class="form-label">Jabatan</label>
-                                            <input type="text" class="form-control" id="jabatan"
-                                                value="{{ $data->jabatan }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="ppiuname" class="form-label">PPIU</label>
-                                            <input type="text" class="form-control" id="ppiuname"
-                                                value="{{ $data->ppiuname }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="address_phone" class="form-label">Alamat</label>
-                                            <input type="text" class="form-control" id="address_phone"
-                                                value="{{ $data->address_phone }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="kab_kota" class="form-label">Kab/Kota</label>
-                                            <input type="text" class="form-control" id="kab_kota"
-                                                value="{{ $data->kab_kota }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="people" class="form-label">Orang</label>
-                                            <input type="text" class="form-control" id="people"
-                                                value="{{ $data->people }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="days" class="form-label">Jumlah Hari</label>
-                                            <input type="text" class="form-control" id="days"
-                                                value="{{ $data->days }}" disabled>
-                                        </div>
-                                        {{-- <div class="col-md-12 mb-3">
-                                            <label for="package" class="form-label">Nama Paket</label>
-                                            <input type="text" class="form-control" id="package"
-                                                value="{{ $data->package }}" disabled>
-                                        </div> --}}
-                                        <div class="col-md-12 mb-3">
-                                            <label for="price" class="form-label">Harga</label>
-                                            <input type="text" class="form-control" id="price"
-                                                value="{{ $data->price }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="datetime" class="form-label">Tanggal Keberangkatan</label>
-                                            <input type="text" class="form-control" id="datetime"
-                                                value="{{ $data->datetime }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="airlines" class="form-label">Maskapai Keberangkatan</label>
-                                            <input type="text" class="form-control" id="airlines"
-                                                value="{{ $data->airlines }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="returndate" class="form-label">Tanggal Kepulangan</label>
-                                            <input type="text" class="form-control" id="returndate"
-                                                value="{{ $data->returndate }}" disabled>
-                                        </div>
-                                        <div class="col-md-12 mb-3">
-                                            <label for="airlines2" class="form-label">Maskapai Kepulangan</label>
-                                            <input type="text" class="form-control" id="airlines2"
-                                                value="{{ $data->airlines2 }}" disabled>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <h5 class="mb-3">Pernyataan yang diupload</h5>
-                                    <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
-                                        height="500px"></iframe>
-                                </div>
+                                <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
+                                    height="480px" class="border rounded"></iframe>
                             @else
-                                <div class="col-md-12 mb-3">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label for="name" class="form-label">Nama</label>
-                                            <input type="text" class="form-control" id="name"
-                                                value="{{ $data->name }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="jabatan" class="form-label">Jabatan</label>
-                                            <input type="text" class="form-control" id="jabatan"
-                                                value="{{ $data->jabatan }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="ppiuname" class="form-label">PPIU</label>
-                                            <input type="text" class="form-control" id="ppiuname"
-                                                value="{{ $data->ppiuname }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="address_phone" class="form-label">Alamat</label>
-                                            <input type="text" class="form-control" id="address_phone"
-                                                value="{{ $data->address_phone }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="kab_kota" class="form-label">Kab/Kota</label>
-                                            <input type="text" class="form-control" id="kab_kota"
-                                                value="{{ $data->kab_kota }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="people" class="form-label">Orang</label>
-                                            <input type="text" class="form-control" id="people"
-                                                value="{{ $data->people }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="package" class="form-label">Paket</label>
-                                            <input type="text" class="form-control" id="package"
-                                                value="{{ $data->package }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="price" class="form-label">Harga</label>
-                                            <input type="text" class="form-control" id="price"
-                                                value="{{ $data->price }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="datetime" class="form-label">Tanggal Keberangkatan</label>
-                                            <input type="text" class="form-control" id="datetime"
-                                                value="{{ $data->datetime }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="airlines" class="form-label">Maskapai Keberangkatan</label>
-                                            <input type="text" class="form-control" id="airlines"
-                                                value="{{ $data->airlines }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="returndate" class="form-label">Tanggal Kepulangan</label>
-                                            <input type="text" class="form-control" id="returndate"
-                                                value="{{ $data->returndate }}" disabled>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label for="airlines2" class="form-label">Maskapai Kepulangan</label>
-                                            <input type="text" class="form-control" id="airlines2"
-                                                value="{{ $data->airlines2 }}" disabled>
-                                        </div>
-                                    </div>
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bx bx-error-circle me-1"></i>
+                                    PDF surat pernyataan belum diunggah.
+                                    @if ($isApprover && $data->status === 'pending')
+                                        Minta travel melengkapi melalui wizard pengajuan.
+                                    @endif
                                 </div>
                             @endif
                         </div>
-                    </form>
-                    @if ($data->pdf_file_path && auth()->user()->role === 'user')
-                        <form action="{{ route('bap.ajukan', ['id' => $data->id]) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-primary mt-2">Ajukan</button>
-                        </form>
-                    @endif
-                    @if ($data->pdf_file_path && (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten'))
-                        <form action="{{ route('bap.updateStatus', $data->id) }}" method="POST" id="statusFormDetail">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    @csrf
-                                    <select name="status"
-                                        class="form-select mt-1 {{ $data->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
-                                                                {{ $data->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
-                                                                {{ $data->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
-                                        onchange="handleStatusChangeDetail(this.value)">
-                                        <option value="pending" {{ $data->status == 'pending' ? 'selected' : '' }}>Pending
-                                        </option>
-                                        <option value="diajukan" {{ $data->status == 'diajukan' ? 'selected' : '' }}>
-                                            Diajukan
-                                        </option>
-                                        <option value="diproses" {{ $data->status == 'diproses' ? 'selected' : '' }}>
-                                            Diproses
-                                        </option>
-                                        <option value="diterima" {{ $data->status == 'diterima' ? 'selected' : '' }}>
-                                            Diterima
-                                        </option>
-                                    </select>
-                                    @if ($data->status === 'diterima' && $data->nomor_surat)
-                                        <small class="text-muted mt-1 d-block">{{ $data->nomor_surat }}</small>
+                    </div>
+
+                    @if ($isApprover)
+                        <hr>
+                        <div class="border rounded p-3 bg-light">
+                            <h6 class="mb-2"><i class="bx bx-task me-1 text-primary"></i>Tindakan persetujuan</h6>
+                            <p class="text-muted small mb-3">
+                                Periksa data keberangkatan dan PDF, lalu ubah status:
+                                <strong>Diajukan → Diproses → Diterima</strong>.
+                            </p>
+
+                            @if (! $data->pdf_file_path && $data->status !== 'pending')
+                                <div class="alert alert-warning small py-2 mb-3">
+                                    PDF belum ada. Pastikan kelengkapan dokumen sebelum menyetujui.
+                                </div>
+                            @endif
+
+                            <form action="{{ route('bap.updateStatus', $data->id) }}" method="POST" id="statusFormDetail">
+                                @csrf
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-md-4">
+                                        <label for="statusSelect" class="form-label small mb-1">Ubah status</label>
+                                        <select name="status" id="statusSelect"
+                                            class="form-select {{ $data->status == 'diajukan' ? 'border-primary' : '' }}
+                                                {{ $data->status == 'diproses' ? 'border-warning' : '' }}
+                                                {{ $data->status == 'diterima' ? 'border-success' : '' }}">
+                                            @foreach ($statusOptions as $status)
+                                                <option value="{{ $status }}" {{ $data->status === $status ? 'selected' : '' }}>
+                                                    {{ \App\Support\BapWizardStatus::approverStatusLabel($status) }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-auto">
+                                        <button type="button" class="btn btn-primary" id="btnApplyStatus">
+                                            <i class="bx bx-check me-1"></i>Simpan status
+                                        </button>
+                                    </div>
+                                    @if ($isApprover && ! $data->pdf_file_path)
+                                        <div class="col-md-auto">
+                                            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal"
+                                                data-bs-target="#uploadPDFModal">
+                                                <i class="bx bx-upload me-1"></i>Upload PDF
+                                            </button>
+                                        </div>
                                     @endif
                                 </div>
-                            </div>
-                        </form>
-                    @endif
-
-                    @if ($data->status === 'diterima')
-                        <div class="mt-3">
-                            <a href="{{ route('cetak.bap', $data->id) }}" target="_blank" class="btn btn-success">
-                                <i class="bx bx-printer me-2"></i>Cetak BAP
-                            </a>
+                            </form>
                         </div>
                     @endif
                 </div>
             </div>
         </div>
     </div>
+
+    @if ($isApprover && ! $data->pdf_file_path)
+        <div id="uploadPDFModal" class="modal fade" tabindex="-1" aria-labelledby="uploadPDFModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="uploadPDFModalLabel">Upload Surat Pernyataan</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{{ route('bap.upload', ['id' => $data->id]) }}"
+                            enctype="multipart/form-data">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="pdf_file" class="form-label">File PDF (maks. 500 KB)</label>
+                                <input type="file" class="form-control" id="pdf_file" name="pdf_file"
+                                    accept="application/pdf" required>
+                            </div>
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-primary">Unggah</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        function handleStatusChangeDetail(status) {
+        document.getElementById('btnApplyStatus')?.addEventListener('click', function () {
+            const select = document.getElementById('statusSelect');
             const form = document.getElementById('statusFormDetail');
+            const status = select.value;
+            const labels = {
+                pending: 'Draft',
+                diajukan: 'Diajukan',
+                diproses: 'Diproses',
+                diterima: 'Diterima',
+            };
 
-            // Submit form langsung untuk semua status
-            form.submit();
-        }
+            Swal.fire({
+                title: 'Ubah status pengajuan?',
+                text: `Status akan diubah menjadi "${labels[status] || status}".`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, simpan',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#556ee6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
     </script>
 @endpush
-
-
-
-<!-- Modal for Uploading PDF -->
-<div id="uploadPDFModal" class="modal fade" tabindex="-1" aria-labelledby="uploadPDFModalLabel"
-    aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="uploadPDFModalLabel">Upload PDF</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{{ route('bap.upload', ['id' => $data->id]) }}"
-                    enctype="multipart/form-data">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="pdf_file" class="form-label">Upload PDF file</label>
-                        <input type="file" class="form-control" id="pdf_file" name="pdf_file"
-                            accept="application/pdf" required>
-                    </div>
-                    <!-- Button container -->
-                    <div class="d-flex justify-content-end">
-                        <button type="submit" class="btn btn-primary">Upload</button>
-                    </div>
-                </form>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
-</div><!-- /.modal -->

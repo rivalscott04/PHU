@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Carbon\Carbon;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
@@ -29,6 +30,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         Carbon::setLocale('id');
+
+        if (! app()->isProduction() && ! filter_var(env('E2E_TESTING', false), FILTER_VALIDATE_BOOL)) {
+            Model::preventLazyLoading();
+        }
 
         $this->configureRateLimiting();
     }

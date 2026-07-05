@@ -143,7 +143,13 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     Route::get('/bap', [BAPController::class, 'index'])->name('bap');
     Route::get('/form-bap', [BAPController::class, 'showFormBAP'])->name('form.bap');
+    Route::get('/form-bap/{id}/edit', [BAPController::class, 'editFormBAP'])->name('form.bap.edit');
+    Route::get('/form-bap/{id}/upload', [BAPController::class, 'showWizardUpload'])->name('bap.wizard.upload');
+    Route::get('/form-bap/{id}/review', [BAPController::class, 'showWizardReview'])->name('bap.wizard.review');
+    Route::get('/bap/jamaah-options', [BAPController::class, 'jamaahPickerOptions'])->name('bap.jamaah.options');
+    Route::get('/bap/template-surat-pernyataan', [BAPController::class, 'downloadSuratPernyataanTemplate'])->name('bap.template.surat-pernyataan');
     Route::post('/bap', [BAPController::class, 'simpan'])->name('post.bap');
+    Route::put('/bap/{id}', [BAPController::class, 'update'])->name('put.bap');
     Route::get('/cetak-bap/{id}', [BAPController::class, 'printBAP'])->name('cetak.bap');
     Route::get('/bap/detail/{id}', [BAPController::class, 'detail'])->name('detail.bap');
     Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');

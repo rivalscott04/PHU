@@ -33,6 +33,11 @@ class Jamaah extends Model
         return $this->belongsTo(TravelCompany::class, 'travel_id');
     }
 
+    public function baps()
+    {
+        return $this->belongsToMany(BAP::class, 'bap_jamaah', 'jamaah_id', 'bap_id')->withTimestamps();
+    }
+
     public function generateQrCode()
     {
         return QrCode::size(200)

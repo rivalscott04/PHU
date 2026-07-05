@@ -168,7 +168,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function show($id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -185,7 +185,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function edit($id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -202,7 +202,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -278,7 +278,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function destroy($id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Check access
@@ -306,7 +306,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $request->validate([
             'status_pendaftaran' => 'required|in:pending,approved,rejected,completed'
         ]);
@@ -431,7 +431,7 @@ class JamaahHajiKhususController extends Controller
         </head>
         <body>
             <div class="header">
-                <h1>KEMENTERIAN AGAMA REPUBLIK INDONESIA</h1>
+                <h1>KEMENTERIAN HAJI DAN UMROH REPUBLIK INDONESIA</h1>
                 <p>DIREKTORAT JENDERAL PENYELENGGARAAN HAJI DAN UMRAH</p>
                 <p>DIREKTORAT PELAYANAN HAJI LUAR NEGERI</p>
                 <h2>' . $title . '</h2>
@@ -527,7 +527,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function verifyBuktiSetor(Request $request, $id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Only admin and kabupaten can verify
@@ -565,7 +565,7 @@ class JamaahHajiKhususController extends Controller
      */
     public function assignPorsiNumber(Request $request, $id)
     {
-        $jamaahHajiKhusus = JamaahHajiKhusus::findOrFail($id);
+        $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
         
         // Only admin and kabupaten can assign porsi number

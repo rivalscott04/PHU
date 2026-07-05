@@ -48,7 +48,7 @@
                                 <a href="{{ url('/') }}" class="auth-logo-light">
                                     <div class="avatar-md profile-user-wid mb-4">
                                         <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('images/logo-icon-light.svg') }}" alt="{{ config('app.name') }}"
+                                            <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}"
                                                 height="34">
                                         </span>
                                     </div>
@@ -57,7 +57,7 @@
                                 <a href="{{ url('/') }}" class="auth-logo-dark">
                                     <div class="avatar-md profile-user-wid mb-4">
                                         <span class="avatar-title rounded-circle bg-light">
-                                            <img src="{{ asset('images/logo-icon.svg') }}" alt="{{ config('app.name') }}"
+                                            <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}"
                                                 height="34">
                                         </span>
                                     </div>

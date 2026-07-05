@@ -34,11 +34,12 @@
                                     <th style="font-size: 12px;">Nama</th>
                                     <th style="font-size: 12px;">Jabatan</th>
                                     <th style="font-size: 12px;">PPIU</th>
-                                    <th style="font-size: 12px;">Alamat & Hp</th>
+                                    <th style="font-size: 12px;">Nomor HP</th>
                                     <th style="font-size: 12px;">Kab/Kota</th>
+                                    <th style="font-size: 12px;">Tgl Berangkat</th>
                                     <th style="font-size: 12px;">Jumlah Jamaah</th>
                                     {{-- <th style="font-size: 12px;">Paket</th> --}}
-                                    <th style="font-size: 12px;">Harga</th>
+                                    <th style="font-size: 12px;">Harga/Orang</th>
                                     <th style="font-size: 12px;">Status</th>
                                     <th style="font-size: 12px;">Aksi</th>
 
@@ -47,12 +48,13 @@
                             <tbody style="font-size: 12px;">
                                 @foreach ($data as $item)
                                     <tr class="text-center" style="font-size: 12px;">
-                                        <td>{{ $loop->iteration }}</td>
+                                        <td>{{ $data->firstItem() + $loop->index }}</td>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->jabatan }}</td>
                                         <td>{{ $item->ppiuname }}</td>
                                         <td>{{ $item->address_phone }}</td>
                                         <td>{{ $item->kab_kota }}</td>
+                                        <td>{{ \Carbon\Carbon::parse($item->datetime)->format('d/m/Y') }}</td>
                                         <td>{{ $item->people }}</td>
                                         {{-- <td>{{ $item->package }}</td> --}}
                                         <td><span>Rp.
@@ -92,17 +94,27 @@
                                                     </div>
                                                 </form>
                                             @else
+                                                @php $badge = \App\Support\BapWizardStatus::travelBadge($item); @endphp
                                                 <div>
-                                                    <div style="font-size: 11px;">{{ ucfirst($item->status) }}</div>
+                                                    <span class="badge {{ $badge['class'] }}" style="font-size: 10px;">
+                                                        {{ $badge['label'] }}
+                                                    </span>
                                                     @if ($item->status === 'diterima' && $item->nomor_surat)
-                                                        <small class="text-muted"
+                                                        <small class="text-muted d-block mt-1"
                                                             style="font-size: 9px;">{{ $item->nomor_surat }}</small>
                                                     @endif
                                                 </div>
                                             @endif
                                         </td>
                                         <td class="fs-4 font-weight-bold">
-                                            <div class="d-flex gap-2 justify-content-center">
+                                            <div class="d-flex gap-2 justify-content-center align-items-center">
+                                                @if (auth()->user()->role === 'user' && ($wizardRoute = \App\Support\BapWizardStatus::wizardRouteName($item)))
+                                                    <a href="{{ route($wizardRoute, $item->id) }}"
+                                                        class="btn btn-sm btn-warning py-0 px-2" title="Lanjutkan pengajuan"
+                                                        style="font-size: 11px;">
+                                                        Lanjutkan
+                                                    </a>
+                                                @endif
                                                 <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
                                                         class="bx bx-info-circle"></i></a>
                                                 @if ($item->status === 'diterima')
@@ -116,6 +128,11 @@
                             </tbody>
                         </table>
                     </div>
+                    @if ($data->hasPages())
+                        <div class="px-3 pb-3">
+                            {{ $data->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

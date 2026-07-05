@@ -4,18 +4,18 @@
             <div class="navbar-brand-box">
                 <a href="index.html" class="logo logo-dark">
                     <span class="logo-sm">
-                        <img src="{{ asset('images/logo-icon.svg') }}" alt="{{ config('app.name') }}" height="28" />
+                        <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
                     <span class="logo-lg">
-                        <img src="{{ asset('images/logo-dark.png') }}" alt="{{ config('app.name') }}" height="17" />
+                        <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="32" />
                     </span>
                 </a>
                 <a href="index.html" class="logo logo-light">
                     <span class="logo-sm">
-                        <img src="{{ asset('images/logo-icon-light.svg') }}" alt="{{ config('app.name') }}" height="28" />
+                        <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
                     <span class="logo-lg">
-                        <img src="{{ asset('images/logo-light.png') }}" alt="{{ config('app.name') }}" height="19" />
+                        <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="32" />
                     </span>
                 </a>
 

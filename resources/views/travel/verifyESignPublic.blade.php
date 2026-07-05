@@ -118,7 +118,7 @@
                                 <div class="mb-3">
                                     <label for="tokenInput" class="form-label">Token Verifikasi</label>
                                     <input type="text" id="tokenInput" class="form-control form-control-lg text-center" 
-                                        placeholder="Masukkan token 8 karakter" maxlength="8" style="font-size: 1.2rem; letter-spacing: 2px;"
+                                        placeholder="Masukkan token verifikasi dokumen" style="font-size: 0.95rem; letter-spacing: 0.5px; font-family: monospace;"
                                         value="{{ $token ?? '' }}">
                                     <small class="text-muted">Contoh: A1B2C3D4</small>
                                 </div>
@@ -172,15 +172,10 @@
         @endif
 
         function verifyToken() {
-            const token = document.getElementById('tokenInput').value.trim().toUpperCase();
+            const token = document.getElementById('tokenInput').value.trim();
             
             if (!token) {
                 Swal.fire('Error', 'Masukkan token terlebih dahulu', 'error');
-                return;
-            }
-
-            if (token.length !== 8) {
-                Swal.fire('Error', 'Token harus 8 karakter', 'error');
                 return;
             }
 

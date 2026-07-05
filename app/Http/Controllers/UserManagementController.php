@@ -88,17 +88,27 @@ class UserManagementController extends Controller
     /** @return array<string, int> */
     private function managedUserTabCounts(): array
     {
-        return [
-            UserRole::Pimpinan->value => User::where('role', UserRole::Pimpinan->value)->count(),
-            UserRole::Kabupaten->value => User::where('role', UserRole::Kabupaten->value)->count(),
-            UserRole::Pengawas->value => User::where('role', UserRole::Pengawas->value)->count(),
-            UserRole::User->value => User::where('role', UserRole::User->value)->count(),
+        $defaults = [
+            UserRole::Pimpinan->value => 0,
+            UserRole::Kabupaten->value => 0,
+            UserRole::Pengawas->value => 0,
+            UserRole::User->value => 0,
         ];
+
+        $counts = User::query()
+            ->selectRaw('role, COUNT(*) as total')
+            ->whereIn('role', array_keys($defaults))
+            ->groupBy('role')
+            ->pluck('total', 'role')
+            ->map(fn ($count) => (int) $count)
+            ->all();
+
+        return array_merge($defaults, $counts);
     }
 
     private function buildManagedUserQuery(Request $request, string $activeTab)
     {
-        $query = User::query()->with('travel')->where('role', $activeTab);
+        $query = User::query()->with(['travel', 'cabang'])->where('role', $activeTab);
 
         if ($request->filled('kabupaten')) {
             if ($activeTab === UserRole::User->value) {
@@ -294,7 +304,7 @@ class UserManagementController extends Controller
         $user = auth()->user();
 
         // Base query for travel users
-        $query = User::where('role', 'user')->with('travel');
+        $query = User::where('role', 'user')->with(['travel', 'cabang']);
         
         // Apply role-based filtering
         if ($user->role === 'kabupaten') {

@@ -142,12 +142,12 @@ class RoleWorkflowGuide
     {
         return [
             'title' => 'Cara Mengajukan BA Pemberangkatan',
-            'hint' => 'Buat pengajuan keberangkatan, unggah surat pernyataan, lalu ajukan ke Kanwil/Kabupaten.',
+            'hint' => 'Ikuti 3 langkah wizard: isi data → unggah PDF → review & ajukan.',
             'steps' => [
-                'Klik Tambah untuk membuat BA baru',
-                'Isi data keberangkatan dan unggah PDF surat pernyataan',
-                'Klik Ajukan di halaman Detail',
-                'Tunggu persetujuan Kabupaten/Kanwil; pantau status di tabel ini',
+                'Klik Tambah atau Lanjutkan draft yang masih pending',
+                'Isi / ubah data keberangkatan dan pilih jamaah (Langkah 1)',
+                'Unggah surat pernyataan PDF (Langkah 2)',
+                'Review data lalu klik Ajukan ke Kabupaten/Kanwil (Langkah 3)',
             ],
             'actions' => [
                 ['label' => 'Buat BA Baru', 'url' => route('form.bap'), 'style' => 'primary', 'icon' => 'bx-plus'],
@@ -185,7 +185,7 @@ class RoleWorkflowGuide
     private static function bapDetailTravel(string $status): array
     {
         $hint = match ($status) {
-            'pending', '' => 'Lengkapi data dan unggah PDF surat pernyataan terlebih dahulu.',
+            'pending', '' => 'Lanjutkan wizard: unggah PDF surat pernyataan lalu ajukan.',
             'diajukan' => 'Pengajuan sudah dikirim. Tunggu Kabupaten/Kanwil memproses.',
             'diproses' => 'Sedang ditinjau oleh Kabupaten/Kanwil.',
             'diterima' => 'Disetujui. Anda dapat mencetak BA dan melihat jadwal keberangkatan.',
@@ -196,10 +196,10 @@ class RoleWorkflowGuide
             'title' => 'Langkah di Halaman Ini',
             'hint' => $hint,
             'steps' => [
-                'Pastikan PDF surat pernyataan sudah diunggah',
-                'Klik Ajukan jika status masih menunggu pengajuan',
-                'Pantau perubahan status dari Kabupaten/Kanwil',
-                'Setelah Diterima, cetak BA dari tombol Cetak BAP',
+                'Pastikan PDF surat pernyataan sudah diunggah (Langkah 2)',
+                'Periksa ringkasan data di halaman ini (Langkah 3)',
+                'Klik Ajukan jika sudah benar',
+                'Setelah Diterima, cetak BA dari daftar atau halaman detail',
             ],
             'actions' => [
                 ['label' => 'Kembali ke Daftar BA', 'url' => route('bap'), 'style' => 'outline-secondary', 'icon' => 'bx-arrow-back'],

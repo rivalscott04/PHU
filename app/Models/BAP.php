@@ -34,5 +34,12 @@ class BAP extends Model
         'status',
         'pdf_file_path',
         'nomor_surat',
+        'travel_token',
+        'kanwil_token',
     ];
+
+    public function jamaah()
+    {
+        return $this->belongsToMany(Jamaah::class, 'bap_jamaah', 'bap_id', 'jamaah_id')->withTimestamps();
+    }
 }
