@@ -529,10 +529,13 @@
                     const status = item.dataset.status || 'CABANG';
                     const jenis = item.dataset.jenis;
                     const kabupaten = item.dataset.kabupaten;
-                    const pimpinan = card.querySelector('.info-item span')?.textContent.replace('Pimpinan: ', '') || '';
-                    const telepon = Array.from(card.querySelectorAll('.info-item span')).find(span => 
+                    const infoSpans = Array.from(card.querySelectorAll('.info-item span'));
+                    const pimpinan = infoSpans.find(span =>
+                        span.textContent.includes('Pimpinan:')
+                    )?.textContent.replace('Pimpinan:', '').trim() || '';
+                    const telepon = infoSpans.find(span =>
                         span.textContent.includes('Telepon:')
-                    )?.textContent.replace('Telepon: ', '') || '';
+                    )?.textContent.replace('Telepon:', '').trim() || '';
                     
                     return {
                         nama: title,
