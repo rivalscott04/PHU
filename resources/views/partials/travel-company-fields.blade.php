@@ -27,7 +27,7 @@
     $show = fn (string ...$names) => $section === 'all' || in_array($section, $names, true);
 @endphp
 
-<div class="row travel-form-fields">
+<div class="row">
     @if ($show('profil'))
         <div class="{{ $colClass }} {{ $fieldSpacing }}">
             <label for="Penyelenggara" class="form-label">Nama Penyelenggara @include('partials.required-star')</label>

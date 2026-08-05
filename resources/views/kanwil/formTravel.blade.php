@@ -16,12 +16,14 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Tambah Data Travel (Admin)</h5>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                        Upload XLSX
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <i class="bx bx-upload me-1"></i> Upload XLSX
                     </button>
                 </div>
                 <div class="card-body">
-                    <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi. Data langsung disetujui tanpa verifikasi.</p>
+                    <div class="alert alert-info mb-3">
+                        <small class="mb-0"><span class="text-danger">*</span> Wajib diisi. Data langsung disetujui tanpa verifikasi.</small>
+                    </div>
                     <form method="POST" action="{{ route('post.travel') }}">
                         @csrf
                         @include('partials.travel-company-fields', ['kabupatens' => $kabupatens])

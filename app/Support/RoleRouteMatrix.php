@@ -120,7 +120,7 @@ final class RoleRouteMatrix
             'kabupaten' => [
                 'home' => $allow,
                 'users.index' => $deny,
-                'pengaduan' => $deny,
+                'pengaduan' => $allow,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,
                 'v2.dashboard' => $deny,

@@ -8,97 +8,79 @@
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/app.min.css') }}" rel="stylesheet" type="text/css" />
-    <style>
-        .travel-success-card {
-            border: none;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(18, 38, 63, 0.08);
-        }
-
-        .travel-success-icon {
-            width: 72px;
-            height: 72px;
-            margin: 0 auto 1.25rem;
-            border-radius: 50%;
-            background: #34c38f;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 36px;
-        }
-
-        .travel-success-steps {
-            background: #f8f9ff;
-            border: 1px solid #eef1ff;
-            border-radius: 12px;
-            padding: 1rem 1.25rem;
-            text-align: left;
-        }
-
-        .travel-success-steps-title {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 0.5rem;
-        }
-
-        .travel-success-steps ol {
-            margin-bottom: 0;
-            padding-left: 1.25rem;
-            color: #74788d;
-            font-size: 14px;
-        }
-
-        .travel-success-steps li + li {
-            margin-top: 0.35rem;
-        }
-    </style>
 </head>
 <body>
     <div class="account-pages my-5 pt-sm-5">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6">
-                    <div class="text-center mb-4">
-                        <a href="{{ route('login') }}">
-                            <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="40">
-                        </a>
-                    </div>
-
-                    <div class="card travel-success-card overflow-hidden">
-                        <div class="card-body p-4 p-md-5 text-center">
-                            <div class="travel-success-icon">
-                                <i class="bx bx-check"></i>
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card overflow-hidden">
+                        <div class="bg-success bg-soft">
+                            <div class="row">
+                                <div class="col-7">
+                                    <div class="text-success p-4">
+                                        <h5 class="text-success">Pendaftaran Terkirim</h5>
+                                        <p class="mb-0">Menunggu verifikasi Admin Kanwil.</p>
+                                    </div>
+                                </div>
+                                <div class="col-5 align-self-end">
+                                    <img src="{{ asset('images/profile-img.png') }}" alt="" class="img-fluid">
+                                </div>
                             </div>
-
-                            <h4 class="mb-2">Pendaftaran Berhasil Dikirim</h4>
-                            <p class="text-muted mb-4">
-                                Terima kasih. Data travel Anda sudah kami terima dan sedang
-                                <strong>menunggu verifikasi Admin Kanwil</strong>.
-                                Setelah disetujui, Anda bisa login dengan email/HP dan password yang didaftarkan.
-                            </p>
-
-                            <div class="travel-success-steps mb-4">
-                                <div class="travel-success-steps-title">Langkah selanjutnya</div>
-                                <ol>
-                                    <li>Tunggu konfirmasi Admin Kanwil (biasanya 1 s.d. 3 hari kerja)</li>
-                                    <li>Setelah disetujui, buka halaman login</li>
-                                    <li>Masuk dengan email/HP dan password Anda</li>
-                                </ol>
+                        </div>
+                        <div class="card-body pt-0">
+                            <div class="auth-logo">
+                                <a href="{{ route('login') }}" class="auth-logo-light">
+                                    <div class="avatar-md profile-user-wid mb-4">
+                                        <span class="avatar-title rounded-circle bg-light">
+                                            <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="34">
+                                        </span>
+                                    </div>
+                                </a>
                             </div>
+                            <div class="p-2">
+                                <div class="text-center mb-4">
+                                    <div class="avatar-md mx-auto mb-3">
+                                        <span class="avatar-title rounded-circle bg-success font-size-24">
+                                            <i class="bx bx-check"></i>
+                                        </span>
+                                    </div>
+                                    <p class="text-muted">
+                                        Terima kasih. Data travel Anda sudah kami terima dan sedang
+                                        <strong>menunggu verifikasi Admin Kanwil</strong>.
+                                        Setelah disetujui, Anda bisa login dengan email/HP dan password yang didaftarkan.
+                                    </p>
+                                </div>
 
-                            <a href="{{ route('login') }}" class="btn btn-primary w-100">
-                                Ke Halaman Login
-                            </a>
+                                <div class="alert alert-info text-start mb-4">
+                                    <h6 class="alert-heading">Langkah selanjutnya</h6>
+                                    <ol class="mb-0 ps-3">
+                                        <li>Tunggu konfirmasi Admin Kanwil (biasanya 1 s.d. 3 hari kerja)</li>
+                                        <li>Setelah disetujui, buka halaman login</li>
+                                        <li>Masuk dengan email/HP dan password Anda</li>
+                                    </ol>
+                                </div>
+
+                                <div class="d-grid">
+                                    <a href="{{ route('login') }}" class="btn btn-primary waves-effect waves-light">
+                                        Ke Halaman Login
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <p class="text-center text-muted mt-4 mb-0 small">
-                        {{ config('app.kanwil.short_name') }} · {{ config('app.kanwil.address') }}
-                    </p>
+                    <div class="mt-5 text-center">
+                        <p class="text-muted mb-0 small">
+                            {{ config('app.kanwil.short_name') }} · {{ config('app.kanwil.address') }}
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
+    <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>

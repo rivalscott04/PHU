@@ -6,6 +6,7 @@ use App\Helpers\ValidationHelper;
 use App\Enums\UserRole;
 use App\Enums\PengawasScopeMode;
 use App\Support\NtbKabupatenMap;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\TravelCompany;
@@ -307,9 +308,9 @@ class UserManagementController extends Controller
         
         // Apply role-based filtering
         if ($user->role === 'kabupaten') {
-            // Kabupaten can only see travel users from their kabupaten
-            $query->whereHas('travel', function ($q) use ($user) {
-                $q->where('kab_kota', $user->kabupaten);
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            $query->whereHas('travel', function ($q) use ($filters) {
+                KabupatenScopeFilter::applyOnColumn($q, $filters, 'kab_kota');
             });
         }
         
@@ -469,7 +470,7 @@ class UserManagementController extends Controller
         // Check if kabupaten user is trying to create travel user for different kabupaten
         if ($user->role === 'kabupaten') {
             $travelCompany = \App\Models\TravelCompany::find($request->travel_id);
-            if ($travelCompany->kab_kota !== $user->kabupaten) {
+            if (! NtbKabupatenMap::matches($travelCompany->kab_kota, $user->kabupaten)) {
                 return redirect()->back()->with('error', 'Anda hanya bisa membuat user travel untuk kabupaten Anda sendiri.');
             }
         }
@@ -502,7 +503,7 @@ class UserManagementController extends Controller
 
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
+            if (! $user->travel || ! NtbKabupatenMap::matches($user->travel->kab_kota, $currentUser->kabupaten)) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
@@ -542,7 +543,7 @@ class UserManagementController extends Controller
 
         // Check if kabupaten user is trying to edit travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
+            if (! $user->travel || ! NtbKabupatenMap::matches($user->travel->kab_kota, $currentUser->kabupaten)) {
                 return redirect()->back()->with('error', 'Anda hanya bisa mengedit user travel dari kabupaten Anda sendiri.');
             }
         }
@@ -621,7 +622,7 @@ class UserManagementController extends Controller
 
         // Check if kabupaten user is trying to delete travel user from different kabupaten
         if ($currentUser->role === 'kabupaten' && $user->role === 'user') {
-            if (!$user->travel || $user->travel->kab_kota !== $currentUser->kabupaten) {
+            if (! $user->travel || ! NtbKabupatenMap::matches($user->travel->kab_kota, $currentUser->kabupaten)) {
                 return redirect()->back()->with('error', 'Anda hanya bisa menghapus user travel dari kabupaten Anda sendiri.');
             }
         }

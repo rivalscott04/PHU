@@ -12,6 +12,8 @@ use App\Models\TravelCompany;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\BapJamaahService;
 use App\Services\BapVerificationService;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Support\Facades\DB;
 
 class BAPController extends Controller
@@ -117,6 +119,7 @@ class BAPController extends Controller
     public function detail($id)
     {
         $data = BAP::findOrFail($id);
+        KabupatenResourceGuard::authorizeBap(auth()->user(), $data);
         $user = auth()->user();
 
         if ($user?->role === 'user' && $data->user_id === $user->id && $data->status === 'pending') {
@@ -175,20 +178,13 @@ class BAPController extends Controller
             abort(403, 'Anda harus login terlebih dahulu.');
         }
 
-        if (in_array($user->role, ['admin', 'kabupaten'], true)) {
-            return;
-        }
-
-        if ($user->role === 'user' && $bap->user_id === $user->id) {
-            return;
-        }
-
-        abort(403, 'Anda tidak memiliki akses ke pengajuan ini.');
+        KabupatenResourceGuard::authorizeBap($user, $bap);
     }
 
     public function printBAP($id)
     {
         $data = BAP::findOrFail($id);
+        KabupatenResourceGuard::authorizeBap(auth()->user(), $data);
 
         $formattedDate = \Carbon\Carbon::parse($data->datetime)->translatedFormat('d F Y');
         $formattedReturnDate = \Carbon\Carbon::parse($data->returndate)->translatedFormat('d F Y');
@@ -353,9 +349,10 @@ class BAPController extends Controller
                 ->paginate(15)
                 ->withQueryString();
         } elseif ($user->role === 'kabupaten') {
-            $data = BAP::query()
-                ->where('kab_kota', $user->kabupaten)
-                ->latest()
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            $data = BAP::query();
+            KabupatenScopeFilter::applyOnColumn($data, $filters, 'kab_kota');
+            $data = $data->latest()
                 ->paginate(15)
                 ->withQueryString();
         } elseif ($user->role === 'admin') {
@@ -479,7 +476,14 @@ class BAPController extends Controller
             }
         }
 
-        $ppiuList = TravelCompany::select('penyelenggara')->distinct()->get();
+        $ppiuQuery = TravelCompany::select('Penyelenggara')->distinct();
+
+        if ($user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($ppiuQuery, $filters, 'kab_kota');
+        }
+
+        $ppiuList = $ppiuQuery->get();
         $jamaahTotalCount = $this->bapJamaahService->countForForm($user, $travelData);
 
         if ($jamaahTotalCount === 0) {
@@ -563,6 +567,7 @@ class BAPController extends Controller
         ]);
 
         $data = BAP::findOrFail($id);
+        KabupatenResourceGuard::authorizeBap($user, $data);
         $oldStatus = $data->status;
         
         $data->status = $request->status;
@@ -622,7 +627,6 @@ class BAPController extends Controller
             return [
                 'title' => $event->ppiuname,
                 'start' => $event->datetime,
-                'color' => '#2563eb', // Bisa disesuaikan berdasarkan package
                 'extendedProps' => [
                     'name' => $event->name,
                     'jabatan' => $event->jabatan,
@@ -667,7 +671,10 @@ class BAPController extends Controller
         }
 
         if ($user->role === 'kabupaten') {
-            return $query->where('kab_kota', $user->kabupaten);
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($query, $filters, 'kab_kota');
+
+            return $query;
         }
 
         return $query;

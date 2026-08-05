@@ -1,4 +1,4 @@
-<div class="row travel-form-fields">
+<div class="row">
     <div class="col-12 col-lg-8 mx-auto mb-4">
         <label for="pic_nama" class="form-label">Nama Lengkap PIC @include('partials.required-star')</label>
         <input type="text" class="form-control form-control-lg @error('pic_nama') is-invalid @enderror"

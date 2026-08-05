@@ -37,7 +37,7 @@
                         </div>
                     @endif
 
-                    <div class="card mb-5 travel-wizard-card">
+                    <div class="card mb-5">
                         <div class="card-body p-4 p-md-5">
                             <form id="travel-registration-form" method="POST" action="{{ route('travel.registration.store') }}" enctype="multipart/form-data">
                                 @csrf

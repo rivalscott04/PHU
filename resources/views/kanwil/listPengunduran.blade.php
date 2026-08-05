@@ -51,12 +51,24 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <a href="">
-                                                <i class="bx bx-info-circle me-2"></i>
-                                            </a>
-                                            <a href="">
-                                                <i class="bx bx-edit text-success"></i>
-                                            </a>
+                                            @if (in_array(auth()->user()->role, ['admin', 'kabupaten']) && $item->status === 'pending')
+                                                <form action="{{ route('pengunduran.update-status', $item->id) }}" method="POST" class="d-inline">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="approved">
+                                                    <button type="submit" class="btn btn-link p-0 text-success" title="Setujui">
+                                                        <i class="bx bx-check-circle"></i>
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('pengunduran.update-status', $item->id) }}" method="POST" class="d-inline ms-1">
+                                                    @csrf
+                                                    <input type="hidden" name="status" value="rejected">
+                                                    <button type="submit" class="btn btn-link p-0 text-danger" title="Tolak">
+                                                        <i class="bx bx-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

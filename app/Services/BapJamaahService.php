@@ -6,6 +6,8 @@ use App\Models\BAP;
 use App\Models\Jamaah;
 use App\Models\TravelCompany;
 use App\Models\User;
+use App\Support\KabupatenScopeFilter;
+use App\Support\NtbKabupatenMap;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -26,9 +28,10 @@ class BapJamaahService
             $jenis = $travel->Status === 'PIHK' ? 'haji' : 'umrah';
             $query->where('travel_id', $travel->id)->where('jenis_jamaah', $jenis);
         } elseif ($user->role === 'kabupaten') {
-            $query->whereHas('travel', function ($q) use ($user) {
-                $q->where('kab_kota', $user->kabupaten);
-            });
+            KabupatenScopeFilter::applyOnTravelRelation(
+                $query,
+                KabupatenScopeFilter::filtersForUser($user)
+            );
         }
 
         return $query;
@@ -152,7 +155,7 @@ class BapJamaahService
                 }
             }
 
-            if ($user->role === 'kabupaten' && $row->travel?->kab_kota !== $user->kabupaten) {
+            if ($user->role === 'kabupaten' && ! NtbKabupatenMap::matches($user->kabupaten, $row->travel?->kab_kota)) {
                 throw ValidationException::withMessages([
                     'jamaah_ids' => 'Jamaah di luar wilayah kabupaten Anda.',
                 ]);

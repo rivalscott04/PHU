@@ -12,6 +12,9 @@ use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
 use App\Support\KanwilContact;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
+
 class JamaahController extends Controller
 {
     public function downloadTemplate()
@@ -36,11 +39,9 @@ class JamaahController extends Controller
                 })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten hanya bisa melihat jamaah dari kabupatennya
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->whereHas('travel', function ($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
+            $jamaahQuery = Jamaah::where('jenis_jamaah', 'haji');
+            KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
+            $jamaah = $jamaahQuery->get();
             $groupedJamaah = null;
         } else if ($user->role === 'admin') {
             // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
@@ -69,11 +70,9 @@ class JamaahController extends Controller
                 })->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten hanya bisa melihat jamaah dari kabupatennya
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->whereHas('travel', function ($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
+            $jamaahQuery = Jamaah::where('jenis_jamaah', 'umrah');
+            KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
+            $jamaah = $jamaahQuery->get();
             $groupedJamaah = null;
         } else if ($user->role === 'admin') {
             // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
@@ -161,6 +160,8 @@ class JamaahController extends Controller
     public function edit($id)
     {
         $jamaah = Jamaah::findOrFail($id);
+        KabupatenResourceGuard::authorizeJamaah(auth()->user(), $jamaah);
+
         return view('jamaah.edit', compact('jamaah'));
     }
 
@@ -174,6 +175,7 @@ class JamaahController extends Controller
 
         try {
             $jamaah = Jamaah::findOrFail($id);
+            KabupatenResourceGuard::authorizeJamaah(auth()->user(), $jamaah);
             $jamaah->update($request->only(['nama', 'alamat', 'nomor_hp']));
 
             return redirect()->route('jamaah.detail', $id)
@@ -188,6 +190,7 @@ class JamaahController extends Controller
     {
         try {
             $jamaah = Jamaah::findOrFail($id);
+            KabupatenResourceGuard::authorizeJamaah(auth()->user(), $jamaah);
             $jenisJamaah = $jamaah->jenis_jamaah;
             $jamaah->delete();
 
@@ -218,6 +221,8 @@ class JamaahController extends Controller
     public function detail($id)
     {
         $jamaah = Jamaah::findOrFail($id);
+        KabupatenResourceGuard::authorizeJamaah(auth()->user(), $jamaah);
+
         return view('jamaah.detail', compact('jamaah'));
     }
 

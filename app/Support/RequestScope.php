@@ -18,7 +18,7 @@ class RequestScope
         $user = $request->user();
 
         if ($user->role === 'kabupaten') {
-            return new self(kabupaten: $user->kabupaten);
+            return new self(kabupaten: NtbKabupatenMap::normalize($user->kabupaten));
         }
 
         if ($user->role === 'pengawas') {

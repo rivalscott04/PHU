@@ -148,10 +148,8 @@
 
                         return `
                             <div class="col-md-6 mb-3">
-                                <div class="jamaah-review-item">
-                                    <div class="jamaah-review-label">${getFieldLabel(fieldId)}</div>
-                                    <div class="jamaah-review-value">${getFieldDisplayValue(fieldId)}</div>
-                                </div>
+                                <small class="text-muted d-block">${getFieldLabel(fieldId)}</small>
+                                <span class="fw-semibold">${getFieldDisplayValue(fieldId)}</span>
                             </div>
                         `;
                     }).filter(Boolean).join('');
@@ -161,9 +159,11 @@
                     }
 
                     return `
-                        <div class="jamaah-review-group mb-3">
-                            <h6 class="jamaah-review-group-title">${group.title}</h6>
-                            <div class="row">${rows}</div>
+                        <div class="card border mb-3">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">${group.title}</h6>
+                                <div class="row">${rows}</div>
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -342,23 +342,21 @@
                 let hint = container.querySelector('.digits-only-hint');
                 if (!hint) {
                     hint = document.createElement('div');
-                    hint.className = 'digits-only-hint';
+                    hint.className = 'text-danger small mt-1 digits-only-hint d-none';
                     hint.setAttribute('role', 'status');
                     hint.setAttribute('aria-live', 'polite');
                     container.appendChild(hint);
                 }
 
                 hint.textContent = message;
-                hint.classList.add('is-visible');
-                field.classList.add('digits-only-blocked');
+                hint.classList.remove('d-none');
 
                 if (field._digitsHintTimer) {
                     clearTimeout(field._digitsHintTimer);
                 }
 
                 field._digitsHintTimer = setTimeout(function () {
-                    hint.classList.remove('is-visible');
-                    field.classList.remove('digits-only-blocked');
+                    hint.classList.add('d-none');
                 }, 2800);
             }
 

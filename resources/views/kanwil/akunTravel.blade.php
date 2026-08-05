@@ -4,36 +4,33 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header ps-0 d-flex justify-content-between align-items-center">
-                    <h6>Data User</h6>
-                    <a href="{{ route('form.addUser') }}" class="btn btn-primary">Tambah User</a>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Data User</h5>
+                    <a href="{{ route('form.addUser') }}" class="btn btn-primary btn-sm">
+                        <i class="bx bx-plus me-1"></i> Tambah User
+                    </a>
                 </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead>
-                                <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 5%">No.</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 20%">Nama</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 20%">Email</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 15%">Nomor HP</th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        style="width: 40%">Aksi</th>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th>No.</th>
+                                    <th>Nama</th>
+                                    <th>Email</th>
+                                    <th>Nomor HP</th>
+                                    <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($users as $user)
                                     @if ($user->role === 'user')
-                                        <tr class="text-center">
-                                            <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $user->nama }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $user->email }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $user->nomor_hp }}</td>
-                                            <td class="text-sm font-weight-bold">
+                                        <tr class="text-center align-middle">
+                                            <td>{{ $loop->iteration }}</td>
+                                            <td>{{ $user->nama }}</td>
+                                            <td>{{ $user->email }}</td>
+                                            <td>{{ $user->nomor_hp }}</td>
+                                            <td>
                                                 <div class="d-flex justify-content-center gap-2">
                                                     <a href="{{ route('impersonate.take', $user->id) }}" 
                                                        class="btn btn-success btn-sm waves-effect waves-light"

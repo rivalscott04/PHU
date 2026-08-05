@@ -34,13 +34,13 @@ class TravelCapabilityService
         } elseif ($user->role === UserRole::Kabupaten->value) {
             $menus = [
                 'dashboard' => true,
-                'jamaah_umrah' => false,
-                'jamaah_haji_khusus' => false,
+                'jamaah_umrah' => true,
+                'jamaah_haji_khusus' => true,
                 'bap' => true,
-                'pengaduan' => false,
+                'pengaduan' => true,
                 'keberangkatan' => true,
                 'pengunduran' => true,
-                'travel_management' => false,
+                'travel_management' => true,
                 'cabang_travel' => true,
                 'user_management' => false,
                 'sertifikat' => true,
@@ -282,7 +282,17 @@ class TravelCapabilityService
                 'icon' => 'bx bx-data',
                 'hasSubmenu' => true,
                 'items' => [
+                    ['name' => 'Data PPIU Pusat', 'route' => 'travel', 'visible' => true],
                     ['name' => 'Data PPIU Cabang', 'route' => 'cabang.travel', 'visible' => true],
+                ],
+            ],
+            [
+                'name' => 'Data Jamaah',
+                'icon' => 'bx bx-user-circle',
+                'hasSubmenu' => true,
+                'items' => [
+                    ['name' => 'Jamaah Umrah', 'route' => 'jamaah.umrah', 'visible' => true],
+                    ['name' => 'Jamaah Haji Khusus', 'route' => 'jamaah.haji-khusus.index', 'visible' => true],
                 ],
             ],
             [
@@ -293,6 +303,7 @@ class TravelCapabilityService
                     ['name' => 'BA Pemberangkatan', 'route' => 'bap', 'visible' => true],
                     ['name' => 'Jadwal Keberangkatan', 'route' => 'keberangkatan', 'visible' => true],
                     ['name' => 'Pengunduran', 'route' => 'pengunduran', 'visible' => true],
+                    ['name' => 'Pengaduan', 'route' => 'pengaduan', 'visible' => true],
                 ],
             ],
             [

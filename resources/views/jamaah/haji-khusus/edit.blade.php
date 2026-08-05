@@ -123,7 +123,7 @@
                                     <i class="bx bx-map-pin me-1"></i>
                                     Provinsi <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select location-select @error('provinsi') is-invalid @enderror" 
+                                <select class="form-select @error('provinsi') is-invalid @enderror" 
                                         id="provinsi" name="provinsi" required>
                                     <option value="">Pilih Provinsi</option>
                                 </select>
@@ -147,7 +147,7 @@
                                     <i class="bx bx-building me-1"></i>
                                     Kota/Kabupaten <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select location-select @error('kota') is-invalid @enderror" 
+                                <select class="form-select @error('kota') is-invalid @enderror" 
                                         id="kota" name="kota" required disabled>
                                     <option value="">Pilih Kota/Kabupaten</option>
                                 </select>
@@ -171,7 +171,7 @@
                                     <i class="bx bx-map-alt me-1"></i>
                                     Kecamatan <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select location-select @error('kecamatan') is-invalid @enderror" 
+                                <select class="form-select @error('kecamatan') is-invalid @enderror" 
                                         id="kecamatan" name="kecamatan" required disabled>
                                     <option value="">Pilih Kecamatan</option>
                                 </select>

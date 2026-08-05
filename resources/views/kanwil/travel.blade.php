@@ -14,156 +14,120 @@
         </div>
     @endif
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('travel_master'))
+        <div class="container-fluid px-0 mb-3">
+            @include('partials.workflow-guide', ['guide' => $guide])
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header ps-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
-                        <h6 class="mb-1">Data Travel</h6>
-                        <ul class="nav nav-pills nav-sm gap-1 mt-2">
-                            <li class="nav-item">
-                                <a class="nav-link {{ ($filter ?? 'all') === 'all' ? 'active' : '' }}"
-                                   href="{{ route('travel') }}">Semua</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ ($filter ?? '') === 'pending' ? 'active' : '' }}"
-                                   href="{{ route('travel', ['filter' => 'pending']) }}">
-                                    Menunggu Verifikasi
-                                    @if (($pendingCount ?? 0) > 0)
-                                        <span class="badge bg-danger ms-1">{{ $pendingCount }}</span>
-                                    @endif
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ ($filter ?? '') === 'approved' ? 'active' : '' }}"
-                                   href="{{ route('travel', ['filter' => 'approved']) }}">Disetujui</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ ($filter ?? '') === 'rejected' ? 'active' : '' }}"
-                                   href="{{ route('travel', ['filter' => 'rejected']) }}">Ditolak</a>
-                            </li>
-                        </ul>
+                        <h5 class="mb-1">Data Travel</h5>
+                        <p class="text-muted mb-0 small">Kelola PPIU/PIHK dan verifikasi pendaftaran mandiri</p>
                     </div>
-                    <div>
-                        <a href="{{ route('form.travel') }}" class="btn btn-primary me-2">Tambah</a>
-                        <a href="{{ route('travel.export') }}" class="btn btn-info me-2">
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('form.travel') }}" class="btn btn-primary btn-sm">
+                            <i class="bx bx-plus me-1"></i> Tambah
+                        </a>
+                        <a href="{{ route('travel.export') }}" class="btn btn-outline-primary btn-sm">
                             <i class="bx bx-download me-1"></i> Export Excel
                         </a>
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
                     </div>
                 </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <!-- DataTables length and search controls -->
-                        <div class="d-flex justify-content-between align-items-center px-4 py-3">
-                            <div class="d-flex align-items-center">
-                                <label class="me-2 text-sm">Tampilkan</label>
-                                <select id="dataTable_length" class="form-select form-select-sm me-2" style="width: 70px">
-                                    <option value="10">10</option>
-                                    <option value="25">25</option>
-                                    <option value="50">50</option>
-                                    <option value="100">100</option>
-                                </select>
-                                <span class="text-sm">data per halaman</span>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <label class="me-2 text-sm">Cari:</label>
-                                <input type="search" id="dataTable_search" class="form-control form-control-sm"
-                                    style="width: 200px">
-                            </div>
-                        </div>
 
-                        <table id="dataTable" class="table align-items-center mb-0">
-                            <thead>
-                                <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 5%">
-                                        <div class="vertical-text">No.</div>
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 15%">
-                                        Penyelenggara
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        colspan="6">
-                                        Nomor SK
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Pimpinan
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 15%">
-                                        Alamat Kantor Lama
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 15%">
-                                        Alamat Kantor Baru
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Telepon
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 5%">
-                                        Status
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Kab/Kota
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 8%">
-                                        Registrasi
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                        rowspan="2" style="width: 10%">
-                                        Aksi
-                                    </th>
+                <div class="card-body pb-0">
+                    <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ ($filter ?? 'all') === 'all' ? 'active' : '' }}"
+                               href="{{ route('travel') }}" role="tab">Semua</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ ($filter ?? '') === 'pending' ? 'active' : '' }}"
+                               href="{{ route('travel', ['filter' => 'pending']) }}" role="tab">
+                                Menunggu Verifikasi
+                                @if (($pendingCount ?? 0) > 0)
+                                    <span class="badge bg-danger ms-1">{{ $pendingCount }}</span>
+                                @endif
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ ($filter ?? '') === 'approved' ? 'active' : '' }}"
+                               href="{{ route('travel', ['filter' => 'approved']) }}" role="tab">Disetujui</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ ($filter ?? '') === 'rejected' ? 'active' : '' }}"
+                               href="{{ route('travel', ['filter' => 'rejected']) }}" role="tab">Ditolak</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-sm-auto">
+                            <label for="dataTable_length" class="form-label mb-1">Tampilkan</label>
+                            <select id="dataTable_length" class="form-select form-select-sm">
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-auto">
+                            <span class="form-text">data per halaman</span>
+                        </div>
+                        <div class="col-sm-auto ms-sm-auto">
+                            <label for="dataTable_search" class="form-label mb-1">Cari</label>
+                            <input type="search" id="dataTable_search" class="form-control form-control-sm">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="dataTable" class="table table-striped table-bordered nowrap w-100 mb-0">
+                            <thead class="table-light text-center">
+                                <tr>
+                                    <th rowspan="2">No.</th>
+                                    <th rowspan="2">Penyelenggara</th>
+                                    <th colspan="6">Nomor SK</th>
+                                    <th rowspan="2">Pimpinan</th>
+                                    <th rowspan="2">Alamat Kantor Lama</th>
+                                    <th rowspan="2">Alamat Kantor Baru</th>
+                                    <th rowspan="2">Telepon</th>
+                                    <th rowspan="2">Status</th>
+                                    <th rowspan="2">Kab/Kota</th>
+                                    <th rowspan="2">Registrasi</th>
+                                    <th rowspan="2">Aksi</th>
                                 </tr>
-                                <tr class="text-center">
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Pusat
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Tanggal
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Jml Akre
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Tanggal Akredi
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        Lembaga Akred
-                                    </th>
-                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                        -
-                                    </th>
+                                <tr>
+                                    <th>Pusat</th>
+                                    <th>Tanggal</th>
+                                    <th>Jml Akre</th>
+                                    <th>Tanggal Akredi</th>
+                                    <th>Lembaga Akred</th>
+                                    <th>-</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($data as $item)
-                                    <tr class="text-center" data-travel-id="{{ $item->id }}">
-                                        <td class="text-sm font-weight-bold">{{ $loop->iteration }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->Penyelenggara }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->Pusat }}</td>
-                                        <td class="text-sm font-weight-bold">
-                                            {{ date('d/m/Y', strtotime($item->Tanggal)) }}
-                                        </td>
-                                        <td class="text-sm font-weight-bold">{{ $item->nilai_akreditasi }}</td>
-                                        <td class="text-sm font-weight-bold">
-                                            {{ date('d/m/Y', strtotime($item->tanggal_akreditasi)) }}
-                                        </td>
-                                        <td class="text-sm font-weight-bold">{{ $item->lembaga_akreditasi }}</td>
-                                        <td class="text-sm font-weight-bold">-</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->Pimpinan }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_lama }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->alamat_kantor_baru }}</td>
-                                        <td class="text-sm font-weight-bold">{{ $item->Telepon }}</td>
-                                        <td class="text-sm font-weight-bold text-center">
+                                    <tr class="text-center align-middle" data-travel-id="{{ $item->id }}">
+                                        <td>{{ $loop->iteration }}</td>
+                                        <td class="text-start">{{ $item->Penyelenggara }}</td>
+                                        <td>{{ $item->Pusat }}</td>
+                                        <td>{{ date('d/m/Y', strtotime($item->Tanggal)) }}</td>
+                                        <td>{{ $item->nilai_akreditasi }}</td>
+                                        <td>{{ date('d/m/Y', strtotime($item->tanggal_akreditasi)) }}</td>
+                                        <td>{{ $item->lembaga_akreditasi }}</td>
+                                        <td>-</td>
+                                        <td>{{ $item->Pimpinan }}</td>
+                                        <td class="text-start">{{ $item->alamat_kantor_lama }}</td>
+                                        <td class="text-start">{{ $item->alamat_kantor_baru }}</td>
+                                        <td>{{ $item->Telepon }}</td>
+                                        <td>
                                             <div class="d-flex flex-column align-items-center status-badge">
                                                 <span class="badge {{ $item->Status === 'PIHK' ? 'bg-success' : 'bg-info' }}">
                                                     {{ $item->Status }}
@@ -177,8 +141,8 @@
                                                 </small>
                                             </div>
                                         </td>
-                                        <td class="text-sm font-weight-bold">{{ $item->kab_kota }}</td>
-                                        <td class="text-sm font-weight-bold text-center">
+                                        <td>{{ $item->kab_kota }}</td>
+                                        <td>
                                             @php
                                                 $regStatus = $item->registration_status ?? \App\Enums\TravelRegistrationStatus::Approved;
                                             @endphp
@@ -213,7 +177,7 @@
                                                 <small class="text-danger d-block mt-1">{{ Str::limit($item->registration_notes, 60) }}</small>
                                             @endif
                                         </td>
-                                        <td class="text-sm font-weight-bold">
+                                        <td>
                                             <div class="d-flex justify-content-center gap-1 flex-wrap">
                                                 @if (auth()->user()->role === 'admin' && ($item->registration_status ?? null) === \App\Enums\TravelRegistrationStatus::Pending)
                                                     <form method="POST" action="{{ route('travel.registration.approve', $item->id) }}" class="d-inline" id="approve-form-{{ $item->id }}">
@@ -246,11 +210,10 @@
                             </tbody>
                         </table>
 
-                        <!-- DataTables pagination -->
-                        <div class="d-flex justify-content-between align-items-center px-4 py-3">
-                            <div id="dataTable_info" class="text-sm text-secondary"></div>
-                            <div id="dataTable_paginate" class="pagination"></div>
-                        </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
+                        <div id="dataTable_info" class="text-muted small"></div>
+                        <div id="dataTable_paginate"></div>
+                    </div>
                     </div>
                 </div>
             </div>

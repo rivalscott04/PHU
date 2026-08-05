@@ -15,7 +15,7 @@ class TravelAccess
             return;
         }
 
-        if ($user->role === 'kabupaten' && $travel->kab_kota === $user->getKabupaten()) {
+        if ($user->role === 'kabupaten' && NtbKabupatenMap::matches($user->kabupaten, $travel->kab_kota)) {
             return;
         }
 

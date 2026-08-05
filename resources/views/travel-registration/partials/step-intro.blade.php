@@ -4,12 +4,7 @@
     $description = $description ?? '';
 @endphp
 
-<div class="travel-step-intro mb-4">
-    <div class="travel-step-intro-icon">
-        <i class="bx {{ $icon }}"></i>
-    </div>
-    <div>
-        <h5 class="travel-step-intro-title mb-1">{{ $title }}</h5>
-        <p class="travel-step-intro-desc mb-0">{{ $description }}</p>
-    </div>
+<div class="alert alert-info mb-4 col-lg-8 mx-auto">
+    <h6 class="alert-heading"><i class="bx {{ $icon }} me-1"></i>{{ $title }}</h6>
+    <p class="mb-0">{{ $description }}</p>
 </div>

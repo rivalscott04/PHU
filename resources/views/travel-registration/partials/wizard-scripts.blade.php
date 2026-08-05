@@ -140,10 +140,8 @@
 
                     return `
                         <div class="col-md-6 mb-3">
-                            <div class="travel-review-item">
-                                <div class="travel-review-label">${getFieldLabel(fieldId)}</div>
-                                <div class="travel-review-value">${getFieldDisplayValue(fieldId)}</div>
-                            </div>
+                            <small class="text-muted d-block">${getFieldLabel(fieldId)}</small>
+                            <span class="fw-semibold">${getFieldDisplayValue(fieldId)}</span>
                         </div>
                     `;
                 }).filter(Boolean).join('');
@@ -153,9 +151,11 @@
                 }
 
                 return `
-                    <div class="travel-review-group mb-3">
-                        <h6 class="travel-review-group-title">${group.title}</h6>
-                        <div class="row">${rows}</div>
+                    <div class="card border mb-3">
+                        <div class="card-body">
+                            <h6 class="card-title mb-3">${group.title}</h6>
+                            <div class="row">${rows}</div>
+                        </div>
                     </div>
                 `;
             }).join('');

@@ -1,230 +1,125 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <div class="mb-3">
-            <h5 class="mb-1">Jadwal Keberangkatan</h5>
-            <p class="text-muted small mb-0">Kalender keberangkatan jamaah dari BA Pemberangkatan yang telah disetujui.</p>
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <h4 class="mb-sm-0">Jadwal Keberangkatan</h4>
         </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
         @if($guide = \App\Support\RoleWorkflowGuide::for('keberangkatan'))
             @include('partials.workflow-guide', ['guide' => $guide])
         @endif
-        <div id='calendar'></div>
-    </div>
 
-    <div class="event-popup-overlay" id="popupOverlay" onclick="closePopup()"></div>
-    <div id="eventPopup" class="event-popup">
-        <button class="close-btn" onclick="closePopup()">
-            <i class="fas fa-times"></i>
-        </button>
-        <div id="popupContent" class="event-details"></div>
-    </div>
-
-    <!-- Year Selection Modal -->
-    <div id="yearSelectModal" class="year-select-modal">
-        <div class="year-select-content">
-            <div class="year-grid" id="yearGrid"></div>
+        <div class="card">
+            <div class="card-body">
+                <p class="text-muted small mb-3">Kalender keberangkatan jamaah dari BA Pemberangkatan yang telah disetujui.</p>
+                <div id="calendar"></div>
+            </div>
         </div>
     </div>
+</div>
+
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="eventModalTitle"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body" id="eventModalBody"></div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="yearSelectModal" tabindex="-1" aria-labelledby="yearSelectModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="yearSelectModalTitle">Pilih Tahun</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <div class="modal-body">
+                <div class="year-grid" id="yearGrid"></div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('styles')
-    <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css" rel="stylesheet" />
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --secondary-color: #1e40af;
-            --success-color: #059669;
-            --background-color: #f8fafc;
-            --card-background: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --border-radius: 12px;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-            --transition: all 0.3s ease;
-        }
-
         #calendar {
-            background: var(--card-background);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow-md);
-            padding: 20px;
             min-height: 700px;
-            margin-bottom: 20px;
-        }
-
-        .fc .fc-toolbar-title {
-            font-size: 1.5em;
-            margin: 0;
-            padding: 0;
-        }
-
-        .fc .fc-button-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .fc .fc-button-primary:hover {
-            background-color: var(--secondary-color);
-            border-color: var(--secondary-color);
-        }
-
-        /* Custom styling for all calendar buttons to avoid black colors */
-        .fc .fc-button-primary {
-            background-color: var(--primary-color) !important;
-            border-color: var(--primary-color) !important;
-            color: white !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .fc .fc-button-primary:hover {
-            background-color: var(--secondary-color) !important;
-            border-color: var(--secondary-color) !important;
-            color: white !important;
-        }
-
-        .fc .fc-button-primary:active {
-            background-color: var(--secondary-color) !important;
-            border-color: var(--secondary-color) !important;
-            color: white !important;
-        }
-
-        /* Ensure active button has good contrast */
-        .fc .fc-button-primary.fc-button-active {
-            background-color: var(--success-color) !important;
-            border-color: var(--success-color) !important;
-            color: white !important;
-            font-weight: 600;
-        }
-
-        .event-popup {
-            display: none;
-            position: fixed;
-            top: 55%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .event-popup-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 999;
-        }
-
-        .detail-item {
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .detail-label {
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 5px;
-        }
-
-        .detail-value {
-            color: var(--text-primary);
-        }
-
-        .close-btn {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: var(--text-secondary);
-        }
-
-        .year-select-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .year-select-content {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            max-width: 400px;
-            width: 90%;
-        }
-
-        .year-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            padding: 10px;
-        }
-
-        .year-button {
-            padding: 10px;
-            border: 1px solid var(--primary-color);
-            border-radius: 6px;
-            background: white;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .year-button:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        .current-year {
-            background: var(--primary-color);
-            color: white;
         }
 
         .fc .fc-toolbar {
             justify-content: center;
-            gap: 20px;
+            gap: 1rem;
+            flex-wrap: wrap;
         }
 
         .fc .fc-toolbar-title {
+            font-size: 1.25rem;
             cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 6px;
-            transition: var(--transition);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--bs-border-radius);
+            transition: background-color 0.2s ease;
         }
 
         .fc .fc-toolbar-title:hover {
-            background: rgba(37, 99, 235, 0.1);
+            background-color: rgba(var(--bs-primary-rgb), 0.08);
         }
 
-        .fc .fc-multimonth {
-            padding: 20px;
-            border-radius: var(--border-radius);
-            background: var(--card-background);
+        .fc .fc-button-primary {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+            color: #fff !important;
         }
 
-        .fc-event {
+        .fc .fc-button-primary:hover,
+        .fc .fc-button-primary:active,
+        .fc .fc-button-primary.fc-button-active {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
+            color: #fff !important;
+            filter: brightness(0.92);
+        }
+
+        .fc .fc-button-primary:disabled {
+            opacity: 0.65;
+            filter: none;
+        }
+
+        .fc .fc-col-header-cell-cushion {
+            color: var(--bs-primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .fc .fc-daygrid-day-number {
+            color: var(--bs-body-color);
+            text-decoration: none;
+        }
+
+        .fc .fc-day-other .fc-daygrid-day-number {
+            color: var(--bs-secondary-color);
+        }
+
+        .fc .fc-day-today {
+            background-color: rgba(var(--bs-primary-rgb), 0.06) !important;
+        }
+
+        .fc-event,
+        .fc-h-event {
+            background-color: var(--bs-primary) !important;
+            border-color: var(--bs-primary) !important;
             cursor: pointer;
-            padding: 2px 4px;
         }
 
         .fc-event .fc-content {
@@ -235,13 +130,55 @@
 
         .fc-event .fc-description {
             margin-top: 2px;
-            opacity: 0.8;
+            opacity: 0.85;
+            font-size: 0.8em;
+        }
+
+        .fc .fc-multimonth {
+            border-radius: var(--bs-border-radius);
+        }
+
+        .year-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+        }
+
+        .year-button {
+            padding: 0.5rem;
+            border: 1px solid var(--bs-border-color);
+            border-radius: var(--bs-border-radius);
+            background: var(--bs-body-bg);
+            color: var(--bs-body-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .year-button:hover {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: #fff;
+        }
+
+        .year-button.current-year {
+            background: var(--bs-primary);
+            border-color: var(--bs-primary);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .keberangkatan-detail dt {
+            color: var(--bs-secondary-color);
+            font-weight: 500;
+        }
+
+        .keberangkatan-detail dd {
+            margin-bottom: 0.75rem;
         }
 
         @media (max-width: 768px) {
             .fc .fc-toolbar {
                 flex-direction: column;
-                gap: 10px;
             }
 
             .fc-header-toolbar {
@@ -252,17 +189,12 @@
                 padding: 0.4em 0.65em;
             }
 
-            .event-popup {
-                width: 95%;
-                padding: 15px;
-            }
-
             .fc-event {
                 font-size: 0.85em;
             }
 
             .fc-toolbar-title {
-                font-size: 1.2em !important;
+                font-size: 1.1em !important;
             }
 
             .year-grid {
@@ -273,31 +205,37 @@
 @endpush
 
 @push('js')
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
-            var yearSelectModal = document.getElementById('yearSelectModal');
+            var yearSelectModalEl = document.getElementById('yearSelectModal');
+            var yearSelectModal = new bootstrap.Modal(yearSelectModalEl);
+            var eventModalEl = document.getElementById('eventModal');
+            var eventModal = new bootstrap.Modal(eventModalEl);
             var yearGrid = document.getElementById('yearGrid');
 
-            // Setup year selection modal
             function setupYearGrid() {
                 const currentYear = new Date().getFullYear();
                 yearGrid.innerHTML = '';
 
                 for (let year = currentYear - 5; year <= currentYear + 5; year++) {
                     const btn = document.createElement('button');
-                    btn.className = `year-button ${year === currentYear ? 'current-year' : ''}`;
+                    btn.type = 'button';
+                    btn.className = 'year-button' + (year === currentYear ? ' current-year' : '');
                     btn.textContent = year;
                     btn.onclick = function() {
-                        calendar.gotoDate(`${year}-01-01`);
-                        yearSelectModal.style.display = 'none';
+                        calendar.gotoDate(year + '-01-01');
+                        yearSelectModal.hide();
                         calendar.changeView('multiMonth');
                     };
                     yearGrid.appendChild(btn);
                 }
+            }
+
+            function showYearModal() {
+                setupYearGrid();
+                yearSelectModal.show();
             }
 
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -310,9 +248,7 @@
                 views: {
                     multiMonth: {
                         type: 'multiMonth',
-                        duration: {
-                            months: 12
-                        },
+                        duration: { months: 12 },
                         multiMonthMaxColumns: 3,
                         multiMonthMinWidth: 350,
                         showNonCurrentDates: false
@@ -325,23 +261,25 @@
                     multiMonth: 'Tahun'
                 },
                 events: {
-                    url: window.location.protocol + '//' + window.location.host + '/keberangkatan/events',
+                    url: '{{ route('calendar.events') }}',
                     method: 'GET',
                     failure: function() {
-                        Swal.fire({ title: 'Gagal', text: 'Error mengambil data keberangkatan!', icon: 'error', confirmButtonColor: '#556ee6' });
+                        Swal.fire({
+                            title: 'Gagal',
+                            text: 'Error mengambil data keberangkatan!',
+                            icon: 'error'
+                        });
                     }
                 },
                 eventClick: function(info) {
-                    showPopup(info.event);
+                    showEventModal(info.event);
                 },
                 eventContent: function(arg) {
                     return {
-                        html: `<div class="fc-content">
-                        <div class="fc-title">${arg.event.title}</div>
-                        <div class="fc-description" style="font-size: 0.8em;">
-                            ${arg.event.extendedProps.days} hari
-                        </div>
-                    </div>`
+                        html: '<div class="fc-content">' +
+                            '<div class="fc-title">' + arg.event.title + '</div>' +
+                            '<div class="fc-description">' + arg.event.extendedProps.days + ' hari</div>' +
+                            '</div>'
                     };
                 },
                 titleFormat: {
@@ -350,113 +288,45 @@
                 },
                 dayMaxEvents: true,
                 displayEventTime: false,
-                // Make title clickable for year selection
                 titleRender: function(info) {
-                    info.el.onclick = function() {
-                        setupYearGrid();
-                        yearSelectModal.style.display = 'flex';
-                    };
+                    info.el.onclick = showYearModal;
                 },
                 viewDidMount: function(info) {
-                    // Trigger year selection modal when switching to multiMonth view
                     if (info.view.type === 'multiMonth') {
-                        setupYearGrid();
-                        yearSelectModal.style.display = 'flex';
+                        showYearModal();
                     }
                 }
             });
 
             calendar.render();
 
-            // Close year select modal when clicking outside
-            yearSelectModal.onclick = function(e) {
-                if (e.target === yearSelectModal) {
-                    yearSelectModal.style.display = 'none';
-                }
-            };
+            function showEventModal(event) {
+                const departureDate = new Date(event.extendedProps.returndate).toLocaleDateString('id-ID', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
 
-            // Close year select modal with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    yearSelectModal.style.display = 'none';
-                    closePopup();
-                }
-            });
+                document.getElementById('eventModalTitle').textContent = event.title;
+                document.getElementById('eventModalBody').innerHTML =
+                    '<dl class="row keberangkatan-detail mb-0">' +
+                        '<dt class="col-sm-5"><i class="bx bx-user me-1"></i>Penanggung Jawab</dt>' +
+                        '<dd class="col-sm-7">' + event.extendedProps.name + ' (' + event.extendedProps.jabatan + ')</dd>' +
+                        '<dt class="col-sm-5"><i class="bx bx-calendar-check me-1"></i>Tanggal Kepulangan</dt>' +
+                        '<dd class="col-sm-7">' + departureDate + '</dd>' +
+                        '<dt class="col-sm-5"><i class="bx bx-group me-1"></i>Jumlah Jamaah</dt>' +
+                        '<dd class="col-sm-7">' + event.extendedProps.people + ' orang</dd>' +
+                        '<dt class="col-sm-5"><i class="bx bx-time me-1"></i>Durasi</dt>' +
+                        '<dd class="col-sm-7">' + event.extendedProps.days + ' Hari</dd>' +
+                        '<dt class="col-sm-5"><i class="bx bx-plane-take-off me-1"></i>Maskapai Keberangkatan</dt>' +
+                        '<dd class="col-sm-7">' + event.extendedProps.airlines + '</dd>' +
+                        '<dt class="col-sm-5"><i class="bx bx-plane-land me-1"></i>Maskapai Kepulangan</dt>' +
+                        '<dd class="col-sm-7">' + event.extendedProps.airlines2 + '</dd>' +
+                    '</dl>';
+
+                eventModal.show();
+            }
         });
-
-        function showPopup(event) {
-            const popup = document.getElementById('eventPopup');
-            const overlay = document.getElementById('popupOverlay');
-            const content = document.getElementById('popupContent');
-
-            const departureDate = new Date(event.extendedProps.returndate).toLocaleDateString('id-ID', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            content.innerHTML = `
-            <h3 style="margin-bottom: 20px; color: var(--primary-color);">
-                ${event.title}
-            </h3>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-user"></i> Penanggung Jawab
-                </div>
-                <div class="detail-value">
-                    ${event.extendedProps.name} (${event.extendedProps.jabatan})
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane-arrival"></i> Tanggal Kepulangan
-                </div>
-                <div class="detail-value">
-                    ${departureDate}<br>
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-users"></i> Jumlah Jamaah
-                </div>
-                <div class="detail-value">
-                    ${event.extendedProps.people} orang
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-clock"></i> Durasi
-                </div>
-                <div class="detail-value">
-                    ${event.extendedProps.days} Hari
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane"></i> Maskapai Keberangkatan
-                </div>
-                <div class="detail-value">
-                    ${event.extendedProps.airlines}
-                </div>
-            </div>
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-plane"></i> Maskapai Kepulangan
-                </div>
-                <div class="detail-value">
-                    ${event.extendedProps.airlines2}
-                </div>
-            </div>
-        `;
-
-            overlay.style.display = 'block';
-            popup.style.display = 'block';
-        }
-
-        function closePopup() {
-            document.getElementById('eventPopup').style.display = 'none';
-            document.getElementById('popupOverlay').style.display = 'none';
-        }
     </script>
 @endpush

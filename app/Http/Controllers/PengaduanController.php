@@ -8,6 +8,8 @@ use App\Models\Pengaduan;
 use App\Models\TravelCompany;
 use App\Services\WorkQueueService;
 use App\Support\PengaduanAttachmentStorage;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 use PDF;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,8 +29,9 @@ class PengaduanController extends Controller
             // Admin can see all travel companies
             $travels = TravelCompany::all();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see travel companies in their area
-            $travels = TravelCompany::where('kab_kota', $user->kabupaten)->get();
+            $travelsQuery = TravelCompany::query();
+            KabupatenScopeFilter::applyOnColumn($travelsQuery, KabupatenScopeFilter::filtersForUser($user), 'kab_kota');
+            $travels = $travelsQuery->get();
         } else {
             // Other roles see empty data
             $travels = collect();
@@ -81,9 +84,8 @@ class PengaduanController extends Controller
         if ($user->role === 'admin') {
             $pengaduanQuery = Pengaduan::query();
         } elseif ($user->role === 'kabupaten') {
-            $pengaduanQuery = Pengaduan::query()->whereHas('travel', function ($query) use ($user) {
-                $query->where('kab_kota', $user->kabupaten);
-            });
+            $pengaduanQuery = Pengaduan::query();
+            KabupatenScopeFilter::applyOnTravelRelation($pengaduanQuery, KabupatenScopeFilter::filtersForUser($user));
         } else {
             $pengaduanQuery = Pengaduan::query()->whereRaw('1 = 0');
         }
@@ -116,6 +118,8 @@ class PengaduanController extends Controller
     public function detail($id)
     {
         $pengaduan = Pengaduan::with('travel')->findOrFail($id);
+        KabupatenResourceGuard::authorizePengaduan(auth()->user(), $pengaduan);
+
         return view('pengaduan.detail', compact('pengaduan'));
     }
 
@@ -130,6 +134,8 @@ class PengaduanController extends Controller
         ]);
 
         $pengaduan = Pengaduan::findOrFail($id);
+        KabupatenResourceGuard::authorizePengaduan(auth()->user(), $pengaduan);
+
         $pengaduan->update([
             'status' => $request->status,
             'admin_notes' => $request->admin_notes ?? '',
@@ -183,6 +189,7 @@ class PengaduanController extends Controller
     public function downloadBerkas(int $id): Response
     {
         $pengaduan = Pengaduan::findOrFail($id);
+        KabupatenResourceGuard::authorizePengaduan(auth()->user(), $pengaduan);
 
         if (! $pengaduan->berkas_aduan) {
             abort(404);
@@ -210,6 +217,7 @@ class PengaduanController extends Controller
     public function downloadPDF($id)
     {
         $pengaduan = Pengaduan::findOrFail($id);
+        KabupatenResourceGuard::authorizePengaduan(auth()->user(), $pengaduan);
         
         if ($pengaduan->status !== 'completed') {
             return redirect()->back()->with('error', 'PDF hanya tersedia untuk pengaduan yang telah selesai.');

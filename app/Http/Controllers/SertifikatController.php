@@ -13,6 +13,8 @@ use Endroid\QrCode\Writer\PngWriter;
 use Carbon\Carbon;
 use App\Helpers\DateHelper;
 use App\Helpers\ValidationHelper;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -28,11 +30,9 @@ class SertifikatController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see sertifikat from travel in their area
-            $sertifikat = Sertifikat::with(['travel', 'cabang'])
-                ->whereHas('travel', function($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })
+            $sertifikatQuery = Sertifikat::with(['travel', 'cabang']);
+            KabupatenScopeFilter::applyOnSertifikat($sertifikatQuery, $user);
+            $sertifikat = $sertifikatQuery
                 ->orderBy('created_at', 'desc')
                 ->paginate(10);
         } else {
@@ -76,6 +76,7 @@ class SertifikatController extends Controller
     public function getTravelData($id)
     {
         $travel = TravelCompany::findOrFail($id);
+        KabupatenResourceGuard::authorizeTravel(auth()->user(), $travel);
 
         // Gunakan alamat kantor baru jika ada, jika tidak gunakan alamat lama
         $alamat = $travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama;
@@ -90,6 +91,7 @@ class SertifikatController extends Controller
     public function getCabangData($id)
     {
         $cabang = CabangTravel::findOrFail($id);
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabang);
         return response()->json([
             'nama_ppiu' => $cabang->Penyelenggara,
             'nama_kepala' => $cabang->pimpinan_cabang ?: ($cabang->Penyelenggara . ', Kepala Cabang'),
@@ -144,6 +146,19 @@ class SertifikatController extends Controller
 
         \Log::info('Validation passed');
         $data = $request->all();
+        $user = auth()->user();
+
+        if ($data['jenis_lokasi'] === 'pusat') {
+            KabupatenResourceGuard::authorizeTravel(
+                $user,
+                TravelCompany::findOrFail($request->travel_id)
+            );
+        } else {
+            KabupatenResourceGuard::authorizeCabang(
+                $user,
+                CabangTravel::findOrFail($request->cabang_id)
+            );
+        }
 
         // Set jenis ke PPIU karena hanya PPIU yang diakomodir
         $data['jenis'] = trim('PPIU'); // Pastikan tidak ada whitespace
@@ -186,6 +201,7 @@ class SertifikatController extends Controller
         \Log::info('Generating PDF for sertifikat ID:', ['id' => $id]);
 
         $sertifikat = Sertifikat::findOrFail($id);
+        KabupatenResourceGuard::authorizeSertifikat(auth()->user(), $sertifikat);
         \Log::info('Sertifikat found:', [
             'id' => $sertifikat->id,
             'nama_ppiu' => $sertifikat->nama_ppiu,
@@ -318,6 +334,7 @@ class SertifikatController extends Controller
         \Log::info('Viewing PDF for sertifikat ID:', ['id' => $id]);
 
         $sertifikat = Sertifikat::findOrFail($id);
+        KabupatenResourceGuard::authorizeSertifikat(auth()->user(), $sertifikat);
         \Log::info('Sertifikat found:', [
             'id' => $sertifikat->id,
             'nama_ppiu' => $sertifikat->nama_ppiu,
@@ -625,6 +642,7 @@ class SertifikatController extends Controller
         \Log::info('Downloading PDF for sertifikat ID:', ['id' => $id]);
 
         $sertifikat = Sertifikat::findOrFail($id);
+        KabupatenResourceGuard::authorizeSertifikat(auth()->user(), $sertifikat);
         \Log::info('Sertifikat found:', [
             'id' => $sertifikat->id,
             'nama_ppiu' => $sertifikat->nama_ppiu,
@@ -677,6 +695,7 @@ class SertifikatController extends Controller
             \Log::info('Deleting sertifikat ID:', ['id' => $id]);
 
             $sertifikat = Sertifikat::findOrFail($id);
+            KabupatenResourceGuard::authorizeSertifikat(auth()->user(), $sertifikat);
             \Log::info('Sertifikat found:', [
                 'id' => $sertifikat->id,
                 'nama_ppiu' => $sertifikat->nama_ppiu,
@@ -725,6 +744,8 @@ class SertifikatController extends Controller
 
     public function updateSettings(Request $request)
     {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
         ValidationHelper::validate($request, [
             'nama_penandatangan' => 'required|string|max:255',
             'nip_penandatangan' => 'required|string|max:255',

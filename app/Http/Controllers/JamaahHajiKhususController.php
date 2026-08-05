@@ -7,6 +7,8 @@ use App\Helpers\ValidationHelper;
 use App\Models\JamaahHajiKhusus;
 use App\Models\TravelCompany;
 use App\Exports\JamaahHajiKhususExport;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -53,10 +55,8 @@ class JamaahHajiKhususController extends Controller
                     $q->where('kab_kota', $user->kabupaten);
                 });
             } else if ($user->role === 'kabupaten') {
-                // Kabupaten hanya bisa melihat jamaah dari kabupatennya
-                $query->whereHas('travel', function($q) use ($user) {
-                    $q->where('kab_kota', $user->kabupaten);
-                });
+                $filters = KabupatenScopeFilter::filtersForUser($user);
+                KabupatenScopeFilter::applyOnTravelRelation($query, $filters);
             }
 
             // Search functionality
@@ -318,6 +318,14 @@ class JamaahHajiKhususController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
+        $user = Auth::user();
+
+        if (! in_array($user->role, ['admin', 'kabupaten'], true)) {
+            abort(403);
+        }
+
+        KabupatenResourceGuard::authorizeJamaahHajiKhusus($user, $jamaahHajiKhusus);
+
         ValidationHelper::validate($request, [
             'status_pendaftaran' => 'required|in:pending,approved,rejected,completed'
         ]);
@@ -549,6 +557,8 @@ class JamaahHajiKhususController extends Controller
             ], 403);
         }
 
+        KabupatenResourceGuard::authorizeJamaahHajiKhusus($user, $jamaahHajiKhusus);
+
         ValidationHelper::validate($request, [
             'status_verifikasi_bukti' => 'required|in:verified,rejected',
             'catatan_verifikasi' => 'nullable|string',
@@ -586,6 +596,8 @@ class JamaahHajiKhususController extends Controller
                 'message' => 'Anda tidak memiliki akses untuk menetapkan nomor porsi.'
             ], 403);
         }
+
+        KabupatenResourceGuard::authorizeJamaahHajiKhusus($user, $jamaahHajiKhusus);
 
         // Check if bukti setor is verified
         if (!$jamaahHajiKhusus->isBuktiSetorVerified()) {

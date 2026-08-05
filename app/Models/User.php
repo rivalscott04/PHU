@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\UserRole;
+use App\Support\NtbKabupatenMap;
 use App\Enums\PengawasScopeMode;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
@@ -148,7 +148,7 @@ class User extends Authenticatable
         }
 
         if ($this->role === UserRole::Kabupaten->value) {
-            return $kabupaten === $this->kabupaten;
+            return NtbKabupatenMap::matches($this->kabupaten, $kabupaten);
         }
 
         if ($this->role !== UserRole::Pengawas->value) {

@@ -12,6 +12,8 @@ use App\Exports\TravelPusatExport;
 use App\Exports\TravelCabangExport;
 use Illuminate\Support\Facades\Storage;
 use App\Support\NtbKabupatenMap;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -21,6 +23,8 @@ class KanwilController extends Controller
 
     public function showFormTravel()
     {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
         return view('kanwil.formTravel', [
             'kabupatens' => NtbKabupatenMap::names(),
         ]);
@@ -28,6 +32,7 @@ class KanwilController extends Controller
 
     public function store(Request $request)
     {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
         $validatedData = ValidationHelper::validate($request, ValidationHelper::travelCompanyDataRules());
 
         $validatedData['registration_status'] = TravelRegistrationStatus::Approved;
@@ -46,6 +51,7 @@ class KanwilController extends Controller
     public function edit($id)
     {
         $travelCompany = TravelCompany::with('user')->findOrFail($id);
+        KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
 
         return view('kanwil.editTravel', [
             'travelCompany' => $travelCompany,
@@ -56,6 +62,7 @@ class KanwilController extends Controller
     public function update(Request $request, $id)
     {
         $travelCompany = TravelCompany::with('user')->findOrFail($id);
+        KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
 
         $validatedData = ValidationHelper::validate(
             $request,
@@ -89,6 +96,7 @@ class KanwilController extends Controller
             ]);
 
             $travelCompany = TravelCompany::findOrFail($id);
+            KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
             $oldStatus = $travelCompany->Status;
             $newStatus = $request->Status;
 
@@ -184,7 +192,8 @@ class KanwilController extends Controller
             );
 
         if ($user && $user->role === 'kabupaten') {
-            $query->where('kab_kota', $user->kabupaten);
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($query, $filters, 'kab_kota');
         } elseif (! $user || $user->role !== 'admin') {
             $query->whereRaw('1 = 0');
         }
@@ -198,7 +207,13 @@ class KanwilController extends Controller
         }
 
         $data = $query->orderByDesc('created_at')->get();
-        $pendingCount = TravelCompany::pendingRegistration()->count();
+
+        $pendingQuery = TravelCompany::pendingRegistration();
+        if ($user && $user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($pendingQuery, $filters, 'kab_kota');
+        }
+        $pendingCount = $pendingQuery->count();
 
         return view('kanwil.travel', [
             'data' => $data,
@@ -286,13 +301,23 @@ class KanwilController extends Controller
 
     public function createCabangTravel()
     {
-        $travels = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara')->get();
+        $user = auth()->user();
+        $travelsQuery = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara');
+
+        if ($user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
+        }
+
+        $travels = $travelsQuery->get();
 
         return view('kanwil.formCabangTravel', compact('travels'));
     }
 
     public function storeCabangTravel(Request $request)
     {
+        $user = auth()->user();
+
         // Validate input
         $validatedData = ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
@@ -307,6 +332,10 @@ class KanwilController extends Controller
             'telepon' => 'required|string|max:20',
         ]);
 
+        if ($user->role === 'kabupaten') {
+            $validatedData['kabupaten'] = NtbKabupatenMap::normalize($user->kabupaten);
+        }
+
         CabangTravel::create($validatedData);
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil disimpan.');
@@ -320,9 +349,10 @@ class KanwilController extends Controller
             // Admin can see all cabang travel - optimized query
             $data = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon')->get();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see cabang travel in their area - optimized query
-            $data = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon')
-                ->where('kabupaten', $user->kabupaten)->get();
+            $dataQuery = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon');
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($dataQuery, $filters, 'kabupaten');
+            $data = $dataQuery->get();
         } else {
             // Other roles see empty data
             $data = collect();
@@ -367,13 +397,26 @@ class KanwilController extends Controller
     public function editCabangTravel($id_cabang)
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
-        $travels = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara')->get();
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
+
+        $travelsQuery = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara');
+        $user = auth()->user();
+
+        if ($user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
+        }
+
+        $travels = $travelsQuery->get();
 
         return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
     }
 
     public function updateCabangTravel(Request $request, $id_cabang)
     {
+        $cabangTravel = CabangTravel::findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
+
         ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
@@ -387,8 +430,13 @@ class KanwilController extends Controller
             'telepon' => 'required|string|max:20',
         ]);
 
-        $cabangTravel = CabangTravel::findOrFail($id_cabang);
-        $cabangTravel->update($request->all());
+        $updateData = $request->all();
+
+        if (auth()->user()->role === 'kabupaten') {
+            $updateData['kabupaten'] = NtbKabupatenMap::normalize(auth()->user()->kabupaten);
+        }
+
+        $cabangTravel->update($updateData);
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil diperbarui.');
     }
@@ -396,6 +444,7 @@ class KanwilController extends Controller
     public function destroyCabangTravel($id_cabang)
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
         $cabangTravel->delete();
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil dihapus.');

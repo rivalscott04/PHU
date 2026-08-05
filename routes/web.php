@@ -131,8 +131,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/jamaah/umrah/export', [JamaahController::class, 'exportUmrah'])->name('jamaah.umrah.export');
     Route::get('/jamaah/haji/export', [JamaahController::class, 'exportHaji'])->name('jamaah.haji.export');
 
-    // Pengaduan routes - accessible by admin only
-    Route::middleware(['admin'])->group(function () {
+    // Pengaduan routes - accessible by admin and kabupaten
+    Route::middleware(['kabupaten.access'])->group(function () {
         Route::get('/pengaduan', [PengaduanController::class, 'index'])->name('pengaduan');
         Route::get('/pengaduan/create', [PengaduanController::class, 'create'])->name('pengaduan.create');
         Route::post('/pengaduan', [PengaduanController::class, 'store'])->name('pengaduan.store');
@@ -145,6 +145,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::get('/pengunduran', [PengunduranController::class, 'index'])->name('pengunduran');
     Route::get('/pengunduran/create', [PengunduranController::class, 'create'])->name('pengunduran.create');
     Route::post('/pengunduran', [PengunduranController::class, 'store'])->name('pengunduran.store');
+    Route::post('/pengunduran/{id}/status', [PengunduranController::class, 'updateStatus'])->name('pengunduran.update-status');
 
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 

@@ -50,4 +50,58 @@ final class KabupatenScopeFilter
 
         return ['kabupatens' => $scoped];
     }
+
+    /** @return array<string, mixed> */
+    public static function filtersForUser(User $user): array
+    {
+        if ($user->role === 'kabupaten') {
+            $values = NtbKabupatenMap::queryValues($user->kabupaten);
+
+            if ($values === []) {
+                return ['kabupaten' => $user->kabupaten];
+            }
+
+            return count($values) === 1
+                ? ['kabupaten' => $values[0]]
+                : ['kabupatens' => $values];
+        }
+
+        return self::pengawasFilters($user);
+    }
+
+    public static function applyOnTravelOrCabangUser(Builder $query, User $user, string $userRelation = 'user'): void
+    {
+        $filters = self::filtersForUser($user);
+
+        if ($filters === []) {
+            return;
+        }
+
+        $query->whereHas($userRelation, function (Builder $subject) use ($filters): void {
+            $subject->where(function (Builder $scoped) use ($filters): void {
+                $scoped->whereHas('travel', function (Builder $travel) use ($filters): void {
+                    self::applyOnColumn($travel, $filters, 'kab_kota');
+                })->orWhereHas('cabang', function (Builder $cabang) use ($filters): void {
+                    self::applyOnColumn($cabang, $filters, 'kabupaten');
+                });
+            });
+        });
+    }
+
+    public static function applyOnSertifikat(Builder $query, User $user): void
+    {
+        $filters = self::filtersForUser($user);
+
+        if ($filters === []) {
+            return;
+        }
+
+        $query->where(function (Builder $scoped) use ($filters): void {
+            $scoped->whereHas('travel', function (Builder $travel) use ($filters): void {
+                self::applyOnColumn($travel, $filters, 'kab_kota');
+            })->orWhereHas('cabang', function (Builder $cabang) use ($filters): void {
+                self::applyOnColumn($cabang, $filters, 'kabupaten');
+            });
+        });
+    }
 }

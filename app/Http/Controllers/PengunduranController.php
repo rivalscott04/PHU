@@ -3,41 +3,33 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ValidationHelper;
-use App\Models\Pengaduan;
 use App\Models\Pengunduran;
-use App\Models\Travel;
 use Illuminate\Http\Request;
-use App\Models\TravelCompany;
-use App\Models\TravelResignation;
+use App\Support\KabupatenResourceGuard;
+use App\Support\KabupatenScopeFilter;
 use Illuminate\Support\Facades\Auth;
 
 class PengunduranController extends Controller
 {
-
     public function index()
     {
         $user = auth()->user();
-        
+
         if ($user->role === 'admin') {
-            // Admin can see all pengunduran
             $pengunduran = Pengunduran::with('user')->get();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten users can only see pengunduran from travel in their area
-            $pengunduran = Pengunduran::with('user')
-                ->whereHas('user.travel', function($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
+            $pengunduranQuery = Pengunduran::with('user');
+            KabupatenScopeFilter::applyOnTravelOrCabangUser($pengunduranQuery, $user);
+            $pengunduran = $pengunduranQuery->get();
         } else {
-            // Other roles see empty data
             $pengunduran = collect();
         }
-        
+
         return view('kanwil.listPengunduran', compact('pengunduran'));
     }
 
     public function create()
     {
-        // Check if user has role 'user' (travel)
         if (Auth::user()->role !== 'user') {
             return redirect()->back()->with('error', 'Anda tidak memiliki akses ke halaman ini');
         }
@@ -62,10 +54,32 @@ class PengunduranController extends Controller
         Pengunduran::create([
             'user_id' => Auth::id(),
             'berkas_pengunduran' => $fileName,
-            'status' => 'pending'  // Set default status
+            'status' => 'pending',
         ]);
 
         return redirect()->route('pengunduran.create')
             ->with('success', 'Berkas pengunduran diri berhasil dikirim');
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        if (! in_array($user->role, ['admin', 'kabupaten'], true)) {
+            abort(403);
+        }
+
+        ValidationHelper::validate($request, [
+            'status' => 'required|in:pending,approved,rejected',
+        ]);
+
+        $pengunduran = Pengunduran::with('user.travel', 'user.cabang')->findOrFail($id);
+        KabupatenResourceGuard::authorizePengunduran($user, $pengunduran);
+
+        $pengunduran->update(['status' => $request->status]);
+
+        return redirect()
+            ->route('pengunduran')
+            ->with('success', 'Status pengunduran berhasil diperbarui.');
     }
 }
