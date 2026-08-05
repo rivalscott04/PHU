@@ -299,6 +299,7 @@
                 </div>
                 <form action="{{ route('jamaah.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
+                    <input type="hidden" name="jenis_jamaah" value="haji">
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="file" class="form-label">Pilih File Excel</label>

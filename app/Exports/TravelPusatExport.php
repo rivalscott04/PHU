@@ -23,13 +23,13 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
 
     public function collection()
     {
+        $query = TravelCompany::approved()->orderBy('Penyelenggara');
+
         if ($this->user && $this->user->role === 'kabupaten') {
-            // Kabupaten users can only see travel companies in their area
-            return TravelCompany::where('kab_kota', $this->user->kabupaten)->get();
-        } else {
-            // Admin can see all travel companies
-            return TravelCompany::all();
+            $query->where('kab_kota', $this->user->kabupaten);
         }
+
+        return $query->get();
     }
 
     public function headings(): array

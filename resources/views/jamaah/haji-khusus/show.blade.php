@@ -53,7 +53,7 @@
                                 </div>
                                 <div class="row mb-3">
                                     <div class="col-sm-4">
-                                        <strong>No. KTP:</strong>
+                                        <strong>NIK:</strong>
                                     </div>
                                     <div class="col-sm-8">
                                         <code>{{ $jamaahHajiKhusus->no_ktp }}</code>
@@ -363,12 +363,12 @@
                                             <div class="col-sm-8">
                                                 @if($jamaahHajiKhusus->bukti_setor_bank)
                                                     @if(Str::endsWith($jamaahHajiKhusus->bukti_setor_bank, '.pdf'))
-                                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
                                                             <i class="bx bx-file-find me-1"></i>
                                                             Lihat Bukti Setor
                                                         </button>
                                                     @else
-                                                        <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                             <i class="bx bx-image me-1"></i>
                                                             Lihat Bukti Setor
                                                         </a>

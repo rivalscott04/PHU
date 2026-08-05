@@ -207,7 +207,7 @@ class SertifikatController extends Controller
 
         try {
             // Generate QR Code using Endroid QR Code library with PNG format
-            $qrCode = QrCode::create($sertifikat->getVerificationUrl())
+            $qrCode = QrCode::create($sertifikat->getVerificationUrl(forQr: true))
                 ->setSize(300)
                 ->setMargin(10);
 
@@ -329,7 +329,7 @@ class SertifikatController extends Controller
             return redirect()->route('sertifikat.generate', $id);
         }
 
-        $path = storage_path("app/public/{$sertifikat->pdf_path}");
+        $path = storage_path('app/public/'.StorageHelper::normalizePath($sertifikat->pdf_path));
         \Log::info('Full PDF path:', ['path' => $path]);
 
         if (!file_exists($path)) {
@@ -636,7 +636,7 @@ class SertifikatController extends Controller
             return redirect()->route('sertifikat.generate', $id);
         }
 
-        $path = storage_path("app/public/{$sertifikat->pdf_path}");
+        $path = storage_path('app/public/'.StorageHelper::normalizePath($sertifikat->pdf_path));
         \Log::info('Full PDF path:', ['path' => $path]);
 
         if (!file_exists($path)) {

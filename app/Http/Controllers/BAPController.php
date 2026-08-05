@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use Carbon\Carbon;
 use App\Models\BAP;
@@ -509,7 +510,7 @@ class BAPController extends Controller
         if ($request->hasFile('pdf_file')) {
             $pdfFile = $request->file('pdf_file');
             $pdfFilePath = $pdfFile->store('uploads', 'public');
-            $data->pdf_file_path = $pdfFilePath;
+            $data->pdf_file_path = StorageHelper::normalizePath($pdfFilePath);
             $data->save();
         }
 

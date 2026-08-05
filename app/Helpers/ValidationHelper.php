@@ -5,6 +5,8 @@ namespace App\Helpers;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator as ValidatorFactory;
+use Illuminate\Validation\Rule;
+use App\Support\NtbKabupatenMap;
 
 class ValidationHelper
 {
@@ -67,7 +69,7 @@ class ValidationHelper
         'alamat_cabang' => 'Alamat Cabang',
         'telepon' => 'Telepon',
         'nama_lengkap' => 'Nama Lengkap',
-        'no_ktp' => 'Nomor KTP',
+        'no_ktp' => 'NIK',
         'tempat_lahir' => 'Tempat Lahir',
         'tanggal_lahir' => 'Tanggal Lahir',
         'jenis_kelamin' => 'Jenis Kelamin',
@@ -258,6 +260,37 @@ class ValidationHelper
         return $rules;
     }
 
+    /** @return array<string, mixed> */
+    public static function travelCompanyDataRules(?int $ignoreTravelId = null): array
+    {
+        return [
+            'Penyelenggara' => ['required', 'string', 'max:255', self::uniquePenyelenggaraRule($ignoreTravelId)],
+            'Pusat' => 'required|string|max:255',
+            'Tanggal' => 'required|date',
+            'nilai_akreditasi' => 'required|string|max:255',
+            'tanggal_akreditasi' => 'required|date',
+            'lembaga_akreditasi' => 'required|string|max:255',
+            'Pimpinan' => 'required|string|max:255',
+            'alamat_kantor_lama' => 'required|string',
+            'alamat_kantor_baru' => 'required|string',
+            'Telepon' => 'required|string|max:20',
+            'kab_kota' => ['required', 'string', Rule::in(NtbKabupatenMap::names())],
+            'Status' => 'required|in:PPIU,PIHK',
+        ];
+    }
+
+    public static function uniquePenyelenggaraRule(?int $ignoreTravelId = null): \Illuminate\Validation\Rules\Unique
+    {
+        $rule = Rule::unique('travels', 'Penyelenggara')
+            ->where(fn ($query) => $query->whereIn('registration_status', ['pending', 'approved']));
+
+        if ($ignoreTravelId !== null) {
+            $rule->ignore($ignoreTravelId);
+        }
+
+        return $rule;
+    }
+
     /**
      * @return array<string, string>
      */
@@ -311,9 +344,13 @@ class ValidationHelper
      */
     private static function contextualOverrides(string $field): array
     {
+        if ($field === 'Penyelenggara') {
+            return ['Penyelenggara.unique' => 'Nama penyelenggara sudah terdaftar (pending atau aktif).'];
+        }
+
         if (in_array($field, ['nomor_hp', 'pic_nomor_hp', 'no_hp'], true)) {
             return [
-                "{$field}.regex" => 'Nomor HP harus angka, diawali 08, panjang 8–14 digit. Contoh: 081234567890.',
+                "{$field}.regex" => 'Nomor HP harus angka, diawali 08, panjang 8 s.d. 14 digit. Contoh: 081234567890.',
             ];
         }
 
@@ -325,7 +362,10 @@ class ValidationHelper
         }
 
         if ($field === 'no_ktp') {
-            return ['no_ktp.size' => 'Nomor KTP harus tepat 16 digit.'];
+            return [
+                'no_ktp.digits' => 'NIK harus tepat 16 digit angka.',
+                'no_ktp.size' => 'NIK harus tepat 16 digit angka.',
+            ];
         }
 
         if ($field === 'kode_pos') {

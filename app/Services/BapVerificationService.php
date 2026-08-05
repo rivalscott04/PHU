@@ -55,9 +55,12 @@ class BapVerificationService
 
     public function verificationUrl(string $token, int $bapId): string
     {
-        $baseUrl = request()->getSchemeAndHttpHost();
+        $path = route('verify-e-sign.public', [
+            'token' => $token,
+            'bap_id' => $bapId,
+        ], absolute: false);
 
-        return $baseUrl.'/public/verify-e-sign?token='.urlencode($token).'&bap_id='.$bapId;
+        return \App\Helpers\StorageHelper::absoluteUrl($path);
     }
 
     public function qrDataUri(string $verificationUrl): ?string

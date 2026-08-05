@@ -145,7 +145,7 @@
                                                     <tr>
                                                         <th class="text-center" style="width: 50px;">No</th>
                                                         <th>Nama Lengkap</th>
-                                                        <th>No. KTP</th>
+                                                        <th>NIK</th>
                                                         <th>Usia</th>
                                                         <th>No. Paspor</th>
                                                         <th>No. SPPH</th>
@@ -244,7 +244,7 @@
                     <div class="row mb-3">
                         <div class="col-md-6">
                             <form method="GET" action="{{ route('jamaah.haji-khusus.index') }}" class="d-flex gap-2">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama, KTP, paspor..." value="{{ request('search') }}">
+                                <input type="text" name="search" class="form-control" placeholder="Cari nama, NIK, paspor..." value="{{ request('search') }}">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bx bx-search"></i>
                                 </button>
@@ -274,7 +274,7 @@
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Lengkap</th>
-                                    <th>No. KTP</th>
+                                    <th>NIK</th>
                                     <th>Usia</th>
                                     <th>No. Paspor</th>
                                     <th>No. SPPH</th>

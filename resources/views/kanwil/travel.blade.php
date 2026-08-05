@@ -219,18 +219,18 @@
                                                     <form method="POST" action="{{ route('travel.registration.approve', $item->id) }}" class="d-inline" id="approve-form-{{ $item->id }}">
                                                         @csrf
                                                         <button type="button" class="btn btn-success btn-sm" title="Setujui"
-                                                                onclick="confirmApproveRegistration(document.getElementById('approve-form-{{ $item->id }}'), @json($item->Penyelenggara))">
+                                                                onclick='confirmApproveRegistration(document.getElementById("approve-form-{{ $item->id }}"), @json($item->Penyelenggara))'>
                                                             <i class="bx bx-check me-1"></i> Setujui
                                                         </button>
                                                     </form>
                                                     <button type="button" class="btn btn-danger btn-sm"
-                                                            onclick="openRejectModal({{ $item->id }}, @json($item->Penyelenggara))"
+                                                            onclick='openRejectModal({{ $item->id }}, @json($item->Penyelenggara))'
                                                             title="Tolak">
                                                         <i class="bx bx-x me-1"></i> Tolak
                                                     </button>
                                                 @endif
                                                 <button type="button" class="btn btn-primary btn-sm" 
-                                                        onclick="editStatus({{ $item->id }}, '{{ $item->Status }}', '{{ $item->Penyelenggara }}')"
+                                                        onclick='editStatus({{ $item->id }}, @json($item->Status), @json($item->Penyelenggara))'
                                                         title="Update Status">
                                                     <i class="bx bx-edit me-1"></i>
                                                     Status

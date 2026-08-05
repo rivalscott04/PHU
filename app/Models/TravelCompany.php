@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\TravelRegistrationStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
@@ -123,6 +124,31 @@ class TravelCompany extends Model
     public function isRegistrationRejected(): bool
     {
         return $this->registration_status === TravelRegistrationStatus::Rejected;
+    }
+
+    public function hasRegistrationDocument(string $type): bool
+    {
+        $path = match ($type) {
+            'sk' => $this->dokumen_sk,
+            'akreditasi' => $this->dokumen_akreditasi,
+            default => null,
+        };
+
+        return $path !== null && Storage::disk('public')->exists($path);
+    }
+
+    public function hasCompleteRegistrationDocuments(): bool
+    {
+        return $this->hasRegistrationDocument('sk') && $this->hasRegistrationDocument('akreditasi');
+    }
+
+    public function syncPicKabupaten(?string $kabupaten = null): void
+    {
+        $kabupaten ??= $this->kab_kota;
+
+        if ($this->user && $this->user->kabupaten !== $kabupaten) {
+            $this->user->update(['kabupaten' => $kabupaten]);
+        }
     }
 
     public function jamaahHajiKhusus()

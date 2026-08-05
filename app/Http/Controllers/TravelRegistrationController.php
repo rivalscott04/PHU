@@ -6,12 +6,12 @@ use App\Enums\TravelRegistrationStatus;
 use App\Enums\UserRole;
 use App\Models\TravelCompany;
 use App\Models\User;
+use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Support\NtbKabupatenMap;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rule;
 
 class TravelRegistrationController extends Controller
 {
@@ -24,28 +24,18 @@ class TravelRegistrationController extends Controller
 
     public function store(Request $request)
     {
+        $this->releaseRejectedRegistrationCredentials($request);
+
         $fileMaxKb = ValidationHelper::fileMaxKb(1.5);
 
-        $rules = [
-            'Penyelenggara' => 'required|string|max:255',
-            'Status' => 'required|in:PPIU,PIHK',
-            'Pusat' => 'required|string|max:255',
-            'Tanggal' => 'required|date',
-            'nilai_akreditasi' => 'required|string|max:255',
-            'tanggal_akreditasi' => 'required|date',
-            'lembaga_akreditasi' => 'required|string|max:255',
-            'Pimpinan' => 'required|string|max:255',
-            'Telepon' => 'required|string|max:20',
-            'alamat_kantor_lama' => 'required|string',
-            'alamat_kantor_baru' => 'required|string',
-            'kab_kota' => ['required', 'string', Rule::in(NtbKabupatenMap::names())],
+        $rules = array_merge(ValidationHelper::travelCompanyDataRules(), [
             'pic_nama' => 'required|string|max:255',
             'pic_email' => 'required|email|max:255|unique:users,email',
             'pic_nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:8|confirmed',
             'dokumen_sk' => "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
             'dokumen_akreditasi' => "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
-        ];
+        ]);
 
         $validated = ValidationHelper::validate($request, $rules, array_merge(
             ValidationHelper::fileMaxMb('dokumen_sk', 1.5),
@@ -72,8 +62,12 @@ class TravelRegistrationController extends Controller
             ])->all();
 
             $travelData['registration_status'] = TravelRegistrationStatus::Pending;
-            $travelData['dokumen_sk'] = $request->file('dokumen_sk')->store('registrasi-travel/sk', 'public');
-            $travelData['dokumen_akreditasi'] = $request->file('dokumen_akreditasi')->store('registrasi-travel/akreditasi', 'public');
+            $travelData['dokumen_sk'] = StorageHelper::normalizePath(
+                $request->file('dokumen_sk')->store('registrasi-travel/sk', 'public')
+            );
+            $travelData['dokumen_akreditasi'] = StorageHelper::normalizePath(
+                $request->file('dokumen_akreditasi')->store('registrasi-travel/akreditasi', 'public')
+            );
 
             $travel = TravelCompany::create($travelData);
             $travel->setDefaultCapabilities();
@@ -96,6 +90,20 @@ class TravelRegistrationController extends Controller
         return redirect()
             ->route('travel.registration.success')
             ->with('success', 'Pendaftaran berhasil dikirim. Tim Kanwil akan memverifikasi data Anda.');
+    }
+
+    private function releaseRejectedRegistrationCredentials(Request $request): void
+    {
+        foreach (['pic_email' => 'email', 'pic_nomor_hp' => 'nomor_hp'] as $field => $column) {
+            if (! $request->filled($field)) {
+                continue;
+            }
+
+            User::query()
+                ->where($column, $request->input($field))
+                ->whereHas('travel', fn ($query) => $query->where('registration_status', TravelRegistrationStatus::Rejected))
+                ->each(fn (User $user) => $user->delete());
+        }
     }
 
     public function success()

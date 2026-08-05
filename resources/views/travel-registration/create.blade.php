@@ -9,22 +9,25 @@
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/app.min.css') }}" rel="stylesheet" type="text/css" />
+    @include('travel-registration.partials.wizard-styles')
 </head>
 <body>
     <div class="account-pages my-4 pt-sm-5">
         <div class="container">
             <div class="row justify-content-center">
-                <div class="col-xl-10 col-lg-11">
+                <div class="col-xl-9 col-lg-10">
                     <div class="text-center mb-4">
                         <a href="{{ route('login') }}">
                             <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="40">
                         </a>
                         <h4 class="mt-3 mb-1">Registrasi Travel (PPIU / PIHK)</h4>
-                        <p class="text-muted mb-0">Isi data perusahaan dan akun PIC. Setelah dikirim, Admin Kanwil akan memverifikasi pendaftaran Anda.</p>
+                        <p class="text-muted mb-0 mx-auto" style="max-width: 520px">
+                            Isi formulir langkah demi langkah. Setiap halaman hanya beberapa pertanyaan. Tidak perlu diisi sekaligus.
+                        </p>
                     </div>
 
                     @if ($errors->any())
-                        <div class="alert alert-danger">
+                        <div class="alert alert-danger col-lg-8 mx-auto">
                             <strong>Periksa kembali formulir:</strong>
                             <ul class="mb-0 mt-2">
                                 @foreach ($errors->all() as $error)
@@ -34,93 +37,113 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('travel.registration.store') }}" enctype="multipart/form-data">
-                        @csrf
+                    <div class="card mb-5 travel-wizard-card">
+                        <div class="card-body p-4 p-md-5">
+                            <form id="travel-registration-form" method="POST" action="{{ route('travel.registration.store') }}" enctype="multipart/form-data">
+                                @csrf
 
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <span class="badge bg-primary rounded-pill me-2">1</span>
-                                    <h5 class="mb-0">Data Perusahaan Travel</h5>
+                                @include('travel-registration.partials.wizard-progress')
+
+                                <div id="travel-registration-wizard">
+                                    <h3>Profil</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-buildings',
+                                            'title' => 'Profil Perusahaan',
+                                            'description' => 'Informasi dasar travel Anda. Isi sesuai data pada izin resmi.',
+                                        ])
+                                        @include('partials.travel-company-fields', [
+                                            'kabupatens' => $kabupatens,
+                                            'section' => 'profil',
+                                            'compact' => true,
+                                        ])
+                                    </section>
+
+                                    <h3>Izin</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-file-blank',
+                                            'title' => 'Izin Operasional',
+                                            'description' => 'Nomor dan tanggal Surat Keputusan (SK) izin travel.',
+                                        ])
+                                        @include('partials.travel-company-fields', [
+                                            'kabupatens' => $kabupatens,
+                                            'section' => 'izin',
+                                            'compact' => true,
+                                        ])
+                                    </section>
+
+                                    <h3>Akreditasi</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-certification',
+                                            'title' => 'Data Akreditasi',
+                                            'description' => 'Informasi sertifikat akreditasi travel Anda.',
+                                        ])
+                                        @include('partials.travel-company-fields', [
+                                            'kabupatens' => $kabupatens,
+                                            'section' => 'akreditasi',
+                                            'compact' => true,
+                                        ])
+                                    </section>
+
+                                    <h3>Alamat</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-map',
+                                            'title' => 'Kontak & Alamat Kantor',
+                                            'description' => 'Nomor telepon dan alamat kantor travel.',
+                                        ])
+                                        @include('partials.travel-company-fields', [
+                                            'kabupatens' => $kabupatens,
+                                            'section' => 'alamat',
+                                            'compact' => true,
+                                        ])
+                                    </section>
+
+                                    <h3>Dokumen</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-cloud-upload',
+                                            'title' => 'Upload Dokumen',
+                                            'description' => 'Unggah scan dokumen resmi. Admin Kanwil akan memeriksa saat verifikasi.',
+                                        ])
+                                        @include('partials.travel-registration-documents', ['compact' => true])
+                                    </section>
+
+                                    <h3>Akun</h3>
+                                    <section>
+                                        @include('travel-registration.partials.step-intro', [
+                                            'icon' => 'bx-user-circle',
+                                            'title' => 'Akun PIC',
+                                            'description' => 'Buat akun login untuk Penanggung Jawab (PIC). Aktif setelah pendaftaran disetujui.',
+                                        ])
+                                        @include('travel-registration.partials.pic-fields')
+                                    </section>
+
+                                    <h3>Review</h3>
+                                    <section>
+                                        <div class="alert alert-light border mb-4 col-lg-8 mx-auto">
+                                            <i class="bx bx-info-circle me-1 text-primary"></i>
+                                            Periksa kembali semua data. Gunakan tombol <strong>Kembali</strong> jika ada yang perlu diperbaiki.
+                                        </div>
+                                        <div class="alert alert-info mb-4 col-lg-8 mx-auto">
+                                            <i class="bx bx-time-five me-1"></i>
+                                            Setelah dikirim, status Anda <strong>Menunggu Verifikasi</strong>.
+                                            Login baru bisa dilakukan setelah Admin Kanwil menyetujui.
+                                        </div>
+                                        <div id="travel-registration-review" class="col-lg-10 mx-auto"></div>
+                                    </section>
                                 </div>
-                                <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
-                                @include('partials.travel-company-fields', ['kabupatens' => $kabupatens])
-                            </div>
+                            </form>
                         </div>
+                    </div>
 
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <span class="badge bg-primary rounded-pill me-2">2</span>
-                                    <h5 class="mb-0">Upload Dokumen Pendukung</h5>
-                                </div>
-                                <p class="text-muted small mb-3">Unggah scan dokumen resmi sesuai data yang diisi. Admin Kanwil akan memeriksa dokumen ini saat verifikasi.</p>
-                                @include('partials.travel-registration-documents')
-                            </div>
-                        </div>
-
-                        <div class="card mb-4">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center mb-3">
-                                    <span class="badge bg-primary rounded-pill me-2">3</span>
-                                    <h5 class="mb-0">Data PIC &amp; Akun Login</h5>
-                                </div>
-                                <p class="text-muted small">PIC (Penanggung Jawab) yang akan login ke sistem setelah pendaftaran disetujui.</p>
-
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="pic_nama" class="form-label">Nama Lengkap PIC @include('partials.required-star')</label>
-                                        <input type="text" class="form-control @error('pic_nama') is-invalid @enderror"
-                                            id="pic_nama" name="pic_nama" value="{{ old('pic_nama') }}" required>
-                                        @error('pic_nama')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="pic_email" class="form-label">Email @include('partials.required-star')</label>
-                                        <input type="email" class="form-control @error('pic_email') is-invalid @enderror"
-                                            id="pic_email" name="pic_email" value="{{ old('pic_email') }}" required>
-                                        @error('pic_email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                        <small class="text-muted">Digunakan untuk login</small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="pic_nomor_hp" class="form-label">Nomor HP (WhatsApp) @include('partials.required-star')</label>
-                                        <input type="tel" class="form-control @error('pic_nomor_hp') is-invalid @enderror"
-                                            id="pic_nomor_hp" name="pic_nomor_hp" value="{{ old('pic_nomor_hp') }}"
-                                            inputmode="numeric" pattern="08[0-9]{6,12}" minlength="8" maxlength="14"
-                                            placeholder="081234567890" autocomplete="tel" required>
-                                        @error('pic_nomor_hp')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                        <small class="text-muted">Angka saja, diawali 08, 8–14 digit. Bisa dipakai untuk login.</small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password" class="form-label">Password @include('partials.required-star')</label>
-                                        <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                            id="password" name="password" minlength="8" required>
-                                        @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                        <small class="text-muted">Minimal 8 karakter</small>
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="password_confirmation" class="form-label">Ulangi Password @include('partials.required-star')</label>
-                                        <input type="password" class="form-control"
-                                            id="password_confirmation" name="password_confirmation" minlength="8" required>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="alert alert-info">
-                            <i class="bx bx-info-circle me-1"></i>
-                            Setelah formulir dikirim, status pendaftaran <strong>Menunggu Verifikasi</strong>.
-                            Anda baru bisa login setelah Admin Kanwil menyetujui.
-                        </div>
-
-                        <div class="d-flex flex-column flex-sm-row justify-content-between gap-2 mb-5">
-                            <a href="{{ route('login') }}" class="btn btn-light">
-                                <i class="bx bx-arrow-back me-1"></i> Kembali ke Login
-                            </a>
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bx bx-send me-1"></i> Kirim Pendaftaran
-                            </button>
-                        </div>
-                    </form>
+                    <div class="text-center mb-4">
+                        <a href="{{ route('login') }}" class="btn btn-light btn-sm">
+                            <i class="bx bx-arrow-back me-1"></i> Kembali ke Login
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -128,10 +151,6 @@
 
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        document.getElementById('pic_nomor_hp')?.addEventListener('input', function () {
-            this.value = this.value.replace(/\D/g, '').slice(0, 14);
-        });
-    </script>
+    @include('travel-registration.partials.wizard-scripts')
 </body>
 </html>

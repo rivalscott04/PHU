@@ -81,9 +81,15 @@ class Sertifikat extends Model
         return 'success';
     }
 
-    public function getVerificationUrl()
+    public function getVerificationUrl(bool $forQr = false): string
     {
-        return route('sertifikat.verifikasi', $this->uuid);
+        $path = route('sertifikat.verifikasi', $this->uuid, absolute: false);
+
+        if ($forQr) {
+            return \App\Helpers\StorageHelper::absoluteUrl($path);
+        }
+
+        return $path;
     }
 
     public function generateNomorSurat()

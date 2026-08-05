@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\JamaahHajiKhusus;
 use App\Models\TravelCompany;
@@ -106,7 +107,7 @@ class JamaahHajiKhususController extends Controller
 
         ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|string|size:16',
+            'no_ktp' => 'required|digits:16',
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -159,7 +160,7 @@ class JamaahHajiKhususController extends Controller
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
                 $path = $request->file($field)->store('dokumen-haji-khusus', 'public');
-                $data[$field] = $path;
+                $data[$field] = StorageHelper::normalizePath($path);
             }
         }
 
@@ -219,7 +220,7 @@ class JamaahHajiKhususController extends Controller
 
         ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|string|size:16',
+            'no_ktp' => 'required|digits:16',
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -273,7 +274,7 @@ class JamaahHajiKhususController extends Controller
                 }
                 
                 $path = $request->file($field)->store('dokumen-haji-khusus', 'public');
-                $data[$field] = $path;
+                $data[$field] = StorageHelper::normalizePath($path);
             }
         }
 

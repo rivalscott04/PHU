@@ -12,8 +12,6 @@ use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
 use App\Support\KanwilContact;
-use Illuminate\Validation\Rule;
-
 class JamaahController extends Controller
 {
     public function downloadTemplate()
@@ -117,11 +115,7 @@ class JamaahController extends Controller
         $user = auth()->user();
 
         ValidationHelper::validate($request, [
-            'nik' => [
-                'required',
-                'digits:16',
-                Rule::unique('jamaah', 'nik')->where(fn ($query) => $query->where('travel_id', $user->travel_id)),
-            ],
+            'nik' => 'required|digits:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15|regex:/^08/',
@@ -145,11 +139,7 @@ class JamaahController extends Controller
         $user = auth()->user();
 
         ValidationHelper::validate($request, [
-            'nik' => [
-                'required',
-                'digits:16',
-                Rule::unique('jamaah', 'nik')->where(fn ($query) => $query->where('travel_id', $user->travel_id)),
-            ],
+            'nik' => 'required|digits:16',
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15|regex:/^08/',
@@ -213,11 +203,12 @@ class JamaahController extends Controller
     public function import(Request $request)
     {
         ValidationHelper::validate($request, [
-            'file' => 'required|mimes:xlsx,xls'
+            'file' => 'required|mimes:xlsx,xls',
+            'jenis_jamaah' => 'required|in:haji,umrah',
         ]);
 
         try {
-            Excel::import(new JamaahImport, $request->file('file'));
+            Excel::import(new JamaahImport($request->jenis_jamaah), $request->file('file'));
             return redirect()->back()->with('success', 'Data berhasil diimport!');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());

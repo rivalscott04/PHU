@@ -19,16 +19,27 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
-                <h4 class="card-title">Edit Data Jamaah Haji Khusus</h4>
+            <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-2">
+                <div>
+                    <h4 class="card-title mb-1">Edit Data Jamaah Haji Khusus</h4>
+                    <p class="card-title-desc mb-0 text-muted">Perbarui data jamaah haji khusus langkah demi langkah</p>
+                </div>
+                <a href="{{ route('jamaah.haji-khusus.index') }}" class="btn btn-sm btn-outline-secondary">
+                    <i class="bx bx-arrow-back me-1"></i>Kembali ke daftar
+                </a>
             </div>
             <div class="card-body">
-                <form action="{{ route('jamaah.haji-khusus.update', $jamaahHajiKhusus->id) }}" method="POST" enctype="multipart/form-data">
+                <form id="jamaah-haji-khusus-form" action="{{ route('jamaah.haji-khusus.update', $jamaahHajiKhusus->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
-                    
-                    <!-- Personal Information -->
-                    <div class="row">
+
+                    @include('jamaah.haji-khusus.partials.form-wizard-progress')
+
+                    <div id="jamaah-haji-khusus-wizard">
+                        <h3>Pribadi</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Identitas jamaah sesuai NIK.</p>
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="mb-3 position-relative">
                                 <label for="nama_lengkap" class="form-label">Nama Lengkap <span class="text-danger">*</span></label>
@@ -42,9 +53,11 @@
                         
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label for="no_ktp" class="form-label">Nomor KTP <span class="text-danger">*</span></label>
+                                <label for="no_ktp" class="form-label">NIK <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('no_ktp') is-invalid @enderror" 
-                                       id="no_ktp" name="no_ktp" value="{{ old('no_ktp', $jamaahHajiKhusus->no_ktp) }}" maxlength="16" required>
+                                       id="no_ktp" name="no_ktp" value="{{ old('no_ktp', $jamaahHajiKhusus->no_ktp) }}"
+                                       data-digits-only="16" inputmode="numeric" pattern="[0-9]*"
+                                       maxlength="16" autocomplete="off" spellcheck="false" required>
                                 @error('no_ktp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -86,32 +99,13 @@
                                 @enderror
                             </div>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="no_hp" class="form-label">Nomor HP <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control @error('no_hp') is-invalid @enderror" 
-                                       id="no_hp" name="no_hp" value="{{ old('no_hp', $jamaahHajiKhusus->no_hp) }}" required>
-                                @error('no_hp')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control @error('email') is-invalid @enderror" 
-                                       id="email" name="email" value="{{ old('email', $jamaahHajiKhusus->email) }}">
-                                @error('email')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
                     </div>
+                        </section>
 
-                    <!-- Address Information -->
-                    <div class="row">
+                        <h3>Alamat</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Alamat domisili jamaah.</p>
+                    <div class="row g-3">
                         <div class="col-12">
                             <div class="mb-3">
                                 <label for="alamat" class="form-label">Alamat Lengkap <span class="text-danger">*</span></label>
@@ -123,7 +117,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="provinsi" class="form-label">
                                     <i class="bx bx-map-pin me-1"></i>
@@ -133,17 +127,21 @@
                                         id="provinsi" name="provinsi" required>
                                     <option value="">Pilih Provinsi</option>
                                 </select>
-                                <div class="form-text">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    Pilih provinsi untuk memuat daftar kota/kabupaten
-                                </div>
+                                @include('partials.wilayah-override', [
+                                    'buttonId' => 'provinsi_override_btn',
+                                    'panelId' => 'provinsi_override_panel',
+                                    'inputId' => 'provinsi_manual',
+                                    'title' => 'Isi provinsi secara manual',
+                                    'label' => 'Nama Provinsi',
+                                    'placeholder' => 'Contoh: Kepulauan Riau',
+                                ])
                                 @error('provinsi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="kota" class="form-label">
                                     <i class="bx bx-building me-1"></i>
@@ -153,17 +151,21 @@
                                         id="kota" name="kota" required disabled>
                                     <option value="">Pilih Kota/Kabupaten</option>
                                 </select>
-                                <div class="form-text">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    Pilih kota/kabupaten sesuai dengan provinsi yang dipilih
-                                </div>
+                                @include('partials.wilayah-override', [
+                                    'buttonId' => 'kota_override_btn',
+                                    'panelId' => 'kota_override_panel',
+                                    'inputId' => 'kota_manual',
+                                    'title' => 'Isi kabupaten/kota secara manual',
+                                    'label' => 'Nama Kabupaten/Kota',
+                                    'placeholder' => 'Contoh: Kabupaten Karimun',
+                                ])
                                 @error('kota')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="kecamatan" class="form-label">
                                     <i class="bx bx-map-alt me-1"></i>
@@ -173,30 +175,62 @@
                                         id="kecamatan" name="kecamatan" required disabled>
                                     <option value="">Pilih Kecamatan</option>
                                 </select>
-                                <div class="form-text">
-                                    <i class="bx bx-info-circle me-1"></i>
-                                    Pilih kecamatan sesuai dengan kota/kabupaten yang dipilih
-                                </div>
+                                @include('partials.wilayah-override', [
+                                    'buttonId' => 'kecamatan_override_btn',
+                                    'panelId' => 'kecamatan_override_panel',
+                                    'inputId' => 'kecamatan_manual',
+                                    'title' => 'Isi kecamatan secara manual',
+                                    'label' => 'Nama Kecamatan',
+                                    'placeholder' => 'Contoh: Kecamatan Tanjung Pinang Barat',
+                                ])
                                 @error('kecamatan')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="kode_pos" class="form-label">Kode Pos <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('kode_pos') is-invalid @enderror" 
-                                       id="kode_pos" name="kode_pos" value="{{ old('kode_pos', $jamaahHajiKhusus->kode_pos) }}" maxlength="5" required>
+                                       id="kode_pos" name="kode_pos" value="{{ old('kode_pos', $jamaahHajiKhusus->kode_pos) }}"
+                                       data-digits-only="5" inputmode="numeric" pattern="[0-9]*"
+                                       maxlength="5" autocomplete="off" required>
                                 @error('kode_pos')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                         </div>
                     </div>
+                        </section>
 
-                    <!-- Family Information -->
-                    <div class="row">
+                        <h3>Kontak</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Nomor yang bisa dihubungi dan data ayah kandung.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="no_hp" class="form-label">Nomor HP <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control @error('no_hp') is-invalid @enderror"
+                                       id="no_hp" name="no_hp" value="{{ old('no_hp', $jamaahHajiKhusus->no_hp) }}"
+                                       data-digits-only="15" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
+                                @error('no_hp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                       id="email" name="email" value="{{ old('email', $jamaahHajiKhusus->email) }}">
+                                @error('email')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="nama_ayah" class="form-label">Nama Ayah <span class="text-danger">*</span></label>
@@ -207,13 +241,14 @@
                                 @enderror
                             </div>
                         </div>
-                        
-
                     </div>
+                        </section>
 
-                    <!-- Personal Details -->
-                    <div class="row">
-                        <div class="col-md-4">
+                        <h3>Tambahan</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Informasi pekerjaan, pendidikan, dan kesehatan.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="pekerjaan" class="form-label">Pekerjaan <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('pekerjaan') is-invalid @enderror" 
@@ -224,7 +259,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="pendidikan_terakhir" class="form-label">Pendidikan Terakhir <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('pendidikan_terakhir') is-invalid @enderror" 
@@ -235,7 +270,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="status_pernikahan" class="form-label">Status Pernikahan <span class="text-danger">*</span></label>
                                 <select class="form-select @error('status_pernikahan') is-invalid @enderror" 
@@ -251,7 +286,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="pergi_haji" class="form-label">Pergi Haji <span class="text-danger">*</span></label>
                                 <select class="form-select @error('pergi_haji') is-invalid @enderror" 
@@ -268,7 +303,7 @@
                         
 
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="golongan_darah" class="form-label">Golongan Darah <span class="text-danger">*</span></label>
                                 <select class="form-select @error('golongan_darah') is-invalid @enderror" id="golongan_darah" name="golongan_darah" required>
@@ -286,7 +321,7 @@
                         
 
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="alergi" class="form-label">Alergi</label>
                                 <textarea class="form-control @error('alergi') is-invalid @enderror" 
@@ -297,10 +332,13 @@
                             </div>
                         </div>
                     </div>
+                        </section>
 
-                    <!-- Passport Information -->
-                    <div class="row">
-                        <div class="col-md-4">
+                        <h3>Paspor</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Data paspor dan informasi haji khusus.</p>
+                    <div class="row g-3">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="no_paspor" class="form-label">Nomor Paspor</label>
                                 <input type="text" class="form-control @error('no_paspor') is-invalid @enderror" 
@@ -311,7 +349,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="tanggal_berlaku_paspor" class="form-label">Tanggal Berlaku Paspor</label>
                                 <input type="date" class="form-control @error('tanggal_berlaku_paspor') is-invalid @enderror" 
@@ -323,7 +361,7 @@
                             </div>
                         </div>
                         
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="tempat_terbit_paspor" class="form-label">Tempat Terbit Paspor</label>
                                 <input type="text" class="form-control @error('tempat_terbit_paspor') is-invalid @enderror" 
@@ -335,9 +373,8 @@
                         </div>
                     </div>
 
-                    <!-- Porsi Information (Disabled for Travel Users) -->
                     <div class="row">
-                                                <div class="col-md-6">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="nomor_porsi" class="form-label">
                                     Nomor SPPH
@@ -349,7 +386,7 @@
                                        id="nomor_porsi" name="nomor_porsi"
                                        value="{{ old('nomor_porsi', $jamaahHajiKhusus->nomor_porsi) }}"
                                        maxlength="20"
-                                        @if(auth()->user()->role === 'user') disabled @endif>
+                                       @if(auth()->user()->role === 'user') disabled @endif>
                                 @if(auth()->user()->role === 'user')
                                     <small class="text-muted">Nomor SPPH akan ditetapkan oleh admin setelah verifikasi bukti setor bank</small>
                                 @endif
@@ -358,7 +395,7 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="tahun_pendaftaran" class="form-label">
@@ -367,8 +404,8 @@
                                         <span class="text-muted">(Ditetapkan oleh Kanwil)</span>
                                     @endif
                                 </label>
-                                <input type="date" class="form-control @error('tahun_pendaftaran') is-invalid @enderror" 
-                                       id="tahun_pendaftaran" name="tahun_pendaftaran" 
+                                <input type="date" class="form-control @error('tahun_pendaftaran') is-invalid @enderror"
+                                       id="tahun_pendaftaran" name="tahun_pendaftaran"
                                        value="{{ old('tahun_pendaftaran', $jamaahHajiKhusus->tahun_pendaftaran) }}"
                                        @if(auth()->user()->role === 'user') disabled @endif>
                                 @if(auth()->user()->role === 'user')
@@ -381,7 +418,6 @@
                         </div>
                     </div>
 
-                    <!-- Bukti Setor Bank Status -->
                     @if($jamaahHajiKhusus->bukti_setor_bank)
                     <div class="row">
                         <div class="col-12">
@@ -405,9 +441,12 @@
                         </div>
                     </div>
                     @endif
+                        </section>
 
-                    <!-- Documents Upload -->
-                    <div class="row">
+                        <h3>Dokumen</h3>
+                        <section>
+                    <p class="text-muted small mb-3">Upload dokumen pendukung. Format PDF/JPG/PNG, maks. 2MB per file.</p>
+                    <div class="row g-3">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="dokumen_ktp" class="form-label">Dokumen KTP</label>
@@ -417,11 +456,11 @@
                                 @if($jamaahHajiKhusus->dokumen_ktp)
                                     <div class="mt-1">
                                         @if(Str::endsWith($jamaahHajiKhusus->dokumen_ktp, '.pdf'))
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_ktp) }}', 'Dokumen KTP')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_ktp) }}', 'Dokumen KTP')">
                                                 <i class="bx bx-file-find me-1"></i>Lihat Dokumen
                                             </button>
                                         @else
-                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_ktp) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_ktp) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="bx bx-image me-1"></i>Lihat Dokumen
                                             </a>
                                         @endif
@@ -442,11 +481,11 @@
                                 @if($jamaahHajiKhusus->dokumen_kk)
                                     <div class="mt-1">
                                         @if(Str::endsWith($jamaahHajiKhusus->dokumen_kk, '.pdf'))
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_kk) }}', 'Dokumen KK')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_kk) }}', 'Dokumen KK')">
                                                 <i class="bx bx-file-find me-1"></i>Lihat Dokumen
                                             </button>
                                         @else
-                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_kk) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_kk) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="bx bx-image me-1"></i>Lihat Dokumen
                                             </a>
                                         @endif
@@ -467,11 +506,11 @@
                                 @if($jamaahHajiKhusus->dokumen_paspor)
                                     <div class="mt-1">
                                         @if(Str::endsWith($jamaahHajiKhusus->dokumen_paspor, '.pdf'))
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_paspor) }}', 'Dokumen Paspor')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_paspor) }}', 'Dokumen Paspor')">
                                                 <i class="bx bx-file-find me-1"></i>Lihat Dokumen
                                             </button>
                                         @else
-                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_paspor) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_paspor) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="bx bx-image me-1"></i>Lihat Dokumen
                                             </a>
                                         @endif
@@ -491,7 +530,7 @@
                                 <small class="text-muted">Format: JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->dokumen_foto)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_foto) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->dokumen_foto) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                             <i class="bx bx-download me-1"></i>Lihat Dokumen
                                         </a>
                                     </div>
@@ -511,11 +550,11 @@
                                 @if($jamaahHajiKhusus->surat_keterangan)
                                     <div class="mt-1">
                                         @if(Str::endsWith($jamaahHajiKhusus->surat_keterangan, '.pdf'))
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->surat_keterangan) }}', 'Surat Keterangan')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->surat_keterangan) }}', 'Surat Keterangan')">
                                                 <i class="bx bx-file-find me-1"></i>Lihat Dokumen
                                             </button>
                                         @else
-                                            <a href="{{ Storage::url($jamaahHajiKhusus->surat_keterangan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->surat_keterangan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="bx bx-image me-1"></i>Lihat Dokumen
                                             </a>
                                         @endif
@@ -526,21 +565,21 @@
                                 @enderror
                             </div>
                         </div>
-                        
+
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label for="bukti_setor_bank" class="form-label">Bukti Setor Bank</label>
-                                <input type="file" class="form-control @error('bukti_setor_bank') is-invalid @enderror" 
+                                <input type="file" class="form-control @error('bukti_setor_bank') is-invalid @enderror"
                                        id="bukti_setor_bank" name="bukti_setor_bank" accept=".pdf,.jpg,.jpeg,.png">
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->bukti_setor_bank)
                                     <div class="mt-1">
                                         @if(Str::endsWith($jamaahHajiKhusus->bukti_setor_bank, '.pdf'))
-                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
                                                 <i class="bx bx-file-find me-1"></i>Lihat Bukti Setor
                                             </button>
                                         @else
-                                            <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <a href="{{ \App\Helpers\StorageHelper::publicUrl($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                                 <i class="bx bx-image me-1"></i>Lihat Bukti Setor
                                             </a>
                                         @endif
@@ -552,21 +591,9 @@
                             </div>
                         </div>
                     </div>
+                        </section>
 
-                    <!-- Submit Buttons -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="d-flex justify-content-end gap-2 mt-4">
-                                <a href="{{ route('jamaah.haji-khusus.index') }}" class="btn btn-secondary">
-                                    <i class="bx bx-arrow-back me-1"></i>
-                                    Kembali
-                                </a>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bx bx-save me-1"></i>
-                                    Update Data
-                                </button>
-                            </div>
-                        </div>
+                        @include('jamaah.haji-khusus.partials.form-wizard-review-step')
                     </div>
                 </form>
             </div>
@@ -576,672 +603,12 @@
 
 @endsection
 
-@push('styles')
-<style>
-/* Enhanced form validation styling */
-.validation-error {
-    animation: shake 0.5s ease-in-out;
-}
-
-.validation-error .form-control,
-.validation-error .form-select {
-    border-color: #f46a6a !important;
-    box-shadow: 0 0 0 0.2rem rgba(244, 106, 106, 0.25) !important;
-}
-
-.validation-error .form-label {
-    color: #f46a6a !important;
-    font-weight: 700;
-}
-
-.validation-error-message {
-    display: block !important;
-    font-size: 12px;
-    font-weight: 500;
-    color: #f46a6a;
-    margin-top: 4px;
-    animation: fadeIn 0.3s ease-in-out;
-}
-
-/* Success state styling */
-.form-control.is-valid,
-.form-select.is-valid {
-    border-color: #34c38f !important;
-    box-shadow: 0 0 0 0.2rem rgba(52, 195, 143, 0.25) !important;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%2334c38f' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
-    background-repeat: no-repeat;
-    background-position: right calc(0.375em + 0.1875rem) center;
-    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
-}
-
-/* Validation summary styling */
-#validation-summary {
-    border: none;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(244, 106, 106, 0.15);
-    animation: slideInDown 0.5s ease-out;
-}
-
-#validation-summary ul {
-    list-style: none;
-    padding-left: 0;
-}
-
-#validation-summary li {
-    padding: 4px 0;
-    font-size: 14px;
-    color: #721c24;
-    position: relative;
-    padding-left: 20px;
-}
-
-#validation-summary li:before {
-    content: "•";
-    color: #f46a6a;
-    font-weight: bold;
-    position: absolute;
-    left: 0;
-    top: 2px;
-}
-
-/* Animations */
-@keyframes shake {
-    0%, 100% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    75% { transform: translateX(5px); }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes slideInDown {
-    from { 
-        opacity: 0; 
-        transform: translateY(-20px); 
-    }
-    to { 
-        opacity: 1; 
-        transform: translateY(0); 
-    }
-}
-
-/* Focus states for better UX */
-.form-control:focus,
-.form-select:focus {
-    border-color: #556ee6;
-    box-shadow: 0 0 0 0.2rem rgba(85, 110, 230, 0.25);
-    transition: all 0.3s ease;
-}
-
-/* Required field indicator */
-.form-label .text-danger {
-    font-weight: bold;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.7; }
-    100% { opacity: 1; }
-}
-
-/* Custom styling for location dropdowns */
-.location-select {
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: #495057;
-    background-color: #fff;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.location-select:focus {
-    border-color: #556ee6;
-    box-shadow: 0 0 0 0.2rem rgba(85, 110, 230, 0.25);
-    background-color: #fff;
-}
-
-.location-select:disabled {
-    background-color: #f8f9fa;
-    color: #6c757d;
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.location-select option {
-    padding: 8px 12px;
-    font-size: 14px;
-    color: #495057;
-    background-color: #fff;
-}
-
-.location-select option:hover {
-    background-color: #556ee6;
-    color: #fff;
-}
-
-/* Form text styling */
-.form-text {
-    font-size: 12px;
-    color: #6c757d;
-    margin-top: 4px;
-    display: flex;
-    align-items: center;
-}
-
-.form-text i {
-    font-size: 14px;
-    margin-right: 4px;
-    color: #556ee6;
-}
-
-/* Label styling */
-.form-label {
-    font-weight: 600;
-    color: #495057;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-}
-
-.form-label i {
-    color: #556ee6;
-    margin-right: 6px;
-}
-
-/* Card styling improvements */
-.card {
-    border: none;
-    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    border-radius: 12px;
-}
-
-.card-header {
-    background-color: #fff;
-    border-bottom: 1px solid #e9ecef;
-    padding: 1.5rem;
-    border-radius: 12px 12px 0 0;
-}
-
-.card-body {
-    padding: 1.5rem;
-}
-
-/* Section headers */
-h5 {
-    color: #495057;
-    font-weight: 600;
-    border-bottom: 2px solid #556ee6;
-    padding-bottom: 8px;
-    margin-bottom: 20px;
-}
-
-h5 i {
-    color: #556ee6;
-}
-
-/* Responsive improvements */
-@media (max-width: 768px) {
-    .location-select {
-        font-size: 16px; /* Prevents zoom on iOS */
-    }
-    
-    .form-label {
-        font-size: 14px;
-    }
-    
-    .form-text {
-        font-size: 11px;
-    }
-}
-
-/* Hover effects */
-.location-select:hover:not(:disabled) {
-    border-color: #556ee6;
-    box-shadow: 0 4px 8px rgba(85, 110, 230, 0.15);
-}
-
-/* Success state */
-.location-select.is-valid {
-    border-color: #34c38f;
-    box-shadow: 0 0 0 0.2rem rgba(52, 195, 143, 0.25);
-}
-
-/* Error state */
-.location-select.is-invalid {
-    border-color: #f46a6a;
-    box-shadow: 0 0 0 0.2rem rgba(244, 106, 106, 0.25);
-}
-</style>
-@endpush
-
-@push('js')
-<script>
-// Enhanced form validation with focus on unfilled fields
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const requiredFields = form.querySelectorAll('[required]');
-    
-    // Add visual indicators for required fields
-    requiredFields.forEach(field => {
-        const label = field.closest('.mb-3').querySelector('.form-label');
-        if (label && !label.querySelector('.text-danger')) {
-            const asterisk = document.createElement('span');
-            asterisk.className = 'text-danger';
-            asterisk.textContent = ' *';
-            label.appendChild(asterisk);
-        }
-    });
-    
-    // Form submission with enhanced validation
-    form.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // Reset all validation states
-        resetValidationStates();
-        
-        // Check for empty required fields
-        const emptyFields = [];
-        let hasErrors = false;
-        
-        requiredFields.forEach(field => {
-            const value = field.value.trim();
-            const fieldContainer = field.closest('.mb-3');
-            
-            if (!value) {
-                // Mark field as invalid
-                field.classList.add('is-invalid');
-                fieldContainer.classList.add('validation-error');
-                
-                // Add error message if not exists
-                if (!fieldContainer.querySelector('.validation-error-message')) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback validation-error-message';
-                    errorDiv.textContent = 'Field ini wajib diisi';
-                    fieldContainer.appendChild(errorDiv);
-                }
-                
-                emptyFields.push(field);
-                hasErrors = true;
-            } else {
-                // Mark field as valid
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-                fieldContainer.classList.remove('validation-error');
-                
-                // Remove error message if exists
-                const errorDiv = fieldContainer.querySelector('.validation-error-message');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
-            }
-        });
-        
-        // Special validation for select fields
-        const requiredSelects = form.querySelectorAll('select[required]');
-        requiredSelects.forEach(select => {
-            const fieldContainer = select.closest('.mb-3');
-            if (select.value === '') {
-                select.classList.add('is-invalid');
-                fieldContainer.classList.add('validation-error');
-                
-                if (!fieldContainer.querySelector('.validation-error-message')) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback validation-error-message';
-                    errorDiv.textContent = 'Field ini wajib diisi';
-                    fieldContainer.appendChild(errorDiv);
-                }
-                
-                emptyFields.push(select);
-                hasErrors = true;
-            } else {
-                select.classList.remove('is-invalid');
-                select.classList.add('is-valid');
-                fieldContainer.classList.remove('validation-error');
-                
-                const errorDiv = fieldContainer.querySelector('.validation-error-message');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
-            }
-        });
-        
-        // Special validation for file fields
-        const requiredFiles = form.querySelectorAll('input[type="file"][required]');
-        requiredFiles.forEach(fileInput => {
-            const fieldContainer = fileInput.closest('.mb-3');
-            if (!fileInput.files || fileInput.files.length === 0) {
-                fileInput.classList.add('is-invalid');
-                fieldContainer.classList.add('validation-error');
-                
-                if (!fieldContainer.querySelector('.validation-error-message')) {
-                    const errorDiv = document.createElement('div');
-                    errorDiv.className = 'invalid-feedback validation-error-message';
-                    errorDiv.textContent = 'File ini wajib diupload';
-                    fieldContainer.appendChild(errorDiv);
-                }
-                
-                emptyFields.push(fileInput);
-                hasErrors = true;
-            } else {
-                fileInput.classList.remove('is-invalid');
-                fileInput.classList.add('is-valid');
-                fieldContainer.classList.remove('validation-error');
-                
-                const errorDiv = fieldContainer.querySelector('.validation-error-message');
-                if (errorDiv) {
-                    errorDiv.remove();
-                }
-            }
-        });
-        
-        if (hasErrors) {
-            // Show summary of missing fields
-            showValidationSummary(emptyFields);
-            
-            // Scroll to first error
-            if (emptyFields.length > 0) {
-                emptyFields[0].scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'center' 
-                });
-                emptyFields[0].focus();
-            }
-            
-            return false;
-        }
-        
-        // If validation passes, submit the form
-        form.submit();
-    });
-    
-    // Real-time validation on field blur
-    requiredFields.forEach(field => {
-        field.addEventListener('blur', function() {
-            validateField(this);
-        });
-        
-        field.addEventListener('input', function() {
-            if (this.classList.contains('is-invalid')) {
-                validateField(this);
-            }
-        });
-    });
-    
-    function validateField(field) {
-        const value = field.value.trim();
-        const fieldContainer = field.closest('.mb-3');
-        
-        if (!value) {
-            field.classList.add('is-invalid');
-            field.classList.remove('is-valid');
-            fieldContainer.classList.add('validation-error');
-            
-            if (!fieldContainer.querySelector('.validation-error-message')) {
-                const errorDiv = document.createElement('div');
-                errorDiv.className = 'invalid-feedback validation-error-message';
-                errorDiv.textContent = 'Field ini wajib diisi';
-                fieldContainer.appendChild(errorDiv);
-            }
-        } else {
-            field.classList.remove('is-invalid');
-            field.classList.add('is-valid');
-            fieldContainer.classList.remove('validation-error');
-            
-            const errorDiv = fieldContainer.querySelector('.validation-error-message');
-            if (errorDiv) {
-                errorDiv.remove();
-            }
-        }
-    }
-    
-    function resetValidationStates() {
-        // Remove all validation classes
-        form.querySelectorAll('.is-invalid, .is-valid').forEach(field => {
-            field.classList.remove('is-invalid', 'is-valid');
-        });
-        
-        form.querySelectorAll('.validation-error').forEach(container => {
-            container.classList.remove('validation-error');
-        });
-        
-        // Remove all validation error messages
-        form.querySelectorAll('.validation-error-message').forEach(message => {
-            message.remove();
-        });
-    }
-    
-    function showValidationSummary(emptyFields) {
-        // Remove existing summary if any
-        const existingSummary = document.getElementById('validation-summary');
-        if (existingSummary) {
-            existingSummary.remove();
-        }
-        
-        // Create validation summary
-        const summary = document.createElement('div');
-        summary.id = 'validation-summary';
-        summary.className = 'alert alert-danger alert-dismissible fade show mt-3';
-        summary.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bx bx-error-circle me-2" style="font-size: 1.2rem;"></i>
-                <div>
-                    <strong>Mohon lengkapi data berikut:</strong>
-                    <ul class="mb-0 mt-2">
-                        ${emptyFields.map(field => {
-                            const label = field.closest('.mb-3').querySelector('.form-label');
-                            const labelText = label ? label.textContent.replace(' *', '').trim() : 'Field';
-                            return `<li>${labelText}</li>`;
-                        }).join('')}
-                    </ul>
-                </div>
-            </div>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        `;
-        
-        // Insert summary before the submit buttons
-        const submitRow = form.querySelector('.d-flex.justify-content-end');
-        submitRow.parentNode.insertBefore(summary, submitRow);
-        
-        // Auto-hide summary after 5 seconds
-        setTimeout(() => {
-            if (summary.parentNode) {
-                summary.remove();
-            }
-        }, 5000);
-    }
-});
-
-// Auto format KTP number
-document.getElementById('no_ktp').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 16) {
-        value = value.substring(0, 16);
-    }
-    e.target.value = value;
-});
-
-// Auto format phone number with validation
-document.getElementById('no_hp').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    e.target.value = value;
-    
-    // Validate phone number starts with 08
-    const phoneInput = e.target;
-    const phoneValue = phoneInput.value;
-    
-    // Remove existing validation message
-    const existingMessage = phoneInput.parentNode.querySelector('.phone-validation-message');
-    if (existingMessage) {
-        existingMessage.remove();
-    }
-    
-    // Add validation if phone number is entered but doesn't start with 08
-    if (phoneValue && phoneValue.length > 0 && !phoneValue.startsWith('08')) {
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'phone-validation-message text-danger small mt-1';
-        errorMessage.textContent = 'Nomor HP harus diawali dengan 08';
-        phoneInput.parentNode.appendChild(errorMessage);
-        phoneInput.classList.add('is-invalid');
-    } else if (phoneValue && phoneValue.startsWith('08')) {
-        phoneInput.classList.remove('is-invalid');
-        phoneInput.classList.add('is-valid');
-    } else {
-        phoneInput.classList.remove('is-invalid', 'is-valid');
-    }
-});
-
-// Auto format postal code
-document.getElementById('kode_pos').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 5) {
-        value = value.substring(0, 5);
-    }
-    e.target.value = value;
-});
-
-// Province, City, and District hierarchical selection with improved UX
-document.addEventListener('DOMContentLoaded', function() {
-    const provinceSelect = document.getElementById('provinsi');
-    const citySelect = document.getElementById('kota');
-    const districtSelect = document.getElementById('kecamatan');
-    const currentProvince = '{{ old("provinsi", $jamaahHajiKhusus->provinsi) }}';
-    const currentCity = '{{ old("kota", $jamaahHajiKhusus->kota) }}';
-    const currentDistrict = '{{ old("kecamatan", $jamaahHajiKhusus->kecamatan) }}';
-    
-    // Load provinces on page load
-    loadProvinces();
-    
-    // Handle province change
-    provinceSelect.addEventListener('change', function() {
-        const provinceId = this.value;
-        if (provinceId) {
-            loadCities(provinceId);
-        } else {
-            resetCitySelect();
-            resetDistrictSelect();
-        }
-    });
-    
-    // Handle city change
-    citySelect.addEventListener('change', function() {
-        const cityId = this.value;
-        if (cityId) {
-            // Find the city ID from the API response
-            const selectedCity = Array.from(this.options).find(option => option.value === cityId);
-            if (selectedCity && selectedCity.dataset.cityId) {
-                loadDistricts(selectedCity.dataset.cityId);
-            }
-        } else {
-            resetDistrictSelect();
-        }
-    });
-    
-    function loadProvinces() {
-        fetch('{{ route("api.provinces") }}')
-            .then(response => response.json())
-            .then(provinces => {
-                provinceSelect.innerHTML = '<option value="">Pilih Provinsi</option>';
-                provinces.forEach(province => {
-                    const option = document.createElement('option');
-                    option.value = province.id;
-                    option.textContent = province.name;
-                    if (province.name === currentProvince) {
-                        option.selected = true;
-                    }
-                    provinceSelect.appendChild(option);
-                });
-                
-                // If we have a current province, load its cities
-                if (currentProvince) {
-                    const selectedProvince = provinceSelect.value;
-                    if (selectedProvince) {
-                        loadCities(selectedProvince);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading provinces:', error);
-                provinceSelect.innerHTML = '<option value="">Error loading provinces</option>';
-            });
-    }
-    
-    function loadCities(provinceId) {
-        citySelect.disabled = true;
-        citySelect.innerHTML = '<option value="">Memuat kota/kabupaten...</option>';
-        resetDistrictSelect();
-        
-        fetch(`{{ route("api.cities") }}?province_id=${provinceId}`)
-            .then(response => response.json())
-            .then(cities => {
-                citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                cities.forEach(city => {
-                    const option = document.createElement('option');
-                    option.value = city.name;
-                    option.textContent = city.name;
-                    option.dataset.cityId = city.id;
-                    if (city.name === currentCity) {
-                        option.selected = true;
-                    }
-                    citySelect.appendChild(option);
-                });
-                citySelect.disabled = false;
-                
-                // If we have a current city, load its districts
-                if (currentCity) {
-                    const selectedCity = Array.from(citySelect.options).find(option => option.value === currentCity);
-                    if (selectedCity && selectedCity.dataset.cityId) {
-                        loadDistricts(selectedCity.dataset.cityId);
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error loading cities:', error);
-                citySelect.innerHTML = '<option value="">Error loading cities</option>';
-                citySelect.disabled = true;
-            });
-    }
-    
-    function loadDistricts(regencyId) {
-        districtSelect.disabled = true;
-        districtSelect.innerHTML = '<option value="">Memuat kecamatan...</option>';
-        
-        fetch(`{{ route("api.districts") }}?regency_id=${regencyId}`)
-            .then(response => response.json())
-            .then(districts => {
-                districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-                districts.forEach(district => {
-                    const option = document.createElement('option');
-                    option.value = district.name;
-                    option.textContent = district.name;
-                    if (district.name === currentDistrict) {
-                        option.selected = true;
-                    }
-                    districtSelect.appendChild(option);
-                });
-                districtSelect.disabled = false;
-            })
-            .catch(error => {
-                console.error('Error loading districts:', error);
-                districtSelect.innerHTML = '<option value="">Error loading districts</option>';
-                districtSelect.disabled = true;
-            });
-    }
-    
-    function resetCitySelect() {
-        citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-        citySelect.disabled = true;
-    }
-    
-    function resetDistrictSelect() {
-        districtSelect.innerHTML = '<option value="">Pilih Kecamatan</option>';
-        districtSelect.disabled = true;
-    }
-});
-</script>
-@endpush 
+@include('jamaah.haji-khusus.partials.form-wizard-styles')
+@include('jamaah.haji-khusus.partials.form-wizard-scripts', [
+    'finishLabel' => 'Update Data',
+    'locationDefaults' => [
+        'provinsi' => old('provinsi', $jamaahHajiKhusus->provinsi),
+        'kota' => old('kota', $jamaahHajiKhusus->kota),
+        'kecamatan' => old('kecamatan', $jamaahHajiKhusus->kecamatan),
+    ],
+])

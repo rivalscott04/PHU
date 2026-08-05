@@ -11,6 +11,7 @@ use App\Imports\CabangTravelImport;
 use App\Exports\TravelPusatExport;
 use App\Exports\TravelCabangExport;
 use Illuminate\Support\Facades\Storage;
+use App\Support\NtbKabupatenMap;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -20,38 +21,23 @@ class KanwilController extends Controller
 
     public function showFormTravel()
     {
-        return view('kanwil.formTravel');
+        return view('kanwil.formTravel', [
+            'kabupatens' => NtbKabupatenMap::names(),
+        ]);
     }
 
     public function store(Request $request)
     {
-        // Validasi input
-        $validatedData = ValidationHelper::validate($request, [
-            'Penyelenggara' => 'required|string|max:255',
-            'Pusat' => 'required|string|max:255',
-            'Tanggal' => 'required|date',
-            'nilai_akreditasi' => 'required|string|max:255',
-            'tanggal_akreditasi' => 'required|date',
-            'lembaga_akreditasi' => 'required|string|max:255',
-            'Pimpinan' => 'required|string|max:255',
-            'alamat_kantor_lama' => 'required|string',
-            'alamat_kantor_baru' => 'required|string',
-            'Telepon' => 'required|string|max:20',
-            'kab_kota' => 'required|string|max:255',
-            'Status' => 'required|in:PPIU,PIHK',
-        ]);
+        $validatedData = ValidationHelper::validate($request, ValidationHelper::travelCompanyDataRules());
 
-        // Format data sebelum disimpan
-        $validatedData['Tanggal'] = date('Y-m-d', strtotime($request->Tanggal));
-        $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
         $validatedData['registration_status'] = TravelRegistrationStatus::Approved;
         $validatedData['verified_at'] = now();
         $validatedData['verified_by'] = auth()->id();
 
         $travelCompany = TravelCompany::create($validatedData);
 
-        // Set default capabilities based on status
         $travelCompany->setDefaultCapabilities();
+        $travelCompany->description = $travelCompany->getTravelTypeDescription();
         $travelCompany->save();
 
         return redirect()->route('form')->with('success', 'Data berhasil disimpan.');
@@ -59,40 +45,28 @@ class KanwilController extends Controller
 
     public function edit($id)
     {
-        // Temukan data berdasarkan id
-        $travelCompany = TravelCompany::findOrFail($id);
+        $travelCompany = TravelCompany::with('user')->findOrFail($id);
 
-        // Tampilkan view edit dengan data yang ditemukan
-        return view('kanwil.editTravel', compact('travelCompany'));
+        return view('kanwil.editTravel', [
+            'travelCompany' => $travelCompany,
+            'kabupatens' => NtbKabupatenMap::names(),
+        ]);
     }
 
     public function update(Request $request, $id)
     {
-        // Validasi input
-        $validatedData = ValidationHelper::validate($request, [
-            'Penyelenggara' => 'required|string|max:255',
-            'Pusat' => 'required|string|max:255',
-            'nilai_akreditasi' => 'required|string|max:255',
-            'lembaga_akreditasi' => 'required|string|max:255',
-            'Pimpinan' => 'required|string|max:255',
-            'alamat_kantor_lama' => 'required|string',
-            'alamat_kantor_baru' => 'required|string',
-            'Telepon' => 'required|string|max:20',
-            'kab_kota' => 'required|string|max:255',
-            'Status' => 'required|in:PPIU,PIHK',
-        ]);
+        $travelCompany = TravelCompany::with('user')->findOrFail($id);
 
-        // Format data sebelum disimpan
-        $validatedData['Tanggal'] = date('Y-m-d', strtotime($request->Tanggal));
-        $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
+        $validatedData = ValidationHelper::validate(
+            $request,
+            ValidationHelper::travelCompanyDataRules($travelCompany->id)
+        );
 
-        // Temukan data dan update
-        $travelCompany = TravelCompany::findOrFail($id);
         $travelCompany->update($validatedData);
-
-        // Update capabilities based on new status
         $travelCompany->setDefaultCapabilities();
+        $travelCompany->description = $travelCompany->getTravelTypeDescription();
         $travelCompany->save();
+        $travelCompany->syncPicKabupaten();
 
         return redirect()->route('travel')->with('success', 'Data berhasil diperbarui.');
     }
@@ -243,6 +217,12 @@ class KanwilController extends Controller
             return redirect()->route('travel')->with('error', 'Pendaftaran ini sudah diproses sebelumnya.');
         }
 
+        if (! $travel->hasCompleteRegistrationDocuments()) {
+            return redirect()
+                ->route('travel', ['filter' => 'pending'])
+                ->with('error', 'Dokumen SK atau akreditasi tidak ditemukan. Minta travel mengunggah ulang sebelum disetujui.');
+        }
+
         $travel->update([
             'registration_status' => TravelRegistrationStatus::Approved,
             'registration_notes' => null,
@@ -276,6 +256,8 @@ class KanwilController extends Controller
             'verified_by' => auth()->id(),
         ]);
 
+        $travel->user?->delete();
+
         return redirect()
             ->route('travel', ['filter' => 'pending'])
             ->with('success', "Pendaftaran {$travel->Penyelenggara} ditolak.");
@@ -293,6 +275,8 @@ class KanwilController extends Controller
             default => null,
         };
 
+        $path = \App\Helpers\StorageHelper::normalizePath($path);
+
         abort_unless($path && Storage::disk('public')->exists($path), 404);
 
         return Storage::disk('public')->response($path, null, [
@@ -302,7 +286,8 @@ class KanwilController extends Controller
 
     public function createCabangTravel()
     {
-        $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
+        $travels = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara')->get();
+
         return view('kanwil.formCabangTravel', compact('travels'));
     }
 
@@ -382,7 +367,8 @@ class KanwilController extends Controller
     public function editCabangTravel($id_cabang)
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
-        $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota')->get();
+        $travels = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara')->get();
+
         return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
     }
 

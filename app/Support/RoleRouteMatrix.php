@@ -15,9 +15,9 @@ final class RoleRouteMatrix
         return [
             ['role' => 'admin', 'email' => 'admin@phu.com', 'password' => 'admin123', 'label' => 'Super Admin'],
             ['role' => 'pimpinan', 'email' => 'pimpinan@phu.local', 'password' => 'password123', 'label' => 'Pimpinan Kanwil'],
-            ['role' => 'pengawas', 'email' => 'pengawas.lombokbarat@phu.local', 'password' => 'password123', 'label' => 'Pengawas Lombok Barat'],
-            ['role' => 'kabupaten', 'email' => 'kabupaten.lombokbarat@phu.com', 'password' => 'password123', 'label' => 'Admin Kabupaten'],
-            ['role' => 'user', 'email' => 'lombokbarat.travel@phu.com', 'password' => 'password123', 'label' => 'User Travel'],
+            ['role' => 'pengawas', 'email' => 'pengawas.mataram@phu.local', 'password' => 'password123', 'label' => 'Pengawas Mataram'],
+            ['role' => 'kabupaten', 'email' => 'kota.mataram@phu.com', 'password' => 'password123', 'label' => 'Admin Mataram'],
+            ['role' => 'user', 'email' => 'mataram.travel@phu.com', 'password' => 'password123', 'label' => 'User Travel'],
         ];
     }
 
@@ -161,13 +161,13 @@ final class RoleRouteMatrix
      */
     public static function routeParameters(): array
     {
-        $travelId = TravelCompany::where('kab_kota', 'Lombok Barat')->value('id')
+        $travelId = TravelCompany::where('kab_kota', 'Kota Mataram')->value('id')
             ?? TravelCompany::query()->value('id')
             ?? 1;
 
         return [
             'v2.monitoring.travel.pengaduan' => ['travel' => $travelId],
-            'v2.monitoring.kabupaten.pengaduan' => ['kabupaten' => 'Lombok Barat'],
+            'v2.monitoring.kabupaten.pengaduan' => ['kabupaten' => 'Kota Mataram'],
         ];
     }
 
