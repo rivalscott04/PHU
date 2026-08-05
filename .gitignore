@@ -42,3 +42,10 @@ __pycache__/
 
 # PHPUnit tests
 /tests
+
+# graphify (knowledge graph cache & output)
+/.graphify/
+/graphify-out/
+
+# PDF.js vendor (jangan commit, pratinjau pakai iframe native browser)
+/public/libs/pdfjs/
