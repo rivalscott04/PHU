@@ -12,6 +12,7 @@ use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Carbon\Carbon;
 use App\Helpers\DateHelper;
+use App\Helpers\ValidationHelper;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -116,36 +117,29 @@ class SertifikatController extends Controller
         \Log::info('Request data:', $request->all());
 
         // Validasi berdasarkan jenis lokasi
+        $sertifikatRules = [
+            'nama_ppiu' => 'required|string|max:255',
+            'nama_kepala' => 'required|string|max:255',
+            'alamat' => 'required|string',
+            'tanggal_diterbitkan' => 'required|date',
+            'nomor_surat' => 'required|numeric|min:1',
+            'nomor_dokumen' => 'required|string',
+            'bulan_surat' => 'required|numeric|min:1|max:12',
+            'tahun_surat' => 'required|numeric|min:2020|max:2030',
+            'tanggal_tandatangan' => 'required|date',
+            'jenis_lokasi' => 'required|in:pusat,cabang',
+        ];
+
         if ($request->jenis_lokasi === 'pusat') {
             \Log::info('Validating PUSAT data');
-            $request->validate([
+            ValidationHelper::validate($request, array_merge($sertifikatRules, [
                 'travel_id' => 'required|exists:travels,id',
-                'nama_ppiu' => 'required|string|max:255',
-                'nama_kepala' => 'required|string|max:255',
-                'alamat' => 'required|string',
-                'tanggal_diterbitkan' => 'required|date',
-                'nomor_surat' => 'required|numeric|min:1',
-                'nomor_dokumen' => 'required|string',
-                'bulan_surat' => 'required|numeric|min:1|max:12',
-                'tahun_surat' => 'required|numeric|min:2020|max:2030',
-                'tanggal_tandatangan' => 'required|date',
-                'jenis_lokasi' => 'required|in:pusat,cabang'
-            ]);
+            ]));
         } else {
             \Log::info('Validating CABANG data');
-            $request->validate([
+            ValidationHelper::validate($request, array_merge($sertifikatRules, [
                 'cabang_id' => 'required|exists:travel_cabang,id_cabang',
-                'nama_ppiu' => 'required|string|max:255',
-                'nama_kepala' => 'required|string|max:255',
-                'alamat' => 'required|string',
-                'tanggal_diterbitkan' => 'required|date',
-                'nomor_surat' => 'required|numeric|min:1',
-                'nomor_dokumen' => 'required|string',
-                'bulan_surat' => 'required|numeric|min:1|max:12',
-                'tahun_surat' => 'required|numeric|min:2020|max:2030',
-                'tanggal_tandatangan' => 'required|date',
-                'jenis_lokasi' => 'required|in:pusat,cabang'
-            ]);
+            ]));
         }
 
         \Log::info('Validation passed');
@@ -731,7 +725,7 @@ class SertifikatController extends Controller
 
     public function updateSettings(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama_penandatangan' => 'required|string|max:255',
             'nip_penandatangan' => 'required|string|max:255',
         ]);

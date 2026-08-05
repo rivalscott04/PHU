@@ -60,8 +60,8 @@
                         <div class="col-lg-6 mb-4">
                             <h6 class="text-muted text-uppercase small mb-3">Surat pernyataan</h6>
                             @if ($data->pdf_file_path)
-                                <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
-                                    height="480px" class="border rounded"></iframe>
+                                <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}"
+                                    width="100%" height="480px" class="border rounded"></iframe>
                             @else
                                 <div class="alert alert-warning mb-0">
                                     <i class="bx bx-error-circle me-1"></i>

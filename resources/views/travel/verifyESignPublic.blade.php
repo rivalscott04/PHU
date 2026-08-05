@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Verifikasi E-Sign BA Pemberangkatan | Kanwil Kementerian Haji dan Umroh NTB</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Roboto:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -33,6 +34,10 @@
             padding: min(4vw, 2rem);
             text-align: center;
         }
+        .header-logo h4,
+        .header-logo p {
+            color: #FFFFFF;
+        }
         .verification-icon {
             font-size: 4rem;
             margin-bottom: 1rem;
@@ -47,6 +52,11 @@
             font-size: 0.9rem;
             padding: 0.5rem 1rem;
             border-radius: 25px;
+        }
+        #tokenInput::placeholder {
+            font-family: var(--phu-body-font);
+            letter-spacing: normal;
+            font-size: 0.85rem;
         }
         .info-table {
             background: rgba(255, 255, 255, 0.4);
@@ -120,7 +130,7 @@
                                     <input type="text" id="tokenInput" class="form-control form-control-lg text-center" 
                                         placeholder="Masukkan token verifikasi dokumen" style="font-size: 0.95rem; letter-spacing: 0.5px; font-family: monospace;"
                                         value="{{ $token ?? '' }}">
-                                    <small class="text-muted">Contoh: A1B2C3D4</small>
+                                    <small class="text-muted">Contoh: aX7pQ2mZk9LrT4vNc8Wy (20 karakter, tertera di dokumen)</small>
                                 </div>
                                 <div class="text-center">
                                     <button type="button" class="btn btn-primary btn-lg" onclick="verifyToken()">
@@ -192,7 +202,8 @@
             fetch('/bap/verify-qr', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ token: token })
             })
@@ -221,7 +232,8 @@
             fetch('/bap/verify-qr', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({ qr_data: qrData })
             })
@@ -239,10 +251,11 @@
         function showVerificationResult(result) {
             const contentDiv = document.getElementById('modalResultContent');
             
+            const verdictColor = result.success ? '#198754' : '#dc3545';
             let html = `
                 <div class="text-center mb-4">
-                    <i class="bx ${result.success ? 'bx-check-circle text-success' : 'bx-x-circle text-danger'}" style="font-size: 4rem;"></i>
-                    <h5 class="mt-2 ${result.success ? 'text-success' : 'text-danger'}">${result.message}</h5>
+                    <i class="bx ${result.success ? 'bx-check-circle' : 'bx-x-circle'}" style="font-size: 4rem; color: ${verdictColor};"></i>
+                    <h5 class="mt-2" style="color: ${verdictColor};">${result.message}</h5>
                 </div>
             `;
 
@@ -252,7 +265,7 @@
                         <div class="col-12 col-md-6">
                             <div class="result-card card mb-3">
                                 <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0"><i class="bx bx-file me-2"></i>Informasi Dokumen</h6>
+                                    <h6 class="mb-0 text-white"><i class="bx bx-file me-2"></i>Informasi Dokumen</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -269,7 +282,7 @@
                         <div class="col-12 col-md-6">
                             <div class="result-card card mb-3">
                                 <div class="card-header bg-info text-white">
-                                    <h6 class="mb-0"><i class="bx bx-user me-2"></i>Informasi Petugas</h6>
+                                    <h6 class="mb-0 text-white"><i class="bx bx-user me-2"></i>Informasi Petugas</h6>
                                 </div>
                                 <div class="card-body">
                                     <div class="table-responsive">
@@ -277,7 +290,7 @@
                                         <tr><td><strong>Nama Petugas</strong></td><td>: ${result.data.nama_petugas}</td></tr>
                                         <tr><td><strong>Jabatan</strong></td><td>: ${result.data.jabatan_petugas}</td></tr>
                                         <tr><td><strong>Tanggal Dibuat</strong></td><td>: ${result.data.tanggal_dibuat}</td></tr>
-                                        <tr><td><strong>Token</strong></td><td>: <code class="bg-light px-2 py-1">${result.data.token}</code></td></tr>
+                                        <tr><td><strong>Token</strong></td><td>: <code class="bg-light px-2 py-1" style="color: #333333;">${result.data.token}</code></td></tr>
                                     </table>
                                     </div>
                                 </div>
@@ -287,15 +300,15 @@
                     <div class="text-center">
                         <div class="row justify-content-center g-2">
                             <div class="col-12 col-md-6">
-                                <span class="badge status-badge bg-${result.hash_valid ? 'success' : 'danger'}">
+                                <span class="badge status-badge" style="background-color: ${result.hash_valid ? '#198754' : '#dc3545'}; color: #fff;">
                                     <i class="bx ${result.hash_valid ? 'bx-check' : 'bx-x'} me-1"></i>
-                                    ${result.hash_valid ? 'Tanda Tangan Valid' : 'Tanda Tangan Tidak Valid'}
+                                    Tanda Tangan: ${result.hash_valid ? 'Valid' : 'Tidak Valid'}
                                 </span>
                             </div>
                             <div class="col-12 col-md-6">
-                                <span class="badge status-badge bg-${result.dokumen_valid ? 'success' : 'warning'}">
+                                <span class="badge status-badge" style="background-color: ${result.dokumen_valid ? '#198754' : '#ffc107'}; color: ${result.dokumen_valid ? '#fff' : '#212529'};">
                                     <i class="bx ${result.dokumen_valid ? 'bx-check' : 'bx-error'} me-1"></i>
-                                    ${result.dokumen_valid ? 'Dokumen Aktif' : 'Dokumen Tidak Aktif'}
+                                    Status Dokumen: ${result.dokumen_valid ? 'Aktif' : 'Belum Aktif'}
                                 </span>
                             </div>
                         </div>

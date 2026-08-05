@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\TravelRegistrationStatus;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -30,16 +32,24 @@ class TravelCompany extends Model
         'can_umrah',
         'description',
         'license_number',
-        'license_expiry'
+        'license_expiry',
+        'registration_status',
+        'registration_notes',
+        'dokumen_sk',
+        'dokumen_akreditasi',
+        'verified_at',
+        'verified_by',
     ];
 
     protected $casts = [
         'Tanggal' => 'date',
         'tanggal_akreditasi' => 'date',
         'license_expiry' => 'date',
+        'verified_at' => 'datetime',
         'capabilities' => 'array',
         'can_haji' => 'boolean',
         'can_umrah' => 'boolean',
+        'registration_status' => TravelRegistrationStatus::class,
     ];
 
     protected static function booted(): void
@@ -83,6 +93,36 @@ class TravelCompany extends Model
     public function user()
     {
         return $this->hasOne(User::class, 'travel_id');
+    }
+
+    public function verifiedByUser()
+    {
+        return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function scopeApproved(Builder $query): Builder
+    {
+        return $query->where('registration_status', TravelRegistrationStatus::Approved);
+    }
+
+    public function scopePendingRegistration(Builder $query): Builder
+    {
+        return $query->where('registration_status', TravelRegistrationStatus::Pending);
+    }
+
+    public function isRegistrationPending(): bool
+    {
+        return $this->registration_status === TravelRegistrationStatus::Pending;
+    }
+
+    public function isRegistrationApproved(): bool
+    {
+        return $this->registration_status === TravelRegistrationStatus::Approved;
+    }
+
+    public function isRegistrationRejected(): bool
+    {
+        return $this->registration_status === TravelRegistrationStatus::Rejected;
     }
 
     public function jamaahHajiKhusus()

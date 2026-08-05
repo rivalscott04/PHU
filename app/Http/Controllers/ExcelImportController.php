@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Imports\DataImport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +17,7 @@ class ExcelImportController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'file' => 'required|mimes:xlsx,xls,csv',
         ]);
 

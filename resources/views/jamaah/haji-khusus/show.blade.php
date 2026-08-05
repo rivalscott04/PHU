@@ -40,7 +40,7 @@
                     <div class="col-md-6">
                         <div class="card border-primary">
                             <div class="card-header bg-primary text-white">
-                                <h6 class="mb-0"><i class="bx bx-user me-2"></i>Informasi Pribadi</h6>
+                                <h6 class="mb-0 text-white"><i class="bx bx-user me-2"></i>Informasi Pribadi</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
@@ -112,7 +112,7 @@
                     <div class="col-md-6">
                         <div class="card border-success">
                             <div class="card-header bg-success text-white">
-                                <h6 class="mb-0"><i class="bx bx-phone me-2"></i>Informasi Kontak</h6>
+                                <h6 class="mb-0 text-white"><i class="bx bx-phone me-2"></i>Informasi Kontak</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
@@ -181,7 +181,7 @@
                     <div class="col-md-6">
                         <div class="card border-warning">
                             <div class="card-header bg-warning text-white">
-                                <h6 class="mb-0"><i class="bx bx-info-circle me-2"></i>Informasi Tambahan</h6>
+                                <h6 class="mb-0 text-white"><i class="bx bx-info-circle me-2"></i>Informasi Tambahan</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
@@ -246,7 +246,7 @@
                     <div class="col-md-6">
                         <div class="card border-info">
                             <div class="card-header bg-info text-white">
-                                <h6 class="mb-0"><i class="bx bx-building me-2"></i>Informasi PPIU</h6>
+                                <h6 class="mb-0 text-white"><i class="bx bx-building me-2"></i>Informasi PPIU</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row mb-3">
@@ -303,7 +303,7 @@
                     <div class="col-12">
                         <div class="card border-secondary">
                             <div class="card-header bg-secondary text-white">
-                                <h6 class="mb-0"><i class="bx bx-file me-2"></i>Informasi Dokumen</h6>
+                                <h6 class="mb-0 text-white"><i class="bx bx-file me-2"></i>Informasi Dokumen</h6>
                             </div>
                             <div class="card-body">
                                 <div class="row">
@@ -362,10 +362,17 @@
                                             </div>
                                             <div class="col-sm-8">
                                                 @if($jamaahHajiKhusus->bukti_setor_bank)
-                                                    <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                        <i class="bx bx-download me-1"></i>
-                                                        Download Bukti Setor
-                                                    </a>
+                                                    @if(Str::endsWith($jamaahHajiKhusus->bukti_setor_bank, '.pdf'))
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
+                                                            <i class="bx bx-file-find me-1"></i>
+                                                            Lihat Bukti Setor
+                                                        </button>
+                                                    @else
+                                                        <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <i class="bx bx-image me-1"></i>
+                                                            Lihat Bukti Setor
+                                                        </a>
+                                                    @endif
                                                 @else
                                                     <span class="text-muted">-</span>
                                                 @endif

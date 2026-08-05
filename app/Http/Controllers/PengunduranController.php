@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Models\Pengaduan;
 use App\Models\Pengunduran;
 use App\Models\Travel;
@@ -50,7 +51,7 @@ class PengunduranController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk melakukan pengunduran diri');
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'berkas_pengunduran' => 'required|file|max:500'
         ]);
 

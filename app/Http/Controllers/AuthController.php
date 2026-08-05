@@ -8,11 +8,11 @@ use App\Models\Jamaah;
 use App\Models\CabangTravel;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
+use App\Helpers\ValidationHelper;
 use App\Support\PublicTrustIndex;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -40,7 +40,7 @@ class AuthController extends Controller
     public function addUser(Request $request)
     {
         // Validasi input dari request
-        $validator = Validator::make($request->all(), [
+        $validator = ValidationHelper::makeValidator($request->all(), [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => 'required|string|max:20|unique:users',
@@ -108,7 +108,7 @@ class AuthController extends Controller
     // Proses update password
     public function changePassword(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'password' => 'required|string|min:8|confirmed',
         ]);
 

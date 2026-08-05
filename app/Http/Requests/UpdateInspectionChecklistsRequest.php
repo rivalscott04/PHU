@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateInspectionChecklistsRequest extends FormRequest
 {
+    use UsesFriendlyValidation;
+
     public function authorize(): bool
     {
         return true;
@@ -18,14 +21,6 @@ class UpdateInspectionChecklistsRequest extends FormRequest
             'items.*.id' => ['required', 'integer', 'exists:pengawasan_checklists,id'],
             'items.*.answer' => ['nullable', 'string', 'max:5000'],
             'items.*.note' => ['nullable', 'string', 'max:1000'],
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'items.required' => 'Daftar checklist wajib diisi.',
-            'items.*.id.exists' => 'Item checklist tidak ditemukan.',
         ];
     }
 }

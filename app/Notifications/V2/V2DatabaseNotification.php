@@ -12,7 +12,13 @@ abstract class V2DatabaseNotification extends Notification
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        $channels = ['database'];
+
+        if (config('broadcasting.default') === 'reverb') {
+            $channels[] = 'broadcast';
+        }
+
+        return $channels;
     }
 
     /** @return array<string, mixed> */

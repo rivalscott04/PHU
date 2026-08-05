@@ -4,6 +4,12 @@ namespace App\Support;
 
 class NtbKabupatenMap
 {
+    /** @return list<string> */
+    public static function names(): array
+    {
+        return array_keys(self::centroids());
+    }
+
     /** @return array<string, array{lat: float, lng: float}> */
     public static function centroids(): array
     {

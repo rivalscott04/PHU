@@ -55,8 +55,8 @@
                                     <i class="bx bx-check-circle me-1"></i>
                                     PDF sudah diunggah. Anda dapat melanjutkan ke langkah review atau mengganti file.
                                 </div>
-                                <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}" width="100%"
-                                    height="280px" class="border rounded mb-3"></iframe>
+                                <iframe src="{{ asset('storage/' . $data->pdf_file_path) }}"
+                                    width="100%" height="280px" class="border rounded mb-3"></iframe>
                             @endif
 
                             <form method="POST" action="{{ route('bap.upload', ['id' => $data->id]) }}"

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Enums\UserRole;
 use App\Enums\PengawasScopeMode;
 use App\Support\NtbKabupatenMap;
@@ -185,9 +186,7 @@ class UserManagementController extends Controller
             $rules['travel_id'] = 'required|exists:travels,id';
         }
 
-        $validated = $request->validate($rules, [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
-        ]);
+        $validated = ValidationHelper::validate($request, $rules);
 
         $payload = [
             'nama' => $validated['nama'],
@@ -414,11 +413,9 @@ class UserManagementController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'admin') {
-            // Admin can see all travel companies
-            $travelCompanies = \App\Models\TravelCompany::all();
+            $travelCompanies = TravelCompany::approved()->get();
         } else if ($user->role === 'kabupaten') {
-            // Kabupaten can only see travel companies from their kabupaten
-            $travelCompanies = \App\Models\TravelCompany::where('kab_kota', $user->kabupaten)->get();
+            $travelCompanies = TravelCompany::approved()->where('kab_kota', $user->kabupaten)->get();
         } else {
             // Other roles see empty data
             $travelCompanies = collect();
@@ -432,14 +429,12 @@ class UserManagementController extends Controller
      */
     public function storeKabupaten(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
             'kabupaten' => 'required|string|max:255',
             'password' => 'required|string|min:8',
-        ], [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         User::create([
@@ -463,14 +458,12 @@ class UserManagementController extends Controller
     {
         $user = auth()->user();
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
             'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
-        ], [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         // Check if kabupaten user is trying to create travel user for different kabupaten
@@ -580,9 +573,7 @@ class UserManagementController extends Controller
 
         $validationRules['password'] = 'nullable|string|min:8';
 
-        $request->validate($validationRules, [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
-        ]);
+        ValidationHelper::validate($request, $validationRules);
 
         $updateData = [
             'nama' => $request->nama,
@@ -665,9 +656,9 @@ class UserManagementController extends Controller
      */
     public function importTravelUsers(Request $request)
     {
-        $request->validate([
-            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
-        ]);
+        ValidationHelper::validate($request, [
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], ValidationHelper::excelFileOverrides('excel_file', 10));
 
         try {
             DB::beginTransaction();
@@ -743,9 +734,9 @@ class UserManagementController extends Controller
      */
     public function importCabangUsers(Request $request)
     {
-        $request->validate([
-            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240', // Max 10MB
-        ]);
+        ValidationHelper::validate($request, [
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ], ValidationHelper::excelFileOverrides('excel_file', 10));
 
         try {
             DB::beginTransaction();

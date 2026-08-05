@@ -1,11 +1,49 @@
 @extends('layouts.app')
 
 @section('content')
+    @if (session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+    @if (session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header ps-0 d-flex justify-content-between align-items-center">
-                    <h6>Data Travel</h6>
+                <div class="card-header ps-0 d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <div>
+                        <h6 class="mb-1">Data Travel</h6>
+                        <ul class="nav nav-pills nav-sm gap-1 mt-2">
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($filter ?? 'all') === 'all' ? 'active' : '' }}"
+                                   href="{{ route('travel') }}">Semua</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($filter ?? '') === 'pending' ? 'active' : '' }}"
+                                   href="{{ route('travel', ['filter' => 'pending']) }}">
+                                    Menunggu Verifikasi
+                                    @if (($pendingCount ?? 0) > 0)
+                                        <span class="badge bg-danger ms-1">{{ $pendingCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($filter ?? '') === 'approved' ? 'active' : '' }}"
+                                   href="{{ route('travel', ['filter' => 'approved']) }}">Disetujui</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ ($filter ?? '') === 'rejected' ? 'active' : '' }}"
+                                   href="{{ route('travel', ['filter' => 'rejected']) }}">Ditolak</a>
+                            </li>
+                        </ul>
+                    </div>
                     <div>
                         <a href="{{ route('form.travel') }}" class="btn btn-primary me-2">Tambah</a>
                         <a href="{{ route('travel.export') }}" class="btn btn-info me-2">
@@ -77,6 +115,10 @@
                                         Kab/Kota
                                     </th>
                                     <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
+                                        rowspan="2" style="width: 8%">
+                                        Registrasi
+                                    </th>
+                                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
                                         rowspan="2" style="width: 10%">
                                         Aksi
                                     </th>
@@ -136,8 +178,57 @@
                                             </div>
                                         </td>
                                         <td class="text-sm font-weight-bold">{{ $item->kab_kota }}</td>
+                                        <td class="text-sm font-weight-bold text-center">
+                                            @php
+                                                $regStatus = $item->registration_status ?? \App\Enums\TravelRegistrationStatus::Approved;
+                                            @endphp
+                                            <span class="badge {{ $regStatus->badgeClass() }}">
+                                                {{ $regStatus->label() }}
+                                            </span>
+                                            @if ($regStatus === \App\Enums\TravelRegistrationStatus::Pending && $item->user)
+                                                <div class="mt-1">
+                                                    <small class="text-muted d-block">{{ $item->user->nama }}</small>
+                                                    <small class="text-muted d-block">{{ $item->user->email }}</small>
+                                                </div>
+                                                @if ($item->dokumen_sk || $item->dokumen_akreditasi)
+                                                    <div class="mt-2 d-flex flex-column gap-1">
+                                                        @if ($item->dokumen_sk)
+                                                            @include('partials.document-preview-button', [
+                                                                'url' => route('travel.registration.document', ['id' => $item->id, 'type' => 'sk']),
+                                                                'path' => $item->dokumen_sk,
+                                                                'label' => 'SK / Izin',
+                                                            ])
+                                                        @endif
+                                                        @if ($item->dokumen_akreditasi)
+                                                            @include('partials.document-preview-button', [
+                                                                'url' => route('travel.registration.document', ['id' => $item->id, 'type' => 'akreditasi']),
+                                                                'path' => $item->dokumen_akreditasi,
+                                                                'label' => 'Akreditasi',
+                                                            ])
+                                                        @endif
+                                                    </div>
+                                                @endif
+                                            @endif
+                                            @if ($regStatus === \App\Enums\TravelRegistrationStatus::Rejected && $item->registration_notes)
+                                                <small class="text-danger d-block mt-1">{{ Str::limit($item->registration_notes, 60) }}</small>
+                                            @endif
+                                        </td>
                                         <td class="text-sm font-weight-bold">
-                                            <div class="d-flex justify-content-center gap-1">
+                                            <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                                @if (auth()->user()->role === 'admin' && ($item->registration_status ?? null) === \App\Enums\TravelRegistrationStatus::Pending)
+                                                    <form method="POST" action="{{ route('travel.registration.approve', $item->id) }}" class="d-inline" id="approve-form-{{ $item->id }}">
+                                                        @csrf
+                                                        <button type="button" class="btn btn-success btn-sm" title="Setujui"
+                                                                onclick="confirmApproveRegistration(document.getElementById('approve-form-{{ $item->id }}'), @json($item->Penyelenggara))">
+                                                            <i class="bx bx-check me-1"></i> Setujui
+                                                        </button>
+                                                    </form>
+                                                    <button type="button" class="btn btn-danger btn-sm"
+                                                            onclick="openRejectModal({{ $item->id }}, @json($item->Penyelenggara))"
+                                                            title="Tolak">
+                                                        <i class="bx bx-x me-1"></i> Tolak
+                                                    </button>
+                                                @endif
                                                 <button type="button" class="btn btn-primary btn-sm" 
                                                         onclick="editStatus({{ $item->id }}, '{{ $item->Status }}', '{{ $item->Penyelenggara }}')"
                                                         title="Update Status">
@@ -162,6 +253,34 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Registration Modal -->
+    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="rejectForm" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectModalLabel">Tolak Pendaftaran Travel</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">Travel: <strong id="rejectTravelName"></strong></p>
+                        <div class="mb-3">
+                            <label for="registration_notes" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="registration_notes" name="registration_notes" rows="4"
+                                placeholder="Contoh: Dokumen SK belum lengkap, silakan daftar ulang." required></textarea>
+                            <small class="text-muted">Alasan ini akan tersimpan di sistem.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-danger">Tolak Pendaftaran</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -585,6 +704,15 @@
             delete window.storedScrollPosition;
         }
     });
+
+    function openRejectModal(travelId, travelName) {
+        document.getElementById('rejectTravelName').textContent = travelName;
+        document.getElementById('rejectForm').action = `/travel/${travelId}/reject-registration`;
+        document.getElementById('registration_notes').value = '';
+        new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    }
+
+    // confirmApproveRegistration() provided globally by js/confirm-dialogs.js
 
     // Debug: Log when page loads
     document.addEventListener('DOMContentLoaded', function() {

@@ -61,12 +61,13 @@
                                                     class="btn btn-sm btn-warning">
                                                     <i class="bx bx-edit"></i>
                                                 </a>
-                                                <form action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
-                                                    method="POST" style="display: inline;"
-                                                    onsubmit="return confirm('Apakah Anda yakin ingin menghapus data ini?')">
+                                                <form id="delete-form-{{ $item->id_cabang }}"
+                                                    action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
+                                                    method="POST" style="display: inline;">
                                                     @csrf
                                                     @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        onclick="confirmDelete('{{ $item->id_cabang }}', '{{ $item->pimpinan_cabang }}', 'cabang travel')">
                                                         <i class="bx bx-trash"></i>
                                                     </button>
                                                 </form>

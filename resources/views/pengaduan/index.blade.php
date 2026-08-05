@@ -193,7 +193,16 @@ document.addEventListener('change', function(e) {
         const currentStatus = e.target.dataset.currentStatus;
         
         if (newStatus !== currentStatus) {
-            if (confirm('Yakin ingin mengubah status pengaduan ini?')) {
+            confirmAction({
+                title: 'Yakin ingin mengubah status pengaduan ini?',
+                icon: 'question',
+                confirmText: 'Ya, ubah',
+            }).then((result) => {
+                if (!result.isConfirmed) {
+                    e.target.value = currentStatus;
+                    return;
+                }
+
                 fetch(`/pengaduan/${id}/status`, {
                     method: 'POST',
                     headers: {
@@ -211,18 +220,16 @@ document.addEventListener('change', function(e) {
                         e.target.dataset.currentStatus = newStatus;
                         location.reload();
                     } else {
-                        alert('Error: ' + data.message);
+                        Swal.fire({ title: 'Gagal', text: 'Error: ' + data.message, icon: 'error', confirmButtonColor: '#556ee6' });
                         e.target.value = currentStatus;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Terjadi kesalahan saat update status');
+                    Swal.fire({ title: 'Gagal', text: 'Terjadi kesalahan saat update status', icon: 'error', confirmButtonColor: '#556ee6' });
                     e.target.value = currentStatus;
                 });
-            } else {
-                e.target.value = currentStatus;
-            }
+            });
         }
     }
 });

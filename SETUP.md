@@ -408,6 +408,8 @@ Semua route V2 memakai prefix `/v2`, middleware `auth` + `password.changed`:
 
 ## 9. Checklist deploy production
 
+> **Panduan lengkap production** (Nginx, Redis, Reverb WebSocket, Supervisor, SSL): lihat **[DEPLOY.md](./DEPLOY.md)**.
+
 - [ ] `.env` — `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` benar
 - [ ] Database credentials & `php artisan migrate --force` (termasuk `pengawasan_antrian` & role `pengawas`)
 - [ ] Akun **Pengawas** dibuat per kabupaten (seeder atau Manajemen User)
@@ -442,6 +444,7 @@ Semua route V2 memakai prefix `/v2`, middleware `auth` + `password.changed`:
 
 ## Dokumentasi terkait
 
+- [DEPLOY.md](./DEPLOY.md) — panduan deploy production (Redis, Reverb, Nginx, Supervisor)
 - [README.md](./README.md) — ringkasan fitur dan peran pengguna
 - [guidev2/](./guidev2/) — spesifikasi modul V2 (dashboard, pengawasan, risk, dll.)
 - [.env.example](./.env.example) — template variabel environment

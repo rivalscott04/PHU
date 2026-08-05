@@ -92,6 +92,8 @@
         </div>
     </div>
 
+    @include('components.pdf-preview-modal')
+
     <!-- Scripts -->
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -105,6 +107,7 @@
     <!-- Sweet Alerts js (must match CSS version above) -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.js"></script>
     <script src="{{ asset('js/confirm-dialogs.js') }}"></script>
+    <script src="{{ asset('js/pdf-preview.js') }}"></script>
 
     <!-- Sweet alert init js-->
     {{-- <script src="{{ asset('js/pages/sweet-alerts.init.js') }}"></script> --}}

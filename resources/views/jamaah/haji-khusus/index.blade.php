@@ -108,10 +108,9 @@
                                     </button>
                                 </div>
                                 
-                                <div id="collapse_{{ $accordionId }}" 
-                                     class="accordion-collapse collapse" 
-                                     aria-labelledby="heading_{{ $accordionId }}" 
-                                     data-bs-parent="#travelAccordion">
+                                <div id="collapse_{{ $accordionId }}"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="heading_{{ $accordionId }}">
                                     <div class="accordion-body p-0">
                                         <!-- Search and Filter Bar -->
                                         <div class="bg-light p-3 border-bottom">
@@ -218,7 +217,7 @@
                                                                     </a>
                                                                     <button type="button" 
                                                                             class="btn btn-sm btn-outline-danger" 
-                                                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama_lengkap }}')"
+                                                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama_lengkap }}', 'data jamaah')"
                                                                             title="Hapus">
                                                                         <i class="bx bx-trash"></i>
                                                                     </button>
@@ -349,7 +348,7 @@
                                             </a>
                                             <button type="button" 
                                                     class="btn btn-sm btn-outline-danger" 
-                                                    onclick="confirmDelete('{{ $jamaah->id }}', '{{ $jamaah->nama_lengkap }}')"
+                                                    onclick="confirmDelete('{{ $jamaah->id }}', '{{ $jamaah->nama_lengkap }}', 'data jamaah')"
                                                     title="Hapus">
                                                 <i class="bx bx-trash"></i>
                                             </button>
@@ -406,44 +405,60 @@
 
 @endsection
 
-@section('scripts')
+@push('js')
 <script>
-function confirmDelete(id, name) {
-    if (confirm(`Apakah Anda yakin ingin menghapus jamaah "${name}"?`)) {
-        document.getElementById(`delete-form-${id}`).submit();
-    }
-}
-
 function verifikasiBuktiSetor(id) {
-    const status = prompt('Masukkan status verifikasi (verified/rejected):');
-    if (status && (status === 'verified' || status === 'rejected')) {
-        const catatan = prompt('Masukkan catatan verifikasi (opsional):');
-        
-        fetch(`/jamaah/haji-khusus/${id}/verify-bukti-setor`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: JSON.stringify({
-                status: status,
-                catatan: catatan
+    Swal.fire({
+        title: 'Verifikasi Bukti Setor',
+        input: 'select',
+        inputOptions: { verified: 'Verified', rejected: 'Rejected' },
+        inputPlaceholder: 'Pilih status verifikasi',
+        showCancelButton: true,
+        confirmButtonText: 'Lanjut',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#556ee6',
+    }).then((statusResult) => {
+        if (!statusResult.isConfirmed || !statusResult.value) return;
+        const status = statusResult.value;
+
+        Swal.fire({
+            title: 'Catatan Verifikasi',
+            input: 'textarea',
+            inputPlaceholder: 'Catatan verifikasi (opsional)',
+            showCancelButton: true,
+            confirmButtonText: 'Simpan',
+            cancelButtonText: 'Batal',
+            confirmButtonColor: '#556ee6',
+        }).then((catatanResult) => {
+            if (!catatanResult.isConfirmed) return;
+            const catatan = catatanResult.value;
+
+            fetch(`/jamaah/haji-khusus/${id}/verify-bukti-setor`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    status: status,
+                    catatan: catatan
+                })
             })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Status verifikasi berhasil diperbarui');
-                location.reload();
-            } else {
-                alert('Gagal memperbarui status verifikasi: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat memperbarui status verifikasi');
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({ title: 'Berhasil', text: 'Status verifikasi berhasil diperbarui', icon: 'success', confirmButtonColor: '#556ee6' })
+                        .then(() => location.reload());
+                } else {
+                    Swal.fire({ title: 'Gagal', text: 'Gagal memperbarui status verifikasi: ' + data.message, icon: 'error', confirmButtonColor: '#556ee6' });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({ title: 'Gagal', text: 'Terjadi kesalahan saat memperbarui status verifikasi', icon: 'error', confirmButtonColor: '#556ee6' });
+            });
         });
-    }
+    });
 }
 
 // Global search functionality
@@ -499,25 +514,23 @@ function collapseAll() {
     });
 }
 
-// Debug function to check accordion state
-function debugAccordion() {
-    const accordionButtons = document.querySelectorAll('#travelAccordion .accordion-button');
-    accordionButtons.forEach((button, index) => {
-        console.log(`Accordion ${index + 1}:`, {
-            collapsed: button.classList.contains('collapsed'),
-            classes: button.className,
-            background: window.getComputedStyle(button).backgroundColor
-        });
-    });
-}
-
-
 
 // Export jamaah for specific travel
 function exportJamaah(travelId) {
-    if (confirm('Export data jamaah untuk travel ini?')) {
-        window.open(`/jamaah/haji-khusus/export?travel_id=${travelId}`, '_blank');
-    }
+    Swal.fire({
+        title: 'Export data jamaah untuk travel ini?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Ya, export',
+        cancelButtonText: 'Batal',
+        confirmButtonColor: '#556ee6',
+        cancelButtonColor: '#74788d',
+        reverseButtons: true,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.open(`/jamaah/haji-khusus/export?travel_id=${travelId}`, '_blank');
+        }
+    });
 }
 
 // Print jamaah for specific accordion
@@ -546,7 +559,9 @@ function printJamaah(accordionId) {
     printWindow.print();
 }
 </script>
+@endpush
 
+@push('styles')
 <style>
     .accordion-button {
         background-color: #f8f9fa;
@@ -620,4 +635,4 @@ function printJamaah(accordionId) {
         }
     }
 </style>
-@endsection 
+@endpush 

@@ -2,10 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\ValidationHelper;
+use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StorePengaduanRequest extends FormRequest
 {
+    use UsesFriendlyValidation;
+
     public function authorize(): bool
     {
         return true;
@@ -29,14 +33,8 @@ class StorePengaduanRequest extends FormRequest
         ];
     }
 
-    public function messages(): array
+    protected function friendlyValidationOverrides(): array
     {
-        return [
-            'nama_pengadu.regex' => 'Nama pengadu hanya boleh berisi huruf, spasi, tanda hubung, titik, dan apostrof.',
-            'hal_aduan.min' => 'Hal yang diadukan minimal 10 karakter.',
-            'hal_aduan.max' => 'Hal yang diadukan maksimal 5000 karakter.',
-            'berkas_aduan.mimes' => 'Lampiran harus berformat PDF, JPG, atau PNG.',
-            'berkas_aduan.max' => 'Ukuran lampiran maksimal 2MB.',
-        ];
+        return ValidationHelper::fileMaxMb('berkas_aduan', 2);
     }
 }

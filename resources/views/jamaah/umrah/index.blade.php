@@ -198,7 +198,7 @@
                                                                         </a>
                                                                         <button type="button"
                                                                             class="btn btn-sm btn-outline-danger"
-                                                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')"
+                                                                            onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}', 'data jamaah')"
                                                                             title="Hapus">
                                                                             <i class="bx bx-trash"></i>
                                                                         </button>
@@ -281,7 +281,7 @@
                                                     <i class="bx bx-edit text-success me-2"></i>
                                                 </a>
                                                 <a href="javascript:void(0)"
-                                                    onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}')">
+                                                    onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}', 'data jamaah')">
                                                     <i class="bx bx-trash text-danger"></i>
                                                 </a>
                                                 <form id="delete-form-{{ $item->id }}"
@@ -348,7 +348,7 @@
                         <div class="col-md-6">
                             <div class="card border-primary">
                                 <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0"><i class="bx bx-globe me-2"></i>Export Global</h6>
+                                    <h6 class="mb-0 text-white"><i class="bx bx-globe me-2"></i>Export Global</h6>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted small">Export semua data jamaah dari semua PPIU dalam satu file
@@ -371,7 +371,7 @@
                         <div class="col-md-6">
                             <div class="card border-success">
                                 <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0"><i class="bx bx-building me-2"></i>Export Per PPIU</h6>
+                                    <h6 class="mb-0 text-white"><i class="bx bx-building me-2"></i>Export Per PPIU</h6>
                                 </div>
                                 <div class="card-body">
                                     <p class="text-muted small">Export data jamaah dari PPIU tertentu saja.</p>
@@ -622,7 +622,7 @@
         function exportByTravel(format) {
             const travelId = document.getElementById('travelSelect').value;
             if (!travelId) {
-                alert('Silakan pilih PPIU terlebih dahulu!');
+                Swal.fire({ title: 'Perhatian', text: 'Silakan pilih PPIU terlebih dahulu!', icon: 'warning', confirmButtonColor: '#556ee6' });
                 return;
             }
             const url = `/jamaah/umrah/export?format=${format}&type=travel&travel_id=${travelId}`;
@@ -665,12 +665,7 @@
             printWindow.print();
         }
 
-        // Confirm delete
-        function confirmDelete(id, nama) {
-            if (confirm('Apakah Anda yakin ingin menghapus jamaah "' + nama + '"?')) {
-                document.getElementById('delete-form-' + id).submit();
-            }
-        }
+        // confirmDelete(id, nama, entityLabel) provided globally by js/confirm-dialogs.js
 
         // Auto-expand first accordion on page load
         document.addEventListener('DOMContentLoaded', function() {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V2;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use Illuminate\Http\Request;
@@ -34,7 +35,7 @@ class NotificationController extends Controller
 
     public function markRead(Request $request)
     {
-        $data = $request->validate([
+        $data = ValidationHelper::validate($request, [
             'id' => ['required', 'uuid'],
         ]);
 

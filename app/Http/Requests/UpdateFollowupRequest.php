@@ -2,11 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\ValidationHelper;
+use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateFollowupRequest extends FormRequest
 {
+    use UsesFriendlyValidation;
+
     public function authorize(): bool
     {
         return true;
@@ -22,5 +26,15 @@ class UpdateFollowupRequest extends FormRequest
             ])],
             'remarks' => ['nullable', 'string'],
         ];
+    }
+
+    protected function friendlyValidationOverrides(): array
+    {
+        return array_merge(
+            ValidationHelper::fileMaxMb('attachment', 10),
+            [
+                'description.min' => 'Deskripsi tindak lanjut minimal :min karakter.',
+            ]
+        );
     }
 }

@@ -158,7 +158,7 @@
 
             const selected = document.querySelectorAll('#jamaahIdsHidden input[name="jamaah_ids[]"]').length;
             if (selected < 1) {
-                alert('Pilih minimal satu jamaah untuk keberangkatan ini.');
+                Swal.fire({ title: 'Perhatian', text: 'Pilih minimal satu jamaah untuk keberangkatan ini.', icon: 'warning', confirmButtonColor: '#556ee6' });
                 return false;
             }
 

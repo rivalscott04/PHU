@@ -416,9 +416,15 @@
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->dokumen_ktp)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_ktp) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bx bx-download me-1"></i>Lihat Dokumen
-                                        </a>
+                                        @if(Str::endsWith($jamaahHajiKhusus->dokumen_ktp, '.pdf'))
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_ktp) }}', 'Dokumen KTP')">
+                                                <i class="bx bx-file-find me-1"></i>Lihat Dokumen
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_ktp) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-image me-1"></i>Lihat Dokumen
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 @error('dokumen_ktp')
@@ -435,9 +441,15 @@
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->dokumen_kk)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_kk) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bx bx-download me-1"></i>Lihat Dokumen
-                                        </a>
+                                        @if(Str::endsWith($jamaahHajiKhusus->dokumen_kk, '.pdf'))
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_kk) }}', 'Dokumen KK')">
+                                                <i class="bx bx-file-find me-1"></i>Lihat Dokumen
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_kk) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-image me-1"></i>Lihat Dokumen
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 @error('dokumen_kk')
@@ -454,9 +466,15 @@
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->dokumen_paspor)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_paspor) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bx bx-download me-1"></i>Lihat Dokumen
-                                        </a>
+                                        @if(Str::endsWith($jamaahHajiKhusus->dokumen_paspor, '.pdf'))
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->dokumen_paspor) }}', 'Dokumen Paspor')">
+                                                <i class="bx bx-file-find me-1"></i>Lihat Dokumen
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($jamaahHajiKhusus->dokumen_paspor) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-image me-1"></i>Lihat Dokumen
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 @error('dokumen_paspor')
@@ -492,9 +510,15 @@
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->surat_keterangan)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->surat_keterangan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bx bx-download me-1"></i>Lihat Dokumen
-                                        </a>
+                                        @if(Str::endsWith($jamaahHajiKhusus->surat_keterangan, '.pdf'))
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->surat_keterangan) }}', 'Surat Keterangan')">
+                                                <i class="bx bx-file-find me-1"></i>Lihat Dokumen
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($jamaahHajiKhusus->surat_keterangan) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-image me-1"></i>Lihat Dokumen
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 @error('surat_keterangan')
@@ -511,9 +535,15 @@
                                 <small class="text-muted">Format: PDF, JPG, JPEG, PNG (Max: 2MB)</small>
                                 @if($jamaahHajiKhusus->bukti_setor_bank)
                                     <div class="mt-1">
-                                        <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                            <i class="bx bx-download me-1"></i>Lihat Bukti Setor
-                                        </a>
+                                        @if(Str::endsWith($jamaahHajiKhusus->bukti_setor_bank, '.pdf'))
+                                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openPdfPreview('{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}', 'Bukti Setor Bank')">
+                                                <i class="bx bx-file-find me-1"></i>Lihat Bukti Setor
+                                            </button>
+                                        @else
+                                            <a href="{{ Storage::url($jamaahHajiKhusus->bukti_setor_bank) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                <i class="bx bx-image me-1"></i>Lihat Bukti Setor
+                                            </a>
+                                        @endif
                                     </div>
                                 @endif
                                 @error('bukti_setor_bank')

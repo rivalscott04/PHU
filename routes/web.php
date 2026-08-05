@@ -40,6 +40,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\PublicTravelController;
+use App\Http\Controllers\TravelRegistrationController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -53,6 +54,12 @@ Route::middleware('throttle:public')->group(function () {
     Route::get('/travel-public/{travel:public_uuid}', [PublicTravelController::class, 'show'])
         ->name('travel.public.show')
         ->whereUuid('travel');
+
+    Route::middleware('guest')->group(function () {
+        Route::get('/registrasi-travel', [TravelRegistrationController::class, 'create'])->name('travel.registration.create');
+        Route::post('/registrasi-travel', [TravelRegistrationController::class, 'store'])->name('travel.registration.store');
+        Route::get('/registrasi-travel/sukses', [TravelRegistrationController::class, 'success'])->name('travel.registration.success');
+    });
 });
 
 Route::post('/register', [RegisterController::class, 'store'])->middleware(['guest', 'throttle:auth'])->name('register.perform');
@@ -168,6 +175,17 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
         ->name('travel.update-status')
         ->middleware('auth', 'password.changed');
+
+    Route::post('/travel/{id}/approve-registration', [KanwilController::class, 'approveRegistration'])
+        ->name('travel.registration.approve')
+        ->whereNumber('id');
+    Route::post('/travel/{id}/reject-registration', [KanwilController::class, 'rejectRegistration'])
+        ->name('travel.registration.reject')
+        ->whereNumber('id');
+    Route::get('/travel/{id}/registration-document/{type}', [KanwilController::class, 'showRegistrationDocument'])
+        ->name('travel.registration.document')
+        ->whereNumber('id')
+        ->whereIn('type', ['sk', 'akreditasi']);
 
     // Sertifikat routes
     Route::resource('sertifikat', SertifikatController::class)->except(['show', 'edit', 'update']);

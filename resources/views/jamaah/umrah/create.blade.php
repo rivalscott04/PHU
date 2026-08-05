@@ -2,16 +2,6 @@
 
 @section('content')
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="row">
         <div class="col-12">
             <div class="card">
@@ -27,19 +17,31 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="nik" class="form-label">NIK @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="nik" name="nik" required>
+                                <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik') }}" required>
+                                @error('nik')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="nama" class="form-label">Nama @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="nama" name="nama" required>
+                                <input type="text" class="form-control @error('nama') is-invalid @enderror" id="nama" name="nama" value="{{ old('nama') }}" required>
+                                @error('nama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="alamat" class="form-label">Alamat @include('partials.required-star')</label>
-                                <textarea class="form-control" id="alamat" name="alamat" required></textarea>
+                                <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" required>{{ old('alamat') }}</textarea>
+                                @error('alamat')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="nomor_hp" class="form-label">Nomor HP @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="nomor_hp" name="nomor_hp" required>
+                                <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" required>
+                                @error('nomor_hp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
                         <button type="submit" class="btn btn-primary">Simpan</button>
@@ -71,47 +73,4 @@
         </div>
     </div>
 
-@endsection
-
-@section('scripts')
-<script>
-// Auto format phone number with validation
-document.getElementById('nomor_hp').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    e.target.value = value;
-    
-    // Validate phone number starts with 08
-    const phoneInput = e.target;
-    const phoneValue = phoneInput.value;
-    
-    // Remove existing validation message
-    const existingMessage = phoneInput.parentNode.querySelector('.phone-validation-message');
-    if (existingMessage) {
-        existingMessage.remove();
-    }
-    
-    // Add validation if phone number is entered but doesn't start with 08
-    if (phoneValue && phoneValue.length > 0 && !phoneValue.startsWith('08')) {
-        const errorMessage = document.createElement('div');
-        errorMessage.className = 'phone-validation-message text-danger small mt-1';
-        errorMessage.textContent = 'Nomor HP harus diawali dengan 08';
-        phoneInput.parentNode.appendChild(errorMessage);
-        phoneInput.classList.add('is-invalid');
-    } else if (phoneValue && phoneValue.startsWith('08')) {
-        phoneInput.classList.remove('is-invalid');
-        phoneInput.classList.add('is-valid');
-    } else {
-        phoneInput.classList.remove('is-invalid', 'is-valid');
-    }
-});
-
-// Auto format NIK
-document.getElementById('nik').addEventListener('input', function(e) {
-    let value = e.target.value.replace(/\D/g, '');
-    if (value.length > 16) {
-        value = value.substring(0, 16);
-    }
-    e.target.value = value;
-});
-</script>
 @endsection

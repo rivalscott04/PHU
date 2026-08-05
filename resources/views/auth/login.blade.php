@@ -105,6 +105,13 @@
                                             In</button>
                                     </div>
 
+                                    <div class="mt-4 text-center">
+                                        <p class="text-muted mb-2">Belum terdaftar sebagai travel?</p>
+                                        <a href="{{ route('travel.registration.create') }}" class="btn btn-outline-primary btn-sm w-100">
+                                            <i class="bx bx-building-house me-1"></i> Registrasi Travel (PPIU / PIHK)
+                                        </a>
+                                    </div>
+
                                 </form>
                             </div>
 

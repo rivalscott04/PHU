@@ -93,7 +93,7 @@
                                                     </a>
 
                                                     <button type="button" class="btn btn-sm btn-danger"
-                                                        onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama_ppiu }}')"
+                                                        onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama_ppiu }}', 'sertifikat')"
                                                         title="Hapus">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
@@ -372,30 +372,5 @@
                 });
         }
 
-        function confirmDelete(id, namaPpiu) {
-            Swal.fire({
-                title: 'Apakah Anda yakin?',
-                text: `Sertifikat untuk ${namaPpiu} akan dihapus secara permanen!`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Submit delete form
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = `/sertifikat/${id}`;
-                    form.innerHTML = `
-                        @csrf
-                        @method('DELETE')
-                    `;
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            });
-        }
     </script>
 @endpush

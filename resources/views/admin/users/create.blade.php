@@ -128,7 +128,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (document.querySelectorAll('input[name="pengawas_kabupatens[]"]:checked').length > 0) return;
 
         event.preventDefault();
-        alert('Pilih minimal satu kabupaten/kota untuk mode akses kustom.');
+        Swal.fire({ title: 'Perhatian', text: 'Pilih minimal satu kabupaten/kota untuk mode akses kustom.', icon: 'warning', confirmButtonColor: '#556ee6' });
     });
 });
 </script>

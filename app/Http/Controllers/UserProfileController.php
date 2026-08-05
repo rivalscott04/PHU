@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class UserProfileController extends Controller
     {
         $user = Auth::user();
         
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $user->id,

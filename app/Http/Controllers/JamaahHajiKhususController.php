@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Models\JamaahHajiKhusus;
 use App\Models\TravelCompany;
 use App\Exports\JamaahHajiKhususExport;
@@ -103,7 +104,7 @@ class JamaahHajiKhususController extends Controller
                 ->with('error', 'Anda tidak memiliki akses untuk menambah jamaah haji khusus.');
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
             'no_ktp' => 'required|string|size:16',
             'tempat_lahir' => 'required|string|max:255',
@@ -135,9 +136,14 @@ class JamaahHajiKhususController extends Controller
             'dokumen_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
             'surat_keterangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
             'bukti_setor_bank' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
-        ], [
-            'no_hp.regex' => 'Nomor HP harus diawali dengan 08',
-        ]);
+        ], array_merge(
+            ValidationHelper::fileMaxMb('dokumen_ktp', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_kk', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_paspor', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_foto', 0.5),
+            ValidationHelper::fileMaxMb('surat_keterangan', 0.5),
+            ValidationHelper::fileMaxMb('bukti_setor_bank', 0.5),
+        ));
 
         $data = $request->all();
         $data['travel_id'] = $user->role === 'user' ? $user->travel->id : $request->travel_id;
@@ -211,7 +217,7 @@ class JamaahHajiKhususController extends Controller
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
             'no_ktp' => 'required|string|size:16',
             'tempat_lahir' => 'required|string|max:255',
@@ -242,9 +248,13 @@ class JamaahHajiKhususController extends Controller
             'dokumen_paspor' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
             'dokumen_foto' => 'nullable|file|mimes:jpg,jpeg,png|max:500',
             'surat_keterangan' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
-        ], [
-            'no_hp.regex' => 'Nomor HP harus diawali dengan 08',
-        ]);
+        ], array_merge(
+            ValidationHelper::fileMaxMb('dokumen_ktp', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_kk', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_paspor', 0.5),
+            ValidationHelper::fileMaxMb('dokumen_foto', 0.5),
+            ValidationHelper::fileMaxMb('surat_keterangan', 0.5),
+        ));
 
         $data = $request->except(['dokumen_ktp', 'dokumen_kk', 'dokumen_paspor', 'dokumen_foto', 'surat_keterangan']);
 
@@ -307,7 +317,7 @@ class JamaahHajiKhususController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
-        $request->validate([
+        ValidationHelper::validate($request, [
             'status_pendaftaran' => 'required|in:pending,approved,rejected,completed'
         ]);
 
@@ -538,7 +548,7 @@ class JamaahHajiKhususController extends Controller
             ], 403);
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'status_verifikasi_bukti' => 'required|in:verified,rejected',
             'catatan_verifikasi' => 'nullable|string',
         ]);
@@ -584,7 +594,7 @@ class JamaahHajiKhususController extends Controller
             ], 400);
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nomor_porsi' => 'required|string|max:255|unique:jamaah_haji_khusus,nomor_porsi,' . $jamaahHajiKhusus->id,
             'tahun_pendaftaran' => 'required|string|max:4',
         ]);

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V2;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use App\Http\Requests\StoreFollowupRequest;
@@ -111,7 +112,7 @@ class FollowupController extends Controller
     {
         $this->authorize('approve', $followup);
 
-        $data = $request->validate(['remarks' => ['nullable', 'string']]);
+        $data = ValidationHelper::validate($request, ['remarks' => ['nullable', 'string']]);
 
         try {
             $updated = $this->followupService->approve($followup, $data['remarks'] ?? null);
@@ -130,7 +131,7 @@ class FollowupController extends Controller
     {
         $this->authorize('approve', $followup);
 
-        $data = $request->validate(['remarks' => ['required', 'string', 'min:10']]);
+        $data = ValidationHelper::validate($request, ['remarks' => ['required', 'string', 'min:10']]);
 
         try {
             $updated = $this->followupService->requestRevision($followup, $data['remarks']);

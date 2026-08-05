@@ -16,6 +16,7 @@
         "intervention/image": "^3.11",
         "lab404/laravel-impersonate": "^1.7.8",
         "laravel/framework": "^12.0",
+        "laravel/reverb": "^1.11",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
         "laravel/ui": "^4.6",

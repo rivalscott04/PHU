@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Requests\StorePengaduanRequest;
 use App\Models\Pengaduan;
 use App\Models\TravelCompany;
@@ -123,7 +124,7 @@ class PengaduanController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'status' => 'required|in:pending,in_progress,completed,rejected',
             'admin_notes' => 'nullable|string',
         ]);

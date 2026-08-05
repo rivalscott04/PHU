@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Models\Jamaah;
 use App\Exports\JamaahExport;
 use App\Exports\JamaahUmrahExport;
@@ -11,6 +12,7 @@ use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
 use App\Support\KanwilContact;
+use Illuminate\Validation\Rule;
 
 class JamaahController extends Controller
 {
@@ -112,17 +114,20 @@ class JamaahController extends Controller
 
     public function storeHaji(Request $request)
     {
-        $request->validate([
-            'nik' => 'required|max:16',
+        $user = auth()->user();
+
+        ValidationHelper::validate($request, [
+            'nik' => [
+                'required',
+                'digits:16',
+                Rule::unique('jamaah', 'nik')->where(fn ($query) => $query->where('travel_id', $user->travel_id)),
+            ],
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15|regex:/^08/',
-        ], [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {
-            $user = auth()->user();
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'haji';
             $jamaahData['user_id'] = $user->id;
@@ -137,17 +142,20 @@ class JamaahController extends Controller
 
     public function storeUmrah(Request $request)
     {
-        $request->validate([
-            'nik' => 'required|max:16',
+        $user = auth()->user();
+
+        ValidationHelper::validate($request, [
+            'nik' => [
+                'required',
+                'digits:16',
+                Rule::unique('jamaah', 'nik')->where(fn ($query) => $query->where('travel_id', $user->travel_id)),
+            ],
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15|regex:/^08/',
-        ], [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {
-            $user = auth()->user();
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'umrah';
             $jamaahData['user_id'] = $user->id;
@@ -168,12 +176,10 @@ class JamaahController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
             'nomor_hp' => 'required|string|max:15|regex:/^08/',
-        ], [
-            'nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ]);
 
         try {
@@ -206,7 +212,7 @@ class JamaahController extends Controller
 
     public function import(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'file' => 'required|mimes:xlsx,xls'
         ]);
 

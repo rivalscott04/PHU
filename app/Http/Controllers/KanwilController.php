@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Models\CabangTravel;
+use App\Enums\TravelRegistrationStatus;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use App\Imports\CabangTravelImport;
 use App\Exports\TravelPusatExport;
 use App\Exports\TravelCabangExport;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 
@@ -23,7 +26,7 @@ class KanwilController extends Controller
     public function store(Request $request)
     {
         // Validasi input
-        $validatedData = $request->validate([
+        $validatedData = ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
             'Pusat' => 'required|string|max:255',
             'Tanggal' => 'required|date',
@@ -41,6 +44,9 @@ class KanwilController extends Controller
         // Format data sebelum disimpan
         $validatedData['Tanggal'] = date('Y-m-d', strtotime($request->Tanggal));
         $validatedData['tanggal_akreditasi'] = date('Y-m-d', strtotime($request->tanggal_akreditasi));
+        $validatedData['registration_status'] = TravelRegistrationStatus::Approved;
+        $validatedData['verified_at'] = now();
+        $validatedData['verified_by'] = auth()->id();
 
         $travelCompany = TravelCompany::create($validatedData);
 
@@ -63,7 +69,7 @@ class KanwilController extends Controller
     public function update(Request $request, $id)
     {
         // Validasi input
-        $validatedData = $request->validate([
+        $validatedData = ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
             'Pusat' => 'required|string|max:255',
             'nilai_akreditasi' => 'required|string|max:255',
@@ -104,7 +110,7 @@ class KanwilController extends Controller
         ]);
 
         try {
-            $request->validate([
+            ValidationHelper::validate($request, [
                 'Status' => 'required|in:PPIU,PIHK'
             ]);
 
@@ -175,24 +181,123 @@ class KanwilController extends Controller
         }
     }
 
-    public function showTravel()
+    public function showTravel(Request $request)
     {
         $user = auth()->user();
+        $filter = $request->get('filter', 'all');
 
-        // Check if user is authenticated before accessing role - optimized queries
-        if ($user && $user->role === 'admin') {
-            // Admin can see all travel companies
-            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')->get();
-        } else if ($user && $user->role === 'kabupaten') {
-            // Kabupaten users can only see travel companies in their area
-            $data = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
-                ->where('kab_kota', $user->kabupaten)->get();
-        } else {
-            // Other roles or unauthenticated users see empty data
-            $data = collect();
+        $query = TravelCompany::query()
+            ->with('user:id,travel_id,nama,email,nomor_hp')
+            ->select(
+                'id',
+                'Penyelenggara',
+                'Pusat',
+                'Tanggal',
+                'nilai_akreditasi',
+                'tanggal_akreditasi',
+                'lembaga_akreditasi',
+                'Pimpinan',
+                'alamat_kantor_lama',
+                'alamat_kantor_baru',
+                'Telepon',
+                'Status',
+                'kab_kota',
+                'registration_status',
+                'registration_notes',
+                'dokumen_sk',
+                'dokumen_akreditasi',
+                'verified_at',
+            );
+
+        if ($user && $user->role === 'kabupaten') {
+            $query->where('kab_kota', $user->kabupaten);
+        } elseif (! $user || $user->role !== 'admin') {
+            $query->whereRaw('1 = 0');
         }
 
-        return view('kanwil.travel', ['data' => $data]);
+        if ($filter === 'pending') {
+            $query->pendingRegistration();
+        } elseif ($filter === 'approved') {
+            $query->approved();
+        } elseif ($filter === 'rejected') {
+            $query->where('registration_status', TravelRegistrationStatus::Rejected);
+        }
+
+        $data = $query->orderByDesc('created_at')->get();
+        $pendingCount = TravelCompany::pendingRegistration()->count();
+
+        return view('kanwil.travel', [
+            'data' => $data,
+            'filter' => $filter,
+            'pendingCount' => $pendingCount,
+        ]);
+    }
+
+    public function approveRegistration($id)
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        $travel = TravelCompany::with('user')->findOrFail($id);
+
+        if (! $travel->isRegistrationPending()) {
+            return redirect()->route('travel')->with('error', 'Pendaftaran ini sudah diproses sebelumnya.');
+        }
+
+        $travel->update([
+            'registration_status' => TravelRegistrationStatus::Approved,
+            'registration_notes' => null,
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('travel', ['filter' => 'pending'])
+            ->with('success', "Pendaftaran {$travel->Penyelenggara} berhasil disetujui. PIC travel sudah bisa login.");
+    }
+
+    public function rejectRegistration(Request $request, $id)
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        ValidationHelper::validate($request, [
+            'registration_notes' => 'required|string|max:1000',
+        ]);
+
+        $travel = TravelCompany::findOrFail($id);
+
+        if (! $travel->isRegistrationPending()) {
+            return redirect()->route('travel')->with('error', 'Pendaftaran ini sudah diproses sebelumnya.');
+        }
+
+        $travel->update([
+            'registration_status' => TravelRegistrationStatus::Rejected,
+            'registration_notes' => $request->registration_notes,
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('travel', ['filter' => 'pending'])
+            ->with('success', "Pendaftaran {$travel->Penyelenggara} ditolak.");
+    }
+
+    public function showRegistrationDocument(int $id, string $type)
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        $travel = TravelCompany::findOrFail($id);
+
+        $path = match ($type) {
+            'sk' => $travel->dokumen_sk,
+            'akreditasi' => $travel->dokumen_akreditasi,
+            default => null,
+        };
+
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return Storage::disk('public')->response($path, null, [
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+        ]);
     }
 
     public function createCabangTravel()
@@ -204,7 +309,7 @@ class KanwilController extends Controller
     public function storeCabangTravel(Request $request)
     {
         // Validate input
-        $validatedData = $request->validate([
+        $validatedData = ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
             'pusat' => 'nullable|string|max:255',
@@ -262,7 +367,7 @@ class KanwilController extends Controller
     }
     public function import(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'file' => 'required|mimes:xlsx,xls,csv'
         ]);
 
@@ -283,7 +388,7 @@ class KanwilController extends Controller
 
     public function updateCabangTravel(Request $request, $id_cabang)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'Penyelenggara' => 'required|string|max:255',
             'kabupaten' => 'required|string|max:255',
             'pusat' => 'nullable|string|max:255',

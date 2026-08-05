@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use App\Services\AuditLogService;
 use App\Models\User;
 use App\Enums\UserRole;
@@ -30,14 +31,9 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'email_or_phone' => 'required|string',
             'password' => 'required|string',
-        ], [
-            'email_or_phone.required' => 'Email atau nomor HP wajib diisi.',
-            'email_or_phone.string' => 'Format email atau nomor HP tidak valid.',
-            'password.required' => 'Password wajib diisi.',
-            'password.string' => 'Format password tidak valid.',
         ]);
 
         $identifier = $request->input('email_or_phone');
@@ -47,6 +43,26 @@ class LoginController extends Controller
         $user = User::findByEmailOrPhone($identifier);
 
         if ($user && Hash::check($password, $user->password)) {
+            if ($user->role === UserRole::User->value && $user->travel) {
+                $registrationStatus = $user->travel->registration_status;
+
+                if ($registrationStatus?->value === 'pending') {
+                    return redirect()->back()->withErrors([
+                        'email_or_phone' => 'Pendaftaran travel Anda masih menunggu verifikasi Admin Kanwil. Silakan coba lagi setelah disetujui.',
+                    ]);
+                }
+
+                if ($registrationStatus?->value === 'rejected') {
+                    $note = $user->travel->registration_notes
+                        ? ' Alasan: ' . $user->travel->registration_notes
+                        : '';
+
+                    return redirect()->back()->withErrors([
+                        'email_or_phone' => 'Pendaftaran travel Anda ditolak.' . $note,
+                    ]);
+                }
+            }
+
             Auth::login($user);
             $this->auditLogService->log('auth', 'login', 'masuk ke sistem', $user->id);
 

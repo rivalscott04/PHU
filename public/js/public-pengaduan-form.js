@@ -2,17 +2,36 @@
     document.addEventListener('DOMContentLoaded', function () {
         document.querySelectorAll('[data-form-id]').forEach(function (form) {
             form.addEventListener('submit', function (event) {
+                if (form.dataset.confirmed === '1') {
+                    return;
+                }
+
+                event.preventDefault();
+
                 const formId = form.dataset.formId;
                 const errors = validatePublicPengaduanForm(form, formId);
 
                 if (errors.length > 0) {
-                    event.preventDefault();
-                    alert(errors.join('\n'));
+                    if (typeof showValidationErrors === 'function') {
+                        showValidationErrors(errors);
+                    } else {
+                        alert(errors.join('\n'));
+                    }
                     return;
                 }
 
-                if (!window.confirm('Apakah Anda yakin ingin mengirim pengaduan ini?')) {
-                    event.preventDefault();
+                if (typeof confirmPublicFormSubmit === 'function') {
+                    confirmPublicFormSubmit(form, {
+                        title: 'Kirim pengaduan?',
+                        text: 'Apakah Anda yakin ingin mengirim pengaduan ini?',
+                        confirmText: 'Ya, kirim',
+                    });
+                    return;
+                }
+
+                if (window.confirm('Apakah Anda yakin ingin mengirim pengaduan ini?')) {
+                    form.dataset.confirmed = '1';
+                    form.submit();
                 }
             });
         });

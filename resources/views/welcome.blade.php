@@ -1654,7 +1654,12 @@
                     url: window.location.protocol + '//' + window.location.host + '/keberangkatan/events',
                     method: 'GET',
                     failure: function() {
-                        alert('Error mengambil data keberangkatan!');
+                        Swal.fire({
+                            title: 'Gagal',
+                            text: 'Error mengambil data keberangkatan!',
+                            icon: 'error',
+                            confirmButtonColor: '#556ee6',
+                        });
                     }
                 },
                 eventClick: function(info) {

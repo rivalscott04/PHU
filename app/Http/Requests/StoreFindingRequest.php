@@ -2,11 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class StoreFindingRequest extends FormRequest
 {
+    use UsesFriendlyValidation;
+
     public function authorize(): bool
     {
         return true;

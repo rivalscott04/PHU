@@ -27,9 +27,15 @@
                                         <td>{{ $item->user->username }}</td>
                                         <td>
                                             @if ($item->berkas_pengunduran)
-                                                <a href="{{ Storage::url($item->berkas_pengunduran) }}" target="_blank">
-                                                    <i class="bx bx-file"></i>
-                                                </a>
+                                                @if (Str::endsWith($item->berkas_pengunduran, '.pdf'))
+                                                    <a href="javascript:void(0)" onclick="openPdfPreview('{{ Storage::url($item->berkas_pengunduran) }}', 'Berkas Pengunduran - {{ $item->user->username }}')">
+                                                        <i class="bx bx-file"></i>
+                                                    </a>
+                                                @else
+                                                    <a href="{{ Storage::url($item->berkas_pengunduran) }}" target="_blank">
+                                                        <i class="bx bx-file"></i>
+                                                    </a>
+                                                @endif
                                             @else
                                                 -
                                             @endif

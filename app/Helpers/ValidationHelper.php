@@ -1,0 +1,416 @@
+<?php
+
+namespace App\Helpers;
+
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator as ValidatorFactory;
+
+class ValidationHelper
+{
+    private const LABELS = [
+        'Penyelenggara' => 'Nama Penyelenggara',
+        'Status' => 'Jenis Izin',
+        'Pusat' => 'No. SK / NIB Pusat',
+        'Tanggal' => 'Tanggal SK',
+        'nilai_akreditasi' => 'Nilai Akreditasi',
+        'tanggal_akreditasi' => 'Tanggal Akreditasi',
+        'lembaga_akreditasi' => 'Lembaga Akreditasi',
+        'Pimpinan' => 'Nama Pimpinan / Direktur',
+        'Telepon' => 'Telepon Kantor',
+        'alamat_kantor_lama' => 'Alamat Kantor (Lama)',
+        'alamat_kantor_baru' => 'Alamat Kantor (Saat Ini)',
+        'kab_kota' => 'Kabupaten / Kota',
+        'pic_nama' => 'Nama Lengkap PIC',
+        'pic_email' => 'Email PIC',
+        'pic_nomor_hp' => 'Nomor HP (WhatsApp)',
+        'password' => 'Password',
+        'password_confirmation' => 'Ulangi Password',
+        'dokumen_sk' => 'Scan SK / Izin Operasional',
+        'dokumen_akreditasi' => 'Scan Sertifikat Akreditasi',
+        'nama_pengadu' => 'Nama Pengadu',
+        'travels_id' => 'Travel yang Diadukan',
+        'hal_aduan' => 'Hal yang Diadukan',
+        'berkas_aduan' => 'Lampiran Aduan',
+        'nama' => 'Nama Lengkap',
+        'email' => 'Email',
+        'nomor_hp' => 'Nomor HP',
+        'role' => 'Peran Pengguna',
+        'kabupaten' => 'Kabupaten',
+        'travel_id' => 'Travel',
+        'nik' => 'NIK',
+        'alamat' => 'Alamat',
+        'file' => 'File Excel',
+        'excel_file' => 'File Excel',
+        'email_or_phone' => 'Email atau Nomor HP',
+        'name' => 'Nama Penanggung Jawab',
+        'jabatan' => 'Jabatan',
+        'ppiuname' => 'Nama PPIU',
+        'address_phone' => 'Alamat dan Telepon',
+        'jamaah_ids' => 'Daftar Jamaah',
+        'days' => 'Jumlah Hari',
+        'price' => 'Harga Paket',
+        'datetime' => 'Tanggal Keberangkatan',
+        'airlines' => 'Maskapai Pergi',
+        'returndate' => 'Tanggal Kembali',
+        'airlines2' => 'Maskapai Pulang',
+        'pdf_file' => 'File PDF',
+        'status' => 'Status',
+        'admin_notes' => 'Catatan Admin',
+        'registration_notes' => 'Alasan Penolakan',
+        'pusat' => 'No. SK Pusat',
+        'pimpinan_pusat' => 'Pimpinan Pusat',
+        'alamat_pusat' => 'Alamat Pusat',
+        'SK_BA' => 'No. SK / BA',
+        'tanggal' => 'Tanggal',
+        'pimpinan_cabang' => 'Pimpinan Cabang',
+        'alamat_cabang' => 'Alamat Cabang',
+        'telepon' => 'Telepon',
+        'nama_lengkap' => 'Nama Lengkap',
+        'no_ktp' => 'Nomor KTP',
+        'tempat_lahir' => 'Tempat Lahir',
+        'tanggal_lahir' => 'Tanggal Lahir',
+        'jenis_kelamin' => 'Jenis Kelamin',
+        'kota' => 'Kota',
+        'kecamatan' => 'Kecamatan',
+        'provinsi' => 'Provinsi',
+        'kode_pos' => 'Kode Pos',
+        'no_hp' => 'Nomor HP',
+        'nama_ayah' => 'Nama Ayah',
+        'pekerjaan' => 'Pekerjaan',
+        'pendidikan_terakhir' => 'Pendidikan Terakhir',
+        'status_pernikahan' => 'Status Pernikahan',
+        'pergi_haji' => 'Riwayat Haji',
+        'golongan_darah' => 'Golongan Darah',
+        'alergi' => 'Alergi',
+        'no_paspor' => 'Nomor Paspor',
+        'tanggal_berlaku_paspor' => 'Masa Berlaku Paspor',
+        'tempat_terbit_paspor' => 'Tempat Terbit Paspor',
+        'nomor_porsi' => 'Nomor Porsi',
+        'tahun_pendaftaran' => 'Tahun Pendaftaran',
+        'catatan_khusus' => 'Catatan Khusus',
+        'dokumen_ktp' => 'Scan KTP',
+        'dokumen_kk' => 'Scan Kartu Keluarga',
+        'dokumen_paspor' => 'Scan Paspor',
+        'dokumen_foto' => 'Foto',
+        'surat_keterangan' => 'Surat Keterangan',
+        'bukti_setor_bank' => 'Bukti Setor Bank',
+        'status_pendaftaran' => 'Status Pendaftaran',
+        'status_verifikasi_bukti' => 'Status Verifikasi Bukti',
+        'catatan_verifikasi' => 'Catatan Verifikasi',
+        'berkas_pengunduran' => 'Berkas Pengunduran Diri',
+        'current_password' => 'Password Saat Ini',
+        'new_password' => 'Password Baru',
+        'new_password_confirmation' => 'Ulangi Password Baru',
+        'address' => 'Alamat',
+        'city' => 'Kota',
+        'country' => 'Negara',
+        'postal' => 'Kode Pos',
+        'about' => 'Tentang Saya',
+        'qr_data' => 'Data QR Code',
+        'token' => 'Token Verifikasi',
+        'remarks' => 'Catatan',
+        'finding_id' => 'Temuan',
+        'description' => 'Deskripsi',
+        'attachment' => 'Lampiran',
+        'inspection_date' => 'Tanggal Pengawasan',
+        'inspection_type' => 'Jenis Pengawasan',
+        'notes' => 'Catatan',
+        'category_id' => 'Kategori Checklist',
+        'title' => 'Judul',
+        'input_type' => 'Tipe Input',
+        'weight' => 'Bobot',
+        'required' => 'Wajib Diisi',
+        'sort_order' => 'Urutan',
+        'is_active' => 'Status Aktif',
+        'category' => 'Kategori',
+        'severity' => 'Tingkat Keparahan',
+        'recommendation' => 'Rekomendasi',
+        'deadline' => 'Batas Waktu',
+        'items' => 'Daftar Checklist',
+        'items.*.id' => 'Item Checklist',
+        'items.*.answer' => 'Jawaban Checklist',
+        'items.*.note' => 'Catatan Checklist',
+        'id' => 'Notifikasi',
+        'cabang_id' => 'Cabang Travel',
+        'nama_ppiu' => 'Nama PPIU',
+        'nama_kepala' => 'Nama Kepala',
+        'tanggal_diterbitkan' => 'Tanggal Diterbitkan',
+        'nomor_surat' => 'Nomor Surat',
+        'nomor_dokumen' => 'Nomor Dokumen',
+        'bulan_surat' => 'Bulan Surat',
+        'tahun_surat' => 'Tahun Surat',
+        'tanggal_tandatangan' => 'Tanggal Tanda Tangan',
+        'jenis_lokasi' => 'Jenis Lokasi',
+        'nama_penandatangan' => 'Nama Penandatangan',
+        'nip_penandatangan' => 'NIP Penandatangan',
+        'pengawas_scope' => 'Cakupan Pengawas',
+        'pengawas_kabupatens' => 'Kabupaten Pengawas',
+        'username' => 'Nama Pengguna',
+        'terms' => 'Persetujuan Syarat dan Ketentuan',
+    ];
+
+    public static function label(string $field): string
+    {
+        return self::LABELS[$field] ?? self::humanize($field);
+    }
+
+    /**
+     * @param  list<string>  $fields
+     * @return array<string, string>
+     */
+    public static function attributes(array $fields): array
+    {
+        $attributes = [];
+
+        foreach ($fields as $field) {
+            $attributes[$field] = self::label($field);
+        }
+
+        return $attributes;
+    }
+
+    /**
+     * @param  array<string, mixed>  $rules
+     * @return list<string>
+     */
+    public static function fieldsFromRules(array $rules): array
+    {
+        return array_keys($rules);
+    }
+
+    /**
+     * @param  list<string>  $fields
+     * @param  array<string, string>  $overrides
+     * @return array<string, string>
+     */
+    public static function messages(array $fields, array $overrides = []): array
+    {
+        $messages = [];
+
+        foreach ($fields as $field) {
+            $messages += self::defaultMessagesFor($field);
+            $messages += self::contextualOverrides($field);
+        }
+
+        return array_merge($messages, $overrides);
+    }
+
+    /**
+     * @param  array<string, mixed>  $rules
+     * @param  array<string, string>  $overrides
+     * @return array<string, mixed>
+     */
+    public static function validate(Request $request, array $rules, array $overrides = []): array
+    {
+        $fields = self::fieldsFromRules($rules);
+
+        return $request->validate(
+            $rules,
+            self::messages($fields, $overrides),
+            self::attributes($fields)
+        );
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array<string, mixed>  $rules
+     * @param  array<string, string>  $overrides
+     */
+    public static function makeValidator(array $data, array $rules, array $overrides = []): Validator
+    {
+        $fields = self::fieldsFromRules($rules);
+
+        return ValidatorFactory::make(
+            $data,
+            $rules,
+            self::messages($fields, $overrides),
+            self::attributes($fields)
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function fileMaxMb(string $field, float $megabytes): array
+    {
+        $label = fmod($megabytes, 1.0) === 0.0 ? (string) (int) $megabytes : (string) $megabytes;
+
+        return [
+            "{$field}.max" => "Ukuran :attribute terlalu besar. Maksimal {$label} MB.",
+        ];
+    }
+
+    public static function fileMaxKb(float $megabytes): int
+    {
+        return (int) round($megabytes * 1024);
+    }
+
+    /** @return list<string> */
+    public static function nomorHpRules(bool $uniqueInUsers = false): array
+    {
+        $rules = ['required', 'string', 'regex:/^08\d{6,12}$/'];
+
+        if ($uniqueInUsers) {
+            $rules[] = 'unique:users,nomor_hp';
+        }
+
+        return $rules;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function excelFileOverrides(string $field = 'file', float $maxMb = 10): array
+    {
+        return array_merge(
+            self::fileMaxMb($field, $maxMb),
+            [
+                "{$field}.required" => 'Mohon pilih file Excel untuk diunggah.',
+                "{$field}.mimes" => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            ]
+        );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function defaultMessagesFor(string $field): array
+    {
+        return [
+            "{$field}.required" => 'Mohon isi :attribute.',
+            "{$field}.string" => ':attribute harus berupa teks.',
+            "{$field}.email" => 'Format email tidak valid. Contoh: nama@perusahaan.com',
+            "{$field}.date" => 'Mohon pilih tanggal yang valid pada :attribute.',
+            "{$field}.max" => ':attribute terlalu panjang. Maksimal :max karakter.',
+            "{$field}.min" => ':attribute terlalu pendek. Minimal :min karakter.',
+            "{$field}.in" => 'Pilihan :attribute tidak valid. Silakan pilih dari daftar.',
+            "{$field}.unique" => ':attribute sudah terdaftar di sistem. Gunakan data lain.',
+            "{$field}.confirmed" => 'Konfirmasi :attribute tidak cocok. Pastikan kedua kolom sama.',
+            "{$field}.regex" => 'Format :attribute tidak valid. Periksa kembali isian Anda.',
+            "{$field}.file" => 'Mohon unggah :attribute.',
+            "{$field}.mimes" => ':attribute harus berformat PDF, JPG, atau PNG.',
+            "{$field}.integer" => ':attribute harus berupa angka bulat.',
+            "{$field}.numeric" => ':attribute harus berupa angka.',
+            "{$field}.exists" => 'Data :attribute tidak ditemukan. Silakan pilih ulang.',
+            "{$field}.digits" => ':attribute harus :digits digit angka.',
+            "{$field}.size" => ':attribute harus :size karakter.',
+            "{$field}.array" => ':attribute harus berupa daftar.',
+            "{$field}.boolean" => ':attribute tidak valid.',
+            "{$field}.uuid" => 'Data :attribute tidak valid.',
+            "{$field}.same" => ':attribute harus sama dengan kolom terkait.',
+            "{$field}.before" => ':attribute harus sebelum hari ini.',
+            "{$field}.after" => ':attribute harus setelah hari ini.',
+            "{$field}.after_or_equal" => ':attribute tidak boleh sebelum hari ini.',
+            "{$field}.nullable" => ':attribute tidak valid.',
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function contextualOverrides(string $field): array
+    {
+        if (in_array($field, ['nomor_hp', 'pic_nomor_hp', 'no_hp'], true)) {
+            return [
+                "{$field}.regex" => 'Nomor HP harus angka, diawali 08, panjang 8–14 digit. Contoh: 081234567890.',
+            ];
+        }
+
+        if ($field === 'nik') {
+            return [
+                'nik.digits' => 'NIK harus tepat 16 digit angka.',
+                'nik.unique' => 'NIK ini sudah terdaftar di travel Anda.',
+            ];
+        }
+
+        if ($field === 'no_ktp') {
+            return ['no_ktp.size' => 'Nomor KTP harus tepat 16 digit.'];
+        }
+
+        if ($field === 'kode_pos') {
+            return ['kode_pos.size' => 'Kode pos harus 5 digit.'];
+        }
+
+        if (in_array($field, ['file', 'excel_file'], true)) {
+            return [
+                "{$field}.required" => 'Mohon pilih file Excel untuk diunggah.',
+                "{$field}.mimes" => 'File harus berformat Excel (.xlsx, .xls) atau CSV.',
+            ];
+        }
+
+        if ($field === 'pdf_file') {
+            return ['pdf_file.mimes' => 'File harus berformat PDF.'];
+        }
+
+        if ($field === 'email_or_phone') {
+            return [
+                'email_or_phone.required' => 'Mohon isi email atau nomor HP.',
+            ];
+        }
+
+        if ($field === 'jamaah_ids') {
+            return [
+                'jamaah_ids.required' => 'Pilih minimal satu jamaah.',
+                'jamaah_ids.min' => 'Pilih minimal satu jamaah.',
+            ];
+        }
+
+        if ($field === 'registration_notes') {
+            return ['registration_notes.required' => 'Mohon tuliskan alasan penolakan.'];
+        }
+
+        if ($field === 'remarks') {
+            return ['remarks.min' => 'Catatan minimal :min karakter. Jelaskan dengan lebih detail.'];
+        }
+
+        if ($field === 'hal_aduan') {
+            return ['hal_aduan.min' => 'Hal yang diadukan minimal :min karakter.'];
+        }
+
+        if ($field === 'nama_pengadu') {
+            return ['nama_pengadu.regex' => 'Nama hanya boleh berisi huruf, spasi, tanda hubung, titik, dan apostrof.'];
+        }
+
+        if ($field === 'items') {
+            return [
+                'items.required' => 'Daftar checklist wajib diisi.',
+                'items.min' => 'Daftar checklist wajib diisi.',
+            ];
+        }
+
+        if ($field === 'items.*.id') {
+            return ['items.*.id.exists' => 'Item checklist tidak ditemukan.'];
+        }
+
+        if ($field === 'attachment') {
+            return [
+                'attachment.mimes' => 'Lampiran harus berformat PDF, Word, JPG, PNG, atau ZIP.',
+            ];
+        }
+
+        if ($field === 'dokumen_foto') {
+            return ['dokumen_foto.mimes' => 'Foto harus berformat JPG atau PNG.'];
+        }
+
+        if ($field === 'terms') {
+            return ['terms.required' => 'Mohon setujui syarat dan ketentuan.'];
+        }
+
+        if (str_starts_with($field, 'dokumen_') || $field === 'berkas_pengunduran' || $field === 'berkas_aduan') {
+            return [
+                "{$field}.required" => 'Mohon unggah :attribute.',
+            ];
+        }
+
+        return [];
+    }
+
+    private static function humanize(string $field): string
+    {
+        $normalized = preg_replace('/\.\*\.?/', ' ', $field) ?? $field;
+        $normalized = str_replace('_', ' ', $normalized);
+
+        return ucwords(trim($normalized));
+    }
+}

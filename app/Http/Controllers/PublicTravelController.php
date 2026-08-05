@@ -17,6 +17,7 @@ class PublicTravelController extends Controller
     public function index()
     {
         $travelPusat = TravelCompany::query()
+            ->approved()
             ->select(
                 'id',
                 'public_uuid',
@@ -95,6 +96,10 @@ class PublicTravelController extends Controller
 
     public function show(TravelCompany $travel)
     {
+        if (! $travel->isRegistrationApproved()) {
+            abort(404);
+        }
+
         $travel->loadMissing('riskScore');
         $profile = $this->profileService->getProfile($travel);
 

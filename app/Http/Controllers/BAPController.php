@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationHelper;
 use Carbon\Carbon;
 use App\Models\BAP;
 use App\Models\Jamaah;
@@ -414,7 +415,7 @@ class BAPController extends Controller
      */
     private function validatedBapPayload(Request $request, $user, ?int $ignoreBapId = null): array
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'name' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
             'ppiuname' => 'required|string|max:255',
@@ -498,9 +499,9 @@ class BAPController extends Controller
 
     public function uploadPDF(Request $request, $id)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'pdf_file' => 'required|mimes:pdf|max:500',
-        ]);
+        ], ValidationHelper::fileMaxMb('pdf_file', 0.5));
 
         $data = BAP::findOrFail($id);
         $this->authorizeBapAccess($data);
@@ -556,7 +557,7 @@ class BAPController extends Controller
             return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengubah status BAP.');
         }
 
-        $request->validate([
+        ValidationHelper::validate($request, [
             'status' => 'required|in:pending,diajukan,diproses,diterima',
         ]);
 
@@ -673,7 +674,7 @@ class BAPController extends Controller
 
     public function verifyQRCode(Request $request)
     {
-        $request->validate([
+        ValidationHelper::validate($request, [
             'qr_data' => 'nullable|string',
             'token' => 'nullable|string'
         ]);

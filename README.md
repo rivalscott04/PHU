@@ -174,7 +174,8 @@ Warga kirim pengaduan dari halaman depan (dengan lampiran opsional) → masuk an
 
 ## Mulai menggunakan
 
-Untuk instalasi, konfigurasi server, perintah artisan, cron, dan Redis, lihat **[SETUP.md](./SETUP.md)**.
+Untuk instalasi development, perintah artisan, dan cron, lihat **[SETUP.md](./SETUP.md)**.  
+Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY.md](./DEPLOY.md)**.
 
 **Login awal** (setelah migrasi database):
 
