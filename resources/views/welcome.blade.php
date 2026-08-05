@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>{{ config('app.name') }}</title>
-    <meta name="description" content="" />
-    <meta name="keywords" content="" />
+    <title>{{ config('app.name') }} | Sistem Pengawasan Haji dan Umrah NTB</title>
+    <meta name="description" content="Platform resmi Kanwil Kementerian Haji dan Umroh NTB. Cek travel berizin, lihat jadwal keberangkatan, dan ajukan pengaduan layanan haji umrah tanpa perlu login." />
+    <meta name="keywords" content="PANTAU, travel berizin, haji, umrah, NTB, jadwal keberangkatan, pengaduan haji umrah" />
 
     <!-- Favicons -->
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
@@ -17,170 +17,62 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/glightbox@3.2.0/dist/css/glightbox.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" rel="stylesheet" />
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
     <link href="{{ asset('css/main.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/public-theme.css') }}" rel="stylesheet" />
-    <link href="{{ asset('css/interactive-cursor.css') }}" rel="stylesheet" />
 
     <style>
-        .travel-stats-card {
-            transition: all 0.3s ease-in-out;
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
+        /* Quick action cards */
+        .quick-actions {
+            padding-top: 0 !important;
+            margin-top: -40px;
+            position: relative;
+            z-index: 2;
         }
 
-        .travel-stats-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1) !important;
-            cursor: pointer;
-        }
-
-        .travel-stats-card .card-body {
-            background: #FFFFFF;
-        }
-
-        .travel-stats-card:hover .bi {
-            animation: bounce 0.5s;
-        }
-
-        .stats-item {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        .stats-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        i.bi {
-            transition: transform 0.3s ease, color 0.3s ease;
-        }
-
-        .stats-item:hover i.bi {
-            transform: scale(1.2);
-            color: #e2a712;
-        }
-
-
-        @keyframes bounce {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
-        }
-
-        .company-header {
+        .quick-action-card {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .company-icon i {
-            font-size: 2rem;
-            color: #c8940e;
-        }
-
-        .accreditation {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
+            align-items: flex-start;
             gap: 0.5rem;
-        }
-
-        .accreditation i {
-            color: #ffc107;
-        }
-
-        /* Updated icon colors */
-        .detail-item i.bi-telephone-fill {
-            color: #e2a712;
-        }
-
-        .detail-item i.bi-geo-alt-fill {
-            color: #ff2828;
-            /* Orange-red color for location */
-        }
-
-        .company-name {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            color: #1a1a1a;
-            min-height: 2.5rem;
-        }
-
-        .company-details {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-
-        .detail-item {
-            display: flex;
-            align-items: start;
-            flex-direction: column;
-        }
-
-        .detail-item i {
-            color: #6c757d;
-            font-size: 1rem;
-        }
-
-        .detail-item span {
-            font-size: 0.9rem;
-            color: #4a4a4a;
-        }
-
-        .hidden-item {
-            display: none;
-        }
-
-        .travel-item {
-            transition: all 0.3s ease-in-out;
-        }
-
-        #showMoreBtn {
-            font-size: 1rem;
+            height: 100%;
+            padding: 1.25rem 1.35rem;
+            background: #FFFFFF;
+            border: 1px solid #E2E2E2;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            text-decoration: none;
+            color: inherit;
             transition: all 0.3s ease;
         }
 
-        #showMoreBtn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        .quick-action-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(226, 167, 18, 0.12);
+            border-color: #e2a712;
+            color: inherit;
         }
 
-        /* Animation for items appearing */
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .quick-action-card__icon {
+            font-size: 1.75rem;
+            color: #e2a712;
         }
 
-        .travel-item.show {
-            display: block;
-            animation: fadeIn 0.5s ease forwards;
+        .quick-action-card__title {
+            font-weight: 600;
+            font-size: 1rem;
+            margin: 0;
+        }
+
+        .quick-action-card__desc {
+            font-size: 0.85rem;
+            color: #5a5a5a;
+            margin: 0;
+            line-height: 1.45;
         }
 
         /* Stats Section Styles */
@@ -243,6 +135,17 @@
             font-weight: 500;
         }
 
+        .stat-hint {
+            display: block;
+            font-size: 0.72rem;
+            color: #888;
+            margin-top: 0.35rem;
+        }
+
+        .stat-item:hover .stat-hint {
+            color: #e2a712;
+        }
+
         @media (max-width: 768px) {
             .stats-bar {
                 padding: 30px 20px;
@@ -258,6 +161,10 @@
             
             .stat-number {
                 font-size: 1.8rem;
+            }
+
+            #calendar {
+                min-height: 380px;
             }
         }
 
@@ -304,8 +211,31 @@
             border-radius: var(--border-radius);
             box-shadow: var(--shadow-md);
             padding: 20px;
-            min-height: 700px;
+            min-height: 480px;
             margin-bottom: 20px;
+        }
+
+        .calendar-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            color: #5a5a5a;
+        }
+
+        .calendar-legend__item {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .calendar-legend__dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: var(--primary-color);
+            flex-shrink: 0;
         }
 
         .fc .fc-toolbar-title {
@@ -746,10 +676,11 @@
             <nav id="navmenu" class="navmenu">
                 <ul>
                     <li><a href="#beranda" class="active">Beranda</a></li>
-                    <li><a href="#about">Tentang</a></li>
+                    <li><a href="#about">5 Pasti Umroh</a></li>
+                    <li><a href="{{ route('travel.public') }}">Daftar Travel</a></li>
                     <li><a href="#calendar-section">Jadwal Keberangkatan</a></li>
                     <li><a href="#informasi">Informasi</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#contact">Pengaduan</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
             </nav>
@@ -759,39 +690,21 @@
     <main class="main">
         <!-- Hero Section -->
         <section id="beranda" class="hero section dark-background">
-            <img src="{{ asset('img/hero-2.jpg') }}" alt="" class="hero-bg" />
+            <img src="{{ asset('img/hero-2.jpg') }}" alt="Latar belakang Masjidil Haram" class="hero-bg" />
 
             <div class="container">
-                @if (session('success'))
-                    <div class="alert alert-success">
-                        {{ session('success') }}
-                    </div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-danger">
-                        {{ session('error') }}
-                    </div>
-                @endif
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul>
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
                 <div class="row gy-4 justify-content-between">
                     <div class="col-lg-4 order-lg-last hero-img" data-aos="zoom-out" data-aos-delay="100">
-                        <img src="{{ asset('img/hero-1.png') }}" class="img-fluid animated" alt="" />
+                        <img src="{{ asset('img/hero-1.png') }}" class="img-fluid animated" alt="Ilustrasi pengawasan haji dan umrah" />
                     </div>
 
                     <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-in">
                         <h1>Mengawal Kepatuhan, Melindungi Jemaah.</h1>
                         <p class="hero-subtitle">Sistem Pengawasan Haji dan Umrah Kanwil NTB</p>
-                        <div class="d-flex flex-wrap gap-3">
-                            <a href="{{ route('login') }}" class="btn-get-started">Masuk</a>
-                            <a href="#stats" class="btn-check-travel">Cek Travel</a>
+                        <p class="hero-desc mb-0">Cek travel berizin, lihat jadwal keberangkatan, dan ajukan pengaduan tanpa perlu login.</p>
+                        <div class="d-flex flex-wrap gap-3 mt-3">
+                            <a href="{{ route('travel.public') }}" class="btn-get-started">Cek Travel Berizin</a>
+                            <a href="{{ route('login') }}" class="btn-check-travel">Masuk Petugas / Travel</a>
                         </div>
                     </div>
                 </div>
@@ -815,6 +728,43 @@
             </svg>
         </section>
         <!-- /Hero Section -->
+
+        <!-- Quick Actions -->
+        <section id="quick-actions" class="quick-actions section">
+            <div class="container" data-aos="fade-up">
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('travel.public') }}" class="quick-action-card">
+                            <i class="bi bi-building quick-action-card__icon"></i>
+                            <h3 class="quick-action-card__title">Cek Travel Berizin</h3>
+                            <p class="quick-action-card__desc">Lihat daftar PPIU/PIHK resmi beserta indeks kepercayaan.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="#calendar-section" class="quick-action-card">
+                            <i class="bi bi-calendar-event quick-action-card__icon"></i>
+                            <h3 class="quick-action-card__title">Jadwal Keberangkatan</h3>
+                            <p class="quick-action-card__desc">Pantau kalender keberangkatan jamaah haji dan umrah.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="#contact" class="quick-action-card">
+                            <i class="bi bi-megaphone quick-action-card__icon"></i>
+                            <h3 class="quick-action-card__title">Ajukan Pengaduan</h3>
+                            <p class="quick-action-card__desc">Laporkan masalah layanan travel secara online.</p>
+                        </a>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <a href="{{ route('login') }}" class="quick-action-card">
+                            <i class="bi bi-box-arrow-in-right quick-action-card__icon"></i>
+                            <h3 class="quick-action-card__title">Masuk Sistem</h3>
+                            <p class="quick-action-card__desc">Untuk petugas Kanwil, admin, dan travel berizin.</p>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- /Quick Actions -->
 
 
         <!-- About Section -->
@@ -913,6 +863,11 @@
             </div>
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="calendar-legend" aria-label="Keterangan kalender">
+                    <span class="calendar-legend__item"><span class="calendar-legend__dot"></span> Jadwal keberangkatan jamaah</span>
+                    <span class="calendar-legend__item"><i class="bi bi-hand-index"></i> Klik tanggal untuk detail</span>
+                    <span class="calendar-legend__item"><i class="bi bi-calendar3"></i> Gunakan tombol Bulan/Tahun untuk navigasi</span>
+                </div>
                 <div id="calendar"></div>
             </div>
 
@@ -945,51 +900,56 @@
             <!-- End Section Title -->
 
             <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <p class="text-center text-muted mb-4" style="font-size: 0.9rem;">Klik kartu statistik untuk melihat rincian. Data diperbarui secara berkala.</p>
                 <div class="row">
                     <div class="col-12">
                         <div class="stats-bar">
                             <div class="row g-3">
                                 <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#travelModal" role="button" tabindex="0" aria-label="Detail travel berizin">
                                         <div class="stat-icon">
                                             <i class="fas fa-building"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['travelCount'] ?: 'Menunggu Data' }}</h3>
+                                            <h3 class="stat-number">{{ $stats['travelCount'] ?: '0' }}</h3>
                                             <p class="stat-label">Travel Berizin</p>
+                                            <small class="stat-hint">Klik untuk detail</small>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#jamaahModal" role="button" tabindex="0" aria-label="Detail total jamaah">
                                         <div class="stat-icon">
                                             <i class="fas fa-users"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) ?: 'Menunggu Data' }}</h3>
+                                            <h3 class="stat-number">{{ ($stats['jamaahHajiCount'] + $stats['jamaahUmrahCount']) ?: '0' }}</h3>
                                             <p class="stat-label">Total Jamaah</p>
+                                            <small class="stat-hint">Klik untuk detail</small>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#maskapaiModal" role="button" tabindex="0" aria-label="Detail maskapai">
                                         <div class="stat-icon">
                                             <i class="fas fa-plane"></i>
                                         </div>
                                         <div class="stat-content">
-                                            <h3 class="stat-number">{{ $stats['airlineCount'] ?: 'Menunggu Data' }}</h3>
+                                            <h3 class="stat-number">{{ $stats['airlineCount'] ?: '0' }}</h3>
                                             <p class="stat-label">Maskapai</p>
+                                            <small class="stat-hint">Klik untuk detail</small>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3 col-6">
-                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal">
+                                    <div class="stat-item" data-bs-toggle="modal" data-bs-target="#kabupatenModal" role="button" tabindex="0" aria-label="Detail kabupaten">
                                         <div class="stat-icon">
                                             <i class="fas fa-map-marker-alt"></i>
                                         </div>
                                         <div class="stat-content">
                                             <h3 class="stat-number">{{ $allKabupatens->count() }}</h3>
                                             <p class="stat-label">Kabupaten</p>
+                                            <small class="stat-hint">Klik untuk detail</small>
                                         </div>
                                     </div>
                                 </div>
@@ -1019,28 +979,23 @@
                     <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
                         <div class="icon-box">
                             <i class="bi bi-question-circle"></i>
-                            <h3>FAQ (Frequently Asked Questions)</h3>
+                            <h3>Pertanyaan Umum</h3>
                             <p>
                                 Temukan jawaban untuk pertanyaan yang sering diajukan tentang PANTAU, cara melihat jadwal keberangkatan, dan prosedur pengaduan.
                             </p>
                             <div class="mt-3">
-                                <button class="btn btn-card btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#faqCollapse">
-                                    Lihat FAQ <i class="bi bi-chevron-down ms-1"></i>
-                                </button>
-                            </div>
-                            <div class="collapse mt-3" id="faqCollapse">
                                 <div class="card card-body border-0 bg-light">
                                     <div class="mb-3">
-                                        <strong>Q: Apa itu PANTAU?</strong><br>
-                                        <small class="text-muted">A: PANTAU adalah platform digital Kanwil Kementerian Haji dan Umroh NTB untuk mengelola dan memantau kegiatan haji dan umrah di wilayah NTB.</small>
+                                        <strong>Apa itu PANTAU?</strong><br>
+                                        <small class="text-muted">PANTAU adalah platform digital Kanwil Kementerian Haji dan Umroh NTB untuk mengelola dan memantau kegiatan haji dan umrah di wilayah NTB.</small>
                                     </div>
                                     <div class="mb-3">
-                                        <strong>Q: Bagaimana cara melihat jadwal keberangkatan?</strong><br>
-                                        <small class="text-muted">A: Anda dapat melihat jadwal keberangkatan di menu "Jadwal Keberangkatan" yang menampilkan kalender dengan detail waktu keberangkatan dan kepulangan.</small>
+                                        <strong>Bagaimana cara melihat jadwal keberangkatan?</strong><br>
+                                        <small class="text-muted">Anda dapat melihat jadwal keberangkatan di bagian "Jadwal Keberangkatan" yang menampilkan kalender dengan detail waktu keberangkatan dan kepulangan.</small>
                                     </div>
-                                    <div class="mb-3">
-                                        <strong>Q: Berapa lama proses pengaduan?</strong><br>
-                                        <small class="text-muted">A: Proses pengaduan akan ditindaklanjuti dalam waktu maksimal 3-5 hari kerja setelah pengaduan diterima.</small>
+                                    <div class="mb-0">
+                                        <strong>Berapa lama proses pengaduan?</strong><br>
+                                        <small class="text-muted">Proses pengaduan akan ditindaklanjuti dalam waktu maksimal 3 sampai 5 hari kerja setelah pengaduan diterima.</small>
                                     </div>
                                 </div>
                             </div>
@@ -1105,9 +1060,9 @@
                                     <div class="mb-2">
                                         <strong>Fitur Utama:</strong><br>
                                         <small class="text-muted">
+                                            • <a href="{{ route('travel.public') }}">Daftar Travel Berizin</a><br>
                                             • Jadwal Keberangkatan: Lihat kalender keberangkatan<br>
                                             • Pengaduan: Ajukan keluhan terkait layanan<br>
-                                            • Informasi Travel: Data travel berizin<br>
                                             • Statistik: Data terkini keberangkatan
                                         </small>
                                     </div>
@@ -1136,7 +1091,7 @@
             <div class="container">
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 d-flex align-items-center" data-aos="zoom-out" data-aos-delay="100">
-                        <img src="{{ asset('img/hero-2.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-2.png') }}" class="img-fluid" alt="Ilustrasi sistem PANTAU" />
                     </div>
                     <div class="col-md-7" data-aos="fade-up" data-aos-delay="100">
                         <h3>Apa itu PANTAU?</h3>
@@ -1158,15 +1113,22 @@
                                 <i class="bi bi-check"></i>
                                 <span>Ajukan pengaduan jika ada masalah dengan travel</span>
                             </li>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span>Data travel hanya menampilkan penyelenggara berizin resmi</span>
+                            </li>
+                            <li>
+                                <i class="bi bi-check"></i>
+                                <span>Semua informasi penting tersedia tanpa perlu login</span>
+                            </li>
                         </ul>
                     </div>
                 </div>
-                <!-- Features Item -->
 
                 <div class="row gy-4 align-items-center features-item">
                     <div class="col-md-5 order-1 order-md-2 d-flex align-items-center" data-aos="zoom-out"
                         data-aos-delay="200">
-                        <img src="{{ asset('img/hero-3.png') }}" class="img-fluid" alt="" />
+                        <img src="{{ asset('img/hero-3.png') }}" class="img-fluid" alt="Ilustrasi pengguna PANTAU" />
                     </div>
                     <div class="col-md-7 order-2 order-md-1" data-aos="fade-up" data-aos-delay="200">
                         <h3>Untuk Siapa PANTAU Digunakan?</h3>
@@ -1188,55 +1150,12 @@
                                 <span><strong>Petugas Kanwil</strong>: pantau kepatuhan, pengawasan, dan tindak lanjut pengaduan</span>
                             </li>
                         </ul>
-                    </div>
-                </div>
-                <!-- Features Item -->
-
-                <div class="row gy-4 align-items-center features-item">
-                    <div class="col-md-5 d-flex align-items-center" data-aos="zoom-out">
-                        <img src="{{ asset('img/hero-4.png') }}" class="img-fluid" alt="" />
-                    </div>
-                    <div class="col-md-7" data-aos="fade-up">
-                        <h3>Perlindungan Jamaah, Transparan</h3>
-                        <p>
-                            PANTAU dirancang agar masyarakat bisa memilih travel dengan lebih aman
-                            dan petugas bisa mengawasi lebih cepat jika ada pelanggaran.
-                        </p>
-                        <ul>
-                            <li>
-                                <i class="bi bi-check"></i>
-                                <span>Data travel hanya menampilkan penyelenggara berizin resmi</span>
-                            </li>
-                            <li>
-                                <i class="bi bi-check"></i>
-                                <span>Indeks kepercayaan membantu Anda menilai rekam jejak travel</span>
-                            </li>
-                            <li>
-                                <i class="bi bi-check"></i>
-                                <span>Pengaduan online dan bisa dilacak hingga selesai</span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <!-- Features Item -->
-
-                <div class="row gy-4 align-items-center features-item">
-                    <div class="col-md-5 order-1 order-md-2 d-flex align-items-center" data-aos="zoom-out">
-                        <img src="{{ asset('img/hero-5.png') }}" class="img-fluid" alt="" />
-                    </div>
-                    <div class="col-md-7 order-2 order-md-1" data-aos="fade-up">
-                        <h3>Informasi Terbuka, Mudah Diakses</h3>
-                        <p>
-                            Semua informasi penting, dari statistik travel berizin, jadwal keberangkatan,
-                            hingga status pengaduan, tersedia di halaman ini tanpa perlu login.
-                        </p>
-                        <p>
-                            Untuk petugas dan travel, tersedia dashboard khusus setelah masuk ke sistem
-                            guna mengelola data, pengawasan, dan tindak lanjut sesuai peran masing-masing.
+                        <p class="mb-0 mt-3">
+                            <a href="{{ route('travel.public') }}" class="btn btn-card btn-sm me-2">Lihat Daftar Travel</a>
+                            <a href="#contact" class="btn btn-card btn-sm">Ajukan Pengaduan</a>
                         </p>
                     </div>
                 </div>
-                <!-- Features Item -->
             </div>
         </section>
         <!-- /Details Section -->
@@ -1254,6 +1173,26 @@
             <!-- End Section Title -->
 
             <div class="container" data-aos="fade" data-aos-delay="100">
+                @if (session('success'))
+                    <div class="alert alert-success" data-aos="fade-up">
+                        {{ session('success') }}
+                    </div>
+                @endif
+                @if (session('error'))
+                    <div class="alert alert-danger" data-aos="fade-up">
+                        {{ session('error') }}
+                    </div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger" data-aos="fade-up">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
                 <!-- Validation Summary - will be shown dynamically -->
                 <div id="validation-summary-welcome" class="alert alert-danger d-none" data-aos="fade-up" data-aos-delay="150" role="alert">
                     <div class="d-flex align-items-center">
@@ -1307,7 +1246,7 @@
 
                                         <div class="col-md-6">
                                             <select class="form-control" name="travels_id" id="travels_id_welcome" required>
-                                                <option value="">-- Pilih Travel --</option>
+                                                <option value="">Cari atau pilih travel...</option>
                                                 @foreach ($travels as $travel)
                                                     @php $trust = $travel->trust ?? []; @endphp
                                                     <option value="{{ $travel->id }}"
@@ -1331,7 +1270,7 @@
 
                                         <div class="col-md-12">
                                             <input type="file" class="form-control" name="berkas_aduan" id="berkas_aduan_welcome" accept=".pdf,.jpg,.jpeg,.png" />
-                                            <small class="text-muted mt-1">File maksimal 2MB. Format yang diperbolehkan: PDF, JPG, PNG, DOC, DOCX</small>
+                                            <small class="text-muted mt-1">File maksimal 2MB. Format: PDF, JPG, atau PNG.</small>
                                             <div class="invalid-feedback"></div>
                                         </div>
 
@@ -1476,6 +1415,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="#calendar-section" class="btn btn-primary" data-bs-dismiss="modal">Lihat Jadwal</a>
                 </div>
             </div>
         </div>
@@ -1504,6 +1444,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="#calendar-section" class="btn btn-primary" data-bs-dismiss="modal">Lihat Jadwal</a>
                 </div>
             </div>
         </div>
@@ -1550,6 +1491,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <a href="{{ route('travel.public') }}" class="btn btn-primary">Lihat Daftar Travel</a>
                 </div>
             </div>
         </div>
@@ -1563,43 +1505,29 @@
     <div id="preloader"></div>
 
     <!-- Vendor JS Files -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/glightbox@3.2.0/dist/js/glightbox.min.js"></script>
-    <script src="{{ asset('js/purecounter_vanilla.js') }}"></script>
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <!-- Main JS File -->
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const showMoreBtn = document.getElementById('showMoreBtn');
-            const hiddenItems = document.querySelectorAll('.hidden-item');
-            let isExpanded = false;
-
-            if (showMoreBtn) {
-                showMoreBtn.addEventListener('click', function() {
-                    if (!isExpanded) {
-                        hiddenItems.forEach(item => {
-                            item.classList.remove('hidden-item');
-                            item.classList.add('show');
-                        });
-                        showMoreBtn.textContent = 'Show Less';
-                        isExpanded = true;
-                    } else {
-                        hiddenItems.forEach(item => {
-                            item.classList.add('hidden-item');
-                            item.classList.remove('show');
-                        });
-                        showMoreBtn.textContent = 'Show More';
-                        isExpanded = false;
-
-                        // Scroll to features section if it's out of view
-                        document.getElementById('features').scrollIntoView({
-                            behavior: 'smooth'
-                        });
+            document.querySelectorAll('.stat-item[role="button"]').forEach(function(item) {
+                item.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        item.click();
                     }
                 });
+            });
+
+            const contactAlerts = document.querySelector('#contact .alert');
+            if (contactAlerts) {
+                contactAlerts.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         });
 
@@ -1792,14 +1720,6 @@
         }
 
         function closePopup() {
-            const popup = document.getElementById('eventPopup');
-            const overlay = document.getElementById('popupOverlay');
-
-            overlay.style.display = 'none';
-            popup.style.display = 'none';
-        }
-
-        function closePopup() {
             document.getElementById('eventPopup').style.display = 'none';
             document.getElementById('popupOverlay').style.display = 'none';
         }
@@ -1956,6 +1876,15 @@
             const travelSelect = document.getElementById('travels_id_welcome');
             const trustHint = document.getElementById('trustHintWelcome');
 
+            if (travelSelect && window.jQuery && jQuery.fn.select2) {
+                jQuery(travelSelect).select2({
+                    theme: 'bootstrap-5',
+                    width: '100%',
+                    placeholder: 'Cari atau pilih travel...',
+                    allowClear: true,
+                }).on('change', updateTrustHint);
+            }
+
             function updateTrustHint() {
                 if (!travelSelect || !trustHint) return;
 
@@ -1985,7 +1914,9 @@
             }
 
             if (travelSelect) {
-                travelSelect.addEventListener('change', updateTrustHint);
+                if (!window.jQuery || !jQuery.fn.select2) {
+                    travelSelect.addEventListener('change', updateTrustHint);
+                }
                 updateTrustHint();
             }
         });

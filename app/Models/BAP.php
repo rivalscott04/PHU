@@ -42,4 +42,9 @@ class BAP extends Model
     {
         return $this->belongsToMany(Jamaah::class, 'bap_jamaah', 'bap_id', 'jamaah_id')->withTimestamps();
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

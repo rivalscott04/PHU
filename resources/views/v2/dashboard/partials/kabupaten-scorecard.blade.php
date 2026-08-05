@@ -23,13 +23,15 @@
                 </thead>
                 <tbody id="kabupaten-scorecard-body">
                     @forelse ($scorecard as $row)
-                        <tr>
+                        <tr class="kabupaten-filter-row" role="button" tabindex="0"
+                            data-filter-kabupaten="{{ $row['kabupaten'] ?? '' }}"
+                            title="Klik untuk filter {{ $row['kabupaten'] ?? '' }}">
                             <td class="ps-3 fw-medium">{{ $row['kabupaten'] ?? '-' }}</td>
                             <td>{{ $row['total_travel'] ?? 0 }}</td>
                             <td>{{ $row['pengawasan'] ?? 0 }}</td>
                             <td>
                                 @if(($row['temuan_aktif'] ?? 0) > 0)
-                                    <span class="badge bg-warning text-dark">{{ $row['temuan_aktif'] }}</span>
+                                    <span class="badge bg-light text-body border">{{ $row['temuan_aktif'] }}</span>
                                 @else
                                     {{ $row['temuan_aktif'] ?? 0 }}
                                 @endif

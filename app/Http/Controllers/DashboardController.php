@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Support\HomeCommandCenter;
+use App\Support\NtbKabupatenMap;
 
 class DashboardController extends Controller
 {
@@ -20,190 +20,73 @@ class DashboardController extends Controller
         if ($landingRoute !== 'home') {
             return redirect()->route($landingRoute);
         }
-        
-        // Get monthly data for the stacked column chart
-        $monthlyData = collect(range(1, 12))->map(function ($month) use ($user) {
-            $startDate = Carbon::create(null, $month, 1, 0, 0, 0);
-            $endDate = $startDate->copy()->endOfMonth();
 
-            if ($user->role === 'user') {
-                // For travel users, get BAP data through user_id
-                return [
-                    'month' => $startDate->format('M'),
-                    'total' => DB::table('bap')
-                        ->where('user_id', $user->id)
-                        ->whereYear('created_at', Carbon::now()->year)
-                        ->whereMonth('created_at', $month)
-                        ->count()
-                ];
-            } else {
-                // For admin and kabupaten, get jamaah data
-                return [
-                    'month' => $startDate->format('M'),
-                    'total' => DB::table('jamaah')
-                        ->whereYear('created_at', Carbon::now()->year)
-                        ->whereMonth('created_at', $month)
-                        ->count()
-                ];
-            }
-        });
-
-        // Calculate percentage for radial chart (comparing to previous month)
         if ($user->role === 'user') {
-            $currentMonthCount = DB::table('bap')
-                ->where('user_id', $user->id)
-                ->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->month)
-                ->count();
-
-            $previousMonthCount = DB::table('bap')
-                ->where('user_id', $user->id)
-                ->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                ->count();
-        } else {
-            $currentMonthCount = DB::table('jamaah')
-                ->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->month)
-                ->count();
-
-            $previousMonthCount = DB::table('jamaah')
-                ->whereYear('created_at', Carbon::now()->year)
-                ->whereMonth('created_at', Carbon::now()->subMonth()->month)
-                ->count();
+            return $this->getUserDashboard($user);
         }
 
-        $growthPercentage = $previousMonthCount > 0
-            ? round(($currentMonthCount - $previousMonthCount) / $previousMonthCount * 100)
-            : 0;
-
-        // Mengambil bulan saat ini
-        $currentMonth = Carbon::now()->month;
-
-        // Role-specific data
-        switch ($user->role) {
-            case 'admin':
-                return $this->getAdminDashboard($user, $monthlyData, $growthPercentage, $currentMonth);
-            case 'kabupaten':
-                return $this->getKabupatenDashboard($user, $monthlyData, $growthPercentage, $currentMonth);
-            case 'user':
-                return $this->getUserDashboard($user, $monthlyData, $growthPercentage, $currentMonth);
-            default:
-                return $this->getKabupatenDashboard($user, $monthlyData, $growthPercentage, $currentMonth);
+        if ($user->role === 'kabupaten') {
+            return $this->getKabupatenDashboard($user);
         }
+
+        if ($user->role === 'admin') {
+            return $this->getAdminDashboard($user);
+        }
+
+        return $this->getKabupatenDashboard($user);
     }
 
-    private function getAdminDashboard($user, $monthlyData, $growthPercentage, $currentMonth)
+    private function getAdminDashboard($user)
     {
-        // Admin-specific statistics
-        $totalJamaah = DB::table('jamaah')->count();
-        $totalBAP = DB::table('bap')->count();
-        $totalTravelPusat = DB::table('travels')->count();
-        $totalTravelCabang = DB::table('travel_cabang')->count();
-        $totalUsers = DB::table('users')->count();
-        $totalRevenue = DB::table('bap')
-            ->select(DB::raw('SUM(people * price) as total_income'))
-            ->value('total_income') ?? 0;
+        $queues = HomeCommandCenter::adminQueues();
 
         return view('pages.dashboard-admin', [
             'username' => $user->nama,
             'role' => $user->role,
-            'totalJamaah' => $totalJamaah,
-            'totalBAP' => $totalBAP,
-            'totalTravelPusat' => $totalTravelPusat,
-            'totalTravelCabang' => $totalTravelCabang,
-            'totalUsers' => $totalUsers,
-            'totalRevenue' => $totalRevenue,
-            'monthlyData' => $monthlyData,
-            'growthPercentage' => $growthPercentage,
-            'bulan' => Carbon::now()->format('F Y'),
+            'queues' => $queues,
+            'queueStatus' => HomeCommandCenter::overallStatus($queues),
+            'summary' => HomeCommandCenter::adminSummary(),
+            'alerts' => HomeCommandCenter::adminAlerts(),
+            'recentPendingBap' => HomeCommandCenter::recentPendingBap(null),
+            'pendingRegistrations' => HomeCommandCenter::recentPendingRegistrations(),
+            'openPengaduan' => HomeCommandCenter::recentOpenPengaduan(),
+            'highRiskTravels' => HomeCommandCenter::recentHighRiskTravels(),
+            'upcomingDepartures' => HomeCommandCenter::upcomingDeparturesForKabupaten(null, 5),
         ]);
     }
 
-    private function getKabupatenDashboard($user, $monthlyData, $growthPercentage, $currentMonth)
+    private function getKabupatenDashboard($user)
     {
-        // Kabupaten-specific statistics - filter by kabupaten
-        $jamaahHaji = DB::table('jamaah')
-            ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
-            ->where('jamaah.jenis_jamaah', 'haji')
-            ->where('travels.kab_kota', $user->kabupaten)
-            ->whereMonth('jamaah.created_at', $currentMonth)
-            ->count();
-
-        $jamaahUmrah = DB::table('jamaah')
-            ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
-            ->where('jamaah.jenis_jamaah', 'umrah')
-            ->where('travels.kab_kota', $user->kabupaten)
-            ->whereMonth('jamaah.created_at', $currentMonth)
-            ->count();
-
-        $bapDiajukan = DB::table('bap')
-            ->where('kab_kota', $user->kabupaten)
-            ->where('status', 'diajukan')
-            ->count();
-
-        $bapDiproses = DB::table('bap')
-            ->where('kab_kota', $user->kabupaten)
-            ->where('status', 'diproses')
-            ->count();
-
-        $bapSelesai = DB::table('bap')
-            ->where('kab_kota', $user->kabupaten)
-            ->where('status', 'diterima')
-            ->count();
+        $kabupaten = NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten;
+        $queues = HomeCommandCenter::kabupatenQueues($kabupaten);
+        $summary = HomeCommandCenter::kabupatenSummary($kabupaten);
 
         return view('pages.dashboard-kabupaten', [
             'username' => $user->nama,
             'role' => $user->role,
-            'jamaahHaji' => $jamaahHaji,
-            'jamaahUmrah' => $jamaahUmrah,
-            'diajukan' => $bapDiajukan,
-            'diproses' => $bapDiproses,
-            'selesai' => $bapSelesai,
-            'monthlyData' => $monthlyData,
-            'growthPercentage' => $growthPercentage,
-            'bulan' => Carbon::now()->format('F Y'),
+            'kabupaten' => $kabupaten,
+            'queues' => $queues,
+            'queueStatus' => HomeCommandCenter::overallStatus($queues),
+            'summary' => $summary,
+            'alerts' => HomeCommandCenter::kabupatenAlerts($kabupaten),
+            'recentPendingBap' => HomeCommandCenter::recentPendingBap($kabupaten),
+            'openPengaduan' => HomeCommandCenter::recentOpenPengaduan($kabupaten),
+            'upcomingDepartures' => HomeCommandCenter::upcomingDeparturesForKabupaten($kabupaten),
         ]);
     }
 
-    private function getUserDashboard($user, $monthlyData, $growthPercentage, $currentMonth)
+    private function getUserDashboard($user)
     {
-        // User (travel company) specific statistics
-        $myTotalBAP = DB::table('bap')
-            ->where('user_id', $user->id)
-            ->count();
-
-        $myBAPDiajukan = DB::table('bap')
-            ->where('user_id', $user->id)
-            ->where('status', 'diajukan')
-            ->count();
-
-        $myBAPDiproses = DB::table('bap')
-            ->where('user_id', $user->id)
-            ->where('status', 'diproses')
-            ->count();
-
-        $myBAPSelesai = DB::table('bap')
-            ->where('user_id', $user->id)
-            ->where('status', 'diterima')
-            ->count();
-
-        $myTotalRevenue = DB::table('bap')
-            ->where('user_id', $user->id)
-            ->select(DB::raw('SUM(people * price) as total_income'))
-            ->value('total_income') ?? 0;
+        $user->loadMissing('travel');
+        $checklist = HomeCommandCenter::travelChecklist($user);
 
         return view('pages.dashboard-user', [
             'username' => $user->nama,
             'role' => $user->role,
-            'myTotalBAP' => $myTotalBAP,
-            'myBAPDiajukan' => $myBAPDiajukan,
-            'myBAPDiproses' => $myBAPDiproses,
-            'myBAPSelesai' => $myBAPSelesai,
-            'myTotalRevenue' => $myTotalRevenue,
-            'monthlyData' => $monthlyData,
-            'growthPercentage' => $growthPercentage,
-            'bulan' => Carbon::now()->format('F Y'),
+            'checklist' => $checklist,
+            'alerts' => HomeCommandCenter::travelAlerts($user),
+            'activeBap' => HomeCommandCenter::recentActiveBap($user),
+            'upcomingDepartures' => HomeCommandCenter::upcomingDepartures($user),
         ]);
     }
 }

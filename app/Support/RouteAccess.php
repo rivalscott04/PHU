@@ -290,6 +290,7 @@ final class RouteAccess
             'pengunduran' => 'pengunduran',
             'pengunduran.create' => 'pengunduran',
             'pengunduran.store' => 'pengunduran',
+            'pengunduran.update-status' => 'pengunduran',
             'cabang.travel' => 'cabang_travel',
             'form.cabang_travel' => 'cabang_travel',
             'post.cabang_travel' => 'cabang_travel',

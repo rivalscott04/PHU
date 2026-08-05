@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Support\NtbKabupatenMap;
 use App\Enums\PengawasScopeMode;
+use App\Enums\UserRole;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

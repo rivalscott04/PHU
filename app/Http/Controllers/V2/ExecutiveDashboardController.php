@@ -8,6 +8,8 @@ use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use App\Policies\MonitoringPolicy;
 use App\Services\DashboardService;
 use App\Support\DashboardFilter;
+use App\Support\HomeCommandCenter;
+use App\Support\RouteAccess;
 use Illuminate\Http\Request;
 
 class ExecutiveDashboardController extends Controller
@@ -28,6 +30,10 @@ class ExecutiveDashboardController extends Controller
 
         if ($request->user()->role === UserRole::Pimpinan->value) {
             $overview['executive'] = $this->dashboardService->getExecutive($filter);
+            $queues = HomeCommandCenter::pimpinanQueues($filter->kabupaten);
+            $overview['trafficLight'] = HomeCommandCenter::overallStatus($queues);
+            $overview['actionQueues'] = $queues;
+            $overview['alerts'] = HomeCommandCenter::pimpinanAlerts($filter->kabupaten);
         }
 
         if ($request->expectsJson()) {
@@ -97,7 +103,33 @@ class ExecutiveDashboardController extends Controller
         abort_unless($request->user()->role === UserRole::Pimpinan->value, 403);
 
         $filter = DashboardFilter::fromRequest($request);
+        $data = $this->dashboardService->getExecutive($filter);
+        $queues = self::pimpinanQueuesWithUrls($request, $filter->kabupaten);
 
-        return $this->jsonSuccess($this->dashboardService->getExecutive($filter));
+        $data['command_center'] = [
+            'trafficLight' => HomeCommandCenter::overallStatus($queues),
+            'actionQueues' => $queues,
+            'alerts' => HomeCommandCenter::pimpinanAlerts($filter->kabupaten),
+        ];
+
+        return $this->jsonSuccess($data);
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private static function pimpinanQueuesWithUrls(Request $request, ?string $kabupaten): array
+    {
+        return array_map(function (array $queue) use ($request): array {
+            $queue['url'] = RouteAccess::canAccessRoute(
+                $request->user(),
+                $queue['route'],
+                $queue['params'] ?? [],
+            )
+                ? route($queue['route'], $queue['params'] ?? [])
+                : null;
+
+            return $queue;
+        }, HomeCommandCenter::pimpinanQueues($kabupaten));
     }
 }

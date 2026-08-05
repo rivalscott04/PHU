@@ -2,9 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Models\BAP;
 use App\Models\Pengaduan;
 use App\Models\TravelCompany;
+use App\Models\User;
 use App\Support\TravelMetrics;
+use Illuminate\Support\Facades\Schema;
 
 class MonitoringRepository
 {
@@ -13,15 +16,50 @@ class MonitoringRepository
         return TravelMetrics::monitoringSummary($kabupaten, $travelId);
     }
 
-    public function getTravelMonitoringList(?string $kabupaten = null, int $perPage = 15, ?int $travelId = null)
-    {
-        return TravelCompany::query()
+    public function getTravelMonitoringList(
+        ?string $kabupaten = null,
+        int $perPage = 15,
+        ?int $travelId = null,
+        ?string $jenisTravel = null,
+        ?string $riskLevel = null,
+        ?string $sort = null,
+    ) {
+        $query = TravelCompany::query()
             ->with(['riskScore'])
             ->withCount(['inspections', 'pengaduan'])
+            ->withMax('inspections as last_inspection_at', 'created_at');
+
+        if (Schema::hasTable('bap')) {
+            $query->addSelect([
+                'bap_pending_count' => BAP::query()
+                    ->selectRaw('count(*)')
+                    ->whereIn('status', ['diajukan', 'diproses', 'pending'])
+                    ->whereIn('user_id', User::query()
+                        ->select('id')
+                        ->whereColumn('travel_id', 'travels.id')),
+            ]);
+        }
+
+        $query
             ->when($kabupaten, fn ($q) => $q->where('kab_kota', $kabupaten))
             ->when($travelId, fn ($q) => $q->where('id', $travelId))
-            ->orderBy('Penyelenggara')
-            ->paginate($perPage);
+            ->when($jenisTravel, fn ($q) => $q->where('Status', $jenisTravel))
+            ->when($riskLevel, fn ($q) => $q->whereHas(
+                'riskScore',
+                fn ($risk) => $risk->where('risk_level', $riskLevel)
+            ));
+
+        match ($sort) {
+            'risk' => $query->orderByRaw(
+                "(SELECT FIELD(risk_level, 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW') FROM risk_scores WHERE risk_scores.travel_id = travels.id LIMIT 1) ASC"
+            )->orderBy('Penyelenggara'),
+            'pengaduan' => $query->orderByDesc('pengaduan_count')->orderBy('Penyelenggara'),
+            'bap_pending' => $query->orderByDesc('bap_pending_count')->orderBy('Penyelenggara'),
+            'inspection' => $query->orderBy('last_inspection_at')->orderBy('Penyelenggara'),
+            default => $query->orderBy('Penyelenggara'),
+        };
+
+        return $query->paginate($perPage)->withQueryString();
     }
 
     /** @return list<array<string, mixed>> */

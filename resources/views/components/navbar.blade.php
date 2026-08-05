@@ -2,7 +2,10 @@
     <div class="navbar-header">
         <div class="d-flex">
             <div class="navbar-brand-box">
-                <a href="index.html" class="logo logo-dark">
+                @php
+                    $sidebarHomeRoute = auth()->user()?->impersonationRedirectRoute() ?? 'home';
+                @endphp
+                <a href="{{ route($sidebarHomeRoute) }}" class="logo logo-dark">
                     <span class="logo-sm">
                         <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
@@ -10,7 +13,7 @@
                         <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="32" />
                     </span>
                 </a>
-                <a href="index.html" class="logo logo-light">
+                <a href="{{ route($sidebarHomeRoute) }}" class="logo logo-light">
                     <span class="logo-sm">
                         <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="28" />
                     </span>
@@ -63,15 +66,9 @@
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <a class="dropdown-item" href="{{ route('profile.show') }}"><i class="bx bx-user font-size-16 align-middle me-1"></i>
-                        <span key="t-profile">Profile</span></a>
-                    <a class="dropdown-item" href="#"><i class="bx bx-wallet font-size-16 align-middle me-1"></i>
-                        <span key="t-my-wallet">My Wallet</span></a>
-                    <a class="dropdown-item d-block" href="#"><span class="badge bg-success float-end">11</span>
-                        <i class="bx bx-wrench font-size-16 align-middle me-1"></i> <span
-                            key="t-settings">Settings</span></a>
-                    <a class="dropdown-item" href="#"><i
-                            class="bx bx-lock-open font-size-16 align-middle me-1"></i>
-                        <span key="t-lock-screen">Lock screen</span></a>
+                        <span key="t-profile">Profil</span></a>
+                    <a class="dropdown-item" href="{{ route('user.changePassword') }}"><i class="bx bx-lock-alt font-size-16 align-middle me-1"></i>
+                        <span>Ubah Password</span></a>
                     @if(Auth::user()->canImpersonate() && !app('impersonate')->isImpersonating())
                     <div class="dropdown-divider"></div>
                     <a class="dropdown-item" href="{{ route('impersonate.index') }}">

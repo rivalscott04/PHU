@@ -4,17 +4,20 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header pb-3 d-flex justify-content-between align-items-center">
-                    <h6>Data Jamaah Haji</h6>
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
-                        <a href="{{ route('jamaah.haji.create') }}" class="btn btn-primary btn-md me-2">
+                        <h5 class="mb-1">Data Jamaah Haji</h5>
+                        <p class="text-muted mb-0 small">Kelola data jamaah haji di wilayah Anda</p>
+                    </div>
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('jamaah.haji.create') }}" class="btn btn-sm btn-primary">
                             <i class="bx bx-plus me-1"></i> Tambah
                         </a>
-                        <button type="button" class="btn btn-success btn-md me-2" data-bs-toggle="modal"
+                        <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
                             data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
-                        <button type="button" class="btn btn-info btn-md" data-bs-toggle="modal"
+                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
                             data-bs-target="#exportModal">
                             <i class="bx bx-export me-1"></i> Export Data
                         </button>

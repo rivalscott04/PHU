@@ -26,9 +26,9 @@
                             <td>{{ $row['last_inspection'] ?? 'Belum pernah' }}</td>
                             <td>
                                 @if($row['last_inspection'] ?? null)
-                                    <span class="text-warning">{{ $row['months_ago'] ?? '-' }} bulan lalu</span>
+                                    <span class="text-muted">{{ $row['months_ago'] ?? '-' }} bulan lalu</span>
                                 @else
-                                    <span class="badge bg-danger">Belum pernah diawasi</span>
+                                    <span class="badge bg-light text-danger border border-danger">Belum pernah diawasi</span>
                                 @endif
                             </td>
                         </tr>

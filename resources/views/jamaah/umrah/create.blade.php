@@ -4,11 +4,23 @@
 
     <div class="row">
         <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Tambah Jamaah Umrah</h4>
+                    <p class="text-muted mb-0 small">Input data jamaah umrah baru</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Tambah Data Jamaah</h5>
-                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">Upload
-                        XLSX</button>
+                    <h5 class="mb-0">Form Data Jamaah</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <i class="bx bx-upload me-1"></i> Upload XLSX
+                    </button>
                 </div>
                 <div class="card-body">
                     <p class="text-muted small mb-3"><span class="text-danger">*</span> Wajib diisi</p>
@@ -44,7 +56,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
                     </form>
                 </div>
             </div>

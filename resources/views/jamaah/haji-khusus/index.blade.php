@@ -4,6 +4,18 @@
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+            <div>
+                <h4 class="mb-sm-0">Jamaah Haji Khusus</h4>
+                <p class="text-muted mb-0 small">Kelola data jamaah haji khusus di wilayah Anda</p>
+            </div>
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-sm btn-primary">
+                    <i class="bx bx-plus me-1"></i> Tambah Jamaah
+                </a>
+                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                    <i class="bx bx-download me-1"></i> Export Data
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -12,19 +24,7 @@
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h4 class="card-title">Daftar Jamaah Haji Khusus</h4>
-                    <div class="d-flex gap-2">
-                        <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-primary">
-                            <i class="bx bx-plus me-1"></i>
-                            Tambah Jamaah
-                        </a>
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                            <i class="bx bx-download me-1"></i>
-                            Export Data
-                        </button>
-                    </div>
-                </div>
+                <h5 class="mb-0">Daftar Jamaah Haji Khusus</h5>
             </div>
             <div class="card-body px-0 pt-0 pb-2">
                 @if(auth()->user()->role === 'admin' && $groupedJamaahHajiKhusus)
@@ -240,37 +240,39 @@
                     @endforeach
                     </div>
                 @else
-                    <!-- Search and Filter -->
-                    <div class="row mb-3">
+                    <div class="row mb-3 px-3">
                         <div class="col-md-6">
                             <form method="GET" action="{{ route('jamaah.haji-khusus.index') }}" class="d-flex gap-2">
-                                <input type="text" name="search" class="form-control" placeholder="Cari nama, NIK, paspor..." value="{{ request('search') }}">
-                                <button type="submit" class="btn btn-primary">
+                                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari nama, NIK, paspor..." value="{{ request('search') }}">
+                                <button type="submit" class="btn btn-sm btn-primary">
                                     <i class="bx bx-search"></i>
                                 </button>
                             </form>
                         </div>
                         <div class="col-md-3">
-                            <select name="status" class="form-select" onchange="this.form.submit()">
-                                <option value="">Semua Status</option>
-                                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
-                                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                                <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
-                            </select>
+                            <form method="GET" action="{{ route('jamaah.haji-khusus.index') }}">
+                                @if(request('search'))
+                                    <input type="hidden" name="search" value="{{ request('search') }}">
+                                @endif
+                                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                                    <option value="">Semua Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                                    <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Disetujui</option>
+                                    <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                </select>
+                            </form>
                         </div>
                         <div class="col-md-3">
-                            <a href="{{ route('jamaah.haji-khusus.index') }}" class="btn btn-secondary">
-                                <i class="bx bx-refresh me-1"></i>
-                                Reset Filter
+                            <a href="{{ route('jamaah.haji-khusus.index') }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bx bx-refresh me-1"></i> Reset Filter
                             </a>
                         </div>
                     </div>
 
-                    <!-- Data Table -->
                     <div class="table-responsive">
-                        <table class="table table-bordered dt-responsive nowrap w-100">
-                            <thead>
+                        <table class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
                                     <th>No</th>
                                     <th>Nama Lengkap</th>

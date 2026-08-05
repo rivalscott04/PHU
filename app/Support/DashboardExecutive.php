@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\TravelCompany;
 use Carbon\Carbon;
 
 final class DashboardExecutive
@@ -26,6 +27,7 @@ final class DashboardExecutive
 
         $points = [];
 
+        self::appendOperationalQueuePoints($points, $filter);
         self::appendJamaahPoints($points, $stats);
 
         $pengaduanValue = (int) (($stats['total_pengaduan'] ?? [])['value'] ?? 0);
@@ -52,8 +54,8 @@ final class DashboardExecutive
         $bapPending = (int) (($stats['bap_pending'] ?? [])['value'] ?? 0);
         if ($bapPending > 0) {
             $points[] = [
-                'label' => 'BA Pemberangkatan Pending',
-                'text' => "{$bapPending} pengajuan menunggu persetujuan Kanwil/Kabupaten",
+                'label' => 'BA Pemberangkatan (Periode)',
+                'text' => "{$bapPending} pengajuan pending pada periode filter",
                 'tone' => 'warning',
             ];
         }
@@ -155,6 +157,28 @@ final class DashboardExecutive
     }
 
     /** @param  list<array{label: string, text: string, tone: string}>  $points */
+    private static function appendOperationalQueuePoints(array &$points, DashboardFilter $filter): void
+    {
+        $registrationPending = HomeCommandCenter::countRegistrationPending($filter->kabupaten);
+        if ($registrationPending > 0) {
+            $points[] = [
+                'label' => 'Registrasi Travel',
+                'text' => "{$registrationPending} pendaftaran mandiri menunggu verifikasi Kanwil",
+                'tone' => $registrationPending > 3 ? 'danger' : 'warning',
+            ];
+        }
+
+        $bapPending = HomeCommandCenter::countBapPendingForScope($filter->kabupaten);
+        if ($bapPending > 0) {
+            $points[] = [
+                'label' => 'BA Pemberangkatan Pending',
+                'text' => "{$bapPending} pengajuan menunggu persetujuan Kanwil/Kabupaten",
+                'tone' => 'warning',
+            ];
+        }
+    }
+
+    /** @param  list<array{label: string, text: string, tone: string}>  $points */
     private static function appendJamaahPoints(array &$points, array $stats): void
     {
         $umrah = $stats['total_jamaah_umrah'] ?? [];
@@ -228,38 +252,64 @@ final class DashboardExecutive
     public static function urgencyBadge(string $urgency): string
     {
         return match ($urgency) {
-            'critical' => 'danger',
-            'high', 'medium' => 'warning text-dark',
-            default => 'warning text-dark',
+            'critical' => 'light text-danger border border-danger',
+            'high' => 'light text-body border',
+            default => 'light text-muted border',
         };
     }
 
-    public static function warningAlertClass(string $level): string
+    public static function warningIconClass(string $level): string
     {
         return match ($level) {
-            'critical' => 'danger',
-            'warning', 'caution' => 'warning',
-            default => 'info',
+            'critical' => 'bx-error-circle text-danger',
+            default => 'bx-info-circle text-muted',
         };
     }
 
-    public static function warningDotClass(string $level): string
+    /** @return array{cardClass: string, badgeClass: string, badgeLabel: string} */
+    public static function completionRateStatus(float $percent): array
     {
-        return match ($level) {
-            'critical' => 'danger',
-            'warning', 'caution' => 'warning',
-            default => 'info',
-        };
+        if ($percent >= 75) {
+            return ['cardClass' => '', 'badgeClass' => '', 'badgeLabel' => ''];
+        }
+
+        if ($percent >= 50) {
+            return [
+                'cardClass' => '',
+                'badgeClass' => 'badge bg-light text-muted border',
+                'badgeLabel' => 'Perlu ditingkatkan',
+            ];
+        }
+
+        return [
+            'cardClass' => 'border-start border-danger border-2',
+            'badgeClass' => 'badge bg-light text-danger border border-danger',
+            'badgeLabel' => 'Rendah',
+        ];
     }
 
-    public static function pointToneClass(string $tone): string
+    public static function pointDotClass(string $tone): string
+    {
+        return ($tone === 'danger') ? 'bg-danger' : 'bg-secondary opacity-50';
+    }
+
+    public static function pointTextClass(string $tone): string
+    {
+        return 'text-muted';
+    }
+
+    /** @return array{class: string, label: string}|null */
+    public static function pointStatusBadge(string $tone): ?array
     {
         return match ($tone) {
-            'danger' => 'text-danger',
-            'warning' => 'text-warning',
-            'success' => 'text-success',
-            'info' => 'text-primary',
-            default => 'text-muted',
+            'danger' => ['class' => 'badge bg-light text-danger border border-danger', 'label' => 'Segera'],
+            default => null,
         };
+    }
+
+    /** @deprecated Use pointDotClass, pointTextClass, and pointStatusBadge */
+    public static function pointToneClass(string $tone): string
+    {
+        return self::pointTextClass($tone);
     }
 }

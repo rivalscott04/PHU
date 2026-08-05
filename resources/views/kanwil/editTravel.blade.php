@@ -25,7 +25,7 @@
                             'travel' => $travelCompany,
                             'kabupatens' => $kabupatens,
                         ])
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-sm btn-primary">
                             <i class="bx bx-save me-1"></i> Perbarui
                         </button>
                     </form>

@@ -1,9 +1,9 @@
 # PANTAU
 ### Sistem Pengawasan Haji dan Umrah Kanwil Kementerian Haji dan Umroh NTB
 
-PANTAU membantu Kanwil Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat mengelola penyelenggara perjalanan ibadah, data jamaah, persetujuan keberangkatan, sertifikat resmi, pengaduan masyarakat, dan pengawasan digital travel haji dan umrah — termasuk transparansi publik lewat indeks kepercayaan travel.
+PANTAU membantu Kanwil Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat mengelola penyelenggara perjalanan ibadah, data jamaah, persetujuan keberangkatan, sertifikat resmi, pengaduan masyarakat, dan pengawasan digital travel haji dan umrah, termasuk transparansi publik lewat indeks kepercayaan travel.
 
-Semua proses penting bisa dilacak dari satu tempat: mulai dari pendaftaran jamaah, pengajuan keberangkatan, hingga pemeriksaan dan tindak lanjut di lapangan.
+Semua proses penting bisa dilacak dari satu tempat: mulai dari pendaftaran travel dan jamaah, pengajuan keberangkatan, hingga pemeriksaan dan tindak lanjut di lapangan.
 
 ---
 
@@ -24,11 +24,14 @@ Semua proses penting bisa dilacak dari satu tempat: mulai dari pendaftaran jamaa
 
 ### Operasional harian
 
+**Registrasi travel mandiri**
+Travel PPIU atau PIHK bisa mendaftar akun sendiri lewat halaman publik. Form wizard memandu pengisian data perusahaan, PIC, dan unggah dokumen SK serta akreditasi. Setelah submit, status menunggu verifikasi Kanwil. Admin Kanwil meninjau, menyetujui, atau menolak registrasi beserta catatannya. Travel yang belum disetujui tidak bisa mengakses fitur operasional; yang ditolak bisa mendaftar ulang.
+
 **Data travel**
-Mencatat perusahaan travel pusat dan cabang di seluruh NTB, lengkap dengan lisensi, akreditasi, dan status layanan (umrah, haji, atau haji khusus).
+Mencatat perusahaan travel pusat dan cabang di seluruh NTB, lengkap dengan lisensi, akreditasi, status layanan (umrah, haji, atau haji khusus), dan status registrasi.
 
 **Data jamaah**
-Mengelola jamaah umrah, haji reguler, dan pendaftaran haji khusus beserta dokumen pendukungnya. Data bisa diinput manual atau diimpor dari Excel.
+Mengelola jamaah umrah, haji reguler, dan pendaftaran haji khusus beserta dokumen pendukungnya. Pendaftaran haji khusus memakai form wizard multi langkah dengan unggah dokumen per tahap. Data bisa diinput manual atau diimpor dari Excel.
 
 **BA Pemberangkatan**
 Travel mengajukan Berita Acara Pelaporan Keberangkatan sebagai deklarasi rencana keberangkatan jamaah. Admin atau admin kabupaten meninjau, memproses, lalu menyetujui. Setelah disetujui, dokumen mendapat nomor surat resmi dan tanda tangan elektronik yang bisa diverifikasi publik.
@@ -44,6 +47,12 @@ Warga bisa mengirim pengaduan dari halaman depan tanpa harus login, lengkap deng
 
 **Pengunduran jamaah**
 Travel dapat mengajukan pengunduran jamaah beserta dokumen pendukung untuk diproses admin.
+
+**Beranda per peran**
+Setelah login, setiap peran melihat beranda yang relevan dengan tugasnya:
+* **Admin Kanwil:** command center dengan kartu antrian (registrasi travel, BA Pemberangkatan, pengaduan, risiko tinggi) dan indikator kondisi (normal, ada antrian, perlu perhatian segera)
+* **Admin Kabupaten:** antrian terfilter wilayah kabupaten/kota, plus daftar BA terbaru yang menunggu proses
+* **User Travel:** checklist langkah demi langkah (registrasi disetujui → tambah jamaah → ajukan BA → pantau jadwal keberangkatan)
 
 ### Pengawasan Digital
 
@@ -77,7 +86,7 @@ Gambaran lengkap satu travel: sertifikat, temuan inspeksi, pengaduan, dan riwaya
 Catatan jejak siapa melakukan apa dan kapan di modul pengawasan, untuk keperluan audit dan akuntabilitas.
 
 **Notifikasi**
-Pemberitahuan di dalam aplikasi untuk pengaduan baru, pengingat deadline, dan pembaruan tindak lanjut.
+Pemberitahuan di dalam aplikasi untuk pengaduan baru, pengingat deadline, dan pembaruan tindak lanjut. Notifikasi real-time muncul langsung di bell icon tanpa perlu refresh halaman (memerlukan Laravel Reverb di production).
 
 ### Halaman untuk publik
 
@@ -85,10 +94,11 @@ Tanpa perlu masuk ke sistem, masyarakat bisa:
 
 1. Melihat jadwal keberangkatan di halaman depan
 2. Mengirim pengaduan, melihat riwayat pengaduan selesai, dan mengecek status lewat token unik
-3. Melihat direktori travel berizin beserta **indeks kepercayaan** (skor kepatuhan berdasarkan data pengawasan Kanwil)
+3. Melihat direktori travel berizin beserta **indeks kepercayaan** (skor kepatuhan berdasarkan data pengawasan Kanwil). Hanya travel dengan registrasi disetujui yang tampil
 4. Membuka profil travel publik: izin operasional, akreditasi, riwayat pengawasan, jumlah pengaduan, dan jamaah terlayani
 5. Memverifikasi sertifikat PPIU lewat pemindaian QR
 6. Memverifikasi tanda tangan elektronik pada BA Pemberangkatan
+7. Mendaftarkan travel PPIU atau PIHK lewat form registrasi mandiri
 
 Indeks kepercayaan bukan sertifikat resmi, melainkan ringkasan transparan dari data pengawasan untuk membantu jamaah memilih travel.
 
@@ -104,6 +114,7 @@ Wilayah kerja: seluruh NTB.
 
 Tugas utama:
 * Mengelola data travel pusat dan akun pengguna (termasuk peran pengawas dan pimpinan)
+* Memverifikasi registrasi travel mandiri (setujui atau tolak beserta catatan)
 * Memproses pengaduan masyarakat
 * Menyetujui BA Pemberangkatan
 * Mengatur master checklist pemeriksaan
@@ -134,7 +145,7 @@ Tugas utama:
 
 ### Admin Kabupaten
 
-Wilayah kerja: satu kabupaten atau kota.
+Wilayah kerja: satu kabupaten atau kota. Akses data dan antrian otomatis difilter sesuai wilayah kerja.
 
 Tugas utama:
 * Memproses pengajuan BA Pemberangkatan di wilayahnya
@@ -148,6 +159,7 @@ Tugas utama:
 Wilayah kerja: satu perusahaan travel (pusat atau cabang).
 
 Tugas utama:
+* Menunggu verifikasi registrasi (jika mendaftar mandiri) sebelum fitur operasional aktif
 * Menginput dan mengelola data jamaah
 * Membuat dan mengajukan BA Pemberangkatan
 * Melihat jadwal keberangkatan yang sudah disetujui
@@ -160,6 +172,9 @@ Tugas utama:
 ---
 
 ## Alur kerja singkat
+
+**Registrasi travel mandiri**
+Travel isi form registrasi dan unggah dokumen → status menunggu verifikasi → Kanwil tinjau dan setujui atau tolak → jika disetujui, akun aktif dan fitur operasional terbuka.
 
 **Keberangkatan jamaah**
 Travel input jamaah → buat BA Pemberangkatan → ajukan ke Kanwil → admin atau kabupaten tinjau dan setujui → jadwal muncul di kalender → dokumen bisa dicetak dengan tanda tangan elektronik.
@@ -175,7 +190,8 @@ Warga kirim pengaduan dari halaman depan (dengan lampiran opsional) → masuk an
 ## Mulai menggunakan
 
 Untuk instalasi development, perintah artisan, dan cron, lihat **[SETUP.md](./SETUP.md)**.  
-Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY.md](./DEPLOY.md)**.
+Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY.md](./DEPLOY.md)**.  
+Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](./docs/persiapan/README.md)**.
 
 **Login awal** (setelah migrasi database):
 
@@ -183,8 +199,8 @@ Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY
 |-------|--------------|----------|
 | Super Admin | `admin@phu.com` | `admin123` |
 | Pimpinan Kanwil | `pimpinan@phu.local` | `password123` |
-| Pengawas | `pengawas.lombokbarat@phu.local` | `password123` |
-| Admin Kabupaten | `kabupaten.lombokbarat@phu.com` | `password123` |
+| Pengawas | `pengawas.mataram@phu.local` | `password123` |
+| Admin Kabupaten | `kota.mataram@phu.com` | `password123` |
 | User Travel | (dari data seeder) | `password123` |
 
 Akun travel dan kabupaten baru wajib mengganti password saat pertama kali masuk.
@@ -193,7 +209,7 @@ Akun travel dan kabupaten baru wajib mengganti password saat pertama kali masuk.
 
 ## Teknologi
 
-Dibangun dengan Laravel 10, PHP 8.1+, dan MySQL. Antarmuka memakai Argon Dashboard. Modul pengawasan (V2) memanfaatkan Redis untuk cache dashboard dan DomPDF untuk dokumen pengaduan.
+Dibangun dengan Laravel 12, PHP 8.2+, dan MySQL. Antarmuka memakai template admin Skote (Bootstrap 5). Modul pengawasan (V2) memanfaatkan Redis untuk cache dashboard, Laravel Reverb untuk notifikasi real-time, dan DomPDF untuk dokumen pengaduan.
 
 ---
 

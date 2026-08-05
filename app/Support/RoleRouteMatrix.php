@@ -130,7 +130,7 @@ final class RoleRouteMatrix
                 'v2.checklist.index' => $deny,
                 'v2.followup.index' => $deny,
                 'v2.risk.index' => $deny,
-                'v2.compliance.index' => $deny,
+                'v2.compliance.index' => $allow,
                 'v2.audit-log.index' => $deny,
                 'v2.notifications.index' => $allow,
             ],

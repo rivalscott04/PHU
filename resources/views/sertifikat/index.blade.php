@@ -8,13 +8,13 @@
             <div class="col-12">
                 <div class="page-title-box d-flex align-items-center justify-content-between">
                     <h4 class="mb-0">Sertifikat PPIU</h4>
-                    <div class="page-title-right">
-                        <button type="button" class="btn btn-outline-secondary me-2" data-bs-toggle="modal"
+                    <div class="page-title-right d-flex gap-2 flex-wrap">
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
                             data-bs-target="#settingsModal">
-                            <i class="bx bx-cog"></i> Pengaturan Penandatangan
+                            <i class="bx bx-cog me-1"></i> Pengaturan Penandatangan
                         </button>
-                        <button type="button" class="btn btn-primary" onclick="checkPenandatangan()">
-                            <i class="fas fa-plus"></i> Buat Sertifikat
+                        <button type="button" class="btn btn-sm btn-primary" onclick="checkPenandatangan()">
+                            <i class="bx bx-plus me-1"></i> Buat Sertifikat
                         </button>
                     </div>
                 </div>
@@ -30,8 +30,8 @@
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped">
-                                <thead>
+                            <table class="table table-striped table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr>
                                         <th>No</th>
                                         <th>Nama PPIU</th>

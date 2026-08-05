@@ -62,10 +62,10 @@
     <div class="card-body pt-3">
         <div class="tab-content" id="pimpinanDashboardTabContent">
             <div class="tab-pane fade show active" id="pane-ringkasan" role="tabpanel" aria-labelledby="tab-ringkasan">
+                @include('v2.dashboard.partials.intervention-priorities', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.executive-summary', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.completion-rates', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.warning')
-                @include('v2.dashboard.partials.intervention-priorities', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.cards', ['colClass' => 'col-xl-2 col-md-3 col-sm-6'])
             </div>
             <div class="tab-pane fade" id="pane-visualisasi" role="tabpanel" aria-labelledby="tab-visualisasi">

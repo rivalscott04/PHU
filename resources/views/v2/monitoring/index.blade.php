@@ -1,22 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-@php
-    use App\Support\RouteAccess;
-    $riskBadges = [
-        'LOW' => 'success',
-        'MEDIUM' => 'info',
-        'HIGH' => 'warning',
-        'CRITICAL' => 'danger',
-    ];
-    $riskLabels = [
-        'LOW' => 'Rendah',
-        'MEDIUM' => 'Sedang',
-        'HIGH' => 'Tinggi',
-        'CRITICAL' => 'Kritis',
-    ];
-@endphp
-
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-start flex-wrap gap-2">
@@ -25,21 +9,21 @@
                 <p class="text-muted mb-0">Ringkasan operasional travel, pengawasan, dan risiko</p>
             </div>
             <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
-                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
-                    <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-primary">
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
+                    <a href="{{ route('v2.monitoring.travel', request()->query()) }}" class="btn btn-sm btn-primary">
                         <i class="bx bx-list-ul me-1"></i> Data Travel
                     </a>
                 @endif
-                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.dashboard'))
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.dashboard'))
                     <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
                         <i class="bx bx-line-chart me-1"></i> Dashboard
                     </a>
                 @endif
-                @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.export.monitoring'))
-                    <a href="{{ route('v2.export.monitoring', ['format' => 'xlsx']) }}" class="btn btn-sm btn-outline-success">
+                @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.export.monitoring'))
+                    <a href="{{ route('v2.export.monitoring', array_merge(['format' => 'xlsx'], request()->query())) }}" class="btn btn-sm btn-outline-success">
                         <i class="bx bx-spreadsheet me-1"></i> Excel
                     </a>
-                    <a href="{{ route('v2.export.monitoring', ['format' => 'csv']) }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ route('v2.export.monitoring', array_merge(['format' => 'csv'], request()->query())) }}" class="btn btn-sm btn-outline-secondary">
                         <i class="bx bx-download me-1"></i> CSV
                     </a>
                 @endif
@@ -54,6 +38,9 @@
         @include('partials.workflow-guide', ['guide' => $guide])
     @endif
 
+    @include('v2.partials.wilayah-scope')
+    @include('v2.monitoring.partials.filters')
+
     @include('v2.partials.kpi-cards', ['cards' => $cards, 'id' => 'monitoring-kpi'])
 
     <div class="row">
@@ -64,57 +51,14 @@
                         <h5 class="mb-0 fw-semibold">Data Travel Terbaru</h5>
                         <small class="text-muted">Snapshot monitoring per penyelenggara</small>
                     </div>
-                    @if(RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
-                        <a href="{{ route('v2.monitoring.travel') }}" class="btn btn-sm btn-link text-primary p-0">
+                    @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.travel'))
+                        <a href="{{ route('v2.monitoring.travel', request()->query()) }}" class="btn btn-sm btn-link text-primary p-0">
                             Lihat semua <i class="bx bx-chevron-right"></i>
                         </a>
                     @endif
                 </div>
                 <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th class="ps-3">Travel</th>
-                                    <th>Kabupaten</th>
-                                    <th>Jenis</th>
-                                    <th>Pengawasan</th>
-                                    <th>Pengaduan</th>
-                                    <th class="pe-3">Risiko</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($travels as $travel)
-                                    @php
-                                        $risk = $travel->riskScore?->risk_level?->value ?? $travel->riskScore?->risk_level;
-                                    @endphp
-                                    <tr>
-                                        <td class="ps-3 fw-medium">{{ $travel->Penyelenggara }}</td>
-                                        <td class="text-muted">{{ $travel->kab_kota }}</td>
-                                        <td><span class="badge bg-light text-dark border">{{ $travel->Status }}</span></td>
-                                        <td>{{ number_format($travel->inspections_count) }}</td>
-                                        <td>@include('v2.partials.pengaduan-count', ['travel' => $travel])</td>
-                                        <td class="pe-3">
-                                            @if($risk)
-                                                <span class="badge bg-{{ $riskBadges[$risk] ?? 'secondary' }}">
-                                                    {{ $riskLabels[$risk] ?? $risk }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">Tidak ada</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center text-muted py-5">
-                                            <i class="bx bx-buildings d-block mb-2" style="font-size:2rem;"></i>
-                                            Belum ada data travel.
-                                        </td>
-                                    </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
+                    @include('v2.monitoring.partials.travel-table', ['travels' => $travels, 'compact' => true])
                 </div>
             </div>
         </div>
@@ -152,7 +96,7 @@ document.getElementById('btn-refresh-kpi')?.addEventListener('click', function (
     const btn = this;
     btn.disabled = true;
 
-    fetch('{{ route('v2.monitoring.statistics') }}', {
+    fetch('{{ route('v2.monitoring.statistics', request()->query()) }}', {
         headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
     })
     .then(r => r.json())

@@ -67,9 +67,11 @@ class RoleWorkflowGuide
             'v2_risk' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
                 ? self::v2Risk($role)
                 : null,
-            'v2_compliance' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
-                ? self::v2Compliance($role)
-                : null,
+            'v2_compliance' => match ($role) {
+                UserRole::Kabupaten->value => self::v2ComplianceKabupaten(),
+                UserRole::Admin->value, UserRole::Pengawas->value => self::v2Compliance($role),
+                default => null,
+            },
             'v2_checklist' => $role === UserRole::Admin->value ? self::v2Checklist() : null,
             'v2_audit_log' => in_array($role, [UserRole::Admin->value, UserRole::Pengawas->value], true)
                 ? self::v2AuditLog()
@@ -553,6 +555,25 @@ class RoleWorkflowGuide
             ],
             'actions' => [
                 ['label' => 'BA Pemeriksaan', 'url' => route('v2.pengawasan.index'), 'style' => 'outline-primary', 'icon' => 'bx-search-alt'],
+            ],
+        ];
+    }
+
+    /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
+    private static function v2ComplianceKabupaten(): array
+    {
+        return [
+            'title' => 'Profil Kepatuhan Wilayah',
+            'hint' => 'Lihat gambaran kepatuhan travel di kabupaten/kota Anda sebelum memproses BA atau pengaduan.',
+            'steps' => [
+                'Cari travel di tabel atau gunakan filter',
+                'Perhatikan level risiko dan jumlah temuan aktif',
+                'Klik Detail untuk riwayat pengawasan dan pengaduan',
+                'Koordinasikan dengan Kanwil jika ada travel berisiko tinggi',
+            ],
+            'actions' => [
+                ['label' => 'BA Pemberangkatan', 'url' => route('bap'), 'style' => 'outline-primary', 'icon' => 'bx-file'],
+                ['label' => 'Pengaduan', 'url' => route('pengaduan'), 'style' => 'outline-danger', 'icon' => 'bx-message-square-dots'],
             ],
         ];
     }

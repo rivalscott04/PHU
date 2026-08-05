@@ -3,9 +3,23 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Detail Pengaduan</h4>
+                    <p class="text-muted mb-0 small">Informasi lengkap pengaduan</p>
+                </div>
+                <a href="{{ route('pengaduan') }}" class="btn btn-sm btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Detail Pengaduan</h5>
+                <div class="card-header">
+                    <h5 class="mb-0">Data Pengaduan</h5>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -51,9 +65,6 @@
                         </div>
                     </div>
 
-                    <div class="mt-3">
-                        <a href="{{ route('pengaduan') }}" class="btn btn-secondary">Kembali</a>
-                    </div>
                 </div>
             </div>
         </div>

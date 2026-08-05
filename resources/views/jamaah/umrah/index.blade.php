@@ -2,28 +2,38 @@
 
 @section('content')
     @if($guide = \App\Support\RoleWorkflowGuide::for('jamaah_umrah'))
-        <div class="container-fluid px-0 mb-3">
-            @include('partials.workflow-guide', ['guide' => $guide])
-        </div>
+        @include('partials.workflow-guide', ['guide' => $guide])
     @endif
+
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Jamaah Umrah</h4>
+                    <p class="text-muted mb-0 small">Kelola data jamaah umrah di wilayah Anda</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('jamaah.umrah.create') }}" class="btn btn-sm btn-primary">
+                        <i class="bx bx-plus me-1"></i> Tambah
+                    </a>
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal"
+                        data-bs-target="#uploadModal">
+                        <i class="bx bx-upload me-1"></i> Upload Excel
+                    </button>
+                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+                        data-bs-target="#exportModal">
+                        <i class="bx bx-export me-1"></i> Export Data
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header pb-3 d-flex justify-content-between align-items-center">
-                    <h6>Data Jamaah Umrah</h6>
-                    <div>
-                        <a href="{{ route('jamaah.umrah.create') }}" class="btn btn-primary btn-md me-2">
-                            <i class="bx bx-plus me-1"></i> Tambah
-                        </a>
-                        <button type="button" class="btn btn-success btn-md me-2" data-bs-toggle="modal"
-                            data-bs-target="#uploadModal">
-                            <i class="bx bx-upload me-1"></i> Upload Excel
-                        </button>
-                        <button type="button" class="btn btn-info btn-md" data-bs-toggle="modal"
-                            data-bs-target="#exportModal">
-                            <i class="bx bx-export me-1"></i> Export Data
-                        </button>
-                    </div>
+                <div class="card-header">
+                    <h5 class="mb-0">Daftar Jamaah Umrah</h5>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     @if (auth()->user()->role === 'admin' && $groupedJamaah)
@@ -237,53 +247,48 @@
                             @endforeach
                         </div>
                     @else
-                        <!-- Regular View: Normal Table -->
-                        <div class="table-responsive p-0">
-                            <table class="table align-items-center mb-0">
-                                <thead>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover align-middle mb-0">
+                                <thead class="table-light">
                                     <tr class="text-center">
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No
-                                        </th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Nama</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Alamat</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No
-                                            HP</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7"
-                                            style="width: 200px; min-width: 200px;">NIK</th>
-                                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">
-                                            Aksi</th>
+                                        <th>No</th>
+                                        <th>Nama</th>
+                                        <th>Alamat</th>
+                                        <th>No HP</th>
+                                        <th style="width: 200px; min-width: 200px;">NIK</th>
+                                        <th>Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach ($jamaah as $key => $item)
                                         <tr class="text-center">
-                                            <td class="text-sm font-weight-bold">{{ $key + 1 }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $item->nama }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $item->alamat }}</td>
-                                            <td class="text-sm font-weight-bold">{{ $item->nomor_hp }}</td>
-                                            <td class="text-sm font-weight-bold" style="width: 200px; min-width: 200px;">
+                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $item->nama }}</td>
+                                            <td>{{ $item->alamat }}</td>
+                                            <td>{{ $item->nomor_hp }}</td>
+                                            <td style="width: 200px; min-width: 200px;">
                                                 <div class="d-flex align-items-center justify-content-center">
                                                     <span id="nik_{{ $item->id }}"
                                                         data-nik="{{ $item->nik }}">{{ str_repeat('*', strlen($item->nik)) }}</span>
-                                                    <button class="btn btn-link p-0 ms-2"
+                                                    <button type="button" class="btn btn-sm btn-link p-0 ms-2"
                                                         onclick="toggleNik('{{ $item->id }}')">
                                                         <i id="icon_{{ $item->id }}" class="bx bxs-show"></i>
                                                     </button>
                                                 </div>
                                             </td>
                                             <td>
-                                                <a href="{{ route('jamaah.detail', $item->id) }}">
-                                                    <i class="bx bx-info-circle me-2"></i>
-                                                </a>
-                                                <a href="{{ route('jamaah.edit', $item->id) }}">
-                                                    <i class="bx bx-edit text-success me-2"></i>
-                                                </a>
-                                                <a href="javascript:void(0)"
-                                                    onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}', 'data jamaah')">
-                                                    <i class="bx bx-trash text-danger"></i>
-                                                </a>
+                                                <div class="d-flex gap-1 justify-content-center">
+                                                    <a href="{{ route('jamaah.detail', $item->id) }}" class="btn btn-sm btn-primary" title="Detail">
+                                                        <i class="bx bx-info-circle"></i>
+                                                    </a>
+                                                    <a href="{{ route('jamaah.edit', $item->id) }}" class="btn btn-sm btn-warning" title="Edit">
+                                                        <i class="bx bx-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-danger" title="Hapus"
+                                                        onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama }}', 'data jamaah')">
+                                                        <i class="bx bx-trash"></i>
+                                                    </button>
+                                                </div>
                                                 <form id="delete-form-{{ $item->id }}"
                                                     action="{{ route('jamaah.destroy', $item->id) }}" method="POST"
                                                     style="display: none;">

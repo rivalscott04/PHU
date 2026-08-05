@@ -13,9 +13,20 @@
 
     <div class="row">
         <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Tambah Data Travel</h4>
+                    <p class="text-muted mb-0 small">Input data PPIU/PIHK baru</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0">Tambah Data Travel (Admin)</h5>
+                    <h5 class="mb-0">Form Data Travel</h5>
                     <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
                         <i class="bx bx-upload me-1"></i> Upload XLSX
                     </button>
@@ -27,7 +38,7 @@
                     <form method="POST" action="{{ route('post.travel') }}">
                         @csrf
                         @include('partials.travel-company-fields', ['kabupatens' => $kabupatens])
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
                     </form>
                 </div>
             </div>

@@ -50,9 +50,7 @@ class ImpersonateController extends Controller
             return redirect()->back()->with('error', 'Gagal memulai impersonasi. Silakan coba lagi.');
         }
 
-        return redirect()
-            ->route($user->impersonationRedirectRoute())
-            ->with('success', 'Sekarang masuk sebagai '.$user->nama);
+        return redirect()->route($user->impersonationRedirectRoute());
     }
 
     /**

@@ -15,32 +15,34 @@
     @endif
 
     @if($guide = \App\Support\RoleWorkflowGuide::for('travel_master'))
-        <div class="container-fluid px-0 mb-3">
-            @include('partials.workflow-guide', ['guide' => $guide])
-        </div>
+        @include('partials.workflow-guide', ['guide' => $guide])
     @endif
 
     <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-                    <div>
-                        <h5 class="mb-1">Data Travel</h5>
-                        <p class="text-muted mb-0 small">Kelola PPIU/PIHK dan verifikasi pendaftaran mandiri</p>
-                    </div>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <a href="{{ route('form.travel') }}" class="btn btn-primary btn-sm">
-                            <i class="bx bx-plus me-1"></i> Tambah
-                        </a>
-                        <a href="{{ route('travel.export') }}" class="btn btn-outline-primary btn-sm">
-                            <i class="bx bx-download me-1"></i> Export Excel
-                        </a>
-                        <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
-                            <i class="bx bx-upload me-1"></i> Upload Excel
-                        </button>
-                    </div>
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Data PPIU Pusat</h4>
+                    <p class="text-muted mb-0 small">Kelola PPIU/PIHK dan verifikasi pendaftaran mandiri</p>
                 </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{{ route('form.travel') }}" class="btn btn-primary btn-sm">
+                        <i class="bx bx-plus me-1"></i> Tambah
+                    </a>
+                    <a href="{{ route('travel.export') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bx bx-download me-1"></i> Export Excel
+                    </a>
+                    <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <i class="bx bx-upload me-1"></i> Upload Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
                 <div class="card-body pb-0">
                     <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
                         <li class="nav-item" role="presentation">
@@ -88,7 +90,7 @@
                     </div>
 
                     <div class="table-responsive">
-                        <table id="dataTable" class="table table-striped table-bordered nowrap w-100 mb-0">
+                        <table id="dataTable" class="table table-striped table-bordered table-hover nowrap w-100 mb-0">
                             <thead class="table-light text-center">
                                 <tr>
                                     <th rowspan="2">No.</th>

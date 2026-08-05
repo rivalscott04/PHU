@@ -1,197 +1,145 @@
 @extends('layouts.app')
 
 @section('content')
-    @if($guide = \App\Support\RoleWorkflowGuide::for('pengaduan'))
-        <div class="container-fluid px-0 mb-3">
-            @include('partials.workflow-guide', ['guide' => $guide])
-        </div>
-    @endif
-    <!-- Statistik Pengaduan Cards -->
-    <div class="row mb-4">
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 10px; border-left: 4px solid #2563eb;">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size: 0.8rem;">Total Pengaduan</p>
-                                <h2 class="font-weight-bolder mb-0 text-primary" style="font-size: 2.5rem;">
-                                    {{ $stats['total'] }}
-                                </h2>
-                                <p class="text-muted mb-0" style="font-size: 0.75rem;">Keseluruhan data</p>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-primary bg-opacity-10 text-center border-radius-md" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                                <i class="bx bx-collection text-primary" style="font-size: 1.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Pengaduan</h4>
+                    <p class="text-muted mb-0 small">Kelola dan pantau pengaduan masyarakat di wilayah Anda</p>
                 </div>
+                <a href="{{ route('pengaduan.create') }}" class="btn btn-sm btn-primary">
+                    <i class="bx bx-plus me-1"></i> Tambah Pengaduan
+                </a>
             </div>
         </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 10px; border-left: 4px solid #f59e0b;">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size: 0.8rem;">Belum Diproses</p>
-                                <h2 class="font-weight-bolder mb-0 text-warning" style="font-size: 2.5rem;">
-                                    {{ $stats['pending'] }}
-                                </h2>
-                                <p class="text-muted mb-0" style="font-size: 0.75rem;">Menunggu tindakan</p>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-warning bg-opacity-10 text-center border-radius-md" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                                <i class="bx bx-time text-warning" style="font-size: 1.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 10px; border-left: 4px solid #06b6d4;">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size: 0.8rem;">Sedang Diproses</p>
-                                <h2 class="font-weight-bolder mb-0 text-info" style="font-size: 2.5rem;">
-                                    {{ $stats['in_progress'] }}
-                                </h2>
-                                <p class="text-muted mb-0" style="font-size: 0.75rem;">Dalam penanganan</p>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-info bg-opacity-10 text-center border-radius-md" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                                <i class="bx bx-cog text-info" style="font-size: 1.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-            <div class="card border-0 shadow-sm" style="border-radius: 10px; border-left: 4px solid #10b981;">
-                <div class="card-body p-4">
-                    <div class="row align-items-center">
-                        <div class="col-8">
-                            <div class="numbers">
-                                <p class="text-muted mb-1 text-uppercase font-weight-bold" style="font-size: 0.8rem;">Selesai</p>
-                                <h2 class="font-weight-bolder mb-0 text-success" style="font-size: 2.5rem;">
-                                    {{ $stats['completed'] }}
-                                </h2>
-                                <p class="text-muted mb-0" style="font-size: 0.75rem;">Telah diselesaikan</p>
-                            </div>
-                        </div>
-                        <div class="col-4 text-end">
-                            <div class="icon icon-shape bg-success bg-opacity-10 text-center border-radius-md" style="width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
-                                <i class="bx bx-check-circle text-success" style="font-size: 1.5rem;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
 
+    @if($guide = \App\Support\RoleWorkflowGuide::for('pengaduan'))
+        @include('partials.workflow-guide', ['guide' => $guide])
+    @endif
+
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Pengaduan</p>
+                    <h4 class="mb-0">{{ $stats['total'] }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Belum Diproses</p>
+                    <h4 class="mb-0">{{ $stats['pending'] }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Sedang Diproses</p>
+                    <h4 class="mb-0">{{ $stats['in_progress'] }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6 mb-3">
+            <div class="card mini-stats-wid">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Selesai</p>
+                    <h4 class="mb-0">{{ $stats['completed'] }}</h4>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header pb-3 d-flex justify-content-between align-items-center">
-                    <h6>Data Pengaduan</h6>
-                    <div class="d-flex gap-2">
-                        <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
-                            <option value="">Semua Status</option>
-                            <option value="pending">Menunggu</option>
-                            <option value="in_progress">Sedang Diproses</option>
-                            <option value="completed">Selesai</option>
-                        </select>
-                        <a href="{{ route('pengaduan.create') }}" class="btn btn-primary btn-sm">
-                            <i class="bx bx-plus me-1"></i> Tambah Pengaduan
-                        </a>
-                    </div>
+                <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                    <h5 class="mb-0">Data Pengaduan</h5>
+                    <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
+                        <option value="">Semua Status</option>
+                        <option value="pending">Menunggu</option>
+                        <option value="in_progress">Sedang Diproses</option>
+                        <option value="completed">Selesai</option>
+                    </select>
                 </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0">
-                            <thead class="bg-light">
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-center">
+                                <th>No</th>
+                                <th>Travel yang diadukan</th>
+                                <th>Hal Aduan</th>
+                                <th>Berkas</th>
+                                <th>Status</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($pengaduan as $item)
                                 <tr class="text-center">
-                                    <th>No</th>
-                                    <th>Travel yang diadukan</th>
-                                    <th>Hal Aduan</th>
-                                    <th>Berkas</th>
-                                    <th>Status</th>
-                                    <th>Tanggal</th>
-                                    <th>Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($pengaduan as $item)
-                                    <tr class="text-center">
-                                        <td>{{ $pengaduan->firstItem() + $loop->index }}</td>
-                                        <td>{{ $item->travel->Penyelenggara }}</td>
-                                        <td style="max-width: 300px; word-wrap: break-word; text-align: left;">{{ $item->hal_aduan }}</td>
-                                        <td>
-                                            @if ($item->berkas_aduan)
-                                                <a href="{{ route('pengaduan.download-berkas', $item->id) }}" target="_blank" rel="noopener noreferrer">
-                                                    <i class="bx bx-file"></i>
-                                                </a>
-                                            @else
-                                                -
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <select class="form-select form-select-sm status-dropdown" 
-                                                    data-id="{{ $item->id }}" 
-                                                    data-current-status="{{ $item->status }}"
-                                                    style="width: auto; min-width: 120px;">
-                                                <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                                <option value="in_progress" {{ $item->status == 'in_progress' ? 'selected' : '' }}>Sedang Diproses</option>
-                                                <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>Selesai</option>
-                                            </select>
-                                        </td>
-                                        <td>{{ $item->created_at->format('d/m/Y') }}</td>
-                                        <td>
-                                            <a href="{{ route('pengaduan.show', $item->id) }}" class="btn btn-sm btn-primary rounded-pill">
+                                    <td>{{ $pengaduan->firstItem() + $loop->index }}</td>
+                                    <td>{{ $item->travel->Penyelenggara }}</td>
+                                    <td class="text-start" style="max-width: 300px;">{{ $item->hal_aduan }}</td>
+                                    <td>
+                                        @if ($item->berkas_aduan)
+                                            <a href="{{ route('pengaduan.download-berkas', $item->id) }}" target="_blank" rel="noopener noreferrer">
+                                                <i class="bx bx-file"></i>
+                                            </a>
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <select class="form-select form-select-sm status-dropdown"
+                                                data-id="{{ $item->id }}"
+                                                data-current-status="{{ $item->status }}"
+                                                style="width: auto; min-width: 140px;">
+                                            <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                                            <option value="in_progress" {{ $item->status == 'in_progress' ? 'selected' : '' }}>Sedang Diproses</option>
+                                            <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>Selesai</option>
+                                        </select>
+                                    </td>
+                                    <td>{{ $item->created_at->format('d/m/Y') }}</td>
+                                    <td>
+                                        <div class="d-flex gap-1 justify-content-center flex-wrap">
+                                            <a href="{{ route('pengaduan.show', $item->id) }}" class="btn btn-sm btn-primary">
                                                 <i class="bx bx-info-circle me-1"></i> Detail
                                             </a>
                                             @if($item->status === 'completed' && $item->pdf_output)
-                                                <a href="{{ $item->getPublicDownloadUrl() }}" class="btn btn-sm btn-success rounded-pill" target="_blank">
+                                                <a href="{{ $item->getPublicDownloadUrl() }}" class="btn btn-sm btn-success" target="_blank">
                                                     <i class="bx bx-download me-1"></i> PDF
                                                 </a>
                                             @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                    @if ($pengaduan->hasPages())
-                        <div class="px-3 pb-3">
-                            {{ $pengaduan->links() }}
-                        </div>
-                    @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
+                @if ($pengaduan->hasPages())
+                    <div class="px-3 py-2 border-top">
+                        {{ $pengaduan->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>
-
-
 @endsection
 
+@push('js')
 <script>
-// Status dropdown change handler
 document.addEventListener('change', function(e) {
     if (e.target.classList.contains('status-dropdown')) {
         const id = e.target.dataset.id;
         const newStatus = e.target.value;
         const currentStatus = e.target.dataset.currentStatus;
-        
+
         if (newStatus !== currentStatus) {
             confirmAction({
                 title: 'Yakin ingin mengubah status pengaduan ini?',
@@ -234,20 +182,16 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// Filter functionality
-document.getElementById('statusFilter').addEventListener('change', function() {
+document.getElementById('statusFilter')?.addEventListener('change', function() {
     const filterValue = this.value;
     const rows = document.querySelectorAll('tbody tr');
-    
+
     rows.forEach(row => {
         const statusDropdown = row.querySelector('.status-dropdown');
         const status = statusDropdown ? statusDropdown.value : '';
-        
-        if (!filterValue || status === filterValue) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+
+        row.style.display = (!filterValue || status === filterValue) ? '' : 'none';
     });
 });
 </script>
+@endpush

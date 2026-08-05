@@ -3,11 +3,22 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Tambah Cabang Travel</h4>
+                    <p class="text-muted mb-0 small">Input data cabang PPIU baru</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Form Data Cabang Travel</h5>
                     <div>
-                        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
+                        <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
                     </div>
@@ -62,7 +73,7 @@
                                 <input type="text" class="form-control" id="telepon" name="telepon" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Simpan</button>
+                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
                     </form>
                 </div>
             </div>

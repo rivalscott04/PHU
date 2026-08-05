@@ -7,47 +7,49 @@
             @if($guide = \App\Support\RoleWorkflowGuide::for('bap_list'))
                 @include('partials.workflow-guide', ['guide' => $guide])
             @endif
-            <div class="card">
-                <div class="card-header ps-0 d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-0">BA Pemberangkatan</h6>
-                        <small class="text-muted">Daftar pengajuan keberangkatan jamaah</small>
-                    </div>
-                    <div>
-                        @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
-                            <a href="{{ route('verify-e-sign') }}" class="btn btn-info me-2">
-                                <i class="bx bx-qr-scan me-1"></i>Verifikasi E Sign
-                            </a>
-                        @endif
-                        <a href="{{ route('form.bap') }}" onclick="return checkJamaah({{ $jamaahCount }});"
-                            class="btn btn-primary">
-                            Tambah
-                        </a>
-                    </div>
-                </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                    <div class="table-responsive p-0">
-                        <table class="table align-items-center mb-0" style="font-size: 12px;">
-                            <thead>
-                                <tr class="text-center">
-                                    <th style="font-size: 12px;">No.</th>
-                                    <th style="font-size: 12px;">Nama</th>
-                                    <th style="font-size: 12px;">Jabatan</th>
-                                    <th style="font-size: 12px;">PPIU</th>
-                                    <th style="font-size: 12px;">Nomor HP</th>
-                                    <th style="font-size: 12px;">Kab/Kota</th>
-                                    <th style="font-size: 12px;">Tgl Berangkat</th>
-                                    <th style="font-size: 12px;">Jumlah Jamaah</th>
-                                    {{-- <th style="font-size: 12px;">Paket</th> --}}
-                                    <th style="font-size: 12px;">Harga/Orang</th>
-                                    <th style="font-size: 12px;">Status</th>
-                                    <th style="font-size: 12px;">Aksi</th>
 
-                                </tr>
-                            </thead>
-                            <tbody style="font-size: 12px;">
-                                @foreach ($data as $item)
-                                    <tr class="text-center" style="font-size: 12px;">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">BA Pemberangkatan</h4>
+                    <p class="text-muted mb-0 small">Daftar pengajuan keberangkatan jamaah</p>
+                </div>
+                <div class="d-flex gap-2 flex-wrap">
+                    @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
+                        <a href="{{ route('verify-e-sign') }}" class="btn btn-sm btn-info">
+                            <i class="bx bx-qr-scan me-1"></i> Verifikasi E Sign
+                        </a>
+                    @endif
+                    <a href="{{ route('form.bap') }}" onclick="return checkJamaah({{ $jamaahCount }});"
+                        class="btn btn-sm btn-primary">
+                        <i class="bx bx-plus me-1"></i> Tambah
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Daftar Pengajuan</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr class="text-center">
+                                <th>No.</th>
+                                <th>Nama</th>
+                                <th>Jabatan</th>
+                                <th>PPIU</th>
+                                <th>Nomor HP</th>
+                                <th>Kab/Kota</th>
+                                <th>Tgl Berangkat</th>
+                                <th>Jumlah Jamaah</th>
+                                <th>Harga/Orang</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($data as $item)
+                                <tr class="text-center">
                                         <td>{{ $data->firstItem() + $loop->index }}</td>
                                         <td>{{ $item->name }}</td>
                                         <td>{{ $item->jabatan }}</td>
@@ -66,10 +68,9 @@
                                                     @csrf
                                                     <div class="d-flex flex-column gap-1">
                                                         <select name="status"
-                                                            class="form-select {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
+                                                            class="form-select form-select-sm {{ $item->status == 'diajukan' ? 'bg-primary text-white fw-semibold' : '' }}
                                                                 {{ $item->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
                                                                 {{ $item->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
-                                                            style="font-size: 11px;"
                                                             onchange="handleStatusChange({{ $item->id }}, this.value)">
                                                             <option value="pending"
                                                                 {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
@@ -88,52 +89,51 @@
                                                             </option>
                                                         </select>
                                                         @if ($item->status === 'diterima' && $item->nomor_surat)
-                                                            <small class="text-muted"
-                                                                style="font-size: 9px;">{{ $item->nomor_surat }}</small>
+                                                            <small class="text-muted">{{ $item->nomor_surat }}</small>
                                                         @endif
                                                     </div>
                                                 </form>
                                             @else
                                                 @php $badge = \App\Support\BapWizardStatus::travelBadge($item); @endphp
                                                 <div>
-                                                    <span class="badge {{ $badge['class'] }}" style="font-size: 10px;">
+                                                    <span class="badge {{ $badge['class'] }}">
                                                         {{ $badge['label'] }}
                                                     </span>
                                                     @if ($item->status === 'diterima' && $item->nomor_surat)
-                                                        <small class="text-muted d-block mt-1"
-                                                            style="font-size: 9px;">{{ $item->nomor_surat }}</small>
+                                                        <small class="text-muted d-block mt-1">{{ $item->nomor_surat }}</small>
                                                     @endif
                                                 </div>
                                             @endif
                                         </td>
-                                        <td class="fs-4 font-weight-bold">
+                                        <td>
                                             <div class="d-flex gap-2 justify-content-center align-items-center">
                                                 @if (auth()->user()->role === 'user' && ($wizardRoute = \App\Support\BapWizardStatus::wizardRouteName($item)))
                                                     <a href="{{ route($wizardRoute, $item->id) }}"
-                                                        class="btn btn-sm btn-warning py-0 px-2" title="Lanjutkan pengajuan"
-                                                        style="font-size: 11px;">
+                                                        class="btn btn-sm btn-warning" title="Lanjutkan pengajuan">
                                                         Lanjutkan
                                                     </a>
                                                 @endif
-                                                <a href="{{ route('detail.bap', $item->id) }}" title="Detail"><i
-                                                        class="bx bx-info-circle"></i></a>
+                                                <a href="{{ route('detail.bap', $item->id) }}" class="btn btn-sm btn-outline-primary" title="Detail">
+                                                    <i class="bx bx-info-circle"></i>
+                                                </a>
                                                 @if ($item->status === 'diterima')
                                                     <a href="{{ route('cetak.bap', $item->id) }}" target="_blank"
-                                                        title="Cetak BAP"><i class="bx bx-printer text-success"></i></a>
+                                                        class="btn btn-sm btn-outline-success" title="Cetak BAP">
+                                                        <i class="bx bx-printer"></i>
+                                                    </a>
                                                 @endif
                                             </div>
                                         </td>
                                     </tr>
                                 @endforeach
                             </tbody>
-                        </table>
-                    </div>
-                    @if ($data->hasPages())
-                        <div class="px-3 pb-3">
-                            {{ $data->links() }}
-                        </div>
-                    @endif
+                    </table>
                 </div>
+                @if ($data->hasPages())
+                    <div class="px-3 py-2 border-top">
+                        {{ $data->links() }}
+                    </div>
+                @endif
             </div>
         </div>
     </div>

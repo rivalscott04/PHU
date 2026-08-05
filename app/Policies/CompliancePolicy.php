@@ -4,12 +4,13 @@ namespace App\Policies;
 
 use App\Models\TravelCompany;
 use App\Models\User;
+use App\Support\NtbKabupatenMap;
 
 class CompliancePolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pengawas', 'user'], true);
+        return in_array($user->role, ['admin', 'pengawas', 'user', 'kabupaten'], true);
     }
 
     public function view(User $user, TravelCompany $travel): bool
@@ -20,6 +21,10 @@ class CompliancePolicy
 
         if ($user->role === 'pengawas') {
             return $user->canAccessKabupaten($travel->kab_kota);
+        }
+
+        if ($user->role === 'kabupaten') {
+            return NtbKabupatenMap::matches($user->kabupaten, $travel->kab_kota);
         }
 
         return $user->travel_id === $travel->id;

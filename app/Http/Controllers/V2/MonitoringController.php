@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
 use App\Models\TravelCompany;
 use App\Policies\MonitoringPolicy;
+use App\Repositories\DashboardRepository;
 use App\Services\MonitoringService;
 use App\Support\RequestScope;
 use App\Support\ResourceAccess;
@@ -17,7 +18,22 @@ class MonitoringController extends Controller
 
     public function __construct(
         private readonly MonitoringService $monitoringService,
+        private readonly DashboardRepository $dashboardRepository,
     ) {
+    }
+
+    /** @return array<string, mixed> */
+    private function filterOptions(Request $request): array
+    {
+        $scope = RequestScope::fromRequest($request);
+
+        return [
+            'kabupaten' => $scope->kabupaten,
+            'jenis_travel' => $request->get('jenis_travel'),
+            'risk_level' => $request->get('risk_level'),
+            'sort' => $request->get('sort'),
+            'kabupaten_options' => $this->dashboardRepository->getKabupatenOptions(),
+        ];
     }
 
     public function index(Request $request)
@@ -25,14 +41,22 @@ class MonitoringController extends Controller
         abort_unless((new MonitoringPolicy())->view($request->user()), 403);
 
         $scope = RequestScope::fromRequest($request);
+        $filters = $this->filterOptions($request);
         $cards = $this->monitoringService->getKpiCards($scope->kabupaten, $scope->travelId);
-        $travels = $this->monitoringService->getTravelList($scope->kabupaten, 8, $scope->travelId);
+        $travels = $this->monitoringService->getTravelList(
+            $scope->kabupaten,
+            8,
+            $scope->travelId,
+            $filters['jenis_travel'],
+            $filters['risk_level'],
+            $filters['sort'],
+        );
 
         if ($request->expectsJson()) {
             return $this->jsonSuccess($this->monitoringService->getKpiSummary($scope->kabupaten, $scope->travelId));
         }
 
-        return view('v2.monitoring.index', compact('cards', 'travels'));
+        return view('v2.monitoring.index', compact('cards', 'travels', 'filters'));
     }
 
     public function statistics(Request $request)
@@ -51,15 +75,19 @@ class MonitoringController extends Controller
         abort_unless((new MonitoringPolicy())->view($request->user()), 403);
 
         $scope = RequestScope::fromRequest($request);
+        $filters = $this->filterOptions($request);
         $travels = $this->monitoringService->getTravelList(
             $scope->kabupaten,
             (int) $request->get('per_page', 15),
-            $scope->travelId
+            $scope->travelId,
+            $filters['jenis_travel'],
+            $filters['risk_level'],
+            $filters['sort'],
         );
 
         return $request->expectsJson()
             ? $this->jsonSuccess($travels)
-            : view('v2.monitoring.travel', compact('travels'));
+            : view('v2.monitoring.travel', compact('travels', 'filters'));
     }
 
     public function travelPengaduan(Request $request, TravelCompany $travel)

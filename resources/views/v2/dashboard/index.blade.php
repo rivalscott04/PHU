@@ -18,9 +18,16 @@
         <div class="row mb-3">
             <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <div>
-                    <h4 class="mb-0">Dashboard Pengawasan</h4>
+                    <h4 class="mb-0">Dashboard Eksekutif</h4>
                     @if($isPimpinan)
-                        <p class="text-muted mb-0 small">Ringkasan eksekutif seluruh NTB</p>
+                        <p class="text-muted mb-0 small">
+                            Ringkasan pengawasan
+                            @if(request('kabupaten'))
+                                {{ request('kabupaten') }}
+                            @else
+                                seluruh NTB
+                            @endif
+                        </p>
                     @endif
                 </div>
                 <div class="d-flex gap-2">
@@ -46,7 +53,7 @@
         <div class="card mb-3 {{ $isPimpinan ? 'border-0 shadow-sm' : '' }}">
             <div class="card-body">
                 <form id="dashboard-filter-form" class="row g-2">
-                    @if(auth()->user()->role === UserRole::Admin->value)
+                    @if(in_array(auth()->user()->role, [UserRole::Admin->value, UserRole::Pimpinan->value], true))
                     <div class="col-md-3">
                         <label class="form-label">Kabupaten</label>
                         <select name="kabupaten" class="form-select form-select-sm">
@@ -96,6 +103,28 @@
     </div>
 
     @if($isPimpinan)
+        <div id="pimpinan-command-traffic">
+            @include('partials.home-traffic-light', [
+                'status' => $trafficLight ?? [],
+                'queues' => $actionQueues ?? [],
+            ])
+        </div>
+
+        <div id="pimpinan-command-queues">
+            @include('partials.home-queue-cards', [
+                'queues' => $actionQueues ?? [],
+                'status' => $trafficLight ?? [],
+                'title' => 'Indikator Prioritas NTB',
+                'subtitle' => 'Klik kartu untuk membuka monitoring atau data terkait',
+            ])
+        </div>
+
+        <div id="pimpinan-command-alerts">
+            @include('partials.home-travel-alerts', ['alerts' => $alerts ?? []])
+        </div>
+    @endif
+
+    @if($isPimpinan)
         @include('v2.dashboard.partials.pimpinan-tabs')
     @else
         @include('v2.dashboard.partials.warning')
@@ -127,6 +156,14 @@
                 border: 0;
                 box-shadow: 0 0.75rem 1.5rem rgba(18, 38, 63, 0.03);
             }
+            .intervention-priority-row,
+            .kabupaten-filter-row {
+                cursor: pointer;
+            }
+            .intervention-priority-row:hover,
+            .kabupaten-filter-row:hover {
+                background-color: rgba(85, 110, 230, 0.04);
+            }
         </style>
     @endpush
 @endif
@@ -137,10 +174,14 @@
     const chartData = @json($charts ?? []);
     const isPimpinan = @json($isPimpinan);
     const canKabupatenPengaduanDrilldown = @json($canKabupatenPengaduanDrilldown);
+    const canMonitoringTravel = @json(RouteAccess::canAccessRoute(auth()->user(), 'v2.monitoring.index'));
+    const travelPengaduanUrl = @json(url('/v2/monitoring/travel'));
     const urgencyLabels = { critical: 'Segera', high: 'Prioritas', medium: 'Perlu Perhatian' };
-    const urgencyBadges = { critical: 'danger', high: 'warning text-dark', medium: 'warning text-dark' };
-    const warningAlertClasses = { critical: 'danger', warning: 'warning', caution: 'warning' };
-    const warningDotClasses = { critical: 'danger', warning: 'warning', caution: 'warning' };
+    const urgencyBadges = {
+        critical: 'light text-danger border border-danger',
+        high: 'light text-body border',
+        medium: 'light text-muted border',
+    };
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>"']/g, (char) => ({
@@ -161,9 +202,73 @@
         return `<button type="button" class="btn btn-link btn-sm p-0 text-primary text-decoration-none pengaduan-kabupaten-drilldown fw-semibold" data-kabupaten="${escapeHtml(kabupaten)}" title="Lihat daftar pengaduan">${total.toLocaleString('id-ID')}</button>`;
     }
 
-    function warningLevelClass(level, map, fallback = 'info') {
-        return map[level] || fallback;
+    function warningIconClass(level) {
+        return level === 'critical' ? 'bx-error-circle text-danger' : 'bx-info-circle text-muted';
     }
+
+    function completionRateStatus(percent) {
+        if (percent >= 75) {
+            return { cardClass: '', badgeClass: '', badgeLabel: '' };
+        }
+        if (percent >= 50) {
+            return {
+                cardClass: '',
+                badgeClass: 'badge bg-light text-muted border',
+                badgeLabel: 'Perlu ditingkatkan',
+            };
+        }
+        return {
+            cardClass: 'border-start border-danger border-2',
+            badgeClass: 'badge bg-light text-danger border border-danger',
+            badgeLabel: 'Rendah',
+        };
+    }
+
+    function executivePointHtml(point) {
+        const tone = point.tone || 'default';
+        const dotClass = tone === 'danger' ? 'bg-danger' : 'bg-secondary opacity-50';
+        const badge = tone === 'danger'
+            ? '<span class="badge bg-light text-danger border border-danger ms-1">Segera</span>'
+            : '';
+
+        return `<li class="d-flex align-items-start gap-2 mb-2 executive-summary-point">
+            <span class="mt-2 flex-shrink-0 rounded-circle ${dotClass}" style="width:6px;height:6px;"></span>
+            <span><span class="fw-semibold text-body">${escapeHtml(point.label)}:</span> <span class="text-muted">${escapeHtml(point.text)}</span>${badge}</span>
+        </li>`;
+    }
+
+    function updateCompletionRateCard(key, rate) {
+        const percent = Number(rate.percent || 0);
+        const status = completionRateStatus(percent);
+        const cardEl = document.querySelector(`.completion-rate-card[data-rate="${key}"]`);
+        const valueEl = document.querySelector(`.completion-rate-value[data-rate="${key}"]`);
+        const detailEl = document.querySelector(`.completion-rate-detail[data-rate="${key}"]`);
+        const badgeEl = document.querySelector(`.completion-rate-badge[data-rate="${key}"]`);
+
+        if (cardEl) {
+            cardEl.className = `card border-0 shadow-sm h-100 completion-rate-card ${status.cardClass}`.trim();
+            cardEl.dataset.rate = key;
+        }
+        if (valueEl) {
+            valueEl.textContent = `${percent.toFixed(1)}%`;
+        }
+        if (detailEl) {
+            detailEl.textContent = (rate.total || 0) > 0
+                ? `${Number(rate.selesai || 0).toLocaleString('id-ID')} dari ${Number(rate.total).toLocaleString('id-ID')}`
+                : 'Belum ada data';
+        }
+        if (badgeEl) {
+            if (status.badgeLabel) {
+                badgeEl.className = `completion-rate-badge ${status.badgeClass}`;
+                badgeEl.textContent = status.badgeLabel;
+                badgeEl.classList.remove('d-none');
+            } else {
+                badgeEl.className = 'completion-rate-badge d-none';
+                badgeEl.textContent = '';
+            }
+        }
+    }
+
     let chartInstances = {};
     let cachedChartData = chartData;
 
@@ -285,19 +390,137 @@
         return new URLSearchParams(new FormData(form)).toString();
     }
 
+    function applyKabupatenFilter(kabupaten) {
+        const select = document.querySelector('#dashboard-filter-form select[name="kabupaten"]');
+        if (!select) {
+            return;
+        }
+
+        select.value = kabupaten || '';
+        applyDashboardFilters();
+        document.getElementById('tab-ringkasan')?.click();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.addEventListener('click', function (event) {
+        const row = event.target.closest('[data-filter-kabupaten]');
+        if (!row || event.target.closest('a, button')) {
+            return;
+        }
+
+        applyKabupatenFilter(row.dataset.filterKabupaten || '');
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key !== 'Enter' && event.key !== ' ') {
+            return;
+        }
+
+        const row = event.target.closest('[data-filter-kabupaten]');
+        if (!row) {
+            return;
+        }
+
+        event.preventDefault();
+        applyKabupatenFilter(row.dataset.filterKabupaten || '');
+    });
+
     function fetchJson(url) {
         return fetch(url + (url.includes('?') ? '&' : '?') + queryString(), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         }).then(r => r.json());
     }
 
-    const pointToneClasses = {
-        danger: 'text-danger',
-        warning: 'text-warning',
-        success: 'text-success',
-        info: 'text-primary',
-        default: 'text-muted',
-    };
+    function renderCommandCenter(commandCenter) {
+        if (!commandCenter) {
+            return;
+        }
+
+        const status = commandCenter.trafficLight || {};
+        const queues = commandCenter.actionQueues || [];
+        const alerts = commandCenter.alerts || [];
+        const level = status.level || 'ok';
+        const lightClass = {
+            critical: 'bg-danger',
+            warning: 'border border-secondary bg-transparent',
+            ok: 'bg-secondary opacity-25',
+        }[level] || 'bg-secondary opacity-25';
+        const statusBadgeClass = status.badge_class || 'bg-secondary';
+
+        const trafficEl = document.getElementById('pimpinan-command-traffic');
+        if (trafficEl) {
+            const badges = queues
+                .filter(queue => Number(queue.count || 0) > 0)
+                .map(queue => `<span class="badge bg-light text-dark border">${escapeHtml(queue.label)}: ${Number(queue.count).toLocaleString('id-ID')}</span>`)
+                .join('');
+
+            trafficEl.innerHTML = `<div class="card border-0 shadow-sm mb-3">
+                <div class="card-body">
+                    <div class="d-flex align-items-center flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="rounded-circle ${lightClass}" style="width: 14px; height: 14px;"></span>
+                            <h5 class="mb-0">${escapeHtml(status.label || 'Kondisi Umum')}</h5>
+                        </div>
+                        <span class="badge ${statusBadgeClass}">${escapeHtml(String(level).toUpperCase())}</span>
+                        <p class="text-muted mb-0 small flex-grow-1">${escapeHtml(status.message || '')}</p>
+                    </div>
+                    ${badges ? `<div class="d-flex flex-wrap gap-2 mt-3">${badges}</div>` : ''}
+                </div>
+            </div>`;
+        }
+
+        const queuesEl = document.getElementById('pimpinan-command-queues');
+        if (queuesEl) {
+            const cards = queues.map(queue => {
+                const count = Number(queue.count || 0);
+                const url = queue.url || '#';
+                const cardInner = `<div class="card border-0 shadow-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <p class="text-muted mb-1 small text-uppercase">${escapeHtml(queue.label)}</p>
+                                <h3 class="mb-1 fw-semibold text-body">${count.toLocaleString('id-ID')}</h3>
+                                <small class="text-muted">${escapeHtml(queue.hint || '')}</small>
+                            </div>
+                            <div class="avatar-sm rounded-circle bg-light text-muted d-flex align-items-center justify-content-center">
+                                <i class="bx ${queue.icon} fs-4"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+                return `<div class="col-xl-3 col-md-6 mb-3">${queue.url
+                    ? `<a href="${escapeHtml(url)}" class="text-decoration-none text-body">${cardInner}</a>`
+                    : cardInner}</div>`;
+            }).join('');
+
+            queuesEl.innerHTML = `<div class="row mb-3">
+                <div class="col-12 d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div>
+                        <h5 class="mb-1">Indikator Prioritas NTB</h5>
+                        <p class="text-muted mb-0 small">Klik kartu untuk membuka monitoring atau data terkait</p>
+                    </div>
+                    <span class="badge ${statusBadgeClass} fs-6">${escapeHtml(status.label || 'Status')}</span>
+                </div>
+            </div>
+            ${status.message ? `<div class="alert alert-light border mb-4 text-body">${escapeHtml(status.message)}</div>` : ''}
+            <div class="row mb-4">${cards}</div>`;
+        }
+
+        const alertsEl = document.getElementById('pimpinan-command-alerts');
+        if (alertsEl) {
+            alertsEl.innerHTML = alerts.length
+                ? `<div class="row mb-4"><div class="col-12"><div class="card border-0 shadow-sm"><div class="card-body">
+                    <h5 class="mb-3">Perlu Perhatian</h5>
+                    <div class="list-group list-group-flush">${alerts.map(alert => `<a href="${escapeHtml(alert.url)}" class="list-group-item list-group-item-action px-0 d-flex align-items-start gap-3">
+                        <i class="bx ${alert.icon} fs-5 mt-1 text-muted"></i>
+                        <div class="flex-grow-1"><div class="fw-medium">${escapeHtml(alert.label)}</div><small class="text-muted">${escapeHtml(alert.hint)}</small></div>
+                        <i class="bx bx-chevron-right text-muted"></i>
+                    </a>`).join('')}</div>
+                </div></div></div></div>`
+                : '';
+        }
+    }
 
     function renderExecutive(data) {
         const periodEl = document.getElementById('executive-summary-period');
@@ -311,55 +534,52 @@
         if (listEl) {
             const points = summary.points || [];
             listEl.innerHTML = points.length
-                ? points.map(point => {
-                    const tone = pointToneClasses[point.tone] || pointToneClasses.default;
-                    return `<li class="d-flex align-items-start gap-2 mb-2 executive-summary-point">
-                        <span class="mt-2 flex-shrink-0 ${tone}" style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
-                        <span><span class="fw-semibold text-body">${point.label}:</span> <span class="${tone}">${point.text}</span></span>
-                    </li>`;
-                }).join('')
+                ? points.map(point => executivePointHtml(point)).join('')
                 : '<li class="text-muted">Tidak ada ringkasan untuk filter ini.</li>';
         }
 
         Object.entries(data.completion_rates || {}).forEach(([key, rate]) => {
-            const valueEl = document.querySelector(`.completion-rate-value[data-rate="${key}"]`);
-            const detailEl = document.querySelector(`.completion-rate-detail[data-rate="${key}"]`);
-            if (valueEl) valueEl.textContent = `${Number(rate.percent || 0).toFixed(1)}%`;
-            if (detailEl) {
-                if ((rate.total || 0) > 0) {
-                    detailEl.textContent = `${Number(rate.selesai || 0).toLocaleString('id-ID')} dari ${Number(rate.total).toLocaleString('id-ID')}`;
-                } else {
-                    detailEl.textContent = 'Belum ada data';
-                }
-            }
+            updateCompletionRateCard(key, rate);
         });
 
         const prioritiesBody = document.getElementById('intervention-priorities-body');
         if (prioritiesBody) {
             const rows = data.intervention_priorities || [];
             prioritiesBody.innerHTML = rows.length
-                ? rows.map(row => `<tr>
-                    <td class="ps-3"><span class="badge bg-${urgencyBadges[row.urgency] || 'warning'}">${urgencyLabels[row.urgency] || 'Perlu Perhatian'}</span></td>
-                    <td class="fw-medium">${row.travel || '-'}</td>
-                    <td>${row.kabupaten || '-'}</td>
-                    <td>${row.issue || '-'}</td>
-                </tr>`).join('')
-                : '<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada penyelenggara yang memerlukan intervensi saat ini.</td></tr>';
+                ? rows.map(row => {
+                    const kabupaten = escapeHtml(row.kabupaten || '');
+                    const travelId = row.travel_id ? Number(row.travel_id) : null;
+                    const detailBtn = travelId && canMonitoringTravel
+                        ? `<a href="${travelPengaduanUrl}/${travelId}/pengaduan" class="btn btn-sm btn-light" onclick="event.stopPropagation()">Detail</a>`
+                        : '<span class="btn btn-sm btn-light disabled">Filter</span>';
+
+                    return `<tr class="intervention-priority-row" role="button" tabindex="0" data-filter-kabupaten="${kabupaten}" title="Klik untuk filter kabupaten ${kabupaten}">
+                    <td class="ps-3"><span class="badge bg-${urgencyBadges[row.urgency] || 'light text-muted border'}">${urgencyLabels[row.urgency] || 'Perlu Perhatian'}</span></td>
+                    <td class="fw-medium">${escapeHtml(row.travel || '-')}</td>
+                    <td>${kabupaten || '-'}</td>
+                    <td>${escapeHtml(row.issue || '-')}</td>
+                    <td class="text-end pe-3">${detailBtn}</td>
+                </tr>`;
+                }).join('')
+                : '<tr><td colspan="5" class="text-center text-muted py-4">Tidak ada penyelenggara yang memerlukan intervensi saat ini.</td></tr>';
         }
 
         const scorecardBody = document.getElementById('kabupaten-scorecard-body');
         if (scorecardBody) {
             const rows = data.kabupaten_scorecard || [];
             scorecardBody.innerHTML = rows.length
-                ? rows.map(row => `<tr>
-                    <td class="ps-3 fw-medium">${row.kabupaten || '-'}</td>
+                ? rows.map(row => {
+                    const kabupaten = escapeHtml(row.kabupaten || '');
+                    return `<tr class="kabupaten-filter-row" role="button" tabindex="0" data-filter-kabupaten="${kabupaten}" title="Klik untuk filter ${kabupaten}">
+                    <td class="ps-3 fw-medium">${kabupaten || '-'}</td>
                     <td>${row.total_travel || 0}</td>
                     <td>${row.pengawasan || 0}</td>
-                    <td>${(row.temuan_aktif || 0) > 0 ? `<span class="badge bg-warning text-dark">${row.temuan_aktif}</span>` : (row.temuan_aktif || 0)}</td>
+                    <td>${(row.temuan_aktif || 0) > 0 ? `<span class="badge bg-light text-body border">${row.temuan_aktif}</span>` : (row.temuan_aktif || 0)}</td>
                     <td>${renderKabupatenPengaduanCell(row.kabupaten, row.pengaduan)}</td>
                     <td>${row.avg_risk || 0}</td>
                     <td>${row.bap_pending || 0}</td>
-                </tr>`).join('')
+                </tr>`;
+                }).join('')
                 : '<tr><td colspan="7" class="text-center text-muted py-4">Belum ada data rekap wilayah untuk filter ini.</td></tr>';
         }
 
@@ -368,15 +588,17 @@
             const rows = data.coverage_gaps || [];
             gapsBody.innerHTML = rows.length
                 ? rows.map(row => `<tr>
-                    <td class="ps-3 fw-medium">${row.travel || '-'}</td>
-                    <td>${row.kabupaten || '-'}</td>
-                    <td>${row.last_inspection || 'Belum pernah'}</td>
+                    <td class="ps-3 fw-medium">${escapeHtml(row.travel || '-')}</td>
+                    <td>${escapeHtml(row.kabupaten || '-')}</td>
+                    <td>${escapeHtml(row.last_inspection || 'Belum pernah')}</td>
                     <td>${row.last_inspection
-                        ? `<span class="text-warning">${row.months_ago ?? '-'} bulan lalu</span>`
-                        : '<span class="badge bg-danger">Belum pernah diawasi</span>'}</td>
+                        ? `<span class="text-muted">${row.months_ago ?? '-'} bulan lalu</span>`
+                        : '<span class="badge bg-light text-danger border border-danger">Belum pernah diawasi</span>'}</td>
                 </tr>`).join('')
                 : '<tr><td colspan="4" class="text-center text-muted py-4">Semua travel telah diawasi dalam 12 bulan terakhir.</td></tr>';
         }
+
+        renderCommandCenter(data.command_center);
     }
 
     function applyDashboardFilters() {
@@ -412,9 +634,11 @@
                         box.innerHTML = '<p class="text-muted mb-0">Tidak ada peringatan saat ini.</p>';
                     } else {
                         box.innerHTML = warnRes.data.map(w => {
-                            const alertCls = warningLevelClass(w.level, warningAlertClasses);
-                            const dotCls = warningLevelClass(w.level, warningDotClasses);
-                            return `<div class="alert alert-${alertCls} border-0 mb-2 py-2 text-dark d-flex align-items-center"><i class="bx bxs-circle text-${dotCls} me-2"></i><span>${w.message}</span></div>`;
+                            const iconCls = warningIconClass(w.level);
+                            return `<div class="d-flex align-items-start gap-2 mb-2 pb-2 border-bottom">
+                                <i class="bx ${iconCls} mt-1"></i>
+                                <span class="text-body mb-0">${escapeHtml(w.message)}</span>
+                            </div>`;
                         }).join('');
                     }
                 }

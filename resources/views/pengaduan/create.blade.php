@@ -3,6 +3,20 @@
 @section('content')
     <div class="row">
         <div class="col-12">
+            <div class="page-title-box d-sm-flex align-items-center justify-content-between">
+                <div>
+                    <h4 class="mb-sm-0">Tambah Pengaduan</h4>
+                    <p class="text-muted mb-0 small">Catat pengaduan masyarakat terhadap travel</p>
+                </div>
+                <a href="{{ route('pengaduan') }}" class="btn btn-sm btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
             <div class="card">
                 <div class="card-header">
                     <h5 class="mb-0">Form Pengaduan</h5>
@@ -59,14 +73,14 @@
                         </div>
 
                         <div class="mt-3">
-                            <button type="submit" class="btn btn-primary" id="submit-btn">
+                            <button type="submit" class="btn btn-sm btn-primary" id="submit-btn">
                                 <span class="btn-text">Kirim Pengaduan</span>
                                 <span class="btn-loading d-none">
                                     <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
                                     Mengirim...
                                 </span>
                             </button>
-                            <a href="{{ route('pengaduan') }}" class="btn btn-secondary">Kembali</a>
+                            <a href="{{ route('pengaduan') }}" class="btn btn-sm btn-secondary">Kembali</a>
                         </div>
                     </form>
                 </div>

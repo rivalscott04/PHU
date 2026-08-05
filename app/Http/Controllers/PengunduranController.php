@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ValidationHelper;
 use App\Models\Pengunduran;
+use App\Services\TravelCapabilityService;
 use Illuminate\Http\Request;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
@@ -11,6 +12,17 @@ use Illuminate\Support\Facades\Auth;
 
 class PengunduranController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (! TravelCapabilityService::canAccess('pengunduran')) {
+                abort(404);
+            }
+
+            return $next($request);
+        });
+    }
+
     public function index()
     {
         $user = auth()->user();
