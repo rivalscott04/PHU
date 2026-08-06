@@ -2,18 +2,7 @@
 
 @section('content')
 @php
-    $riskBadges = [
-        'LOW' => 'success',
-        'MEDIUM' => 'info',
-        'HIGH' => 'warning',
-        'CRITICAL' => 'danger',
-    ];
-    $riskLabels = [
-        'LOW' => 'Rendah',
-        'MEDIUM' => 'Sedang',
-        'HIGH' => 'Tinggi',
-        'CRITICAL' => 'Kritis',
-    ];
+    use App\Enums\RiskLevel;
 @endphp
 
 <div class="container-fluid">
@@ -81,8 +70,8 @@
                                 <td>{{ number_format($travel->pengaduan_count ?? 0) }}</td>
                                 <td>
                                     @if($risk)
-                                        <span class="badge bg-{{ $riskBadges[$risk] ?? 'secondary' }}">
-                                            {{ $riskLabels[$risk] ?? $risk }}
+                                        <span class="badge bg-{{ RiskLevel::badgeFor($risk) }}">
+                                            {{ RiskLevel::labelFor($risk) }}
                                         </span>
                                     @else
                                         <span class="text-muted">Tidak ada</span>

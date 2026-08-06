@@ -12,6 +12,12 @@ class TravelInUserScope implements ValidationRule
     {
         $user = auth()->user();
 
+        if ($user === null) {
+            $fail('Sesi login tidak valid.');
+
+            return;
+        }
+
         if ($user->role === 'admin') {
             return;
         }

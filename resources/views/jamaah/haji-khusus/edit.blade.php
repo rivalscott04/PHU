@@ -213,7 +213,8 @@
                                 <label for="no_hp" class="form-label">Nomor HP <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('no_hp') is-invalid @enderror"
                                        id="no_hp" name="no_hp" value="{{ old('no_hp', $jamaahHajiKhusus->no_hp) }}"
-                                       data-digits-only="15" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
+                                       data-digits-only="16" inputmode="numeric" pattern="[0-9]*"
+                                       maxlength="16" autocomplete="off" required>
                                 @error('no_hp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Helpers\ValidationHelper;
 use App\Models\User;
 use App\Models\TravelCompany;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -18,11 +19,19 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
     protected $errors = [];
     protected $successCount = 0;
     protected $travelCompanies = [];
+    /** @var array<string, true> */
+    protected array $existingEmails = [];
+    /** @var array<string, true> */
+    protected array $existingPhones = [];
 
     public function __construct()
     {
-        // Load all travel companies for fuzzy matching
         $this->travelCompanies = TravelCompany::all();
+
+        foreach (User::query()->select('email', 'nomor_hp')->cursor() as $user) {
+            $this->existingEmails[strtolower((string) $user->email)] = true;
+            $this->existingPhones[(string) $user->nomor_hp] = true;
+        }
     }
 
     public function model(array $row)
@@ -63,7 +72,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             }
 
             // Check if email already exists
-            if (User::where('email', $row['email'])->exists()) {
+            if (isset($this->existingEmails[$row['email']])) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Email '{$row['email']}' sudah digunakan";
                 $this->errors[] = $msg;
                 Log::warning("UserTravelImport warning: $msg");
@@ -71,7 +80,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             }
 
             // Check if nomor_hp already exists
-            if (User::where('nomor_hp', $row['nomor_hp'])->exists()) {
+            if (isset($this->existingPhones[$row['nomor_hp']])) {
                 $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nomor HP '{$row['nomor_hp']}' sudah digunakan";
                 $this->errors[] = $msg;
                 Log::warning("UserTravelImport warning: $msg");
@@ -108,6 +117,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             ];
 
             $this->successCount++;
+            $this->existingEmails[$row['email']] = true;
+            $this->existingPhones[$row['nomor_hp']] = true;
             Log::info("UserTravelImport: User berhasil dibuat (Row {$this->successCount})", $userData);
 
             return new User($userData);
@@ -221,7 +232,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 'normalized' => $digits,
             ]);
 
-            $normalized['nomor_hp'] = $digits;
+            $normalized['nomor_hp'] = substr($digits, 0, ValidationHelper::NOMOR_HP_MAX);
         }
 
         return $normalized;
@@ -232,7 +243,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
         return [
             '*.nama' => 'required|string|max:255',
             '*.email' => 'required|string|max:255',
-            '*.nomor_hp' => 'required|string|max:20|regex:/^08/',
+            '*.nomor_hp' => ValidationHelper::nomorHpRules(),
             '*.password' => 'required|min:5',
             '*.travel_company' => 'required|string|max:255',
         ];
@@ -240,6 +251,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
 
     public function customValidationMessages()
     {
+        $hpMax = ValidationHelper::NOMOR_HP_MAX;
+
         return [
             '*.nama.required' => 'Nama wajib diisi',
             '*.nama.string' => 'Nama harus berupa teks',
@@ -249,7 +262,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.email.max' => 'Email maksimal 255 karakter',
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
             '*.nomor_hp.string' => 'Nomor HP harus berupa teks',
-            '*.nomor_hp.max' => 'Nomor HP maksimal 20 karakter',
+            '*.nomor_hp.max' => "Nomor HP maksimal {$hpMax} karakter",
             '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
             '*.password.required' => 'Password wajib diisi',
             '*.password.string' => 'Password harus berupa teks',

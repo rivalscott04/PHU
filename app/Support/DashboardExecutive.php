@@ -55,7 +55,7 @@ final class DashboardExecutive
         if ($bapPending > 0) {
             $points[] = [
                 'label' => 'BA Pemberangkatan (Periode)',
-                'text' => "{$bapPending} pengajuan pending pada periode filter",
+                'text' => "{$bapPending} pengajuan menunggu pada periode filter",
                 'tone' => 'warning',
             ];
         }
@@ -171,7 +171,7 @@ final class DashboardExecutive
         $bapPending = HomeCommandCenter::countBapPendingForScope($filter->kabupaten);
         if ($bapPending > 0) {
             $points[] = [
-                'label' => 'BA Pemberangkatan Pending',
+                'label' => 'BA Pemberangkatan Menunggu',
                 'text' => "{$bapPending} pengajuan menunggu persetujuan Kanwil/Kabupaten",
                 'tone' => 'warning',
             ];

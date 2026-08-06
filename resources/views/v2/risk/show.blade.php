@@ -3,14 +3,9 @@
 @section('content')
 @php
     use App\Support\WorkQueueNextSteps;
+    use App\Enums\RiskLevel;
 
     $level = $breakdown['risk_level'] ?? ($risk->risk_level?->value ?? 'LOW');
-    $riskLabels = [
-        'LOW' => 'Rendah',
-        'MEDIUM' => 'Sedang',
-        'HIGH' => 'Tinggi',
-        'CRITICAL' => 'Kritis',
-    ];
     $canSeeNextSteps = in_array(auth()->user()->role, ['admin', 'pengawas'], true);
     $nextSteps = $canSeeNextSteps ? WorkQueueNextSteps::forRiskDetail($travel, $level) : null;
 @endphp
@@ -39,16 +34,11 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center">
                     @php
-                        $badgeClass = match($level) {
-                            'CRITICAL' => 'danger',
-                            'HIGH' => 'warning',
-                            'MEDIUM' => 'info',
-                            default => 'success',
-                        };
+                        $badgeClass = RiskLevel::badgeFor($level);
                     @endphp
-                    <p class="text-muted mb-1">Total Risk Score</p>
+                    <p class="text-muted mb-1">Total Skor Risiko</p>
                     <h1 class="display-4 mb-2">{{ number_format($breakdown['total_score'] ?? $risk?->total_score ?? 0, 0) }}</h1>
-                    <span class="badge bg-{{ $badgeClass }} fs-6">{{ $riskLabels[$level] ?? $level }}</span>
+                    <span class="badge bg-{{ $badgeClass }} fs-6">{{ RiskLevel::labelFor($level) }}</span>
                     @if($risk?->last_calculated_at)
                         <p class="text-muted small mt-3 mb-0">Terakhir dihitung: {{ $risk->last_calculated_at->format('d/m/Y H:i') }}</p>
                     @endif

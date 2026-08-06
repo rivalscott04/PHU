@@ -56,7 +56,7 @@
             <a href="{{ route('bap') }}" class="text-decoration-none text-body">
                 <div class="card mini-stats-wid h-100">
                     <div class="card-body">
-                        <p class="text-muted mb-1">BA Pending</p>
+                        <p class="text-muted mb-1">BA Menunggu</p>
                         <h4 class="mb-0">{{ $summary['bap_pending'] ?? 0 }}</h4>
                     </div>
                 </div>

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\BapStatus;
 use App\Enums\FollowupStatus;
 use App\Enums\RiskLevel;
 use App\Enums\TravelRegistrationStatus;
@@ -18,6 +19,11 @@ use Illuminate\Support\Facades\Schema;
 
 final class HomeCommandCenter
 {
+    /** @var array<string, int> */
+    private static array $countCache = [];
+
+    /** @var array<string, list<array<string, mixed>>> */
+    private static array $queueCache = [];
     /**
      * @return list<array{key: string, label: string, count: int, route: string, params?: array<string, mixed>, color: string, icon: string, hint: string}>
      */
@@ -90,9 +96,8 @@ final class HomeCommandCenter
      */
     public static function travelChecklist(User $user): array
     {
-        $travel = $user->travel_id
-            ? TravelCompany::query()->find($user->travel_id)
-            : null;
+        $user->loadMissing('travel');
+        $travel = $user->travel;
 
         $registrationStatus = $travel?->registration_status ?? TravelRegistrationStatus::Approved;
         $isApproved = $travel === null || $registrationStatus === TravelRegistrationStatus::Approved;
@@ -102,9 +107,20 @@ final class HomeCommandCenter
             $jamaahTotal = Jamaah::query()->where('travel_id', $travel->id)->count();
         }
 
-        $bapDiajukan = BAP::query()->where('user_id', $user->id)->where('status', 'diajukan')->count();
-        $bapDiproses = BAP::query()->where('user_id', $user->id)->where('status', 'diproses')->count();
-        $bapDiterima = BAP::query()->where('user_id', $user->id)->where('status', 'diterima')->count();
+        $bapStats = Schema::hasTable('bap')
+            ? BAP::query()
+                ->where('user_id', $user->id)
+                ->selectRaw("
+                    SUM(CASE WHEN status = 'diajukan' THEN 1 ELSE 0 END) as diajukan,
+                    SUM(CASE WHEN status = 'diproses' THEN 1 ELSE 0 END) as diproses,
+                    SUM(CASE WHEN status = 'diterima' THEN 1 ELSE 0 END) as diterima
+                ")
+                ->first()
+            : null;
+
+        $bapDiajukan = (int) ($bapStats->diajukan ?? 0);
+        $bapDiproses = (int) ($bapStats->diproses ?? 0);
+        $bapDiterima = (int) ($bapStats->diterima ?? 0);
 
         $steps = [];
 
@@ -181,9 +197,8 @@ final class HomeCommandCenter
     public static function travelAlerts(User $user): array
     {
         $alerts = [];
-        $travel = $user->travel_id
-            ? TravelCompany::query()->find($user->travel_id)
-            : null;
+        $user->loadMissing('travel');
+        $travel = $user->travel;
 
         if ($travel?->license_expiry) {
             if ($travel->isLicenseExpired()) {
@@ -310,6 +325,8 @@ final class HomeCommandCenter
             return [];
         }
 
+        $user->loadMissing('travel');
+
         $query = BAP::query()
             ->where('status', 'diterima')
             ->where('datetime', '>=', now()->startOfDay())
@@ -355,7 +372,7 @@ final class HomeCommandCenter
         }
 
         if (Schema::hasTable('bap')) {
-            $staleCount = self::staleBapQuery($kabupaten)->count();
+            $staleCount = self::countStaleBap($kabupaten);
 
             if ($staleCount > 0) {
                 $alerts[] = [
@@ -406,27 +423,38 @@ final class HomeCommandCenter
         ];
 
         if (Schema::hasTable('jamaah') && Schema::hasTable('travels')) {
-            foreach (['haji' => 'jamaah_haji', 'umrah' => 'jamaah_umrah'] as $jenis => $key) {
-                $query = Jamaah::query()
-                    ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
-                    ->where('jamaah.jenis_jamaah', $jenis)
-                    ->whereMonth('jamaah.created_at', $currentMonth);
+            $jamaahQuery = Jamaah::query()
+                ->join('travels', 'jamaah.travel_id', '=', 'travels.id')
+                ->whereMonth('jamaah.created_at', $currentMonth);
 
-                self::applyKabupatenColumn($query, 'travels.kab_kota', $kabupaten);
-                $summary[$key] = $query->count();
-            }
+            self::applyKabupatenColumn($jamaahQuery, 'travels.kab_kota', $kabupaten);
+
+            $jamaahStats = $jamaahQuery
+                ->selectRaw("
+                    SUM(CASE WHEN jamaah.jenis_jamaah = 'haji' THEN 1 ELSE 0 END) as haji,
+                    SUM(CASE WHEN jamaah.jenis_jamaah = 'umrah' THEN 1 ELSE 0 END) as umrah
+                ")
+                ->first();
+
+            $summary['jamaah_haji'] = (int) ($jamaahStats->haji ?? 0);
+            $summary['jamaah_umrah'] = (int) ($jamaahStats->umrah ?? 0);
         }
 
         if (Schema::hasTable('bap')) {
-            foreach ([
-                'diajukan' => 'bap_diajukan',
-                'diproses' => 'bap_diproses',
-                'diterima' => 'bap_diterima',
-            ] as $status => $key) {
-                $query = BAP::query()->where('status', $status);
-                self::applyKabupatenColumn($query, 'kab_kota', $kabupaten);
-                $summary[$key] = $query->count();
-            }
+            $bapQuery = BAP::query();
+            self::applyKabupatenColumn($bapQuery, 'kab_kota', $kabupaten);
+
+            $bapStats = $bapQuery
+                ->selectRaw("
+                    SUM(CASE WHEN status = 'diajukan' THEN 1 ELSE 0 END) as diajukan,
+                    SUM(CASE WHEN status = 'diproses' THEN 1 ELSE 0 END) as diproses,
+                    SUM(CASE WHEN status = 'diterima' THEN 1 ELSE 0 END) as diterima
+                ")
+                ->first();
+
+            $summary['bap_diajukan'] = (int) ($bapStats->diajukan ?? 0);
+            $summary['bap_diproses'] = (int) ($bapStats->diproses ?? 0);
+            $summary['bap_diterima'] = (int) ($bapStats->diterima ?? 0);
         }
 
         return $summary;
@@ -465,7 +493,7 @@ final class HomeCommandCenter
             $badge = match ($bap->status) {
                 'diajukan' => ['label' => 'Diajukan', 'class' => 'bg-primary text-white'],
                 'diproses' => ['label' => 'Diproses', 'class' => 'bg-warning text-dark'],
-                default => ['label' => ucfirst($bap->status), 'class' => 'bg-secondary text-white'],
+                default => ['label' => BapStatus::labelFor($bap->status), 'class' => 'bg-secondary text-white'],
             };
 
             return [
@@ -596,7 +624,8 @@ final class HomeCommandCenter
         }
 
         if (Schema::hasTable('bap')) {
-            $staleCount = self::staleBapQuery(null)->count();
+            $staleCount = self::countStaleBap(null);
+
             if ($staleCount > 0) {
                 $alerts[] = [
                     'key' => 'bap_stale',
@@ -811,7 +840,7 @@ final class HomeCommandCenter
         }
 
         if (Schema::hasTable('bap')) {
-            $staleCount = self::staleBapQuery($kabupaten)->count();
+            $staleCount = self::countStaleBap($kabupaten);
             if ($staleCount > 0) {
                 $alerts[] = [
                     'key' => 'bap_stale',
@@ -832,6 +861,12 @@ final class HomeCommandCenter
      */
     private static function queueCards(?string $kabupaten, bool $includeRegistration): array
     {
+        $cacheKey = ($kabupaten ?? '__all__').':'.($includeRegistration ? '1' : '0');
+
+        if (isset(self::$queueCache[$cacheKey])) {
+            return self::$queueCache[$cacheKey];
+        }
+
         $cards = [];
 
         if ($includeRegistration) {
@@ -879,18 +914,22 @@ final class HomeCommandCenter
             ];
         }
 
-        return $cards;
+        return self::$queueCache[$cacheKey] = $cards;
     }
 
     public static function countRegistrationPending(?string $kabupaten = null): int
     {
-        $query = TravelCompany::pendingRegistration();
+        $cacheKey = 'registration_pending:'.($kabupaten ?? '__all__');
 
-        if ($kabupaten) {
-            $query->where('kab_kota', $kabupaten);
-        }
+        return self::cachedCount($cacheKey, function () use ($kabupaten): int {
+            $query = TravelCompany::pendingRegistration();
 
-        return $query->count();
+            if ($kabupaten) {
+                $query->where('kab_kota', $kabupaten);
+            }
+
+            return $query->count();
+        });
     }
 
     public static function countBapPendingForScope(?string $kabupaten = null): int
@@ -904,13 +943,17 @@ final class HomeCommandCenter
             return 0;
         }
 
-        $query = BAP::query()->whereIn('status', ['diajukan', 'diproses', 'pending']);
+        $cacheKey = 'bap_pending:'.($kabupaten ?? '__all__');
 
-        if ($kabupaten) {
-            self::applyKabupatenColumn($query, 'kab_kota', $kabupaten);
-        }
+        return self::cachedCount($cacheKey, function () use ($kabupaten): int {
+            $query = BAP::query()->whereIn('status', ['diajukan', 'diproses', 'pending']);
 
-        return $query->count();
+            if ($kabupaten) {
+                self::applyKabupatenColumn($query, 'kab_kota', $kabupaten);
+            }
+
+            return $query->count();
+        });
     }
 
     private static function countOpenPengaduan(?string $kabupaten): int
@@ -919,13 +962,17 @@ final class HomeCommandCenter
             return 0;
         }
 
-        $query = Pengaduan::query()->whereIn('status', ['pending', 'in_progress']);
+        $cacheKey = 'pengaduan_open:'.($kabupaten ?? '__all__');
 
-        if ($kabupaten) {
-            KabupatenScopeFilter::applyOnTravelRelation($query, self::kabupatenFilters($kabupaten));
-        }
+        return self::cachedCount($cacheKey, function () use ($kabupaten): int {
+            $query = Pengaduan::query()->whereIn('status', ['pending', 'in_progress']);
 
-        return $query->count();
+            if ($kabupaten) {
+                KabupatenScopeFilter::applyOnTravelRelation($query, self::kabupatenFilters($kabupaten));
+            }
+
+            return $query->count();
+        });
     }
 
     private static function countHighRisk(?string $kabupaten): int
@@ -934,15 +981,28 @@ final class HomeCommandCenter
             return 0;
         }
 
-        $query = RiskScore::query()->whereIn('risk_level', ['HIGH', 'CRITICAL']);
+        $cacheKey = 'risk_high:'.($kabupaten ?? '__all__');
 
-        if ($kabupaten) {
-            $travelQuery = TravelCompany::query();
-            self::applyKabupatenColumn($travelQuery, 'kab_kota', $kabupaten);
-            $query->whereIn('travel_id', $travelQuery->select('id'));
+        return self::cachedCount($cacheKey, function () use ($kabupaten): int {
+            $query = RiskScore::query()->whereIn('risk_level', ['HIGH', 'CRITICAL']);
+
+            if ($kabupaten) {
+                $travelQuery = TravelCompany::query();
+                self::applyKabupatenColumn($travelQuery, 'kab_kota', $kabupaten);
+                $query->whereIn('travel_id', $travelQuery->select('id'));
+            }
+
+            return $query->count();
+        });
+    }
+
+    private static function cachedCount(string $key, callable $resolver): int
+    {
+        if (! array_key_exists($key, self::$countCache)) {
+            self::$countCache[$key] = (int) $resolver();
         }
 
-        return $query->count();
+        return self::$countCache[$key];
     }
 
     private static function applyKabupatenColumn(Builder $query, string $column, string $kabupaten): void
@@ -990,6 +1050,17 @@ final class HomeCommandCenter
         }
 
         return $query;
+    }
+
+    private static function countStaleBap(?string $kabupaten): int
+    {
+        if (! Schema::hasTable('bap')) {
+            return 0;
+        }
+
+        $cacheKey = 'bap_stale:'.($kabupaten ?? '__all__');
+
+        return self::cachedCount($cacheKey, fn (): int => self::staleBapQuery($kabupaten)->count());
     }
 
     /**

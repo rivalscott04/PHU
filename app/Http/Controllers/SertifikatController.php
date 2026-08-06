@@ -15,6 +15,7 @@ use App\Helpers\DateHelper;
 use App\Helpers\ValidationHelper;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
+use App\Support\KanwilContact;
 use Dompdf\Dompdf;
 use Dompdf\Options;
 
@@ -392,9 +393,11 @@ class SertifikatController extends Controller
         $tahun = $matches[3] ?? Carbon::now()->format('Y');
 
         // Get signatory settings from database
-        $settings = SertifikatSetting::first();
-        $nama_penandatangan = $settings ? $settings->nama_penandatangan : 'Drs. H. Ahmad Hidayat, M.Pd';
-        $nip_penandatangan = $settings ? $settings->nip_penandatangan : '196501011990031001';
+        $signatory = SertifikatSetting::signatory();
+        $nama_penandatangan = $signatory->nama;
+        $nip_penandatangan = $signatory->nip;
+        $jabatanText = rtrim($signatory->jabatan, ", \t\n\r");
+        $jabatanHtml = nl2br(htmlspecialchars($jabatanText)).',';
 
         // Convert QR code to base64
         $qrBase64 = '';
@@ -403,13 +406,12 @@ class SertifikatController extends Controller
             $qrBase64 = 'data:image/png;base64,' . base64_encode($qrData);
         }
 
-        // Get background image path
-        $backgroundPath = public_path('images/Picture1.png');
-        $backgroundBase64 = '';
-        if (file_exists($backgroundPath)) {
-            $backgroundData = file_get_contents($backgroundPath);
-            $backgroundBase64 = 'data:image/png;base64,' . base64_encode($backgroundData);
-        }
+        $letterheadMinistry = htmlspecialchars(KanwilContact::get('letterhead_ministry'));
+        $letterheadOffice = htmlspecialchars(KanwilContact::get('letterhead_office'));
+        $letterheadProvince = htmlspecialchars(KanwilContact::get('letterhead_province'));
+        $letterheadContact = htmlspecialchars(KanwilContact::get('address'))
+            .' Telp. '.htmlspecialchars(KanwilContact::get('phone'))
+            .' · Email: '.htmlspecialchars(KanwilContact::get('email'));
 
         $html = '<!DOCTYPE html>
 <html>
@@ -426,8 +428,7 @@ class SertifikatController extends Controller
             padding: 0;
             font-family: Times, serif;
             font-size: 14px;
-            background: white url("' . $backgroundBase64 . '") no-repeat center center;
-            background-size: cover;
+            background: white;
             width: 297mm;
             height: 210mm;
             position: relative;
@@ -435,117 +436,115 @@ class SertifikatController extends Controller
 
         .container {
             position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
+            width: calc(100% - 24mm);
+            height: calc(100% - 24mm);
+            top: 12mm;
+            left: 12mm;
+            border: 2px solid #1a1a1a;
+            box-sizing: border-box;
+        }
+
+        .inner {
+            position: absolute;
+            inset: 4mm;
+            border: 1px solid #666;
+        }
+
+        .letterhead {
+            position: absolute;
+            top: 8mm;
+            left: 10mm;
+            right: 10mm;
+            text-align: center;
+            border-bottom: 2px solid #1a1a1a;
+            padding-bottom: 3mm;
+        }
+
+        .letterhead-line {
+            font-weight: bold;
+            font-size: 13px;
+            line-height: 1.25;
+        }
+
+        .letterhead-contact {
+            font-size: 11px;
+            margin-top: 1mm;
         }
 
         .doc-number-top {
             position: absolute;
-            top: 20mm;
-            right: 15mm;
+            top: 28mm;
+            right: 12mm;
             font-weight: bold;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .center-number {
             position: absolute;
-            top: 85mm;
+            top: 36mm;
             width: 100%;
             text-align: center;
             font-weight: bold;
-            font-size: 18px;
+            font-size: 16px;
             font-style: italic;
         }
 
         .main-content {
             position: absolute;
-            top: 95mm;
+            top: 46mm;
             left: 15mm;
             right: 15mm;
             width: calc(100% - 30mm);
         }
 
-        .left-content {
-            width: 100%;
-            margin-bottom: 20mm;
-        }
-
         .keputusan {
             font-weight: bold;
-            font-size: 15px;
-            margin-bottom: 5mm;
+            font-size: 14px;
+            margin-bottom: 4mm;
             line-height: 1.4;
             text-align: justify;
         }
 
         .detail-table {
             width: 100%;
-            margin-bottom: 5mm;
+            margin-bottom: 4mm;
         }
 
         .detail-table td {
             vertical-align: top;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 14px;
             padding: 1mm 0;
         }
 
-        .label-col {
-            width: 45mm;
-        }
-
-        .colon-col {
-            width: 5mm;
-        }
+        .label-col { width: 45mm; }
+        .colon-col { width: 5mm; }
 
         .purpose {
             font-weight: bold;
-            font-size: 15px;
-            margin-top: 5mm;
+            font-size: 14px;
+            margin-top: 3mm;
         }
 
         .signature-section {
             position: absolute;
-            bottom: 10mm;
+            bottom: 12mm;
             left: 50%;
             transform: translateX(-50%);
-            width: 80mm;
+            width: 90mm;
             text-align: center;
         }
 
-        .signature {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .location-date {
-            text-align: left;
-            margin-bottom: 2mm;
-        }
-
-        .signature-title {
-            text-align: left;
-            margin-bottom: 5mm;
-            line-height: 1.3;
-        }
-
-        .qr-container {
-            text-align: center;
-        }
-
-        .qr-img {
-            width: 20mm;
-            height: 20mm;
-        }
-
+        .signature { font-size: 13px; font-weight: bold; }
+        .location-date { text-align: left; margin-bottom: 2mm; }
+        .signature-title { text-align: left; margin-bottom: 4mm; line-height: 1.3; }
+        .qr-container { text-align: center; margin-bottom: 2mm; }
+        .qr-img { width: 18mm; height: 18mm; }
         .name-signature {
             text-align: center;
             font-weight: bold;
             text-decoration: underline;
         }
-
         .nip {
             text-align: center;
             font-size: 12px;
@@ -555,8 +554,17 @@ class SertifikatController extends Controller
 </head>
 <body>
     <div class="container">
+        <div class="inner"></div>
+
+        <div class="letterhead">
+            <div class="letterhead-line">'.$letterheadMinistry.'</div>
+            <div class="letterhead-line">'.$letterheadOffice.'</div>
+            <div class="letterhead-line">'.$letterheadProvince.'</div>
+            <div class="letterhead-contact">'.$letterheadContact.'</div>
+        </div>
+
         <div class="doc-number-top">
-            No. ' . $sertifikat->nomor_dokumen . '
+            No. ' . htmlspecialchars($sertifikat->nomor_dokumen) . '
         </div>
 
         <div class="center-number">
@@ -564,37 +572,35 @@ class SertifikatController extends Controller
         </div>
 
         <div class="main-content">
-            <div class="left-content">
-                <div class="keputusan">
-                    Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
-                </div>
+            <div class="keputusan">
+                Berdasarkan Keputusan Kepala Kantor Wilayah Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat Nomor : 226 Tahun 2021 tanggal 09 Maret 2021 diberikan kepada :
+            </div>
 
-                <table class="detail-table">
-                    <tr>
-                        <td class="label-col">Nama PPIU</td>
-                        <td class="colon-col">:</td>
-                        <td>' . htmlspecialchars($sertifikat->nama_ppiu) . '</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Nama Kepala Cabang</td>
-                        <td class="colon-col">:</td>
-                        <td>' . htmlspecialchars($sertifikat->nama_kepala) . '</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Alamat Kantor</td>
-                        <td class="colon-col">:</td>
-                        <td>' . htmlspecialchars($sertifikat->alamat) . '</td>
-                    </tr>
-                    <tr>
-                        <td class="label-col">Tanggal diterbitkannya</td>
-                        <td class="colon-col">:</td>
-                        <td>' . DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_diterbitkan) . '</td>
-                    </tr>
-                </table>
+            <table class="detail-table">
+                <tr>
+                    <td class="label-col">Nama PPIU</td>
+                    <td class="colon-col">:</td>
+                    <td>' . htmlspecialchars($sertifikat->nama_ppiu) . '</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Nama Kepala Cabang</td>
+                    <td class="colon-col">:</td>
+                    <td>' . htmlspecialchars($sertifikat->nama_kepala) . '</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Alamat Kantor</td>
+                    <td class="colon-col">:</td>
+                    <td>' . htmlspecialchars($sertifikat->alamat) . '</td>
+                </tr>
+                <tr>
+                    <td class="label-col">Tanggal diterbitkannya</td>
+                    <td class="colon-col">:</td>
+                    <td>' . DateHelper::formatIndonesiaWithMonth($sertifikat->tanggal_diterbitkan) . '</td>
+                </tr>
+            </table>
 
-                <div class="purpose">
-                    sebagai Penyelenggara Perjalanan Ibadah Umrah
-                </div>
+            <div class="purpose">
+                sebagai Penyelenggara Perjalanan Ibadah Umrah
             </div>
         </div>
 
@@ -605,8 +611,7 @@ class SertifikatController extends Controller
                 </div>
 
                 <div class="signature-title">
-                    Kepala Kantor Wilayah Kementerian Haji dan Umroh<br>
-                    Provinsi Nusa Tenggara Barat,
+                    '.$jabatanHtml.'
                 </div>
 
                 <div class="qr-container">
@@ -749,6 +754,7 @@ class SertifikatController extends Controller
         ValidationHelper::validate($request, [
             'nama_penandatangan' => 'required|string|max:255',
             'nip_penandatangan' => 'required|string|max:255',
+            'jabatan_penandatangan' => 'required|string|max:500',
         ]);
 
         $settings = SertifikatSetting::first();
@@ -759,6 +765,7 @@ class SertifikatController extends Controller
 
         $settings->nama_penandatangan = $request->nama_penandatangan;
         $settings->nip_penandatangan = $request->nip_penandatangan;
+        $settings->jabatan_penandatangan = $request->jabatan_penandatangan;
         $settings->save();
 
         return response()->json([

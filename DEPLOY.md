@@ -201,10 +201,16 @@ REVERB_APP_ID=GANTI_APP_ID
 REVERB_APP_KEY=GANTI_APP_KEY
 REVERB_APP_SECRET=GANTI_APP_SECRET
 
-# Host yang dilihat browser (domain publik)
-REVERB_HOST=pantau.example.com
-REVERB_PORT=443
-REVERB_SCHEME=https
+# PHP → Reverb (server-side publish). WAJIB loopback agar submit form
+# (pengaduan / BA pemeriksaan) tidak hang lewat HTTPS publik.
+REVERB_HOST=127.0.0.1
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+# Browser → Reverb (WebSocket lewat Nginx /app). Domain publik HTTPS.
+REVERB_CLIENT_HOST=pantau.example.com
+REVERB_CLIENT_PORT=443
+REVERB_CLIENT_SCHEME=https
 
 # Server internal Reverb (bind lokal)
 REVERB_SERVER_HOST=0.0.0.0
@@ -350,15 +356,23 @@ location /app {
 }
 ```
 
-Pastikan `.env` client-side match dengan domain publik:
+Pastikan `.env` memisahkan host publisher (PHP) dan host browser:
 
 ```dotenv
-REVERB_HOST=pantau.example.com   # sama dengan domain HTTPS
-REVERB_PORT=443
-REVERB_SCHEME=https
+# PHP publish ke Reverb lokal
+REVERB_HOST=127.0.0.1
+REVERB_PORT=8080
+REVERB_SCHEME=http
+
+# Browser connect via HTTPS/Nginx
+REVERB_CLIENT_HOST=pantau.example.com
+REVERB_CLIENT_PORT=443
+REVERB_CLIENT_SCHEME=https
 ```
 
-Frontend membaca konfigurasi ini lewat `notification-bell.blade.php` → `public/js/notifications-realtime.js`.
+Frontend membaca `REVERB_CLIENT_*` lewat `notification-bell.blade.php` → `public/js/notifications-realtime.js`.
+
+> **Penting:** jangan set `REVERB_HOST` ke domain publik. PHP akan publish event lewat HTTPS publik; jika Nginx hanya mem-proxy `/app` (WebSocket) atau Reverb mati, request create pengaduan/pengawasan bisa hang tanpa respon.
 
 ### 6.4 Scaling (opsional, multi-server)
 
@@ -593,7 +607,8 @@ Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setela
 
 - [ ] `BROADCAST_CONNECTION=reverb`
 - [ ] `REVERB_APP_ID`, `REVERB_APP_KEY`, `REVERB_APP_SECRET` terisi
-- [ ] `REVERB_HOST` = domain HTTPS, `REVERB_SCHEME=https`, `REVERB_PORT=443`
+- [ ] `REVERB_HOST=127.0.0.1`, `REVERB_PORT=8080`, `REVERB_SCHEME=http` (publisher PHP)
+- [ ] `REVERB_CLIENT_HOST` = domain HTTPS, `REVERB_CLIENT_SCHEME=https`, `REVERB_CLIENT_PORT=443` (browser)
 - [ ] Supervisor `phu-reverb` running
 - [ ] Nginx proxy `/app` ke `127.0.0.1:8080`
 - [ ] Tes: notifikasi muncul tanpa refresh halaman
@@ -641,6 +656,7 @@ Jika tidak jalan, buka DevTools → Network → filter `WS` — harus ada koneks
 
 | Gejala | Penyebab umum | Solusi |
 |--------|---------------|--------|
+| Submit pengaduan/pengawasan hang, tidak ada respon | `REVERB_HOST` mengarah ke domain publik / Reverb mati | Set `REVERB_HOST=127.0.0.1`, `REVERB_PORT=8080`, `REVERB_SCHEME=http`; isi `REVERB_CLIENT_*` untuk browser; restart `php-fpm` + `config:cache` |
 | Notifikasi tidak real-time | Reverb tidak jalan | `sudo supervisorctl status phu-reverb`; cek `storage/logs/reverb.log` |
 | WebSocket gagal connect (403/502) | Nginx proxy belum benar | Pastikan block `location /app` ada; Reverb listen di 8080 |
 | WebSocket connect tapi tidak dapat event | Kredensial Reverb salah | Regenerate dengan `php artisan reverb:install`; `config:cache` ulang |
@@ -651,7 +667,7 @@ Jika tidak jalan, buka DevTools → Network → filter `WS` — harus ada koneks
 | UI/CSS beda dengan lokal setelah deploy | View cache / OPcache / Cloudflare HTML cache | `php artisan optimize:clear && php artisan view:clear && php artisan view:cache && sudo systemctl reload php8.2-fpm`; purge Cloudflare; cek `<head>` punya `app-typography.css` |
 | Risk score tidak update | Cron tidak aktif | Cek crontab `www-data`; jalankan manual `php artisan risk:calculate` |
 | Upload gagal | Permission storage | `chown -R www-data:www-data storage`; `chmod -R ug+rwx storage` |
-| Mixed content error (WS) | `REVERB_SCHEME=http` di HTTPS | Set `REVERB_SCHEME=https`, `REVERB_PORT=443` |
+| Mixed content error (WS) | `REVERB_CLIENT_SCHEME=http` di HTTPS | Set `REVERB_CLIENT_SCHEME=https`, `REVERB_CLIENT_PORT=443` |
 
 ### Perintah diagnostik
 

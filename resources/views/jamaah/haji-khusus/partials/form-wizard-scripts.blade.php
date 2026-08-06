@@ -237,9 +237,11 @@
                     return false;
                 }
 
-                if (field.id === 'no_hp' && !value.startsWith('08')) {
-                    markFieldInvalid(field, 'Nomor HP harus diawali dengan 08');
-                    return false;
+                if (field.id === 'no_hp') {
+                    if (!/^08\d{6,14}$/.test(value)) {
+                        markFieldInvalid(field, 'Nomor HP harus diawali 08, panjang 8 s.d. 16 digit');
+                        return false;
+                    }
                 }
 
                 if (field.id === 'no_ktp') {
@@ -286,8 +288,8 @@
                 });
 
                 const phoneField = section.querySelector('#no_hp');
-                if (phoneField && !phoneField.disabled && phoneField.value.trim() && !phoneField.value.trim().startsWith('08')) {
-                    markFieldInvalid(phoneField, 'Nomor HP harus diawali dengan 08');
+                if (phoneField && !phoneField.disabled && phoneField.value.trim() && !/^08\d{6,14}$/.test(phoneField.value.trim())) {
+                    markFieldInvalid(phoneField, 'Nomor HP harus diawali 08, panjang 8 s.d. 16 digit');
                     if (!invalidFields.includes(phoneField)) {
                         invalidFields.push(phoneField);
                     }

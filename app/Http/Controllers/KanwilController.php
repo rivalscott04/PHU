@@ -329,7 +329,7 @@ class KanwilController extends Controller
             'tanggal' => 'nullable|date',
             'pimpinan_cabang' => 'required|string|max:255',
             'alamat_cabang' => 'required|string',
-            'telepon' => 'required|string|max:20',
+            'telepon' => ValidationHelper::teleponRules(),
         ]);
 
         if ($user->role === 'kabupaten') {
@@ -427,7 +427,7 @@ class KanwilController extends Controller
             'tanggal' => 'nullable|date',
             'pimpinan_cabang' => 'required|string|max:255',
             'alamat_cabang' => 'required|string',
-            'telepon' => 'required|string|max:20',
+            'telepon' => ValidationHelper::teleponRules(),
         ]);
 
         $updateData = $request->all();

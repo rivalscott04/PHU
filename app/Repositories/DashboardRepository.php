@@ -54,7 +54,7 @@ class DashboardRepository
             'total_jamaah_umrah' => 'Jamaah Umrah',
             'total_jamaah_haji_khusus' => 'Jamaah Haji Khusus',
             'total_bap' => 'Total BA Pemberangkatan',
-            'bap_pending' => 'BA Pemberangkatan Pending',
+            'bap_pending' => 'BA Pemberangkatan Menunggu',
             'pengawasan_berjalan' => 'Pengawasan Berjalan',
             'temuan_aktif' => 'Temuan Aktif',
             'total_pengaduan' => 'Pengaduan',
@@ -911,13 +911,6 @@ class DashboardRepository
             return ['labels' => [], 'series' => []];
         }
 
-        $statusLabels = [
-            'pending' => 'Menunggu',
-            'in_progress' => 'Sedang Diproses',
-            'completed' => 'Selesai',
-            'rejected' => 'Ditolak',
-        ];
-
         $rows = Pengaduan::query()
             ->selectRaw('status, COUNT(*) as total')
             ->whereIn('travels_id', $travelIds)
@@ -926,7 +919,7 @@ class DashboardRepository
             ->get();
 
         return [
-            'labels' => $rows->map(fn ($row) => $statusLabels[$row->status] ?? $row->status)->all(),
+            'labels' => $rows->map(fn ($row) => \App\Enums\PengaduanStatus::labelFor($row->status))->all(),
             'series' => $rows->pluck('total')->map(fn ($v) => (int) $v)->all(),
         ];
     }

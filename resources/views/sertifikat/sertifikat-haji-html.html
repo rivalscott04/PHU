@@ -29,19 +29,12 @@
             width: 100%;
             height: 100%;
             position: relative;
+            border: 2px solid #1a1a1a;
+            box-sizing: border-box;
         }
         
         .background-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('Picture1.png');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: -1;
+            display: none;
         }
         
         .content {
@@ -283,8 +276,7 @@
                     </div>
                     
                     <div class="signature-title">
-                        Kepala Kantor Wilayah Kementerian Haji dan Umroh<br>
-                        Provinsi Nusa Tenggara Barat,
+                        <span class="variable">${jabatanpenandatangan}</span>
                     </div>
                     
                     <div class="qr-section">

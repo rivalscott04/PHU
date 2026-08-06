@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\ProvidesLocalizedLabels;
+
 enum InspectionStatus: string
 {
+    use ProvidesLocalizedLabels;
     case Draft = 'DRAFT';
     case Scheduled = 'SCHEDULED';
     case OnProgress = 'ON_PROGRESS';

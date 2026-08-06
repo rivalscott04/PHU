@@ -241,8 +241,8 @@
             }
 
             if (field.id === 'pic_nomor_hp' && value) {
-                if (!/^08\d{6,12}$/.test(value)) {
-                    markFieldInvalid(field, 'Nomor HP harus diawali 08, panjang 8 s.d. 14 digit angka');
+                if (!/^08\d{6,14}$/.test(value)) {
+                    markFieldInvalid(field, 'Nomor HP harus diawali 08, panjang 8 s.d. 16 digit angka');
                     return false;
                 }
             }

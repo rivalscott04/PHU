@@ -11,6 +11,8 @@ use Illuminate\Http\Request;
 use App\Imports\JamaahImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
+use App\Support\ExportFilename;
+use App\Support\JamaahExportScope;
 use App\Support\KanwilContact;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
@@ -34,12 +36,12 @@ class JamaahController extends Controller
                     ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
             }
             $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->whereHas('travel', function ($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
+                ->where('travel_id', $user->travel_id)
+                ->orderBy('nama')
+                ->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
-            $jamaahQuery = Jamaah::where('jenis_jamaah', 'haji');
+            $jamaahQuery = Jamaah::where('jenis_jamaah', 'haji')->with('travel');
             KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
             $jamaah = $jamaahQuery->get();
             $groupedJamaah = null;
@@ -63,14 +65,13 @@ class JamaahController extends Controller
         $user = auth()->user();
 
         if ($user->role === 'user') {
-            // User (travel) hanya bisa melihat jamaah dari kabupatennya
             $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->whereHas('travel', function ($query) use ($user) {
-                    $query->where('kab_kota', $user->kabupaten);
-                })->get();
+                ->where('travel_id', $user->travel_id)
+                ->orderBy('nama')
+                ->get();
             $groupedJamaah = null;
         } else if ($user->role === 'kabupaten') {
-            $jamaahQuery = Jamaah::where('jenis_jamaah', 'umrah');
+            $jamaahQuery = Jamaah::where('jenis_jamaah', 'umrah')->with('travel');
             KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
             $jamaah = $jamaahQuery->get();
             $groupedJamaah = null;
@@ -114,10 +115,10 @@ class JamaahController extends Controller
         $user = auth()->user();
 
         ValidationHelper::validate($request, [
-            'nik' => 'required|digits:16',
+            'nik' => ValidationHelper::nikRules(),
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(),
         ]);
 
         try {
@@ -138,10 +139,10 @@ class JamaahController extends Controller
         $user = auth()->user();
 
         ValidationHelper::validate($request, [
-            'nik' => 'required|digits:16',
+            'nik' => ValidationHelper::nikRules(),
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(),
         ]);
 
         try {
@@ -170,7 +171,7 @@ class JamaahController extends Controller
         ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'alamat' => 'required|string|max:255',
-            'nomor_hp' => 'required|string|max:15|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(),
         ]);
 
         try {
@@ -233,128 +234,50 @@ class JamaahController extends Controller
 
     public function exportUmrah(Request $request)
     {
-        $format = $request->get('format', 'excel');
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
-
-        if ($format === 'pdf') {
-            return $this->exportUmrahPDF($request);
-        }
-
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->where('travel_id', $travelId)
-                ->with('travel')
-                ->get();
-
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_umrah_travel.xlsx';
-
-            return Excel::download(new JamaahUmrahExport($jamaah, false), $filename);
-        } else {
-            // Export global with separators
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-
-            $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.xlsx';
-
-            return Excel::download(new JamaahUmrahExport($jamaah, true), $filename);
-        }
+        return $this->exportJamaahByJenis($request, 'umrah', JamaahUmrahExport::class);
     }
 
     public function exportHaji(Request $request)
     {
-        $format = $request->get('format', 'excel');
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
-
-        if ($format === 'pdf') {
-            return $this->exportHajiPDF($request);
-        }
-
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->where('travel_id', $travelId)
-                ->with('travel')
-                ->get();
-
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_travel.xlsx';
-
-            return Excel::download(new JamaahHajiExport($jamaah, false), $filename);
-        } else {
-            // Export global with separators
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-
-            $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.xlsx';
-
-            return Excel::download(new JamaahHajiExport($jamaah, true), $filename);
-        }
+        return $this->exportJamaahByJenis($request, 'haji', JamaahHajiExport::class);
     }
 
     public function exportUmrahPDF(Request $request)
     {
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
-
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->where('travel_id', $travelId)
-                ->with('travel')
-                ->get();
-
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_umrah_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_umrah_travel.pdf';
-
-            return $this->generatePDF($jamaah, false, 'umrah', $filename);
-        } else {
-            // Export global with separators
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-
-            $filename = 'jamaah_umrah_global_' . now()->format('Y-m-d') . '.pdf';
-
-            return $this->generatePDF($jamaah, true, 'umrah', $filename);
-        }
+        return $this->exportJamaahPdfByJenis($request, 'umrah');
     }
 
     public function exportHajiPDF(Request $request)
     {
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
+        return $this->exportJamaahPdfByJenis($request, 'haji');
+    }
 
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->where('travel_id', $travelId)
-                ->with('travel')
-                ->get();
-
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_haji_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_travel.pdf';
-
-            return $this->generatePDF($jamaah, false, 'haji', $filename);
-        } else {
-            // Export global with separators
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-
-            $filename = 'jamaah_haji_global_' . now()->format('Y-m-d') . '.pdf';
-
-            return $this->generatePDF($jamaah, true, 'haji', $filename);
+    private function exportJamaahByJenis(Request $request, string $jenis, string $exportClass)
+    {
+        if ($request->get('format') === 'pdf') {
+            return $this->exportJamaahPdfByJenis($request, $jenis);
         }
+
+        $scope = JamaahExportScope::forJamaah(auth()->user(), $request, $jenis);
+        if ($scope['error']) {
+            return back()->with('error', $scope['error']);
+        }
+
+        $filename = ExportFilename::jamaah($jenis, $scope['isGlobal'], $scope['travel'], 'xlsx');
+
+        return Excel::download(new $exportClass($scope['data'], $scope['isGlobal']), $filename);
+    }
+
+    private function exportJamaahPdfByJenis(Request $request, string $jenis)
+    {
+        $scope = JamaahExportScope::forJamaah(auth()->user(), $request, $jenis);
+        if ($scope['error']) {
+            return back()->with('error', $scope['error']);
+        }
+
+        $filename = ExportFilename::jamaah($jenis, $scope['isGlobal'], $scope['travel'], 'pdf');
+
+        return $this->generatePDF($scope['data'], $scope['isGlobal'], $jenis, $filename);
     }
 
     private function generatePDF($data, $isGlobal, $type, $filename)
@@ -380,8 +303,11 @@ class JamaahController extends Controller
 
     private function generatePDFHTML($data, $isGlobal, $type)
     {
-        $jenisJamaah = ucfirst($type);
-        $title = "DATA JAMAAH {$jenisJamaah}";
+        $jenisJamaah = match ($type) {
+            'haji-khusus' => 'Haji Khusus',
+            default => ucfirst($type),
+        };
+        $title = 'DATA JAMAAH '.strtoupper($jenisJamaah);
 
         // Convert logo to base64
         $logoPath = public_path('images/logo_web.png');

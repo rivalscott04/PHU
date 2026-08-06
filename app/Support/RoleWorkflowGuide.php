@@ -25,9 +25,12 @@ class RoleWorkflowGuide
                 UserRole::Admin->value => self::homeAdmin(),
                 default => null,
             },
-            'bap_list' => in_array($role, [UserRole::Kabupaten->value, UserRole::Admin->value], true)
-                ? self::bapListApprover()
-                : ($role === UserRole::User->value ? self::bapListTravel() : null),
+            'bap_list' => match ($role) {
+                UserRole::Admin->value => self::bapListAdmin(),
+                UserRole::Kabupaten->value => self::bapListKabupaten(),
+                UserRole::User->value => self::bapListTravel(),
+                default => null,
+            },
             'bap_detail' => in_array($role, [UserRole::Kabupaten->value, UserRole::Admin->value], true)
                 ? self::bapDetailApprover((string) ($context['status'] ?? ''))
                 : ($role === UserRole::User->value ? self::bapDetailTravel((string) ($context['status'] ?? '')) : null),
@@ -122,7 +125,25 @@ class RoleWorkflowGuide
     }
 
     /** @return array{title: string, hint: string, steps: list<string>, actions: list<array{label: string, url: string, style: string, icon: string}>} */
-    private static function bapListApprover(): array
+    private static function bapListAdmin(): array
+    {
+        return [
+            'title' => 'Cara Memproses BA Pemberangkatan',
+            'hint' => 'Travel mengajukan BA; Anda yang menyetujui atau menolak melalui perubahan status.',
+            'steps' => [
+                'Atur pejabat penandatangan Kanwil lewat tombol Pengaturan Penandatangan (isi sekali)',
+                'Cari baris berstatus Diajukan (biru) atau Diproses (kuning)',
+                'Klik Detail untuk melihat data lengkap dan PDF surat pernyataan',
+                'Ubah status: Diajukan → Diproses → Diterima',
+                'Setelah Diterima, cetak BA dan jadwal tampil di Jadwal Keberangkatan',
+            ],
+            'actions' => [
+                ['label' => 'Jadwal Keberangkatan', 'url' => route('keberangkatan'), 'style' => 'outline-primary', 'icon' => 'bx-calendar'],
+            ],
+        ];
+    }
+
+    private static function bapListKabupaten(): array
     {
         return [
             'title' => 'Cara Memproses BA Pemberangkatan',
@@ -234,7 +255,7 @@ class RoleWorkflowGuide
             'title' => 'Cara Mengelola Sertifikat PPIU',
             'hint' => 'Terbitkan dan kelola sertifikat izin penyelenggara ibadah umrah.',
             'steps' => [
-                'Pastikan pengaturan penandatangan sudah diisi (tombol Pengaturan Penandatangan)',
+                'Atur pejabat penandatangan lewat tombol Pengaturan Penandatangan (nama, NIP, dan jabatan)',
                 'Klik Buat Sertifikat untuk travel yang memerlukan',
                 'Isi data dan generate dokumen sertifikat',
                 'Travel dapat mengunduh sertifikat dari akun mereka',

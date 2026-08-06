@@ -70,7 +70,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="telepon" class="form-label">Telepon @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="telepon" name="telepon" required>
+                                <input type="text" class="form-control @error('telepon') is-invalid @enderror" id="telepon" name="telepon" maxlength="16" inputmode="numeric" required>
                             </div>
                         </div>
                         <button type="submit" class="btn btn-sm btn-primary">Simpan</button>

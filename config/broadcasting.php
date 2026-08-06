@@ -35,14 +35,24 @@ return [
             'key' => env('REVERB_APP_KEY'),
             'secret' => env('REVERB_APP_SECRET'),
             'app_id' => env('REVERB_APP_ID'),
+            // Server-side publisher (PHP → Reverb). Prefer 127.0.0.1:8080 on the
+            // same machine so form submits never wait on the public HTTPS hop.
             'options' => [
-                'host' => env('REVERB_HOST'),
-                'port' => env('REVERB_PORT', 443),
-                'scheme' => env('REVERB_SCHEME', 'https'),
-                'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                'host' => env('REVERB_HOST', '127.0.0.1'),
+                'port' => env('REVERB_PORT', 8080),
+                'scheme' => env('REVERB_SCHEME', 'http'),
+                'useTLS' => env('REVERB_SCHEME', 'http') === 'https',
+            ],
+            // Browser Echo/Pusher config (may differ from the publisher host).
+            'client' => [
+                'host' => env('REVERB_CLIENT_HOST', env('REVERB_HOST', '127.0.0.1')),
+                'port' => env('REVERB_CLIENT_PORT', env('REVERB_PORT', 8080)),
+                'scheme' => env('REVERB_CLIENT_SCHEME', env('REVERB_SCHEME', 'http')),
             ],
             'client_options' => [
-                // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html
+                // Fail fast if Reverb is down — never block pengaduan/pengawasan saves.
+                'timeout' => (float) env('REVERB_HTTP_TIMEOUT', 2),
+                'connect_timeout' => (float) env('REVERB_HTTP_CONNECT_TIMEOUT', 1),
             ],
         ],
 

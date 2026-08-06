@@ -1738,6 +1738,13 @@
             }
             
             // If validation passes, show confirmation dialog
+            if (typeof Swal === 'undefined') {
+                if (window.confirm('Apakah anda yakin mengirim aduan?')) {
+                    document.getElementById('pengaduanForm').submit();
+                }
+                return;
+            }
+
             Swal.fire({
                 title: 'Apakah anda yakin mengirim aduan?',
                 icon: 'warning',

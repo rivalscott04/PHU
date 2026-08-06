@@ -1,21 +1,9 @@
 @php
+    use App\Enums\RiskLevel;
     use App\Enums\TravelRegistrationStatus;
 
     $travels = $travels ?? collect();
     $compact = $compact ?? false;
-
-    $riskBadges = [
-        'LOW' => 'success',
-        'MEDIUM' => 'info',
-        'HIGH' => 'warning',
-        'CRITICAL' => 'danger',
-    ];
-    $riskLabels = [
-        'LOW' => 'Rendah',
-        'MEDIUM' => 'Sedang',
-        'HIGH' => 'Tinggi',
-        'CRITICAL' => 'Kritis',
-    ];
 @endphp
 
 <div class="table-responsive">
@@ -31,7 +19,7 @@
                 <th>Terakhir Diawasi</th>
                 <th>Pengawasan</th>
                 <th>Pengaduan</th>
-                <th>BA Pending</th>
+                <th>BA Menunggu</th>
                 <th class="pe-3">Risiko</th>
             </tr>
         </thead>
@@ -76,8 +64,8 @@
                     </td>
                     <td class="pe-3">
                         @if($risk)
-                            <span class="badge bg-{{ $riskBadges[$risk] ?? 'secondary' }}">
-                                {{ $riskLabels[$risk] ?? $risk }}
+                            <span class="badge bg-{{ RiskLevel::badgeFor($risk) }}">
+                                {{ RiskLevel::labelFor($risk) }}
                             </span>
                         @else
                             <span class="text-muted">Tidak ada</span>

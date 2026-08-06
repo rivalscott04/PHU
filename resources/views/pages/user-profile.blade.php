@@ -108,7 +108,7 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label for="example-text-input" class="form-control-label">Nomor HP</label>
-                                        <input class="form-control" type="text" name="nomor_hp" value="{{ old('nomor_hp', auth()->user()->nomor_hp) }}">
+                                        <input class="form-control" type="text" name="nomor_hp" value="{{ old('nomor_hp', auth()->user()->nomor_hp) }}" maxlength="16" inputmode="numeric">
                                     </div>
                                 </div>
                             </div>

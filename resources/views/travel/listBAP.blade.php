@@ -14,9 +14,20 @@
                     <p class="text-muted mb-0 small">Daftar pengajuan keberangkatan jamaah</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
+                    @if (auth()->user()->role === 'admin')
+                        <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal"
+                            data-bs-target="#bapSettingsModal">
+                            <i class="bx bx-cog me-1"></i> Pengaturan Penandatangan
+                        </button>
+                    @endif
                     @if (auth()->user()->role === 'admin' || auth()->user()->role === 'kabupaten')
                         <a href="{{ route('verify-e-sign') }}" class="btn btn-sm btn-info">
                             <i class="bx bx-qr-scan me-1"></i> Verifikasi E Sign
+                        </a>
+                    @endif
+                    @if(in_array(auth()->user()->role, ['user', 'admin', 'kabupaten'], true))
+                        <a href="{{ route('bap.export') }}" class="btn btn-sm btn-outline-success">
+                            <i class="bx bx-export me-1"></i> Unduh Rekap
                         </a>
                     @endif
                     <a href="{{ route('form.bap') }}" onclick="return checkJamaah({{ $jamaahCount }});"
@@ -72,21 +83,11 @@
                                                                 {{ $item->status == 'diproses' ? 'bg-warning text-dark fw-semibold' : '' }}
                                                                 {{ $item->status == 'diterima' ? 'bg-success text-white fw-semibold' : '' }}"
                                                             onchange="handleStatusChange({{ $item->id }}, this.value)">
-                                                            <option value="pending"
-                                                                {{ $item->status == 'pending' ? 'selected' : '' }}>Pending
+                                                            @foreach (\App\Enums\BapStatus::cases() as $bapStatus)
+                                                            <option value="{{ $bapStatus->value }}"
+                                                                {{ $item->status == $bapStatus->value ? 'selected' : '' }}>{{ $bapStatus->label() }}
                                                             </option>
-                                                            <option value="diajukan"
-                                                                {{ $item->status == 'diajukan' ? 'selected' : '' }}>
-                                                                Diajukan
-                                                            </option>
-                                                            <option value="diproses"
-                                                                {{ $item->status == 'diproses' ? 'selected' : '' }}>
-                                                                Diproses
-                                                            </option>
-                                                            <option value="diterima"
-                                                                {{ $item->status == 'diterima' ? 'selected' : '' }}>
-                                                                Diterima
-                                                            </option>
+                                                            @endforeach
                                                         </select>
                                                         @if ($item->status === 'diterima' && $item->nomor_surat)
                                                             <small class="text-muted">{{ $item->nomor_surat }}</small>
@@ -137,6 +138,52 @@
             </div>
         </div>
     </div>
+
+    @if (auth()->user()->role === 'admin')
+        <div class="modal fade" id="bapSettingsModal" tabindex="-1" aria-labelledby="bapSettingsModalLabel">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bapSettingsModalLabel">
+                            <i class="bx bx-cog text-primary"></i> Pengaturan Penandatangan BA
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small">
+                            Data ini muncul di blok tanda tangan Kanwil saat BA dicetak dan saat verifikasi QR.
+                        </p>
+                        <form id="bapSettingsForm">
+                            @csrf
+                            <div class="mb-3">
+                                <label for="bap_nama_penandatangan" class="form-label">Nama Pejabat *</label>
+                                <input type="text" class="form-control" id="bap_nama_penandatangan"
+                                    name="nama_penandatangan" required
+                                    placeholder="Contoh: Dr. Ahmad Hidayat, M.Ag">
+                                <small class="form-text text-muted">Nama lengkap pejabat yang menandatangani BA</small>
+                            </div>
+                            <div class="mb-3">
+                                <label for="bap_jabatan_penandatangan" class="form-label">Jabatan *</label>
+                                <input type="text" class="form-control" id="bap_jabatan_penandatangan"
+                                    name="jabatan_penandatangan" required
+                                    value="{{ config('app.kanwil.bap_kanwil_jabatan') }}"
+                                    placeholder="Contoh: Kepala Bidang Bina Haji">
+                                <small class="form-text text-muted">Jabatan resmi pejabat penandatangan Kanwil</small>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bx bx-x"></i> Batal
+                        </button>
+                        <button type="button" class="btn btn-primary" id="saveBapSettings">
+                            <i class="bx bx-save"></i> Simpan Pengaturan
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
 @endsection
 
 @push('js')
@@ -161,5 +208,79 @@
             // Submit form langsung untuk semua status
             form.submit();
         }
+
+        @if (auth()->user()->role === 'admin')
+        document.addEventListener('DOMContentLoaded', function() {
+            const saveBtn = document.getElementById('saveBapSettings');
+            const settingsModal = document.getElementById('bapSettingsModal');
+
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveBapSettings);
+            }
+
+            if (settingsModal) {
+                settingsModal.addEventListener('show.bs.modal', loadBapSettings);
+            }
+        });
+
+        function loadBapSettings() {
+            fetch('{{ route('bap.settings') }}')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('bap_nama_penandatangan').value = data?.nama_penandatangan || '';
+                    document.getElementById('bap_jabatan_penandatangan').value =
+                        data?.jabatan_penandatangan || '{{ config('app.kanwil.bap_kanwil_jabatan') }}';
+                })
+                .catch(error => console.error('Error loading BA settings:', error));
+        }
+
+        function saveBapSettings() {
+            const nama = document.getElementById('bap_nama_penandatangan').value.trim();
+            const jabatan = document.getElementById('bap_jabatan_penandatangan').value.trim();
+
+            if (!nama || !jabatan) {
+                Swal.fire({
+                    title: 'Data belum lengkap',
+                    text: 'Nama pejabat dan jabatan harus diisi.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                return;
+            }
+
+            const formData = new FormData(document.getElementById('bapSettingsForm'));
+
+            fetch('{{ route('bap.settings.update') }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Berhasil',
+                            text: data.message,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            bootstrap.Modal.getInstance(document.getElementById('bapSettingsModal')).hide();
+                        });
+                    } else {
+                        throw new Error(data.message || 'Gagal menyimpan');
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        title: 'Gagal',
+                        text: error.message || 'Terjadi kesalahan saat menyimpan pengaturan.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
+        }
+        @endif
     </script>
 @endpush

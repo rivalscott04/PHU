@@ -5,22 +5,6 @@
     $inspection = $followup->finding?->inspection;
     $travel = $inspection?->travel;
     $status = $followup->status?->value ?? $followup->status;
-    $statusLabels = [
-        'SUBMITTED' => 'Diajukan',
-        'PENDING' => 'Menunggu',
-        'REVISION_REQUIRED' => 'Perlu Revisi',
-        'VERIFIED' => 'Terverifikasi',
-        'REJECTED' => 'Ditolak',
-        'CLOSED' => 'Selesai',
-    ];
-    $statusBadges = [
-        'SUBMITTED' => 'info',
-        'PENDING' => 'warning',
-        'REVISION_REQUIRED' => 'danger',
-        'VERIFIED' => 'success',
-        'REJECTED' => 'dark',
-        'CLOSED' => 'secondary',
-    ];
 @endphp
 
 <div class="container-fluid">
@@ -112,8 +96,8 @@
             <div class="card border-0 shadow-sm h-100">
                 <div class="card-body text-center d-flex flex-column justify-content-center">
                     <p class="text-muted text-uppercase mb-1" style="font-size:0.7rem; letter-spacing:0.05em;">Status</p>
-                    <span class="badge bg-{{ $statusBadges[$status] ?? 'secondary' }} fs-6 px-3 py-2 mb-3">
-                        {{ $statusLabels[$status] ?? $status }}
+                    <span class="badge bg-{{ \App\Enums\FollowupStatus::badgeFor($status) }} fs-6 px-3 py-2 mb-3">
+                        {{ \App\Enums\FollowupStatus::labelFor($status) }}
                     </span>
                     @if($followup->submitted_at)
                         <p class="text-muted small mb-0">Diajukan {{ $followup->submitted_at->format('d M Y, H:i') }}</p>
@@ -202,7 +186,7 @@
                             </div>
                         </div>
                         <div>
-                            <strong>{{ $statusLabels[$log->status] ?? $log->status }}</strong>
+                            <strong>{{ \App\Enums\FollowupStatus::labelFor($log->status) }}</strong>
                             <p class="mb-1 text-body-secondary">{{ $log->description }}</p>
                             <small class="text-muted">{{ optional($log->created_at)->format('d M Y, H:i') }}</small>
                         </div>

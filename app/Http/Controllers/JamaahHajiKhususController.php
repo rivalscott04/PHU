@@ -7,6 +7,8 @@ use App\Helpers\ValidationHelper;
 use App\Models\JamaahHajiKhusus;
 use App\Models\TravelCompany;
 use App\Exports\JamaahHajiKhususExport;
+use App\Support\ExportFilename;
+use App\Support\JamaahExportScope;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
@@ -107,7 +109,7 @@ class JamaahHajiKhususController extends Controller
 
         ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|digits:16',
+            'no_ktp' => ValidationHelper::nikRules(),
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -116,7 +118,7 @@ class JamaahHajiKhususController extends Controller
             'kecamatan' => 'required|string|max:255',
             'provinsi' => 'required|string|max:255',
             'kode_pos' => 'required|string|size:5',
-            'no_hp' => 'required|string|max:15|regex:/^08/',
+            'no_hp' => ValidationHelper::nomorHpRules(),
             'email' => 'nullable|email|max:255',
             'nama_ayah' => 'required|string|max:255',
             'pekerjaan' => 'required|string|max:255',
@@ -220,7 +222,7 @@ class JamaahHajiKhususController extends Controller
 
         ValidationHelper::validate($request, [
             'nama_lengkap' => 'required|string|max:255',
-            'no_ktp' => 'required|digits:16',
+            'no_ktp' => ValidationHelper::nikRules(),
             'tempat_lahir' => 'required|string|max:255',
             'tanggal_lahir' => 'required|date|before:today',
             'jenis_kelamin' => 'required|in:L,P',
@@ -229,7 +231,7 @@ class JamaahHajiKhususController extends Controller
             'kecamatan' => 'required|string|max:255',
             'provinsi' => 'required|string|max:255',
             'kode_pos' => 'required|string|size:5',
-            'no_hp' => 'required|string|max:15|regex:/^08/',
+            'no_hp' => ValidationHelper::nomorHpRules(),
             'email' => 'nullable|email|max:255',
             'nama_ayah' => 'required|string|max:255',
             'pekerjaan' => 'required|string|max:255',
@@ -343,77 +345,30 @@ class JamaahHajiKhususController extends Controller
      */
     public function export(Request $request)
     {
-        $format = $request->get('format', 'excel');
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
-        
-        if ($format === 'pdf') {
+        if ($request->get('format') === 'pdf') {
             return $this->exportPDF($request);
         }
-        
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = JamaahHajiKhusus::where('travel_id', $travelId)
-                                     ->with('travel')
-                                     ->get();
-            
-            if ($jamaah->isEmpty()) {
-                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk travel ini.');
-            }
-            
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.xlsx' : 'jamaah_haji_khusus_travel.xlsx';
-            
-            return Excel::download(new JamaahHajiKhususExport($jamaah, false), $filename);
-        } else {
-            // Export global with separators
-            $jamaah = JamaahHajiKhusus::with('travel')
-                                     ->get()
-                                     ->groupBy('travel_id');
-            
-            if ($jamaah->isEmpty()) {
-                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk diexport.');
-            }
-            
-            $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.xlsx';
-            
-            return Excel::download(new JamaahHajiKhususExport($jamaah, true), $filename);
+
+        $scope = JamaahExportScope::forHajiKhusus(Auth::user(), $request);
+        if ($scope['error']) {
+            return back()->with('error', $scope['error']);
         }
+
+        $filename = ExportFilename::jamaah('haji_khusus', $scope['isGlobal'], $scope['travel'], 'xlsx');
+
+        return Excel::download(new JamaahHajiKhususExport($scope['data'], $scope['isGlobal']), $filename);
     }
 
     public function exportPDF(Request $request)
     {
-        $type = $request->get('type', 'global');
-        $travelId = $request->get('travel_id');
-        
-        if ($type === 'travel' && $travelId) {
-            // Export specific travel
-            $jamaah = JamaahHajiKhusus::where('travel_id', $travelId)
-                                     ->with('travel')
-                                     ->get();
-            
-            if ($jamaah->isEmpty()) {
-                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk travel ini.');
-            }
-            
-            $travel = $jamaah->first()->travel ?? null;
-            $filename = $travel ? 'jamaah_haji_khusus_' . str_replace(' ', '_', $travel->Penyelenggara) . '.pdf' : 'jamaah_haji_khusus_travel.pdf';
-            
-            return $this->generatePDF($jamaah, false, 'haji-khusus', $filename);
-        } else {
-            // Export global with separators
-            $jamaah = JamaahHajiKhusus::with('travel')
-                                     ->get()
-                                     ->groupBy('travel_id');
-            
-            if ($jamaah->isEmpty()) {
-                return back()->with('error', 'Tidak ada data jamaah haji khusus untuk diexport.');
-            }
-            
-            $filename = 'jamaah_haji_khusus_global_' . now()->format('Y-m-d') . '.pdf';
-            
-            return $this->generatePDF($jamaah, true, 'haji-khusus', $filename);
+        $scope = JamaahExportScope::forHajiKhusus(Auth::user(), $request);
+        if ($scope['error']) {
+            return back()->with('error', $scope['error']);
         }
+
+        $filename = ExportFilename::jamaah('haji_khusus', $scope['isGlobal'], $scope['travel'], 'pdf');
+
+        return $this->generatePDF($scope['data'], $scope['isGlobal'], 'haji-khusus', $filename);
     }
 
     private function generatePDF($data, $isGlobal, $type, $filename)

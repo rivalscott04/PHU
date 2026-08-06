@@ -34,7 +34,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="nomor_hp" class="form-label">Nomor HP <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" 
-                                       id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" required>
+                                       id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" maxlength="16" inputmode="numeric" required>
                                 @error('nomor_hp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

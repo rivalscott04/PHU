@@ -24,7 +24,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="nomor_hp" class="form-label">Nomor HP</label>
                                 <input type="text" class="form-control" id="nomor_hp" name="nomor_hp"
-                                    value="{{ old('nomor_hp') }}" required>
+                                    value="{{ old('nomor_hp') }}" maxlength="16" inputmode="numeric" placeholder="08xxxxxxxxxx" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="password" class="form-label">Password</label>

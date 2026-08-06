@@ -88,7 +88,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="telepon" class="form-label">Telepon</label>
                                 <input type="text" class="form-control" id="telepon" name="telepon"
-                                    value="{{ old('telepon', $cabangTravel->telepon) }}" required>
+                                    value="{{ old('telepon', $cabangTravel->telepon) }}" maxlength="16" inputmode="numeric" required>
                                 @error('telepon')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror

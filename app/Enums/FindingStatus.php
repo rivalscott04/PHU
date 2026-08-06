@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\ProvidesLocalizedLabels;
+
 enum FindingStatus: string
 {
+    use ProvidesLocalizedLabels;
     case Open = 'OPEN';
     case WaitingResponse = 'WAITING_RESPONSE';
     case FollowupUploaded = 'FOLLOWUP_UPLOADED';

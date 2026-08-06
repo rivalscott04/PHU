@@ -2,19 +2,24 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\BapStatus;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use Carbon\Carbon;
 use App\Models\BAP;
+use App\Models\BapSetting;
 use App\Models\Jamaah;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Services\BapJamaahService;
 use App\Services\BapVerificationService;
+use App\Exports\BapExport;
+use App\Support\ExportFilename;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BAPController extends Controller
 {
@@ -209,13 +214,16 @@ class BAPController extends Controller
             }
         }
 
+        $kanwilSignatory = BapSetting::signatory();
+
         return view('travel.printBAP', compact(
             'data',
             'travelQrCodeData',
             'kanwilQrCodeData',
             'formattedDate',
             'formattedReturnDate',
-            'token'
+            'token',
+            'kanwilSignatory'
         ));
     }
 
@@ -374,6 +382,36 @@ class BAPController extends Controller
         return view('travel.listBAP', compact('data', 'jamaahCount'));
     }
 
+    public function export()
+    {
+        $user = auth()->user();
+
+        if (! $user) {
+            return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
+        }
+
+        $query = BAP::query()->latest();
+
+        if ($user->role === 'user') {
+            $query->where('user_id', $user->id)
+                ->where('kab_kota', $user->kabupaten);
+        } elseif ($user->role === 'kabupaten') {
+            KabupatenScopeFilter::applyOnColumn($query, KabupatenScopeFilter::filtersForUser($user), 'kab_kota');
+        } elseif ($user->role !== 'admin') {
+            abort(403);
+        }
+
+        $records = $query->get();
+
+        if ($records->isEmpty()) {
+            return back()->with('error', 'Tidak ada data BA Pemberangkatan untuk diunduh.');
+        }
+
+        $filename = ExportFilename::build('rekap_ba_pemberangkatan');
+
+        return Excel::download(new BapExport($records), $filename);
+    }
+
 
     public function simpan(Request $request)
     {
@@ -405,7 +443,7 @@ class BAPController extends Controller
 
         return redirect()
             ->route($nextRoute, $bap->id)
-            ->with('success', 'Draft berhasil diperbarui.');
+            ->with('success', 'Draf berhasil diperbarui.');
     }
 
     /**
@@ -605,7 +643,7 @@ class BAPController extends Controller
             $this->bapVerificationService->ensureKanwilToken($data->fresh());
         }
 
-        $message = 'Status berhasil diubah dari ' . ucfirst($oldStatus) . ' menjadi ' . ucfirst($request->status);
+        $message = 'Status berhasil diubah dari ' . BapStatus::labelFor($oldStatus) . ' menjadi ' . BapStatus::labelFor($request->status);
         if ($request->status === 'diterima') {
             $message .= ' dengan nomor surat: ' . $data->nomor_surat;
         }
@@ -730,13 +768,15 @@ class BAPController extends Controller
 
     private function verifyBAPData($qrData)
     {
+        $signatory = BapSetting::signatory();
+
                         // Verifikasi data BAP
                 $verificationResult = [
                     'jenis_dokumen' => 'BA Pemberangkatan',
                     'nomor_surat' => $qrData['nomor_surat'] ?? 'Tidak ditemukan',
                     'nama_travel' => $qrData['nama_travel'] ?? 'Tidak ditemukan',
-                    'nama_petugas' => $qrData['nama_petugas'] ?? 'Bidang PHU Kanwil NTB',
-                    'jabatan_petugas' => $qrData['jabatan_petugas'] ?? 'Verifikator',
+                    'nama_petugas' => $qrData['nama_petugas'] ?? ($signatory->nama ?: $signatory->jabatan),
+                    'jabatan_petugas' => $qrData['jabatan_petugas'] ?? $signatory->jabatan,
                     'tanggal_dibuat' => $qrData['tanggal_dibuat'] ?? 'Tidak ditemukan',
                     'status_dokumen' => $qrData['status_dokumen'] ?? 'Tidak ditemukan',
                     'token' => $qrData['token'] ?? 'Tidak ditemukan'
@@ -824,12 +864,14 @@ class BAPController extends Controller
             ]);
         }
 
+        $signatory = BapSetting::signatory();
+
         $verificationResult = [
             'jenis_dokumen' => 'BA Pemberangkatan',
             'nomor_surat' => $foundBap->nomor_surat,
             'nama_travel' => $foundBap->ppiuname,
-            'nama_petugas' => 'Bidang PHU Kanwil NTB',
-            'jabatan_petugas' => 'Verifikator',
+            'nama_petugas' => $signatory->nama ?: $signatory->jabatan,
+            'jabatan_petugas' => $signatory->jabatan,
             'tanggal_dibuat' => $foundBap->created_at->format('Y-m-d H:i:s'),
             'status_dokumen' => $foundBap->status,
             'token' => $token,
@@ -853,6 +895,33 @@ class BAPController extends Controller
         $combined = $this->bapVerificationService->combinedToken($bap);
 
         return $combined !== null && hash_equals($combined, $token);
+    }
+
+    public function getSettings()
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        return response()->json(BapSetting::first());
+    }
+
+    public function updateSettings(Request $request)
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        ValidationHelper::validate($request, [
+            'nama_penandatangan' => 'required|string|max:255',
+            'jabatan_penandatangan' => 'required|string|max:255',
+        ]);
+
+        $settings = BapSetting::first() ?? new BapSetting();
+        $settings->nama_penandatangan = $request->nama_penandatangan;
+        $settings->jabatan_penandatangan = $request->jabatan_penandatangan;
+        $settings->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pengaturan penandatangan BA berhasil disimpan',
+        ]);
     }
 
     public function showVerifyQR(Request $request)

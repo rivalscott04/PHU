@@ -29,7 +29,7 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="nik" class="form-label">NIK @include('partials.required-star')</label>
-                                <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik') }}" required>
+                                <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik" name="nik" value="{{ old('nik') }}" maxlength="16" inputmode="numeric" required>
                                 @error('nik')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -50,7 +50,7 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="nomor_hp" class="form-label">Nomor HP @include('partials.required-star')</label>
-                                <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" required>
+                                <input type="text" class="form-control @error('nomor_hp') is-invalid @enderror" id="nomor_hp" name="nomor_hp" value="{{ old('nomor_hp') }}" maxlength="16" inputmode="numeric" placeholder="08xxxxxxxxxx" required>
                                 @error('nomor_hp')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

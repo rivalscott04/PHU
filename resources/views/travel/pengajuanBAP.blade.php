@@ -17,7 +17,7 @@
             <div class="card">
                 <div class="card-header ps-0 d-flex flex-wrap justify-content-between align-items-start gap-2">
                     <div>
-                        <h5 class="mb-0">{{ $editing ? 'Ubah Draft BA Pemberangkatan' : 'Form BA Pemberangkatan' }}</h5>
+                        <h5 class="mb-0">{{ $editing ? 'Ubah Draf BA Pemberangkatan' : 'Form BA Pemberangkatan' }}</h5>
                         <small class="text-muted d-block">Langkah 1 dari 3 — isi data keberangkatan jamaah.</small>
                     </div>
                     @if ($editing)

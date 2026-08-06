@@ -80,7 +80,7 @@
                                         <div class="fw-medium">{{ $item['name'] }}</div>
                                         <small class="text-muted">{{ $item['kabupaten'] }} · {{ $item['created_at'] }}</small>
                                     </div>
-                                    <span class="badge bg-warning text-dark">Pending</span>
+                                    <span class="badge bg-warning text-dark">Menunggu</span>
                                 </div>
                             </a>
                         @endforeach
@@ -134,7 +134,7 @@
             <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">Travel Risiko Tinggi</h5>
-                    <small class="text-muted">PPIU berstatus HIGH atau CRITICAL</small>
+                    <small class="text-muted">PPIU berstatus Tinggi atau Kritis</small>
                 </div>
                 @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.risk.index'))
                     <a href="{{ route('v2.risk.index') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>

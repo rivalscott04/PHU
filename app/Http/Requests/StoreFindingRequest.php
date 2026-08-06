@@ -15,6 +15,13 @@ class StoreFindingRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('deadline') && $this->input('deadline') === '') {
+            $this->merge(['deadline' => null]);
+        }
+    }
+
     public function rules(): array
     {
         return [
@@ -24,6 +31,14 @@ class StoreFindingRequest extends FormRequest
             'description' => ['required', 'string', 'max:5000'],
             'recommendation' => ['required', 'string', 'max:5000'],
             'deadline' => ['nullable', 'date', 'after_or_equal:today'],
+        ];
+    }
+
+    /** @return array<string, string> */
+    protected function friendlyValidationOverrides(): array
+    {
+        return [
+            'deadline.after_or_equal' => 'Deadline temuan tidak boleh sebelum hari ini.',
         ];
     }
 }

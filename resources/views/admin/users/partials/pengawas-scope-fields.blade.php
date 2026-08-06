@@ -84,12 +84,21 @@
                     allInfo.style.display = mode === 'all' ? 'block' : 'none';
                     if (singleSelect) {
                         singleSelect.required = scopeFieldsVisible && mode === 'single';
+                        singleSelect.disabled = !scopeFieldsVisible || mode !== 'single';
                     }
+
+                    document.querySelectorAll('input[name="pengawas_kabupatens[]"]').forEach((input) => {
+                        input.disabled = !scopeFieldsVisible || mode !== 'custom';
+                    });
 
                     const firstRadio = document.querySelector('.pengawas-scope-mode');
                     if (firstRadio) {
                         firstRadio.required = scopeFieldsVisible;
                     }
+
+                    document.querySelectorAll('.pengawas-scope-mode').forEach((input) => {
+                        input.disabled = !scopeFieldsVisible;
+                    });
                 }
 
                 document.querySelectorAll('.pengawas-scope-mode').forEach((input) => {

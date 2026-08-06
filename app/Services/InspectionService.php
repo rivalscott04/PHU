@@ -144,6 +144,14 @@ class InspectionService
 
     public function createFinding(Inspection $inspection, array $data): \App\Models\InspectionFinding
     {
+        $status = $inspection->status instanceof InspectionStatus
+            ? $inspection->status->value
+            : (string) $inspection->status;
+
+        if (in_array($status, [InspectionStatus::Closed->value, InspectionStatus::Cancelled->value], true)) {
+            throw new InvalidArgumentException('Temuan tidak dapat ditambahkan pada pengawasan yang sudah ditutup atau dibatalkan.');
+        }
+
         return DB::transaction(function () use ($inspection, $data) {
             $finding = $this->inspectionRepository->createFinding([
                 ...$data,

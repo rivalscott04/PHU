@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\ProvidesLocalizedLabels;
+
 enum WorkQueueStatus: string
 {
+    use ProvidesLocalizedLabels;
     case Open = 'open';
     case InProgress = 'in_progress';
     case Resolved = 'resolved';

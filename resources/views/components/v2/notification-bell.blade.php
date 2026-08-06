@@ -1,8 +1,10 @@
 @auth
 @if(\Illuminate\Support\Facades\Schema::hasTable('notifications'))
 @php
-    $recentNotifications = auth()->user()->unreadNotifications()->latest()->take(5)->get();
-    $unreadCount = auth()->user()->unreadNotifications()->count();
+    $notificationUser = auth()->user();
+    $notificationUser->loadCount('unreadNotifications');
+    $recentNotifications = $notificationUser->unreadNotifications()->latest()->take(5)->get();
+    $unreadCount = (int) $notificationUser->unread_notifications_count;
     $reverbEnabled = config('broadcasting.default') === 'reverb' && config('broadcasting.connections.reverb.key');
 @endphp
 <div class="dropdown d-inline-block">
@@ -63,9 +65,9 @@ window.__PHU_REVERB__ = {
     userId: {{ auth()->id() }},
     indexUrl: @json(route('v2.notifications.index')),
     key: @json(config('broadcasting.connections.reverb.key')),
-    host: @json(config('broadcasting.connections.reverb.options.host')),
-    port: {{ (int) config('broadcasting.connections.reverb.options.port', 8080) }},
-    scheme: @json(config('broadcasting.connections.reverb.options.scheme', 'http')),
+    host: @json(config('broadcasting.connections.reverb.client.host')),
+    port: {{ (int) config('broadcasting.connections.reverb.client.port', 8080) }},
+    scheme: @json(config('broadcasting.connections.reverb.client.scheme', 'http')),
     authEndpoint: @json(url('/broadcasting/auth')),
     csrfToken: @json(csrf_token()),
 };

@@ -42,10 +42,10 @@
                                 <td>{{ $inspection->inspection_no }}</td>
                                 <td>{{ $inspection->travel?->Penyelenggara }}</td>
                                 <td>{{ $inspection->inspection_date?->format('d/m/Y') }}</td>
-                                <td>{{ $inspection->inspection_type?->label() ?? $inspection->inspection_type }}</td>
+                                <td>{{ $inspection->inspection_type?->label() ?? \App\Enums\InspectionType::labelFor($inspection->inspection_type) }}</td>
                                 <td>
-                                    <span class="badge bg-{{ $inspection->status?->badgeColor() ?? 'secondary' }}">
-                                        {{ $inspection->status?->label() ?? $inspection->status }}
+                                    <span class="badge bg-{{ $inspection->status?->badgeColor() ?? \App\Enums\InspectionStatus::badgeFor($inspection->status) }}">
+                                        {{ $inspection->status?->label() ?? \App\Enums\InspectionStatus::labelFor($inspection->status) }}
                                     </span>
                                 </td>
                                 <td><a href="{{ route('v2.pengawasan.show', $inspection) }}" class="btn btn-sm btn-outline-primary">Detail</a></td>

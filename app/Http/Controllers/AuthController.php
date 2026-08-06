@@ -43,7 +43,7 @@ class AuthController extends Controller
         $validator = ValidationHelper::makeValidator($request->all(), [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users',
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
         ]);

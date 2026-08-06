@@ -11,6 +11,7 @@ use App\Http\Requests\UpdateInspectionRequest;
 use App\Models\Inspection;
 use App\Models\TravelCompany;
 use App\Services\InspectionService;
+use App\Support\NtbKabupatenMap;
 use Illuminate\Http\Request;
 
 class InspectionController extends Controller
@@ -121,11 +122,18 @@ class InspectionController extends Controller
     {
         $this->authorize('update', $pengawasan);
 
-        $finding = $this->inspectionService->createFinding($pengawasan, $request->validated());
+        try {
+            $finding = $this->inspectionService->createFinding($pengawasan, $request->validated());
+        } catch (\InvalidArgumentException $e) {
+            return $request->expectsJson()
+                ? $this->jsonError($e->getMessage(), 422)
+                : back()->withInput()->withErrors(['temuan' => $e->getMessage()]);
+        }
 
         return $request->expectsJson()
             ? $this->jsonSuccess($finding, 'Temuan berhasil ditambahkan.', 201)
-            : back()->with('success', 'Temuan berhasil ditambahkan.');
+            : redirect()->route('v2.pengawasan.show', $pengawasan)
+                ->with('success', 'Temuan berhasil ditambahkan.');
     }
 
     public function updateChecklists(UpdateInspectionChecklistsRequest $request, Inspection $pengawasan)
@@ -172,7 +180,10 @@ class InspectionController extends Controller
                 return TravelCompany::orderBy('Penyelenggara')->get();
             }
 
-            return TravelCompany::whereIn('kab_kota', $scoped)->orderBy('Penyelenggara')->get();
+            return TravelCompany::whereIn(
+                'kab_kota',
+                NtbKabupatenMap::expandKabupatenList($scoped)
+            )->orderBy('Penyelenggara')->get();
         }
 
         return collect();

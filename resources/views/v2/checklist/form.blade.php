@@ -31,30 +31,33 @@
                     @endif
                     <div class="col-12 mb-3">
                         <label class="form-label">Judul @include('partials.required-star')</label>
-                        <input type="text" name="title" class="form-control" value="{{ old('title', $checklist->title ?? '') }}" required>
+                        <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title', $checklist?->title ?? '') }}" required>
+                        @error('title')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Kategori @include('partials.required-star')</label>
-                        <select name="category_id" class="form-select" required>
+                        <select name="category_id" class="form-select @error('category_id') is-invalid @enderror" required>
                             @foreach ($categories as $category)
-                                <option value="{{ $category->id }}" @selected(old('category_id', $checklist->category_id ?? '') == $category->id)>{{ $category->name }}</option>
+                                <option value="{{ $category->id }}" @selected(old('category_id', $checklist?->category_id ?? '') == $category->id)>{{ $category->name }}</option>
                             @endforeach
                         </select>
+                        @error('category_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Jenis Pertanyaan @include('partials.required-star')</label>
-                        <select name="input_type" class="form-select" required id="input-type-select">
+                        <select name="input_type" class="form-select @error('input_type') is-invalid @enderror" required id="input-type-select">
                             @foreach (ChecklistInputType::cases() as $type)
-                                <option value="{{ $type->value }}" @selected(old('input_type', $checklist->input_type?->value ?? ChecklistInputType::Boolean->value) === $type->value)>{{ $type->label() }}</option>
+                                <option value="{{ $type->value }}" @selected(old('input_type', $checklist?->input_type?->value ?? ChecklistInputType::Boolean->value) === $type->value)>{{ $type->label() }}</option>
                             @endforeach
                         </select>
                         <div class="form-text" id="input-type-hint">
-                            {{ ChecklistInputType::from(old('input_type', $checklist->input_type?->value ?? ChecklistInputType::Boolean->value))->hint() }}
+                            {{ ChecklistInputType::from(old('input_type', $checklist?->input_type?->value ?? ChecklistInputType::Boolean->value))->hint() }}
                         </div>
+                        @error('input_type')<div class="invalid-feedback d-block">{{ $message }}</div>@enderror
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="form-label">Bobot @include('partials.required-star')</label>
-                        <input type="number" name="weight" class="form-control" value="{{ old('weight', $checklist->weight ?? 1) }}" min="1" max="100" required>
+                        <input type="number" name="weight" class="form-control @error('weight') is-invalid @enderror" value="{{ old('weight', $checklist?->weight ?? 1) }}" min="1" max="100" required>
                         <div class="form-text">Semakin besar bobot, semakin berpengaruh ke skor kepatuhan.</div>
                     </div>
                 </div>

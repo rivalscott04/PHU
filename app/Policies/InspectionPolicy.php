@@ -38,9 +38,17 @@ class InspectionPolicy
         }
 
         if ($user->role === 'pengawas') {
-            return $user->canAccessKabupaten($inspection->travel?->kab_kota);
+            return $user->canAccessKabupaten($inspection->travel?->kab_kota)
+                && ! $this->isLocked($inspection);
         }
 
         return false;
+    }
+
+    private function isLocked(Inspection $inspection): bool
+    {
+        $status = $inspection->status?->value ?? (string) $inspection->status;
+
+        return in_array($status, ['CLOSED', 'CANCELLED'], true);
     }
 }

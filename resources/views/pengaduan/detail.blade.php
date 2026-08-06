@@ -61,7 +61,7 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Status</label>
-                            <input type="text" class="form-control" value="{{ $pengaduan->status }}" readonly>
+                            <input type="text" class="form-control" value="{{ $pengaduan->getStatusLabel() }}" readonly>
                         </div>
                     </div>
 

@@ -158,7 +158,17 @@ class User extends Authenticatable
 
         $scoped = $this->getScopedKabupatens();
 
-        return $scoped === null || in_array($kabupaten, $scoped, true);
+        if ($scoped === null) {
+            return true;
+        }
+
+        foreach ($scoped as $scopedKabupaten) {
+            if (NtbKabupatenMap::matches($scopedKabupaten, $kabupaten)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getWilayahKerjaLabel(): string

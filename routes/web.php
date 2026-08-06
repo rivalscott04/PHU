@@ -151,6 +151,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::put('/pengajuan/{id}/status', [KanwilController::class, 'updateStatus'])->name('update.status');
 
     Route::get('/bap', [BAPController::class, 'index'])->name('bap');
+    Route::get('/bap/export', [BAPController::class, 'export'])->name('bap.export');
     Route::get('/form-bap', [BAPController::class, 'showFormBAP'])->name('form.bap');
     Route::get('/form-bap/{id}/edit', [BAPController::class, 'editFormBAP'])->name('form.bap.edit');
     Route::get('/form-bap/{id}/upload', [BAPController::class, 'showWizardUpload'])->name('bap.wizard.upload');
@@ -164,6 +165,8 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/upload/{id}', [BAPController::class, 'uploadPDF'])->name('bap.upload');
     Route::post('bap/ajukan/{id}', [BAPController::class, 'ajukan'])->name('bap.ajukan');
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
+    Route::get('/bap/settings', [BAPController::class, 'getSettings'])->name('bap.settings');
+    Route::post('/bap/settings', [BAPController::class, 'updateSettings'])->name('bap.settings.update');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');

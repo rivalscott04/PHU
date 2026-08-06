@@ -307,12 +307,15 @@
         <div class="sheet-bottom">
             <div class="signatures">
                 <div class="signature">
-                    Petugas Satgas Umrah<br>
+                    {{ $kanwilSignatory->jabatan }}<br>
                     Kanwil Kemenhaj Provinsi NTB
                     @if ($data->status === 'diterima' && $kanwilQrCodeData)
                         <img src="{{ $kanwilQrCodeData }}" alt="QR Code Verifikasi Kanwil">
                     @else
                         <span class="signature-space"></span>
+                    @endif
+                    @if ($kanwilSignatory->nama)
+                        <br>{{ $kanwilSignatory->nama }}
                     @endif
                 </div>
                 <div class="signature">

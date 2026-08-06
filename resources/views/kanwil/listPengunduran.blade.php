@@ -52,13 +52,9 @@
                                     </td>
                                     <td>{{ $item->created_at->format('d/m/Y') }}</td>
                                     <td>
-                                        @if ($item->status == 'pending')
-                                            <span class="badge bg-warning text-dark">Pending</span>
-                                        @elseif($item->status == 'approved')
-                                            <span class="badge bg-success">Disetujui</span>
-                                        @elseif($item->status == 'rejected')
-                                            <span class="badge bg-danger">Ditolak</span>
-                                        @endif
+                                        <span class="badge bg-{{ \App\Enums\PengunduranStatus::badgeFor($item->status) }}">
+                                            {{ \App\Enums\PengunduranStatus::labelFor($item->status) }}
+                                        </span>
                                     </td>
                                     <td>
                                         @if (in_array(auth()->user()->role, ['admin', 'kabupaten']) && $item->status === 'pending')

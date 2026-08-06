@@ -62,10 +62,7 @@ class RiskCalculationService
         $count = 0;
 
         TravelCompany::query()->select('id')->chunkById(50, function ($travels) use (&$count) {
-            foreach ($travels as $travel) {
-                $this->recalculateForTravel($travel->id, logAudit: false);
-                $count++;
-            }
+            $count += $this->recalculateChunk($travels->pluck('id')->all());
         });
 
         if ($logAudit) {
@@ -79,6 +76,77 @@ class RiskCalculationService
         $this->clearDashboardCache();
 
         return $count;
+    }
+
+    /**
+     * @param  list<int>  $travelIds
+     */
+    private function recalculateChunk(array $travelIds): int
+    {
+        if ($travelIds === []) {
+            return 0;
+        }
+
+        $batch = $this->preloadBatchContext($travelIds);
+        $now = now();
+        $rows = [];
+        $upsertedTravelIds = [];
+
+        foreach ($travelIds as $travelId) {
+            $context = $this->contextFromBatch($travelId, $batch);
+
+            if ($context['travel'] === null) {
+                continue;
+            }
+
+            $scores = $this->calculateAllScores($context);
+            $total = min(100, array_sum($scores));
+
+            $rows[] = [
+                'travel_id' => $travelId,
+                'complaint_score' => $scores['complaint_score'],
+                'inspection_score' => $scores['inspection_score'],
+                'followup_score' => $scores['followup_score'],
+                'certificate_score' => $scores['certificate_score'],
+                'bap_score' => $scores['bap_score'],
+                'activity_score' => $scores['activity_score'],
+                'total_score' => $total,
+                'risk_level' => $this->resolveRiskLevel($total),
+                'last_calculated_at' => $now,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+            $upsertedTravelIds[] = $travelId;
+        }
+
+        if ($rows === []) {
+            return 0;
+        }
+
+        RiskScore::query()->upsert(
+            $rows,
+            ['travel_id'],
+            [
+                'complaint_score',
+                'inspection_score',
+                'followup_score',
+                'certificate_score',
+                'bap_score',
+                'activity_score',
+                'total_score',
+                'risk_level',
+                'last_calculated_at',
+                'updated_at',
+            ]
+        );
+
+        RiskScore::query()
+            ->with('travel')
+            ->whereIn('travel_id', $upsertedTravelIds)
+            ->get()
+            ->each(fn (RiskScore $riskScore) => $this->workQueueService->handleRiskScoreUpdated($riskScore));
+
+        return count($upsertedTravelIds);
     }
 
     /** @return array<string, mixed> */
@@ -113,53 +181,221 @@ class RiskCalculationService
      * @return array{
      *     travel: ?TravelCompany,
      *     user_ids: Collection<int, int>,
-     *     findings: Collection<int, InspectionFinding>
+     *     findings: Collection<int, InspectionFinding>,
+     *     complaint_count?: int,
+     *     oldest_pending_bap?: mixed,
+     *     has_expired_cert?: bool,
+     *     has_recent_bap?: bool,
+     *     has_recent_jamaah?: bool
      * }
      */
     private function loadTravelContext(int $travelId): array
     {
-        $travel = TravelCompany::find($travelId);
-        $userIds = User::where('travel_id', $travelId)->pluck('id');
+        $batch = $this->preloadBatchContext([$travelId]);
 
-        $findings = collect();
+        return $this->contextFromBatch($travelId, $batch);
+    }
+
+    /**
+     * @param  list<int>  $travelIds
+     * @return array{
+     *     travels: Collection<int, TravelCompany>,
+     *     user_ids_by_travel: Collection<int, Collection<int, int>>,
+     *     findings_by_travel: Collection<int, Collection<int, InspectionFinding>>,
+     *     complaint_counts: Collection<int, int>,
+     *     oldest_pending_bap_by_travel: array<int, mixed>,
+     *     expired_cert_travel_ids: array<int, true>,
+     *     recent_bap_travel_ids: array<int, true>,
+     *     recent_jamaah_travel_ids: array<int, true>
+     * }
+     */
+    private function preloadBatchContext(array $travelIds): array
+    {
+        $travels = TravelCompany::query()
+            ->whereIn('id', $travelIds)
+            ->get(['id', 'Penyelenggara', 'kab_kota', 'license_expiry'])
+            ->keyBy('id');
+
+        $userIdsByTravel = User::query()
+            ->whereIn('travel_id', $travelIds)
+            ->get(['id', 'travel_id'])
+            ->groupBy('travel_id')
+            ->map(fn (Collection $users) => $users->pluck('id'));
+
+        $userToTravel = [];
+        foreach ($userIdsByTravel as $travelId => $userIds) {
+            foreach ($userIds as $userId) {
+                $userToTravel[$userId] = (int) $travelId;
+            }
+        }
+
+        $findingsByTravel = collect();
         if (Schema::hasTable('pengawasan_temuan') && Schema::hasTable('pengawasan')) {
-            $findings = InspectionFinding::query()
+            $findingsByTravel = InspectionFinding::query()
                 ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
-                ->where('pengawasan.travel_id', $travelId)
+                ->whereIn('pengawasan.travel_id', $travelIds)
                 ->whereNotIn('pengawasan_temuan.status', ['CLOSED', 'VERIFIED'])
-                ->select('pengawasan_temuan.*')
-                ->get();
+                ->select('pengawasan_temuan.*', 'pengawasan.travel_id')
+                ->get()
+                ->groupBy('travel_id');
+        }
+
+        $complaintCounts = collect();
+        if (Schema::hasTable('pengaduan')) {
+            $complaintCounts = Pengaduan::query()
+                ->whereIn('travels_id', $travelIds)
+                ->selectRaw('travels_id, COUNT(*) as total')
+                ->groupBy('travels_id')
+                ->pluck('total', 'travels_id')
+                ->map(fn ($count) => (int) $count);
+        }
+
+        $oldestPendingBapByTravel = [];
+        if (Schema::hasTable('bap') && $userToTravel !== []) {
+            $oldestByUser = BAP::query()
+                ->whereIn('user_id', array_keys($userToTravel))
+                ->where('status', 'pending')
+                ->selectRaw('user_id, MIN(created_at) as oldest')
+                ->groupBy('user_id')
+                ->pluck('oldest', 'user_id');
+
+            foreach ($oldestByUser as $userId => $oldest) {
+                $travelId = $userToTravel[$userId];
+                if (
+                    ! isset($oldestPendingBapByTravel[$travelId])
+                    || $oldest < $oldestPendingBapByTravel[$travelId]
+                ) {
+                    $oldestPendingBapByTravel[$travelId] = $oldest;
+                }
+            }
+        }
+
+        $expiredCertTravelIds = [];
+        if (Schema::hasTable('sertifikat')) {
+            $expiredCertTravelIds = array_fill_keys(
+                Sertifikat::query()
+                    ->whereIn('travel_id', $travelIds)
+                    ->whereIn('status', ['expired', 'revoked'])
+                    ->distinct()
+                    ->pluck('travel_id')
+                    ->all(),
+                true,
+            );
+        }
+
+        $recentBapTravelIds = [];
+        if (Schema::hasTable('bap') && $userToTravel !== []) {
+            $recentUserIds = BAP::query()
+                ->whereIn('user_id', array_keys($userToTravel))
+                ->where('created_at', '>=', now()->subMonths(6))
+                ->distinct()
+                ->pluck('user_id');
+
+            foreach ($recentUserIds as $userId) {
+                $travelId = $userToTravel[$userId] ?? null;
+                if ($travelId !== null) {
+                    $recentBapTravelIds[$travelId] = true;
+                }
+            }
+        }
+
+        $recentJamaahTravelIds = [];
+        if (Schema::hasTable('jamaah')) {
+            $recentJamaahTravelIds = array_fill_keys(
+                Jamaah::query()
+                    ->whereIn('travel_id', $travelIds)
+                    ->where('created_at', '>=', now()->subYear())
+                    ->distinct()
+                    ->pluck('travel_id')
+                    ->all(),
+                true,
+            );
         }
 
         return [
-            'travel' => $travel,
-            'user_ids' => $userIds,
-            'findings' => $findings,
+            'travels' => $travels,
+            'user_ids_by_travel' => $userIdsByTravel,
+            'findings_by_travel' => $findingsByTravel,
+            'complaint_counts' => $complaintCounts,
+            'oldest_pending_bap_by_travel' => $oldestPendingBapByTravel,
+            'expired_cert_travel_ids' => $expiredCertTravelIds,
+            'recent_bap_travel_ids' => $recentBapTravelIds,
+            'recent_jamaah_travel_ids' => $recentJamaahTravelIds,
         ];
     }
 
-    /** @param  array{travel: ?TravelCompany, user_ids: Collection, findings: Collection}  $context
+    /**
+     * @param  array{
+     *     travels: Collection<int, TravelCompany>,
+     *     user_ids_by_travel: Collection<int, Collection<int, int>>,
+     *     findings_by_travel: Collection<int, Collection<int, InspectionFinding>>,
+     *     complaint_counts: Collection<int, int>,
+     *     oldest_pending_bap_by_travel: array<int, mixed>,
+     *     expired_cert_travel_ids: array<int, true>,
+     *     recent_bap_travel_ids: array<int, true>,
+     *     recent_jamaah_travel_ids: array<int, true>
+     * }  $batch
+     * @return array{
+     *     travel: ?TravelCompany,
+     *     user_ids: Collection<int, int>,
+     *     findings: Collection<int, InspectionFinding>,
+     *     complaint_count: int,
+     *     oldest_pending_bap: mixed,
+     *     has_expired_cert: bool,
+     *     has_recent_bap: bool,
+     *     has_recent_jamaah: bool
+     * }
+     */
+    private function contextFromBatch(int $travelId, array $batch): array
+    {
+        return [
+            'travel' => $batch['travels'][$travelId] ?? null,
+            'user_ids' => $batch['user_ids_by_travel']->get($travelId, collect()),
+            'findings' => $batch['findings_by_travel']->get($travelId, collect()),
+            'complaint_count' => (int) ($batch['complaint_counts'][$travelId] ?? 0),
+            'oldest_pending_bap' => $batch['oldest_pending_bap_by_travel'][$travelId] ?? null,
+            'has_expired_cert' => isset($batch['expired_cert_travel_ids'][$travelId]),
+            'has_recent_bap' => isset($batch['recent_bap_travel_ids'][$travelId]),
+            'has_recent_jamaah' => isset($batch['recent_jamaah_travel_ids'][$travelId]),
+        ];
+    }
+
+    /** @param  array{travel: ?TravelCompany, user_ids: Collection, findings: Collection, complaint_count?: int, oldest_pending_bap?: mixed, has_expired_cert?: bool, has_recent_bap?: bool, has_recent_jamaah?: bool}  $context
      * @return array<string, float>
      */
     private function calculateAllScores(array $context): array
     {
         return [
-            'complaint_score' => $this->calculateComplaintScore($context['travel']?->id ?? 0),
+            'complaint_score' => $this->calculateComplaintScore(
+                $context['travel']?->id ?? 0,
+                $context['complaint_count'] ?? null,
+            ),
             'inspection_score' => $this->calculateInspectionScore($context['findings']),
             'followup_score' => $this->calculateFollowupScore($context['findings']),
-            'bap_score' => $this->calculateBapScore($context['user_ids']),
-            'certificate_score' => $this->calculateCertificateScore($context['travel']),
-            'activity_score' => $this->calculateActivityScore($context['travel']?->id ?? 0, $context['user_ids']),
+            'bap_score' => $this->calculateBapScore(
+                $context['user_ids'],
+                $context['oldest_pending_bap'] ?? null,
+            ),
+            'certificate_score' => $this->calculateCertificateScore(
+                $context['travel'],
+                array_key_exists('has_expired_cert', $context) ? $context['has_expired_cert'] : null,
+            ),
+            'activity_score' => $this->calculateActivityScore(
+                $context['travel']?->id ?? 0,
+                $context['user_ids'],
+                array_key_exists('has_recent_bap', $context) ? $context['has_recent_bap'] : null,
+                array_key_exists('has_recent_jamaah', $context) ? $context['has_recent_jamaah'] : null,
+            ),
         ];
     }
 
-    private function calculateComplaintScore(int $travelId): float
+    private function calculateComplaintScore(int $travelId, ?int $preloadedCount = null): float
     {
         if (! Schema::hasTable('pengaduan') || $travelId === 0) {
             return 0;
         }
 
-        $count = Pengaduan::where('travels_id', $travelId)->count();
+        $count = $preloadedCount ?? Pengaduan::where('travels_id', $travelId)->count();
 
         return match (true) {
             $count === 0 => 0,
@@ -207,13 +443,13 @@ class RiskCalculationService
     }
 
     /** @param  Collection<int, int>  $userIds */
-    private function calculateBapScore(Collection $userIds): float
+    private function calculateBapScore(Collection $userIds, mixed $preloadedOldestPending = null): float
     {
         if (! Schema::hasTable('bap') || $userIds->isEmpty()) {
             return 0;
         }
 
-        $oldestPending = BAP::query()
+        $oldestPending = $preloadedOldestPending ?? BAP::query()
             ->whereIn('user_id', $userIds)
             ->where('status', 'pending')
             ->orderBy('created_at')
@@ -232,7 +468,7 @@ class RiskCalculationService
         };
     }
 
-    private function calculateCertificateScore(?TravelCompany $travel): float
+    private function calculateCertificateScore(?TravelCompany $travel, ?bool $preloadedHasExpired = null): float
     {
         if (! $travel) {
             return 0;
@@ -249,7 +485,7 @@ class RiskCalculationService
         }
 
         if (Schema::hasTable('sertifikat')) {
-            $hasExpired = Sertifikat::where('travel_id', $travel->id)
+            $hasExpired = $preloadedHasExpired ?? Sertifikat::where('travel_id', $travel->id)
                 ->whereIn('status', ['expired', 'revoked'])
                 ->exists();
 
@@ -262,8 +498,12 @@ class RiskCalculationService
     }
 
     /** @param  Collection<int, int>  $userIds */
-    private function calculateActivityScore(int $travelId, Collection $userIds): float
-    {
+    private function calculateActivityScore(
+        int $travelId,
+        Collection $userIds,
+        ?bool $preloadedHasRecentBap = null,
+        ?bool $preloadedHasRecentJamaah = null,
+    ): float {
         if ($travelId === 0) {
             return 0;
         }
@@ -271,7 +511,7 @@ class RiskCalculationService
         $score = 0;
 
         if (Schema::hasTable('bap') && $userIds->isNotEmpty()) {
-            $hasRecentBap = BAP::query()
+            $hasRecentBap = $preloadedHasRecentBap ?? BAP::query()
                 ->whereIn('user_id', $userIds)
                 ->where('created_at', '>=', now()->subMonths(6))
                 ->exists();
@@ -282,7 +522,7 @@ class RiskCalculationService
         }
 
         if (Schema::hasTable('jamaah')) {
-            $hasRecentJamaah = Jamaah::query()
+            $hasRecentJamaah = $preloadedHasRecentJamaah ?? Jamaah::query()
                 ->where('travel_id', $travelId)
                 ->where('created_at', '>=', now()->subYear())
                 ->exists();

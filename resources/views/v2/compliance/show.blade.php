@@ -2,22 +2,12 @@
 
 @section('content')
 @php
+    use App\Enums\RiskLevel;
+
     $risk = $statistics['risk_score'] ?? null;
     $riskLevel = $risk?->risk_level?->value ?? $risk?->risk_level ?? null;
-    $riskBadge = match ($riskLevel) {
-        'CRITICAL' => 'danger',
-        'HIGH' => 'warning',
-        'MEDIUM' => 'info',
-        'LOW' => 'success',
-        default => 'secondary',
-    };
-    $riskLabel = match ($riskLevel) {
-        'CRITICAL' => 'Kritis',
-        'HIGH' => 'Tinggi',
-        'MEDIUM' => 'Sedang',
-        'LOW' => 'Rendah',
-        default => 'Belum dihitung',
-    };
+    $riskBadge = RiskLevel::badgeFor($riskLevel);
+    $riskLabel = $riskLevel ? RiskLevel::labelFor($riskLevel) : 'Belum dihitung';
 
     $kpiCards = [
         ['key' => 'total_pengawasan', 'label' => 'Pengawasan', 'icon' => 'bx-search-alt', 'color' => '#556ee6'],
@@ -184,7 +174,7 @@
                                         $statusEnum = $item->status instanceof \App\Enums\InspectionStatus
                                             ? $item->status
                                             : \App\Enums\InspectionStatus::tryFrom((string) ($item->status?->value ?? $item->status));
-                                        $statusText = $statusEnum?->label() ?? ($item->status?->value ?? $item->status);
+                                        $statusText = $statusEnum?->label() ?? \App\Enums\InspectionStatus::labelFor($item->status);
                                         $statusColor = $statusEnum?->badgeColor() ?? 'secondary';
                                     @endphp
                                     <tr>

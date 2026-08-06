@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\ProvidesLocalizedLabels;
+
 enum InspectionType: string
 {
+    use ProvidesLocalizedLabels;
     case Routine = 'ROUTINE';
     case SpotCheck = 'SPOT_CHECK';
     case ComplaintBased = 'COMPLAINT_BASED';

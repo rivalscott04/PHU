@@ -73,7 +73,7 @@
                     @endforeach
                 </select>
                 <select name="status" class="form-select form-select-sm" style="min-width:160px;" onchange="this.form.submit()">
-                    <option value="">Aktif (Open + Proses)</option>
+                    <option value="">Aktif (Menunggu + Diproses)</option>
                     @foreach($statusOptions as $status)
                         <option value="{{ $status->value }}" @selected(($filters['status'] ?? '') === $status->value)>
                             {{ $status->label() }}

@@ -20,10 +20,16 @@
                         data-bs-target="#uploadModal">
                         <i class="bx bx-upload me-1"></i> Upload Excel
                     </button>
-                    <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
-                        data-bs-target="#exportModal">
-                        <i class="bx bx-export me-1"></i> Export Data
-                    </button>
+                    @if(in_array(auth()->user()->role, ['user', 'kabupaten'], true))
+                        @include('partials.export-dropdown', [
+                            'excelUrl' => route('jamaah.umrah.export', ['format' => 'excel']),
+                            'pdfUrl' => route('jamaah.umrah.export', ['format' => 'pdf']),
+                        ])
+                    @else
+                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exportModal">
+                            <i class="bx bx-export me-1"></i> Unduh Data
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -340,100 +346,15 @@
         </div>
     </div>
 
-    <!-- Export Modal -->
-    <div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exportModalLabel">Export Data Jamaah Umrah</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="row">
-                        <!-- Global Export -->
-                        <div class="col-md-6">
-                            <div class="card border-primary">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0 text-white"><i class="bx bx-globe me-2"></i>Export Global</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted small">Export semua data jamaah dari semua PPIU dalam satu file
-                                        dengan separator per PPIU.</p>
-                                    <div class="d-grid gap-2">
-                                        <button type="button" class="btn btn-outline-primary"
-                                            onclick="exportGlobal('excel')">
-                                            <i class="bx bx-file me-2"></i>Export Excel Global
-                                        </button>
-                                        <button type="button" class="btn btn-outline-success"
-                                            onclick="exportGlobal('pdf')">
-                                            <i class="bx bx-file-pdf me-2"></i>Export PDF Global
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Travel Specific Export -->
-                        <div class="col-md-6">
-                            <div class="card border-success">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0 text-white"><i class="bx bx-building me-2"></i>Export Per PPIU</h6>
-                                </div>
-                                <div class="card-body">
-                                    <p class="text-muted small">Export data jamaah dari PPIU tertentu saja.</p>
-                                    <div class="mb-3">
-                                        <label for="travelSelect" class="form-label">Pilih PPIU:</label>
-                                        <select class="form-select" id="travelSelect">
-                                            <option value="">Pilih PPIU...</option>
-                                            @if (auth()->user()->role === 'admin' && $groupedJamaah)
-                                                @foreach ($groupedJamaah as $travelId => $jamaahGroup)
-                                                    @php
-                                                        $travel = $jamaahGroup->first()->travel;
-                                                        $totalJamaah = $jamaahGroup->count();
-                                                    @endphp
-                                                    <option value="{{ $travelId }}"
-                                                        data-travel-name="{{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }}">
-                                                        {{ $travel->Penyelenggara ?? 'PPIU Tidak Diketahui' }}
-                                                        ({{ $totalJamaah }} Jamaah)
-                                                    </option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                    <div class="d-grid gap-2">
-                                        <button type="button" class="btn btn-outline-success"
-                                            onclick="exportByTravel('excel')" disabled id="exportTravelExcel">
-                                            <i class="bx bx-file me-2"></i>Export Excel PPIU
-                                        </button>
-                                        <button type="button" class="btn btn-outline-info"
-                                            onclick="exportByTravel('pdf')" disabled id="exportTravelPdf">
-                                            <i class="bx bx-file-pdf me-2"></i>Export PDF PPIU
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Export Summary -->
-                    <div class="row mt-3">
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <h6 class="alert-heading"><i class="bx bx-info-circle me-2"></i>Informasi Export</h6>
-                                <ul class="mb-0 small">
-                                    <li><strong>Format Excel:</strong> File .xlsx dengan multiple sheets</li>
-                                    <li><strong>Format PDF:</strong> File .pdf dengan header resmi Kementerian Haji</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    @if(auth()->user()->role === 'admin')
+        @include('partials.jamaah-export-modal', [
+            'modalId' => 'exportModal',
+            'title' => 'Unduh Data Jamaah Umrah',
+            'exportRoute' => 'jamaah.umrah.export',
+            'groupedData' => $groupedJamaah,
+            'orgLabel' => 'PPIU',
+        ])
+    @endif
 
     <style>
         /* Accordion Styles - Following Theme */
@@ -612,43 +533,9 @@
             });
         }
 
-        // Export jamaah data (legacy function for individual travel export)
         function exportJamaah(travelId) {
-            // Redirect to export route for specific travel
-            window.open(`/jamaah/umrah/export?travel_id=${travelId}`, '_blank');
+            window.open('/jamaah/umrah/export?format=excel&type=travel&travel_id=' + travelId, '_blank');
         }
-
-        // Global export function
-        function exportGlobal(format) {
-            const url = `/jamaah/umrah/export?format=${format}&type=global`;
-            window.open(url, '_blank');
-        }
-
-        // Export by travel function
-        function exportByTravel(format) {
-            const travelId = document.getElementById('travelSelect').value;
-            if (!travelId) {
-                Swal.fire({ title: 'Perhatian', text: 'Silakan pilih PPIU terlebih dahulu!', icon: 'warning', confirmButtonColor: '#556ee6' });
-                return;
-            }
-            const url = `/jamaah/umrah/export?format=${format}&type=travel&travel_id=${travelId}`;
-            window.open(url, '_blank');
-        }
-
-        // Enable/disable travel export buttons based on selection
-        document.addEventListener('DOMContentLoaded', function() {
-            const travelSelect = document.getElementById('travelSelect');
-            const exportTravelExcel = document.getElementById('exportTravelExcel');
-            const exportTravelPdf = document.getElementById('exportTravelPdf');
-
-            if (travelSelect) {
-                travelSelect.addEventListener('change', function() {
-                    const isSelected = this.value !== '';
-                    exportTravelExcel.disabled = !isSelected;
-                    exportTravelPdf.disabled = !isSelected;
-                });
-            }
-        });
 
         // Print jamaah data
         function printJamaah(accordionId) {

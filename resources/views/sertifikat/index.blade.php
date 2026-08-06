@@ -136,19 +136,29 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <p class="text-muted small">
+                        Data ini muncul di blok tanda tangan sertifikat PPIU. Kop surat memakai branding Kementerian Haji dan Umroh (bukan Kemenag).
+                    </p>
                     <form id="settingsForm">
                         @csrf
                         <div class="mb-3">
-                            <label for="nama_penandatangan" class="form-label">Nama Penandatangan *</label>
+                            <label for="nama_penandatangan" class="form-label">Nama Pejabat *</label>
                             <input type="text" class="form-control" id="nama_penandatangan" name="nama_penandatangan"
-                                required>
-                            <small class="form-text text-muted">Nama lengkap penandatangan sertifikat</small>
+                                required placeholder="Contoh: Dr. Ahmad Hidayat, M.Ag">
+                            <small class="form-text text-muted">Nama lengkap pejabat penandatangan sertifikat</small>
                         </div>
                         <div class="mb-3">
-                            <label for="nip_penandatangan" class="form-label">NIP Penandatangan *</label>
+                            <label for="nip_penandatangan" class="form-label">NIP Pejabat *</label>
                             <input type="text" class="form-control" id="nip_penandatangan" name="nip_penandatangan"
                                 required>
                             <small class="form-text text-muted">Nomor Induk Pegawai penandatangan</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jabatan_penandatangan" class="form-label">Jabatan *</label>
+                            <textarea class="form-control" id="jabatan_penandatangan" name="jabatan_penandatangan"
+                                rows="3" required
+                                placeholder="Contoh: Kepala Kantor Wilayah Kementerian Haji dan Umroh&#10;Provinsi Nusa Tenggara Barat">{{ config('app.kanwil.sertifikat_kanwil_jabatan') }}</textarea>
+                            <small class="form-text text-muted">Jabatan resmi yang tercetak di atas tanda tangan. Bisa lebih dari satu baris.</small>
                         </div>
                     </form>
                 </div>
@@ -188,29 +198,30 @@
         });
 
         function checkPenandatangan() {
-            // Check if penandatangan is set
-            fetch('/sertifikat/settings')
+            fetch('{{ route('sertifikat.settings') }}')
                 .then(response => response.json())
                 .then(data => {
-                    if (!data || !data.nama_penandatangan || data.nama_penandatangan.trim() === '') {
-                        // Show SweetAlert if penandatangan is not set
+                    const incomplete = !data
+                        || !data.nama_penandatangan?.trim()
+                        || !data.nip_penandatangan?.trim()
+                        || !data.jabatan_penandatangan?.trim();
+
+                    if (incomplete) {
                         Swal.fire({
-                            title: 'Nama Penandatangan Kosong!',
-                            text: 'Silahkan isi penandatangan terlebih dahulu sebelum membuat sertifikat.',
+                            title: 'Pengaturan Belum Lengkap',
+                            text: 'Isi nama pejabat, NIP, dan jabatan penandatangan terlebih dahulu sebelum membuat sertifikat.',
                             icon: 'warning',
                             showCancelButton: true,
                             confirmButtonColor: '#3085d6',
                             cancelButtonColor: '#6c757d',
-                            confirmButtonText: 'Isi Penandatangan',
+                            confirmButtonText: 'Isi Pengaturan',
                             cancelButtonText: 'Batal'
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                // Open settings modal
-                                $('#settingsModal').modal('show');
+                                bootstrap.Modal.getOrCreateInstance(document.getElementById('settingsModal')).show();
                             }
                         });
                     } else {
-                        // If penandatangan is set, proceed to create certificate
                         window.location.href = '{{ route("sertifikat.create") }}';
                     }
                 })
@@ -235,11 +246,13 @@
         }
 
         function loadSettings() {
-            fetch('/sertifikat/settings')
+            fetch('{{ route('sertifikat.settings') }}')
                 .then(response => response.json())
                 .then(data => {
-                    document.getElementById('nama_penandatangan').value = data.nama_penandatangan || '';
-                    document.getElementById('nip_penandatangan').value = data.nip_penandatangan || '';
+                    document.getElementById('nama_penandatangan').value = data?.nama_penandatangan || '';
+                    document.getElementById('nip_penandatangan').value = data?.nip_penandatangan || '';
+                    document.getElementById('jabatan_penandatangan').value =
+                        data?.jabatan_penandatangan || @json(config('app.kanwil.sertifikat_kanwil_jabatan'));
                 })
                 .catch(error => {
                     console.error('Error loading settings:', error);
@@ -247,13 +260,14 @@
         }
 
         function saveSettings() {
-            const namaPenandatangan = document.getElementById('nama_penandatangan').value;
-            const nipPenandatangan = document.getElementById('nip_penandatangan').value;
+            const namaPenandatangan = document.getElementById('nama_penandatangan').value.trim();
+            const nipPenandatangan = document.getElementById('nip_penandatangan').value.trim();
+            const jabatanPenandatangan = document.getElementById('jabatan_penandatangan').value.trim();
 
-            if (!namaPenandatangan || !nipPenandatangan) {
+            if (!namaPenandatangan || !nipPenandatangan || !jabatanPenandatangan) {
                 Swal.fire({
-                    title: 'Error!',
-                    text: 'Nama dan NIP penandatangan harus diisi',
+                    title: 'Data belum lengkap',
+                    text: 'Nama pejabat, NIP, dan jabatan harus diisi.',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
@@ -263,7 +277,7 @@
             const form = document.getElementById('settingsForm');
             const formData = new FormData(form);
 
-            fetch('/sertifikat/settings', {
+            fetch('{{ route('sertifikat.settings.update') }}', {
                     method: 'POST',
                     body: formData,
                     headers: {
@@ -279,7 +293,7 @@
                             icon: 'success',
                             confirmButtonText: 'OK'
                         }).then(() => {
-                            $('#settingsModal').modal('hide');
+                            bootstrap.Modal.getInstance(document.getElementById('settingsModal'))?.hide();
                         });
                     } else {
                         Swal.fire({

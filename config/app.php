@@ -67,7 +67,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Makassar',
 
     /*
     |--------------------------------------------------------------------------
@@ -156,6 +156,8 @@ return [
         'letterhead_ministry' => 'KEMENTERIAN HAJI DAN UMROH REPUBLIK INDONESIA',
         'letterhead_office' => 'KANTOR WILAYAH KEMENTERIAN HAJI DAN UMROH',
         'letterhead_province' => 'PROVINSI NUSA TENGGARA BARAT',
+        'bap_kanwil_jabatan' => 'Kepala Bidang Bina Haji',
+        'sertifikat_kanwil_jabatan' => 'Kepala Kantor Wilayah Kementerian Haji dan Umroh Provinsi Nusa Tenggara Barat',
     ],
 
 ];

@@ -2,8 +2,11 @@
 
 namespace App\Enums;
 
+use App\Enums\Concerns\ProvidesLocalizedLabels;
+
 enum TravelRegistrationStatus: string
 {
+    use ProvidesLocalizedLabels;
     case Pending = 'pending';
     case Approved = 'approved';
     case Rejected = 'rejected';
@@ -23,6 +26,15 @@ enum TravelRegistrationStatus: string
             self::Pending => 'bg-warning text-dark',
             self::Approved => 'bg-success',
             self::Rejected => 'bg-danger',
+        };
+    }
+
+    public function badgeColor(): string
+    {
+        return match ($this) {
+            self::Pending => 'warning',
+            self::Approved => 'success',
+            self::Rejected => 'danger',
         };
     }
 }

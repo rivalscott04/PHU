@@ -14,7 +14,12 @@ abstract class V2DatabaseNotification extends Notification
     {
         $channels = ['database'];
 
-        if (config('broadcasting.default') === 'reverb') {
+        // Only broadcast when Reverb is actually configured; empty key would
+        // still attempt a remote publish and can hang the HTTP request.
+        if (
+            config('broadcasting.default') === 'reverb'
+            && filled(config('broadcasting.connections.reverb.key'))
+        ) {
             $channels[] = 'broadcast';
         }
 

@@ -69,6 +69,18 @@ class NtbKabupatenMap
         return $values;
     }
 
+    /** @param  list<string>  $kabupatens
+     * @return list<string>
+     */
+    public static function expandKabupatenList(array $kabupatens): array
+    {
+        return collect($kabupatens)
+            ->flatMap(fn (string $kabupaten) => self::queryValues($kabupaten))
+            ->unique()
+            ->values()
+            ->all();
+    }
+
     /** @return array<string, array{lat: float, lng: float}> */
     public static function centroids(): array
     {

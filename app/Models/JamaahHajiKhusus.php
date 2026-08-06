@@ -115,7 +115,7 @@ class JamaahHajiKhusus extends Model
             case 'completed':
                 return 'Selesai';
             default:
-                return 'Unknown';
+                return 'Tidak Diketahui';
         }
     }
 
@@ -149,7 +149,7 @@ class JamaahHajiKhusus extends Model
             case 'rejected':
                 return 'Ditolak';
             default:
-                return 'Unknown';
+                return 'Tidak Diketahui';
         }
     }
 

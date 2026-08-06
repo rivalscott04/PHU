@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\BapStatus;
 use App\Models\BAP;
 
 final class BapWizardStatus
@@ -23,7 +24,7 @@ final class BapWizardStatus
             'diajukan' => ['label' => 'Menunggu Persetujuan', 'class' => 'bg-primary text-white'],
             'diproses' => ['label' => 'Sedang Ditinjau', 'class' => 'bg-warning text-dark'],
             'diterima' => ['label' => 'Disetujui', 'class' => 'bg-success text-white'],
-            default => ['label' => ucfirst($bap->status), 'class' => 'bg-secondary text-white'],
+            default => ['label' => BapStatus::labelFor($bap->status), 'class' => 'bg-secondary text-white'],
         };
     }
 
@@ -53,14 +54,14 @@ final class BapWizardStatus
         if ($bap->status === 'pending') {
             if (! $bap->pdf_file_path) {
                 return [
-                    'label' => 'Draft',
+                    'label' => 'Draf',
                     'class' => 'bg-secondary text-white',
                     'hint' => 'Data sudah disimpan. Lengkapi upload PDF melalui wizard pengajuan.',
                 ];
             }
 
             return [
-                'label' => 'Draft — Siap Diajukan',
+                'label' => 'Draf — Siap Diajukan',
                 'class' => 'bg-info text-dark',
                 'hint' => 'Data dan PDF sudah lengkap. Ajukan melalui wizard sebelum menunggu persetujuan.',
             ];
@@ -83,7 +84,7 @@ final class BapWizardStatus
                 'hint' => 'Keberangkatan disetujui. Anda dapat mencetak BA Pemberangkatan.',
             ],
             default => [
-                'label' => ucfirst($bap->status),
+                'label' => BapStatus::labelFor($bap->status),
                 'class' => 'bg-secondary text-white',
                 'hint' => '',
             ],
@@ -104,12 +105,6 @@ final class BapWizardStatus
 
     public static function approverStatusLabel(string $status): string
     {
-        return match ($status) {
-            'pending' => 'Draft',
-            'diajukan' => 'Diajukan',
-            'diproses' => 'Diproses',
-            'diterima' => 'Diterima',
-            default => ucfirst($status),
-        };
+        return BapStatus::labelFor($status);
     }
 }

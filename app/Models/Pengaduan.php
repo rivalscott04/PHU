@@ -67,13 +67,7 @@ class Pengaduan extends Model
      */
     public function getStatusBadgeClass()
     {
-        return match($this->status) {
-            'pending' => 'badge bg-warning',
-            'in_progress' => 'badge bg-info',
-            'completed' => 'badge bg-success',
-            'rejected' => 'badge bg-danger',
-            default => 'badge bg-secondary'
-        };
+        return 'badge bg-'.(\App\Enums\PengaduanStatus::badgeFor($this->status));
     }
 
     /**
@@ -81,12 +75,6 @@ class Pengaduan extends Model
      */
     public function getStatusLabel()
     {
-        return match($this->status) {
-            'pending' => 'Menunggu',
-            'in_progress' => 'Sedang Diproses',
-            'completed' => 'Selesai',
-            'rejected' => 'Ditolak',
-            default => 'Tidak Diketahui'
-        };
+        return \App\Enums\PengaduanStatus::labelFor($this->status);
     }
 }

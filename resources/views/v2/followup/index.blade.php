@@ -2,22 +2,6 @@
 
 @section('content')
 @php
-    $statusLabels = [
-        'SUBMITTED' => 'Diajukan',
-        'PENDING' => 'Menunggu',
-        'REVISION_REQUIRED' => 'Perlu Revisi',
-        'VERIFIED' => 'Terverifikasi',
-        'REJECTED' => 'Ditolak',
-        'CLOSED' => 'Selesai',
-    ];
-    $statusBadges = [
-        'SUBMITTED' => 'info',
-        'PENDING' => 'warning',
-        'REVISION_REQUIRED' => 'danger',
-        'VERIFIED' => 'success',
-        'REJECTED' => 'dark',
-        'CLOSED' => 'secondary',
-    ];
     $canVerify = in_array(auth()->user()->role, ['admin', 'pengawas'], true);
 @endphp
 
@@ -56,8 +40,8 @@
             <form method="GET" class="d-flex gap-2 align-items-center">
                 <select name="status" class="form-select form-select-sm" style="min-width:180px;" onchange="this.form.submit()">
                     <option value="">Semua Status</option>
-                    @foreach ($statusLabels as $value => $label)
-                        <option value="{{ $value }}" @selected(($filters['status'] ?? '') === $value)>{{ $label }}</option>
+                    @foreach (\App\Enums\FollowupStatus::cases() as $followupStatus)
+                        <option value="{{ $followupStatus->value }}" @selected(($filters['status'] ?? '') === $followupStatus->value)>{{ $followupStatus->label() }}</option>
                     @endforeach
                 </select>
             </form>
@@ -85,8 +69,8 @@
                                 <td class="text-muted">{{ $followup->finding?->inspection?->travel?->kab_kota }}</td>
                                 <td>{{ $followup->finding?->title }}</td>
                                 <td>
-                                    <span class="badge bg-{{ $statusBadges[$status] ?? 'secondary' }}">
-                                        {{ $statusLabels[$status] ?? $status }}
+                                    <span class="badge bg-{{ \App\Enums\FollowupStatus::badgeFor($status) }}">
+                                        {{ \App\Enums\FollowupStatus::labelFor($status) }}
                                     </span>
                                 </td>
                                 <td class="text-muted">{{ optional($followup->submitted_at)->format('d M Y, H:i') ?? 'Tidak ada' }}</td>

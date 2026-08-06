@@ -45,10 +45,14 @@ final class KabupatenScopeFilter
         }
 
         if (count($scoped) === 1) {
-            return ['kabupaten' => $scoped[0]];
+            $values = NtbKabupatenMap::queryValues($scoped[0]);
+
+            return count($values) === 1
+                ? ['kabupaten' => $values[0]]
+                : ['kabupatens' => $values];
         }
 
-        return ['kabupatens' => $scoped];
+        return ['kabupatens' => NtbKabupatenMap::expandKabupatenList($scoped)];
     }
 
     /** @return array<string, mixed> */

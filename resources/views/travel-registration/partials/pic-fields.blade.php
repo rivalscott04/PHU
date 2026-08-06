@@ -21,7 +21,7 @@
         <label for="pic_nomor_hp" class="form-label">Nomor HP (WhatsApp) @include('partials.required-star')</label>
         <input type="tel" class="form-control form-control-lg @error('pic_nomor_hp') is-invalid @enderror"
             id="pic_nomor_hp" name="pic_nomor_hp" value="{{ old('pic_nomor_hp') }}"
-            inputmode="numeric" pattern="08[0-9]{6,12}" minlength="8" maxlength="14"
+            inputmode="numeric" pattern="08[0-9]{6,14}" minlength="8" maxlength="16"
             placeholder="081234567890" autocomplete="tel" required>
         @error('pic_nomor_hp')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <div class="form-text">Angka saja, diawali 08. Bisa juga dipakai untuk login.</div>

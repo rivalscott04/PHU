@@ -146,6 +146,7 @@ class ValidationHelper
         'jenis_lokasi' => 'Jenis Lokasi',
         'nama_penandatangan' => 'Nama Penandatangan',
         'nip_penandatangan' => 'NIP Penandatangan',
+        'jabatan_penandatangan' => 'Jabatan Penandatangan',
         'pengawas_scope' => 'Cakupan Pengawas',
         'pengawas_kabupatens' => 'Kabupaten Pengawas',
         'username' => 'Nama Pengguna',
@@ -191,8 +192,8 @@ class ValidationHelper
         $messages = [];
 
         foreach ($fields as $field) {
-            $messages += self::defaultMessagesFor($field);
             $messages += self::contextualOverrides($field);
+            $messages += self::defaultMessagesFor($field);
         }
 
         return array_merge($messages, $overrides);
@@ -248,13 +249,42 @@ class ValidationHelper
         return (int) round($megabytes * 1024);
     }
 
-    /** @return list<string> */
-    public static function nomorHpRules(bool $uniqueInUsers = false): array
+    public const NIK_LENGTH = 16;
+
+    public const NOMOR_HP_MAX = 16;
+
+    /** 08 + 6..14 digit = total 8..16 karakter */
+    public const NOMOR_HP_REGEX = '/^08\d{6,14}$/';
+
+    /** @return list<string|\Illuminate\Validation\Rules\Unique> */
+    public static function nikRules(): array
     {
-        $rules = ['required', 'string', 'regex:/^08\d{6,12}$/'];
+        return ['required', 'digits:'.self::NIK_LENGTH];
+    }
+
+    /** @return list<string|\Illuminate\Validation\Rules\Unique> */
+    public static function nomorHpRules(bool $uniqueInUsers = false, ?int $ignoreUserId = null): array
+    {
+        $rules = ['required', 'string', 'max:'.self::NOMOR_HP_MAX, 'regex:'.self::NOMOR_HP_REGEX];
 
         if ($uniqueInUsers) {
-            $rules[] = 'unique:users,nomor_hp';
+            $unique = Rule::unique('users', 'nomor_hp');
+            if ($ignoreUserId !== null) {
+                $unique->ignore($ignoreUserId);
+            }
+            $rules[] = $unique;
+        }
+
+        return $rules;
+    }
+
+    /** @return list<string|\Illuminate\Validation\Rules\Unique> */
+    public static function teleponRules(bool $required = true): array
+    {
+        $rules = ['string', 'max:'.self::NOMOR_HP_MAX];
+
+        if ($required) {
+            array_unshift($rules, 'required');
         }
 
         return $rules;
@@ -273,7 +303,7 @@ class ValidationHelper
             'Pimpinan' => 'required|string|max:255',
             'alamat_kantor_lama' => 'required|string',
             'alamat_kantor_baru' => 'required|string',
-            'Telepon' => 'required|string|max:20',
+            'Telepon' => ValidationHelper::teleponRules(),
             'kab_kota' => ['required', 'string', Rule::in(NtbKabupatenMap::names())],
             'Status' => 'required|in:PPIU,PIHK',
         ];
@@ -349,22 +379,29 @@ class ValidationHelper
         }
 
         if (in_array($field, ['nomor_hp', 'pic_nomor_hp', 'no_hp'], true)) {
+            $max = self::NOMOR_HP_MAX;
+
             return [
-                "{$field}.regex" => 'Nomor HP harus angka, diawali 08, panjang 8 s.d. 14 digit. Contoh: 081234567890.',
+                "{$field}.regex" => "Nomor HP harus angka, diawali 08, panjang 8 s.d. {$max} digit. Contoh: 081234567890.",
+                "{$field}.max" => "Nomor HP terlalu panjang. Maksimal {$max} digit.",
             ];
         }
 
         if ($field === 'nik') {
+            $len = self::NIK_LENGTH;
+
             return [
-                'nik.digits' => 'NIK harus tepat 16 digit angka.',
+                'nik.digits' => "NIK harus tepat {$len} digit angka.",
                 'nik.unique' => 'NIK ini sudah terdaftar di travel Anda.',
             ];
         }
 
         if ($field === 'no_ktp') {
+            $len = self::NIK_LENGTH;
+
             return [
-                'no_ktp.digits' => 'NIK harus tepat 16 digit angka.',
-                'no_ktp.size' => 'NIK harus tepat 16 digit angka.',
+                'no_ktp.digits' => "NIK harus tepat {$len} digit angka.",
+                'no_ktp.size' => "NIK harus tepat {$len} digit angka.",
             ];
         }
 

@@ -1,6 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
+@php
+    $canVerifyBukti = in_array(auth()->user()->role, ['admin', 'kabupaten'], true);
+@endphp
 <div class="row">
     <div class="col-12">
         <div class="page-title-box d-sm-flex align-items-center justify-content-between">
@@ -12,9 +15,17 @@
                 <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-sm btn-primary">
                     <i class="bx bx-plus me-1"></i> Tambah Jamaah
                 </a>
-                <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                    <i class="bx bx-download me-1"></i> Export Data
-                </button>
+                @if(in_array(auth()->user()->role, ['user', 'kabupaten'], true))
+                    @include('partials.export-dropdown', [
+                        'excelUrl' => route('jamaah.haji-khusus.export', ['format' => 'excel']),
+                        'pdfUrl' => route('jamaah.haji-khusus.export', ['format' => 'pdf']),
+                        'buttonClass' => 'btn-success',
+                    ])
+                @else
+                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="bx bx-export me-1"></i> Unduh Data
+                    </button>
+                @endif
             </div>
         </div>
     </div>
@@ -178,30 +189,16 @@
                                                                 <code>{{ $item->nomor_porsi ?? '-' }}</code>
                                                             </td>
                                                             <td>
-                                                                @if($item->status_pendaftaran === 'pending')
-                                                                    <span class="badge bg-warning">Menunggu</span>
-                                                                @elseif($item->status_pendaftaran === 'approved')
-                                                                    <span class="badge bg-success">Disetujui</span>
-                                                                @elseif($item->status_pendaftaran === 'rejected')
-                                                                    <span class="badge bg-danger">Ditolak</span>
-                                                                @elseif($item->status_pendaftaran === 'completed')
-                                                                    <span class="badge bg-info">Selesai</span>
-                                                                @else
-                                                                    <span class="badge bg-secondary">{{ $item->status_pendaftaran }}</span>
-                                                                @endif
+                                                                <span class="badge {{ $item->getStatusBadgeClass() }}">{{ $item->getStatusText() }}</span>
                                                             </td>
                                                             <td>
-                                                                @if($item->status_verifikasi_bukti === 'verified')
-                                                                    <span class="badge bg-success">Terverifikasi</span>
-                                                                @elseif($item->status_verifikasi_bukti === 'rejected')
-                                                                    <span class="badge bg-danger">Ditolak</span>
-                                                                @else
-                                                                    <span class="badge bg-warning">Menunggu</span>
+                                                                <span class="badge {{ $item->getBuktiSetorStatusBadgeClass() }}">{{ $item->getBuktiSetorStatusText() }}</span>
+                                                                @if($canVerifyBukti)
+                                                                    <br>
+                                                                    <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $item->id }}')">
+                                                                        Verifikasi
+                                                                    </button>
                                                                 @endif
-                                                                <br>
-                                                                <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $item->id }}')">
-                                                                    Verifikasi
-                                                                </button>
                                                             </td>
                                                             <td class="text-center">
                                                                 <div class="btn-group" role="group">
@@ -311,30 +308,16 @@
                                         <code>{{ $jamaah->nomor_porsi ?? '-' }}</code>
                                     </td>
                                     <td>
-                                        @if($jamaah->status_pendaftaran === 'pending')
-                                            <span class="badge bg-warning">Menunggu</span>
-                                        @elseif($jamaah->status_pendaftaran === 'approved')
-                                            <span class="badge bg-success">Disetujui</span>
-                                        @elseif($jamaah->status_pendaftaran === 'rejected')
-                                            <span class="badge bg-danger">Ditolak</span>
-                                        @elseif($jamaah->status_pendaftaran === 'completed')
-                                            <span class="badge bg-info">Selesai</span>
-                                        @else
-                                            <span class="badge bg-secondary">{{ $jamaah->status_pendaftaran }}</span>
-                                        @endif
+                                        <span class="badge {{ $jamaah->getStatusBadgeClass() }}">{{ $jamaah->getStatusText() }}</span>
                                     </td>
                                     <td>
-                                        @if($jamaah->status_verifikasi_bukti === 'verified')
-                                            <span class="badge bg-success">Terverifikasi</span>
-                                        @elseif($jamaah->status_verifikasi_bukti === 'rejected')
-                                            <span class="badge bg-danger">Ditolak</span>
-                                        @else
-                                            <span class="badge bg-warning">Menunggu</span>
+                                        <span class="badge {{ $jamaah->getBuktiSetorStatusBadgeClass() }}">{{ $jamaah->getBuktiSetorStatusText() }}</span>
+                                        @if($canVerifyBukti)
+                                            <br>
+                                            <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $jamaah->id }}')">
+                                                Verifikasi
+                                            </button>
                                         @endif
-                                        <br>
-                                        <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $jamaah->id }}')">
-                                            Verifikasi
-                                        </button>
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
@@ -383,27 +366,15 @@
     </div>
 </div>
 
-<!-- Export Modal -->
-<div class="modal fade" id="exportModal" tabindex="-1" aria-labelledby="exportModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="exportModalLabel">Export Data Jamaah Haji Khusus</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ route('jamaah.haji-khusus.export') }}" class="btn btn-success">
-                        <i class="bx bx-file me-2"></i>Export Excel (Global)
-                    </a>
-                    <a href="{{ route('jamaah.haji-khusus.export-pdf') }}" class="btn btn-danger">
-                        <i class="bx bx-file-pdf me-2"></i>Export PDF (Global)
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+@if(auth()->user()->role === 'admin')
+    @include('partials.jamaah-export-modal', [
+        'modalId' => 'exportModal',
+        'title' => 'Unduh Data Jamaah Haji Khusus',
+        'exportRoute' => 'jamaah.haji-khusus.export',
+        'groupedData' => $groupedJamaahHajiKhusus,
+        'orgLabel' => 'PIHK',
+    ])
+@endif
 
 @endsection
 
@@ -413,7 +384,7 @@ function verifikasiBuktiSetor(id) {
     Swal.fire({
         title: 'Verifikasi Bukti Setor',
         input: 'select',
-        inputOptions: { verified: 'Verified', rejected: 'Rejected' },
+        inputOptions: { verified: 'Terverifikasi', rejected: 'Ditolak' },
         inputPlaceholder: 'Pilih status verifikasi',
         showCancelButton: true,
         confirmButtonText: 'Lanjut',
@@ -439,25 +410,31 @@ function verifikasiBuktiSetor(id) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
-                    status: status,
-                    catatan: catatan
+                    status_verifikasi_bukti: status,
+                    catatan_verifikasi: catatan
                 })
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    Swal.fire({ title: 'Berhasil', text: 'Status verifikasi berhasil diperbarui', icon: 'success', confirmButtonColor: '#556ee6' })
-                        .then(() => location.reload());
-                } else {
-                    Swal.fire({ title: 'Gagal', text: 'Gagal memperbarui status verifikasi: ' + data.message, icon: 'error', confirmButtonColor: '#556ee6' });
+            .then(async (response) => {
+                const data = await response.json();
+                if (!response.ok || !data.success) {
+                    const message = data.message
+                        || (data.errors ? Object.values(data.errors).flat().join(' ') : null)
+                        || 'Gagal memperbarui status verifikasi';
+                    throw new Error(message);
                 }
+                return data;
+            })
+            .then(() => {
+                Swal.fire({ title: 'Berhasil', text: 'Status verifikasi berhasil diperbarui', icon: 'success', confirmButtonColor: '#556ee6' })
+                    .then(() => location.reload());
             })
             .catch(error => {
                 console.error('Error:', error);
-                Swal.fire({ title: 'Gagal', text: 'Terjadi kesalahan saat memperbarui status verifikasi', icon: 'error', confirmButtonColor: '#556ee6' });
+                Swal.fire({ title: 'Gagal', text: error.message || 'Terjadi kesalahan saat memperbarui status verifikasi', icon: 'error', confirmButtonColor: '#556ee6' });
             });
         });
     });
@@ -517,22 +494,8 @@ function collapseAll() {
 }
 
 
-// Export jamaah for specific travel
 function exportJamaah(travelId) {
-    Swal.fire({
-        title: 'Export data jamaah untuk travel ini?',
-        icon: 'question',
-        showCancelButton: true,
-        confirmButtonText: 'Ya, export',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#556ee6',
-        cancelButtonColor: '#74788d',
-        reverseButtons: true,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.open(`/jamaah/haji-khusus/export?travel_id=${travelId}`, '_blank');
-        }
-    });
+    window.open('/jamaah/haji-khusus/export?format=excel&type=travel&travel_id=' + travelId, '_blank');
 }
 
 // Print jamaah for specific accordion

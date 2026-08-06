@@ -2,18 +2,8 @@
 
 @section('content')
 @php
-    $riskBadges = [
-        'LOW' => 'success',
-        'MEDIUM' => 'info',
-        'HIGH' => 'warning',
-        'CRITICAL' => 'danger',
-    ];
-    $riskLabels = [
-        'LOW' => 'Rendah',
-        'MEDIUM' => 'Sedang',
-        'HIGH' => 'Tinggi',
-        'CRITICAL' => 'Kritis',
-    ];
+    use App\Enums\RiskLevel;
+
     $isReadOnly = auth()->user()->role !== 'admin';
 @endphp
 
@@ -64,8 +54,8 @@
             <form method="GET" class="d-flex gap-2 align-items-center">
                 <select name="risk_level" class="form-select form-select-sm" style="min-width:160px;" onchange="this.form.submit()">
                     <option value="">Semua Level</option>
-                    @foreach ($riskLabels as $value => $label)
-                        <option value="{{ $value }}" @selected(($filters['risk_level'] ?? '') === $value)>{{ $label }}</option>
+                    @foreach (RiskLevel::cases() as $riskLevel)
+                        <option value="{{ $riskLevel->value }}" @selected(($filters['risk_level'] ?? '') === $riskLevel->value)>{{ $riskLevel->label() }}</option>
                     @endforeach
                 </select>
             </form>
@@ -95,8 +85,8 @@
                                 <td class="text-muted">{{ $risk->travel?->kab_kota }}</td>
                                 <td><strong>{{ number_format($risk->total_score, 0) }}</strong></td>
                                 <td>
-                                    <span class="badge bg-{{ $riskBadges[$level] ?? 'secondary' }}">
-                                        {{ $riskLabels[$level] ?? $level }}
+                                    <span class="badge bg-{{ RiskLevel::badgeFor($level) }}">
+                                        {{ RiskLevel::labelFor($level) }}
                                     </span>
                                 </td>
                                 <td class="text-muted">{{ optional($risk->last_calculated_at)->format('d M Y, H:i') ?? 'Tidak ada' }}</td>

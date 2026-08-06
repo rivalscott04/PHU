@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Helpers\ValidationHelper;
 use App\Models\Jamaah;
 use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -57,7 +58,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
                 $digits = '0' . $digits;
             }
 
-            $normalized['nomor_hp'] = substr($digits, 0, 15);
+            $normalized['nomor_hp'] = substr($digits, 0, ValidationHelper::NOMOR_HP_MAX);
         }
 
         return $normalized;
@@ -66,22 +67,25 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            '*.nik' => 'required|digits:16',
+            '*.nik' => ValidationHelper::nikRules(),
             '*.nama' => 'required|string|max:255',
             '*.alamat' => 'required|string',
-            '*.nomor_hp' => 'required|string|max:15|regex:/^08/',
+            '*.nomor_hp' => ValidationHelper::nomorHpRules(),
         ];
     }
 
     public function customValidationMessages()
     {
+        $nikLen = ValidationHelper::NIK_LENGTH;
+        $hpMax = ValidationHelper::NOMOR_HP_MAX;
+
         return [
             '*.nik.required' => 'NIK wajib diisi',
-            '*.nik.digits' => 'NIK harus 16 digit',
+            '*.nik.digits' => "NIK harus {$nikLen} digit",
             '*.nama.required' => 'Nama wajib diisi',
             '*.alamat.required' => 'Alamat wajib diisi',
             '*.nomor_hp.required' => 'Nomor HP wajib diisi',
-            '*.nomor_hp.max' => 'Nomor HP maksimal 15 digit',
+            '*.nomor_hp.max' => "Nomor HP maksimal {$hpMax} digit",
             '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
         ];
     }

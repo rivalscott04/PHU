@@ -163,7 +163,7 @@
             const form = document.getElementById('statusFormDetail');
             const status = select.value;
             const labels = {
-                pending: 'Draft',
+                pending: 'Draf',
                 diajukan: 'Diajukan',
                 diproses: 'Diproses',
                 diterima: 'Diterima',

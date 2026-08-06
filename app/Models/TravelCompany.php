@@ -200,7 +200,7 @@ class TravelCompany extends Model
         } elseif ($this->Status === 'PPIU') {
             return 'PPIU: Penyelenggara Perjalanan Ibadah Umrah (Umrah Only)';
         }
-        return 'Unknown Type';
+        return 'Jenis Tidak Diketahui';
     }
 
     /**

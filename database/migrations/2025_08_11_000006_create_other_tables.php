@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('nik', 16);
             $table->string('nama');
             $table->text('alamat');
-            $table->string('nomor_hp', 13);
+            $table->string('nomor_hp', 16);
             $table->string('jenis_jamaah');
             $table->timestamps();
 
@@ -43,7 +43,7 @@ return new class extends Migration
             $table->string('kecamatan')->nullable();
             $table->string('provinsi');
             $table->string('kode_pos', 5);
-            $table->string('no_hp', 15);
+            $table->string('no_hp', 16);
             $table->string('email')->nullable();
             $table->string('nama_ayah');
             $table->string('pekerjaan');

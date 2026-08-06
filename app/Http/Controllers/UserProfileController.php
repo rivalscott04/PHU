@@ -28,7 +28,7 @@ class UserProfileController extends Controller
         ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $user->id,
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true, ignoreUserId: $user->id),
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',

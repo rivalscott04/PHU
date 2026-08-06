@@ -27,6 +27,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'password.changed' => \App\Http\Middleware\CheckPasswordChanged::class,
         ]);
 
+        $middleware->web(append: [
+            \App\Http\Middleware\EagerLoadAuthRelations::class,
+        ]);
+
         $middleware->redirectGuestsTo(fn () => route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
@@ -35,7 +39,14 @@ return Application::configure(basePath: dirname(__DIR__))
                 return response()->json(['message' => 'Not found.'], 404);
             }
 
-            return response()->view('errors::404', [], 404);
+            if ($request->isMethod('GET') && $request->is('v2/pengawasan/*')) {
+                return response()->view('errors::404', [], 404);
+            }
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'Anda tidak memiliki akses untuk aksi ini, atau pengawasan sudah ditutup.');
         });
     })
     ->create();

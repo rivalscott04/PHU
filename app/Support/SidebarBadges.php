@@ -15,13 +15,15 @@ final class SidebarBadges
     public static function forUser(User $user): array
     {
         $scope = self::scopeFilters($user);
+        $queues = self::resolveQueues($user);
 
         return [
             'antrian' => self::antrianCount($scope),
-            'home_queues' => self::homeQueuesCount($user),
-            'bap_pending' => self::bapPendingCount($user),
-            'pengaduan_open' => self::pengaduanOpenCount($user),
-            'registration_pending' => self::registrationPendingCount($user),
+            'home_queues' => self::sumQueueCounts($queues),
+            'bap_pending' => self::countFromQueues($queues, 'bap_pending')
+                ?: HomeCommandCenter::countBapPendingForScope(self::kabupatenScope($user)),
+            'pengaduan_open' => self::countFromQueues($queues, 'pengaduan_open'),
+            'registration_pending' => self::countFromQueues($queues, 'registration_pending'),
             'followup_verify' => self::followupVerifyCount($user, $scope),
             'followup_action' => self::followupActionCount($user),
         ];
@@ -74,17 +76,27 @@ final class SidebarBadges
         return (int) array_sum($byType);
     }
 
-    private static function homeQueuesCount(User $user): int
+    /** @return list<array{key: string, label: string, count: int, route: string, params?: array<string, mixed>, color: string, icon: string, hint: string}> */
+    private static function resolveQueues(User $user): array
     {
         if ($user->role === UserRole::Admin->value) {
-            $queues = HomeCommandCenter::adminQueues();
-        } elseif ($user->role === UserRole::Kabupaten->value && $user->kabupaten) {
-            $queues = HomeCommandCenter::kabupatenQueues(NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten);
-        } else {
-            return 0;
+            return HomeCommandCenter::adminQueues();
         }
 
+        if ($user->role === UserRole::Kabupaten->value && $user->kabupaten) {
+            return HomeCommandCenter::kabupatenQueues(
+                NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten
+            );
+        }
+
+        return [];
+    }
+
+    /** @param  list<array{key: string, count: int}>  $queues */
+    private static function sumQueueCounts(array $queues): int
+    {
         $total = 0;
+
         foreach ($queues as $queue) {
             $total += (int) ($queue['count'] ?? 0);
         }
@@ -92,43 +104,13 @@ final class SidebarBadges
         return $total;
     }
 
-    private static function bapPendingCount(User $user): int
+    private static function kabupatenScope(User $user): ?string
     {
-        if (! in_array($user->role, [UserRole::Admin->value, UserRole::Kabupaten->value], true)) {
-            return 0;
+        if ($user->role !== UserRole::Kabupaten->value || ! $user->kabupaten) {
+            return null;
         }
 
-        $kabupaten = $user->role === UserRole::Kabupaten->value
-            ? (NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten)
-            : null;
-
-        return HomeCommandCenter::countBapPendingForScope($kabupaten);
-    }
-
-    private static function pengaduanOpenCount(User $user): int
-    {
-        if (! in_array($user->role, [UserRole::Admin->value, UserRole::Kabupaten->value], true)) {
-            return 0;
-        }
-
-        $kabupaten = $user->role === UserRole::Kabupaten->value
-            ? (NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten)
-            : null;
-
-        if ($kabupaten) {
-            return self::countFromQueues(HomeCommandCenter::kabupatenQueues($kabupaten), 'pengaduan_open');
-        }
-
-        return self::countFromQueues(HomeCommandCenter::adminQueues(), 'pengaduan_open');
-    }
-
-    private static function registrationPendingCount(User $user): int
-    {
-        if ($user->role !== UserRole::Admin->value) {
-            return 0;
-        }
-
-        return HomeCommandCenter::countRegistrationPending();
+        return NtbKabupatenMap::normalize($user->kabupaten) ?? $user->kabupaten;
     }
 
     /** @param  array<string, mixed>  $scope */

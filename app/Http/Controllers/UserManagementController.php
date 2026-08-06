@@ -168,7 +168,7 @@ class UserManagementController extends Controller
         $rules = [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:8',
             'role' => 'required|in:'.implode(',', $assignableRoles),
         ];
@@ -433,7 +433,7 @@ class UserManagementController extends Controller
         ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'kabupaten' => 'required|string|max:255',
             'password' => 'required|string|min:8',
         ]);
@@ -462,7 +462,7 @@ class UserManagementController extends Controller
         ValidationHelper::validate($request, [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'nomor_hp' => 'required|string|max:20|unique:users|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
         ]);
@@ -551,7 +551,7 @@ class UserManagementController extends Controller
         $validationRules = [
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
-            'nomor_hp' => 'required|string|max:20|unique:users,nomor_hp,' . $id . '|regex:/^08/',
+            'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true, ignoreUserId: (int) $id),
             'address' => 'nullable|string',
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',

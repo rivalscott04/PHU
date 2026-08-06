@@ -114,7 +114,8 @@
             <label for="Telepon" class="form-label">Telepon Kantor @include('partials.required-star')</label>
             <input type="tel" class="{{ $inputClass }} @error('Telepon') is-invalid @enderror"
                 id="Telepon" name="Telepon" value="{{ $old('Telepon') }}"
-                placeholder="{{ $compact ? 'Contoh: 0370-123456' : '0370-123456' }}" required>
+                maxlength="16" inputmode="numeric"
+                placeholder="{{ $compact ? 'Contoh: 081234567890' : '081234567890' }}" required>
             @error('Telepon')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
 

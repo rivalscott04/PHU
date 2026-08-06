@@ -4,9 +4,12 @@ namespace App\Console\Commands;
 
 use App\Enums\FindingStatus;
 use App\Models\InspectionFinding;
+use App\Models\TravelCompany;
+use App\Models\User;
 use App\Notifications\V2\DeadlineReminderNotification;
 use App\Services\NotificationService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 
 class SendDeadlineReminders extends Command
 {
@@ -23,6 +26,9 @@ class SendDeadlineReminders extends Command
         -30 => 'h_plus_30',
     ];
 
+    /** @var Collection<int, User>|null */
+    private ?Collection $adminAndPengawas = null;
+
     public function handle(NotificationService $notificationService): int
     {
         $sent = 0;
@@ -35,9 +41,7 @@ class SendDeadlineReminders extends Command
             ->whereNotNull('deadline')
             ->with('inspection.travel')
             ->chunkById(50, function ($findings) use ($notificationService, &$sent) {
-                foreach ($findings as $finding) {
-                    $sent += $this->dispatchReminder($finding, $notificationService);
-                }
+                $sent += $this->processChunk($findings, $notificationService);
             });
 
         $this->info("Reminder deadline terkirim: {$sent}");
@@ -45,8 +49,49 @@ class SendDeadlineReminders extends Command
         return self::SUCCESS;
     }
 
-    private function dispatchReminder(InspectionFinding $finding, NotificationService $notificationService): int
+    /** @param  Collection<int, InspectionFinding>  $findings */
+    private function processChunk(Collection $findings, NotificationService $notificationService): int
     {
+        $travelIds = $findings
+            ->map(fn (InspectionFinding $finding) => $finding->inspection?->travel_id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $usersByTravel = $notificationService->usersGroupedByTravel($travelIds);
+        $adminAndPengawas = $this->adminAndPengawasUsers($notificationService);
+
+        $recipientIds = $usersByTravel
+            ->flatten()
+            ->pluck('id')
+            ->merge($adminAndPengawas->pluck('id'))
+            ->unique()
+            ->values();
+
+        $sentKeys = $notificationService->deadlineReminderSentKeysToday($recipientIds);
+        $sent = 0;
+
+        foreach ($findings as $finding) {
+            $sent += $this->dispatchReminder(
+                $finding,
+                $notificationService,
+                $usersByTravel,
+                $adminAndPengawas,
+                $sentKeys,
+            );
+        }
+
+        return $sent;
+    }
+
+    private function dispatchReminder(
+        InspectionFinding $finding,
+        NotificationService $notificationService,
+        Collection $usersByTravel,
+        Collection $adminAndPengawas,
+        array &$sentKeys,
+    ): int {
         $travel = $finding->inspection?->travel;
         if (! $travel) {
             return 0;
@@ -57,39 +102,64 @@ class SendDeadlineReminders extends Command
 
         if ($reminderType === null) {
             if ($finding->deadline->isPast()) {
-                return $this->notifySupervisorsOnce($finding, $notificationService, 'overdue');
+                return $this->notifySupervisorsOnce(
+                    $finding,
+                    $notificationService,
+                    'overdue',
+                    $adminAndPengawas,
+                    $sentKeys,
+                );
             }
 
             return 0;
         }
 
         if (in_array($reminderType, ['h_plus_7', 'h_plus_30'], true)) {
-            return $this->notifySupervisorsOnce($finding, $notificationService, $reminderType);
+            return $this->notifySupervisorsOnce(
+                $finding,
+                $notificationService,
+                $reminderType,
+                $adminAndPengawas,
+                $sentKeys,
+            );
         }
 
-        return $this->notifyTravelUsersOnce($finding, $notificationService, $reminderType);
+        return $this->notifyTravelUsersOnce(
+            $finding,
+            $notificationService,
+            $reminderType,
+            $usersByTravel->get($travel->id, collect()),
+            $sentKeys,
+        );
     }
 
+    /** @param  Collection<int, User>  $travelUsers */
     private function notifyTravelUsersOnce(
         InspectionFinding $finding,
         NotificationService $notificationService,
         string $reminderType,
+        Collection $travelUsers,
+        array &$sentKeys,
     ): int {
-        $travel = $finding->inspection->travel;
+        if ($travelUsers->isEmpty()) {
+            return 0;
+        }
+
         $notification = new DeadlineReminderNotification($finding, $reminderType);
         $sent = 0;
 
-        foreach ($notificationService->usersForTravel($travel->id) as $user) {
-            if ($notificationService->alreadySentToday($user, DeadlineReminderNotification::class, [
-                'meta' => [
-                    'finding_id' => $finding->id,
-                    'reminder_type' => $reminderType,
-                ],
-            ])) {
+        foreach ($travelUsers as $user) {
+            if ($notificationService->wasDeadlineReminderSentToday(
+                $sentKeys,
+                $user->id,
+                $finding->id,
+                $reminderType,
+            )) {
                 continue;
             }
 
             $user->notify($notification);
+            $sentKeys["{$user->id}|{$finding->id}|{$reminderType}"] = true;
             $sent++;
         }
 
@@ -100,25 +170,43 @@ class SendDeadlineReminders extends Command
         InspectionFinding $finding,
         NotificationService $notificationService,
         string $reminderType,
+        Collection $adminAndPengawas,
+        array &$sentKeys,
     ): int {
-        $travel = $finding->inspection->travel;
+        $travel = $finding->inspection?->travel;
+        if (! $travel instanceof TravelCompany) {
+            return 0;
+        }
+
+        $supervisors = $notificationService->supervisorsForTravelFromPool($travel, $adminAndPengawas);
+        if ($supervisors->isEmpty()) {
+            return 0;
+        }
+
         $notification = new DeadlineReminderNotification($finding, $reminderType);
         $sent = 0;
 
-        foreach ($notificationService->supervisorsForTravel($travel) as $user) {
-            if ($notificationService->alreadySentToday($user, DeadlineReminderNotification::class, [
-                'meta' => [
-                    'finding_id' => $finding->id,
-                    'reminder_type' => $reminderType,
-                ],
-            ])) {
+        foreach ($supervisors as $user) {
+            if ($notificationService->wasDeadlineReminderSentToday(
+                $sentKeys,
+                $user->id,
+                $finding->id,
+                $reminderType,
+            )) {
                 continue;
             }
 
             $user->notify($notification);
+            $sentKeys["{$user->id}|{$finding->id}|{$reminderType}"] = true;
             $sent++;
         }
 
         return $sent;
+    }
+
+    /** @return Collection<int, User> */
+    private function adminAndPengawasUsers(NotificationService $notificationService): Collection
+    {
+        return $this->adminAndPengawas ??= $notificationService->adminAndPengawasUsers();
     }
 }
