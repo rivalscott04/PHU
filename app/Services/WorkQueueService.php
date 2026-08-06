@@ -60,7 +60,7 @@ class WorkQueueService
         $this->auditLogService->log(
             'antrian',
             'enqueue',
-            "menambahkan pengaduan #{$pengaduan->id} ke antrian kerja pengawasan"
+            'menambahkan pengaduan ke antrian kerja'
         );
 
         return $item;

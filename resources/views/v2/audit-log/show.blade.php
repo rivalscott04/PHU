@@ -19,7 +19,7 @@
                 <div class="card-body">
                     <p class="fs-5 mb-3">{{ $narrative['summary'] }}</p>
                     @if($narrative['detail'])
-                        <p class="text-muted mb-0">{{ $narrative['detail'] }}.</p>
+                        <p class="text-muted mb-0"><span class="fw-medium">Referensi:</span> {{ $narrative['detail'] }}</p>
                     @endif
                 </div>
             </div>

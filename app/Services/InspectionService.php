@@ -22,7 +22,7 @@ class InspectionService
     private const STATUS_TRANSITIONS = [
         'DRAFT' => ['SCHEDULED', 'CANCELLED'],
         'SCHEDULED' => ['ON_PROGRESS', 'CANCELLED'],
-        'ON_PROGRESS' => ['WAITING_FOLLOWUP', 'CANCELLED'],
+        'ON_PROGRESS' => ['WAITING_FOLLOWUP', 'CLOSED', 'CANCELLED'],
         'WAITING_FOLLOWUP' => ['FOLLOWUP_UPLOADED'],
         'FOLLOWUP_UPLOADED' => ['VERIFIED'],
         'VERIFIED' => ['CLOSED'],
@@ -59,7 +59,7 @@ class InspectionService
             $this->auditLogService->log(
                 'pengawasan',
                 'create',
-                "menjadwalkan pengawasan baru {$inspection->inspection_no} untuk {$travelName}"
+                "menjadwalkan pemeriksaan ke {$travelName}"
             );
 
             $this->notificationService->notifyTravelUsers(
@@ -88,7 +88,7 @@ class InspectionService
             $this->auditLogService->log(
                 'pengawasan',
                 'update',
-                "memperbarui jadwal pengawasan {$updated->inspection_no}"
+                'memperbarui jadwal pemeriksaan'
             );
 
             DashboardCache::flush();
@@ -174,7 +174,7 @@ class InspectionService
             $this->auditLogService->log(
                 'pengawasan',
                 'create',
-                "mencatat temuan baru \"{$finding->title}\" pada pengawasan {$inspection->inspection_no}"
+                "mencatat masalah \"{$finding->title}\""
             );
 
             DashboardCache::flush();
@@ -191,7 +191,7 @@ class InspectionService
             $this->auditLogService->log(
                 'pengawasan',
                 'update',
-                "memperbarui temuan \"{$updated->title}\" pada pengawasan {$updated->inspection?->inspection_no}"
+                "memperbarui masalah \"{$updated->title}\""
             );
 
             DashboardCache::flush();
@@ -252,7 +252,7 @@ class InspectionService
             $this->auditLogService->log(
                 'pengawasan',
                 'update',
-                "mengisi daftar periksa pengawasan {$updated->inspection_no}"
+                'mengisi pertanyaan pemeriksaan'
             );
 
             DashboardCache::flush();
@@ -264,5 +264,67 @@ class InspectionService
                 'findings.followups',
             ]);
         });
+    }
+
+    public function finalize(Inspection $inspection): Inspection
+    {
+        if (in_array($inspection->status, [InspectionStatus::Closed, InspectionStatus::Cancelled], true)) {
+            throw new InvalidArgumentException('Pengawasan ini sudah selesai atau dibatalkan.');
+        }
+
+        $inspection->load(['checklists.masterChecklist', 'findings']);
+        $this->assertChecklistComplete($inspection);
+
+        return DB::transaction(function () use ($inspection) {
+            $status = $inspection->status instanceof InspectionStatus
+                ? $inspection->status
+                : InspectionStatus::tryFrom((string) $inspection->status);
+
+            if ($status === InspectionStatus::Draft) {
+                $this->transitionStatus($inspection, InspectionStatus::Scheduled);
+                $status = InspectionStatus::Scheduled;
+            }
+
+            if ($status === InspectionStatus::Scheduled) {
+                $this->transitionStatus($inspection, InspectionStatus::OnProgress);
+                $status = InspectionStatus::OnProgress;
+            }
+
+            $inspection->refresh()->load('findings');
+
+            if ($inspection->findings->isEmpty()) {
+                $this->transitionStatus($inspection, InspectionStatus::Closed);
+            } elseif ($status === InspectionStatus::OnProgress) {
+                $this->transitionStatus($inspection, InspectionStatus::WaitingFollowup);
+            }
+
+            $updated = $inspection->fresh(['travel', 'checklists.masterChecklist', 'findings']);
+
+            $this->auditLogService->log(
+                'pengawasan',
+                'update',
+                'menyelesaikan pemeriksaan travel'
+            );
+
+            DashboardCache::flush();
+
+            return $updated;
+        });
+    }
+
+    private function assertChecklistComplete(Inspection $inspection): void
+    {
+        foreach ($inspection->checklists as $item) {
+            if ($item->masterChecklist?->required && ! filled($item->answer)) {
+                throw new InvalidArgumentException('Lengkapi semua pertanyaan pemeriksaan wajib sebelum menyelesaikan.');
+            }
+        }
+    }
+
+    private function transitionStatus(Inspection $inspection, InspectionStatus $newStatus): void
+    {
+        $this->assertValidStatusTransition($inspection, $newStatus->value);
+        $this->inspectionRepository->update($inspection, ['status' => $newStatus->value]);
+        $inspection->refresh();
     }
 }

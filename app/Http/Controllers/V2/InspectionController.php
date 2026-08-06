@@ -71,8 +71,8 @@ class InspectionController extends Controller
             return $this->jsonSuccess($inspection, 'Pengawasan berhasil dibuat.', 201);
         }
 
-        return redirect()->route('v2.pengawasan.show', $inspection)
-            ->with('success', 'Pengawasan berhasil dibuat.');
+        return redirect()->route('v2.pengawasan.show', ['pengawasan' => $inspection, 'step' => 2])
+            ->with('success', 'Pemeriksaan berhasil dibuat. Lanjut isi pertanyaan pemeriksaan.');
     }
 
     public function show(Request $request, Inspection $pengawasan)
@@ -84,11 +84,23 @@ class InspectionController extends Controller
         $canFillChecklist = auth()->user()->can('update', $inspection)
             && ! in_array($inspection->status?->value ?? $inspection->status, ['CLOSED', 'CANCELLED'], true);
 
+        $checklistFilled = $inspection->checklists->filter(fn ($item) => filled($item->answer))->count();
+        $checklistTotal = $inspection->checklists->count();
+        $checklistComplete = $checklistTotal > 0 && $checklistFilled === $checklistTotal;
+        $isLocked = in_array($inspection->status?->value ?? $inspection->status, ['CLOSED', 'CANCELLED'], true);
+        $activeStep = $this->resolveWizardStep($request, $checklistComplete, $isLocked);
+
         if ($request->expectsJson()) {
             return $this->jsonSuccess($inspection);
         }
 
-        return view('v2.pengawasan.show', compact('inspection', 'checklistGroups', 'canFillChecklist'));
+        return view('v2.pengawasan.show', compact(
+            'inspection',
+            'checklistGroups',
+            'canFillChecklist',
+            'checklistComplete',
+            'activeStep',
+        ));
     }
 
     public function edit(Inspection $pengawasan)
@@ -127,13 +139,15 @@ class InspectionController extends Controller
         } catch (\InvalidArgumentException $e) {
             return $request->expectsJson()
                 ? $this->jsonError($e->getMessage(), 422)
-                : back()->withInput()->withErrors(['temuan' => $e->getMessage()]);
+                : redirect()->route('v2.pengawasan.show', ['pengawasan' => $pengawasan, 'step' => 3])
+                    ->withInput()
+                    ->withErrors(['temuan' => $e->getMessage()]);
         }
 
         return $request->expectsJson()
             ? $this->jsonSuccess($finding, 'Temuan berhasil ditambahkan.', 201)
-            : redirect()->route('v2.pengawasan.show', $pengawasan)
-                ->with('success', 'Temuan berhasil ditambahkan.');
+            : redirect()->route('v2.pengawasan.show', ['pengawasan' => $pengawasan, 'step' => 3])
+                ->with('success', 'Masalah berhasil dicatat.');
     }
 
     public function updateChecklists(UpdateInspectionChecklistsRequest $request, Inspection $pengawasan)
@@ -145,13 +159,53 @@ class InspectionController extends Controller
         } catch (\InvalidArgumentException $e) {
             return $request->expectsJson()
                 ? $this->jsonError($e->getMessage(), 422)
-                : back()->withInput()->withErrors(['checklist' => $e->getMessage()]);
+                : redirect()->route('v2.pengawasan.show', ['pengawasan' => $pengawasan, 'step' => 2])
+                    ->withInput()
+                    ->withErrors(['checklist' => $e->getMessage()]);
         }
 
         return $request->expectsJson()
             ? $this->jsonSuccess($inspection, 'Daftar periksa berhasil disimpan.')
-            : redirect()->route('v2.pengawasan.show', $inspection)
-                ->with('success', 'Daftar periksa berhasil disimpan.');
+            : redirect()->route('v2.pengawasan.show', ['pengawasan' => $pengawasan, 'step' => 3])
+                ->with('success', 'Pertanyaan pemeriksaan berhasil disimpan. Lanjut ke langkah temuan.');
+    }
+
+    public function finalize(Request $request, Inspection $pengawasan)
+    {
+        $this->authorize('update', $pengawasan);
+
+        try {
+            $inspection = $this->inspectionService->finalize($pengawasan);
+        } catch (\InvalidArgumentException $e) {
+            return $request->expectsJson()
+                ? $this->jsonError($e->getMessage(), 422)
+                : redirect()->route('v2.pengawasan.show', ['pengawasan' => $pengawasan, 'step' => 3])
+                    ->withErrors(['finalize' => $e->getMessage()]);
+        }
+
+        $message = $inspection->findings->isEmpty()
+            ? 'Pemeriksaan selesai. Tidak ada masalah yang perlu ditindaklanjuti.'
+            : 'Pemeriksaan selesai. Travel akan menindaklanjuti masalah yang ditemukan.';
+
+        return $request->expectsJson()
+            ? $this->jsonSuccess($inspection, $message)
+            : redirect()->route('v2.pengawasan.show', ['pengawasan' => $inspection, 'step' => 3])
+                ->with('success', $message);
+    }
+
+    private function resolveWizardStep(Request $request, bool $checklistComplete, bool $isLocked): int
+    {
+        $step = (int) $request->query('step', 0);
+
+        if ($step >= 1 && $step <= 3) {
+            if ($step === 3 && ! $checklistComplete && ! $isLocked) {
+                return 2;
+            }
+
+            return $step;
+        }
+
+        return ($checklistComplete || $isLocked) ? 3 : 2;
     }
 
     private function groupChecklists(Inspection $inspection): \Illuminate\Support\Collection

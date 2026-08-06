@@ -71,7 +71,7 @@ class ChecklistService
 
         return DB::transaction(function () use ($data) {
             $checklist = $this->checklistRepository->create($data);
-            $this->auditLogService->log('checklist', 'create', "menambahkan item daftar periksa \"{$checklist->title}\" ({$checklist->code})");
+            $this->auditLogService->log('checklist', 'create', "menambahkan item pertanyaan \"{$checklist->title}\"");
 
             return $checklist;
         });
@@ -83,7 +83,7 @@ class ChecklistService
 
         return DB::transaction(function () use ($checklist, $data) {
             $updated = $this->checklistRepository->update($checklist, $data);
-            $this->auditLogService->log('checklist', 'update', "memperbarui item daftar periksa \"{$updated->title}\" ({$updated->code})");
+            $this->auditLogService->log('checklist', 'update', "memperbarui item pertanyaan \"{$updated->title}\"");
 
             return $updated;
         });

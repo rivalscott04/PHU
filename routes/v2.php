@@ -49,6 +49,7 @@ Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v
         Route::put('/{pengawasan}', [InspectionController::class, 'update'])->name('update');
         Route::post('/{pengawasan}/temuan', [InspectionController::class, 'storeFinding'])->name('temuan.store');
         Route::put('/{pengawasan}/checklist', [InspectionController::class, 'updateChecklists'])->name('checklist.update');
+        Route::post('/{pengawasan}/selesai', [InspectionController::class, 'finalize'])->name('finalize');
     });
 
     Route::prefix('master/checklist')->name('checklist.')->group(function () {
