@@ -253,8 +253,95 @@ class ValidationHelper
 
     public const NOMOR_HP_MAX = 16;
 
+    /** @var list<string> */
+    public const NIK_FIELD_NAMES = ['nik', 'no_ktp'];
+
+    /** @var list<string> */
+    public const PHONE_FIELD_NAMES = ['nomor_hp', 'no_hp', 'pic_nomor_hp', 'telepon', 'Telepon'];
+
     /** 08 + 6..14 digit = total 8..16 karakter */
     public const NOMOR_HP_REGEX = '/^08\d{6,14}$/';
+
+    public static function isNikField(string $name): bool
+    {
+        return in_array($name, self::NIK_FIELD_NAMES, true);
+    }
+
+    public static function isPhoneField(string $name): bool
+    {
+        return in_array($name, self::PHONE_FIELD_NAMES, true);
+    }
+
+    /**
+     * @return array{nik: array{fields: list<string>, max: int}, phone: array{fields: list<string>, max: int}}
+     */
+    public static function inputLimitConfig(): array
+    {
+        return [
+            'nik' => [
+                'fields' => self::NIK_FIELD_NAMES,
+                'max' => self::NIK_LENGTH,
+            ],
+            'phone' => [
+                'fields' => self::PHONE_FIELD_NAMES,
+                'max' => self::NOMOR_HP_MAX,
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, string|bool|null>  $extra
+     * @return array<string, string|bool>
+     */
+    public static function nikInputAttributes(array $extra = []): array
+    {
+        return array_filter(array_merge([
+            'maxlength' => (string) self::NIK_LENGTH,
+            'inputmode' => 'numeric',
+            'data-digits-only' => (string) self::NIK_LENGTH,
+            'autocomplete' => 'off',
+            'spellcheck' => 'false',
+        ], $extra), static fn ($value) => $value !== null && $value !== false);
+    }
+
+    /**
+     * @param  array<string, string|bool|null>  $extra
+     * @return array<string, string|bool>
+     */
+    public static function nomorHpInputAttributes(array $extra = []): array
+    {
+        return array_filter(array_merge([
+            'maxlength' => (string) self::NOMOR_HP_MAX,
+            'inputmode' => 'numeric',
+            'data-digits-only' => (string) self::NOMOR_HP_MAX,
+            'placeholder' => '08xxxxxxxxxx',
+            'autocomplete' => 'tel',
+        ], $extra), static fn ($value) => $value !== null && $value !== false);
+    }
+
+    /**
+     * @param  array<string, string|bool>  $attributes
+     */
+    public static function renderInputAttributes(array $attributes): string
+    {
+        $parts = [];
+
+        foreach ($attributes as $key => $value) {
+            if ($value === false || $value === null) {
+                continue;
+            }
+
+            if ($value === true) {
+                $parts[] = $key;
+
+                continue;
+            }
+
+            $parts[] = $key.'="'.e((string) $value).'"';
+        }
+
+        return implode(' ', $parts);
+    }
 
     /** @return list<string|\Illuminate\Validation\Rules\Unique> */
     public static function nikRules(): array

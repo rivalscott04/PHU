@@ -137,6 +137,7 @@
     <script src="{{ asset('js/pages/datatables.init.js') }}"></script>
     <!-- App js -->
     <script src="{{ asset('js/app.js') }}"></script>
+    @include('partials.input-limits-script')
     @stack('js')
 
     <style>

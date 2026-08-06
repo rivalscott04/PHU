@@ -1,0 +1,26 @@
+---
+description: NIK (16 digit) dan nomor HP (max 16, diawali 08) harus memakai ValidationHelper + input-limits.js terpusat
+globs: resources/views/**/*.blade.php,app/Http/Controllers/**/*.php,app/Http/Requests/**/*.php,app/Imports/**/*.php,app/Helpers/ValidationHelper.php
+alwaysApply: false
+---
+
+# Form Input Limits (NIK & Nomor HP)
+
+Baca skill proyek: `.cursor/skills/form-input-limits/SKILL.md`
+
+## Wajib
+
+1. **Backend**: `ValidationHelper::nikRules()` / `nomorHpRules()` / `teleponRules()` — jangan hardcode `digits:16` atau regex HP sendiri.
+2. **Blade baru**: `{!! ValidationHelper::renderInputAttributes(ValidationHelper::nikInputAttributes()) !!}` atau `nomorHpInputAttributes()`.
+3. **Field name**: gunakan `nik`, `no_ktp`, `nomor_hp`, `no_hp`, `pic_nomor_hp`, `telepon`, atau `Telepon` agar `public/js/input-limits.js` otomatis membatasi input.
+4. **Layout standalone** (di luar `layouts/app`): include `@include('partials.input-limits-script')`.
+
+## Jangan
+
+- Hardcode `maxlength="16"` tanpa helper (kecuali form legacy yang sudah ada — JS global tetap backup).
+- Tambah validasi NIK/HP duplikat di controller; extend `ValidationHelper` jika perlu field name baru.
+- Terapkan digit-only ke `email_or_phone` (login boleh email).
+
+## Sumber kebenaran
+
+`app/Helpers/ValidationHelper.php` — `NIK_LENGTH`, `NOMOR_HP_MAX`, `NIK_FIELD_NAMES`, `PHONE_FIELD_NAMES`.

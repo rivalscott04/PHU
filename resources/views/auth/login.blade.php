@@ -142,6 +142,7 @@
 
     <!-- App js -->
     <script src="{{ asset('js/app.js') }}"></script>
+    @include('partials.input-limits-script')
 </body>
 
 

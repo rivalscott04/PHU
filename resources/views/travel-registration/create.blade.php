@@ -151,6 +151,7 @@
 
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    @include('partials.input-limits-script')
     @include('travel-registration.partials.wizard-scripts')
 </body>
 </html>
