@@ -6,6 +6,7 @@ use App\Models\TravelCompany;
 
 /**
  * Matriks akses route V1 & V2 per role, dipakai seeder, PHPUnit, dan Playwright.
+ * Akun travel (mataram.travel@phu.com) hanya ada setelah DevTravelSeeder — bukan seed default.
  */
 final class RoleRouteMatrix
 {

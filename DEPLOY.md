@@ -523,10 +523,17 @@ git pull origin master
 composer install --no-dev --optimize-autoloader
 php artisan migrate --force
 
-# Refresh cache
+# WAJIB: bersihkan cache lama sebelum rebuild (UI/Blade/CSS link tidak akan update tanpa ini)
+php artisan optimize:clear
+php artisan view:clear
+
+# Rebuild cache production
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+
+# Reload PHP-FPM agar OPcache tidak menyimpan file PHP lama
+sudo systemctl reload php8.2-fpm
 
 # Restart proses latar belakang
 sudo supervisorctl restart phu-reverb
@@ -534,6 +541,31 @@ sudo supervisorctl restart phu-reverb
 
 php artisan up
 ```
+
+> **Penting:** Perubahan tampilan dashboard (warna tenang, typography, partial Blade) **bukan** file CSS terpisah saja — sebagian besar ada di `resources/views/`. Jika hanya `git pull` tanpa `view:clear`, server bisa masih merender HTML/JS versi lama meskipun file di `public/css/` sudah baru.
+
+### Verifikasi cepat setelah deploy
+
+```bash
+# Commit terbaru harus sama dengan GitHub
+git log -1 --oneline
+
+# File typography harus ada
+test -f public/css/app-typography.css && echo "OK: app-typography.css"
+
+# Layout harus mereferensikan typography (cek sumber Blade, bukan cache browser)
+grep -n app-typography resources/views/layouts/app.blade.php
+```
+
+Di browser (DevTools → Elements → `<head>`), pastikan ada:
+
+```html
+<link href="/css/app-typography.css?v=..." rel="stylesheet" />
+```
+
+Jika file CSS ada tapi tag `<link>` tidak muncul di HTML, jalankan ulang `php artisan view:clear && php artisan view:cache`.
+
+Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setelah deploy — file CSS statis biasanya sudah miss, tapi halaman Blade bisa tertahan di edge cache.
 
 ---
 
@@ -616,6 +648,7 @@ Jika tidak jalan, buka DevTools → Network → filter `WS` — harus ada koneks
 | Dashboard lambat | Cache masih file | Set `CACHE_DRIVER=redis`; pastikan Redis jalan |
 | `Connection refused` Redis | Redis mati / bind salah | `sudo systemctl status redis-server`; cek `bind 127.0.0.1` |
 | 500 setelah ubah `.env` | Config cache stale | `php artisan config:clear && php artisan config:cache` |
+| UI/CSS beda dengan lokal setelah deploy | View cache / OPcache / Cloudflare HTML cache | `php artisan optimize:clear && php artisan view:clear && php artisan view:cache && sudo systemctl reload php8.2-fpm`; purge Cloudflare; cek `<head>` punya `app-typography.css` |
 | Risk score tidak update | Cron tidak aktif | Cek crontab `www-data`; jalankan manual `php artisan risk:calculate` |
 | Upload gagal | Permission storage | `chown -R www-data:www-data storage`; `chmod -R ug+rwx storage` |
 | Mixed content error (WS) | `REVERB_SCHEME=http` di HTTPS | Set `REVERB_SCHEME=https`, `REVERB_PORT=443` |

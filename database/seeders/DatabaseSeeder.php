@@ -10,10 +10,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             UserSeeder::class,
-            TravelCompanySeeder::class,
-            UpdateTravelCapabilitiesSeeder::class,
-            TravelUserSeeder::class,
-            CabangTravelSeeder::class,
             V2MasterChecklistSeeder::class,
         ]);
     }

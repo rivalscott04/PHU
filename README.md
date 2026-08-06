@@ -201,9 +201,10 @@ Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](
 | Pimpinan Kanwil | `pimpinan@phu.local` | `password123` |
 | Pengawas | `pengawas.mataram@phu.local` | `password123` |
 | Admin Kabupaten | `kota.mataram@phu.com` | `password123` |
-| User Travel | (dari data seeder) | `password123` |
 
-Akun travel dan kabupaten baru wajib mengganti password saat pertama kali masuk.
+Akun **travel tidak di-seed** — data travel live dari registrasi mandiri (lihat [PERSIAPAN_TRAVEL.md](./docs/persiapan/PERSIAPAN_TRAVEL.md)). Untuk development lokal saja: `php artisan db:seed --class=DevTravelSeeder` (PT. Mataram Travel + `mataram.travel@phu.com`).
+
+Akun kabupaten baru wajib mengganti password saat pertama kali masuk.
 
 ---
 

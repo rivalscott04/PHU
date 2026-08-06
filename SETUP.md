@@ -49,8 +49,11 @@ php artisan migrate
 # Symlink storage (upload BAP, sertifikat, dll.)
 php artisan storage:link
 
-# (Opsional) Data contoh untuk development
+# (Opsional) Data contoh — hanya 4 akun inti + master checklist V2
 php artisan db:seed
+
+# (Opsional, development saja) Satu travel contoh + akun mataram.travel@phu.com
+php artisan db:seed --class=DevTravelSeeder
 
 # Jalankan server lokal
 php artisan serve
@@ -63,20 +66,16 @@ Akses aplikasi: `http://localhost:8000`
 | Role | Email | Password |
 |------|-------|----------|
 | Admin Kanwil | `admin@phu.com` | `admin123` |
-| Pengawas (per kabupaten/kota) | `pengawas.lombokbarat@phu.local` (dan 8 akun lainnya) | `password123` |
-| Admin kabupaten | `kabupaten.lombokbarat@phu.com` (dan 8 akun lainnya) | `password123` |
-| User travel | (dari seeder) | `password123` |
+| Pimpinan Kanwil | `pimpinan@phu.local` | `password123` |
+| Pengawas Kota Mataram | `pengawas.mataram@phu.local` | `password123` |
+| Admin kabupaten Mataram | `kota.mataram@phu.com` | `password123` |
 
+> **Travel tidak di-seed** di `DatabaseSeeder`. Data travel production dari registrasi mandiri.  
+> Untuk uji lokal / Playwright: `php artisan db:seed --class=DevTravelSeeder` → `mataram.travel@phu.com` / `password123`  
 > User travel/kabupaten **wajib ganti password** sebelum mengakses modul V2 (middleware `password.changed`).  
-> Akun **Pengawas** dari `PengawasSeeder` sudah `is_password_changed=true` — langsung bisa akses modul V2 di wilayah kabupatennya.
+> Akun **Pengawas** sudah `is_password_changed=true` — langsung bisa akses modul V2 di wilayah kabupatennya.
 
-**Seeder khusus Pengawas** (tanpa data contoh lain):
-
-```bash
-php artisan db:seed --class=PengawasSeeder
-```
-
-Akun pengawas juga bisa dibuat lewat menu **Manajemen User** (role *Pengawas*). Atur wilayah akses: satu kabupaten, beberapa kabupaten, atau seluruh NTB.
+Akun pengawas tambahan bisa dibuat lewat menu **Manajemen User** (role *Pengawas*). Atur wilayah akses: satu kabupaten, beberapa kabupaten, atau seluruh NTB.
 
 ---
 
