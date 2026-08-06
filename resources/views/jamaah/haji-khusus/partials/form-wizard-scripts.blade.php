@@ -551,8 +551,10 @@
 
             document.addEventListener('DOMContentLoaded', function () {
                 bindFormatters();
-                initLocationSelects();
+                // jQuery Steps rebuilds section HTML from a string snapshot, so
+                // wilayah cascade must bind after the wizard recreates the selects.
                 initWizard();
+                initLocationSelects();
             });
         })();
     </script>
