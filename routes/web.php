@@ -79,13 +79,14 @@ Route::get('/logout-redirect', function () {
 
 Route::get('/keberangkatan/events', [BAPController::class, 'getEvents'])->name('calendar.events');
 
-Route::group(['middleware' => ['auth', 'password.changed']], function () {
+// Auth-only: must stay outside password.changed to avoid redirect loops
+Route::middleware('auth')->group(function () {
     Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-
-    // Change Password routes
     Route::get('/change-password', [AuthController::class, 'showChangePasswordForm'])->name('user.changePassword');
     Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
+});
 
+Route::group(['middleware' => ['auth', 'password.changed']], function () {
     // User Profile routes
     Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile', [UserProfileController::class, 'update'])->name('profile.update');

@@ -2,8 +2,8 @@
 
 namespace App\Http\Middleware;
 
-use Log;
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CheckPasswordChanged
@@ -15,17 +15,20 @@ class CheckPasswordChanged
      * @param  \Closure  $next
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next)
     {
-        Log::info('CheckPasswordChanged middleware hit');
-        $user = Auth::user();
+        // Never redirect the password-change or logout endpoints themselves
+        if ($request->routeIs('user.changePassword', 'user.updatePassword', 'logout')) {
+            return $next($request);
+        }
 
         // Skip password check if impersonating
         if (app('impersonate')->isImpersonating()) {
             return $next($request);
         }
 
-        // Check password change for both 'user' and 'kabupaten' roles
+        $user = Auth::user();
+
         if ($user && in_array($user->role, ['user', 'kabupaten', 'pengawas', 'pimpinan'], true) && ! $user->is_password_changed) {
             return redirect()->route('user.changePassword')->with('warning', 'Anda harus mengganti password default Anda.');
         }

@@ -91,7 +91,7 @@ class AuthController extends Controller
     {
         $user = User::find($id);
         if ($user && $user->role === 'user') {
-            $user->password = 'password123';
+            $user->password = Hash::make('password123');
             $user->is_password_changed = false;
 
             $user->save();
@@ -113,17 +113,20 @@ class AuthController extends Controller
         ]);
 
         $user = auth()->user();
-        
-        // Check if user is authenticated
-        if (!$user) {
+
+        if (! $user) {
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
-        
-        $user->password = $request->password;
+
+        $user->password = Hash::make($request->password);
         $user->is_password_changed = true;
         $user->save();
 
-        return redirect()->route('bap')->with('success', 'Password Anda berhasil diperbarui.');
+        return match ($user->role) {
+            'pengawas' => redirect()->route('v2.antrian.index')->with('success', 'Password Anda berhasil diperbarui.'),
+            'pimpinan' => redirect()->route('v2.dashboard')->with('success', 'Password Anda berhasil diperbarui.'),
+            default => redirect()->route('home')->with('success', 'Password Anda berhasil diperbarui.'),
+        };
     }
 
     public function showLanding()
