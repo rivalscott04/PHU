@@ -1,0 +1,80 @@
+/**
+ * PANTAU readability overrides — Skote defaults to 13px body / 11px -sm controls.
+ * Target: 14px body, readable forms, compact table actions only.
+ */
+:root {
+    --bs-body-font-size: 0.875rem;
+    --phu-font-size-base: 0.875rem;
+    --phu-font-size-compact: 0.8125rem;
+}
+
+body {
+    font-size: var(--phu-font-size-base);
+}
+
+.form-control,
+.form-select,
+.btn {
+    font-size: var(--phu-font-size-base);
+}
+
+.page-content h4,
+.page-content .h4 {
+    font-size: 1.3125rem;
+}
+
+.page-content h5,
+.page-content .h5 {
+    font-size: 1.125rem;
+}
+
+.page-content h6,
+.page-content .h6 {
+    font-size: var(--phu-font-size-base);
+}
+
+.page-content .table {
+    font-size: var(--phu-font-size-base);
+}
+
+.page-content table.dataTable {
+    font-size: var(--phu-font-size-base);
+}
+
+/* Filter bars & page toolbars: -sm should not shrink below body size */
+.page-content .form-control-sm,
+.page-content .form-select-sm,
+.page-content .card-body .btn-sm,
+.page-content .container-fluid > .row .btn-sm,
+.page-content .container-fluid .card .btn-sm {
+    font-size: var(--phu-font-size-base);
+    padding: 0.47rem 0.75rem;
+    border-radius: 0.25rem;
+}
+
+.page-content .form-control-sm,
+.page-content .form-select-sm {
+    min-height: calc(1.5em + 0.94rem + 2px);
+}
+
+.page-content .form-select-sm {
+    padding-top: 0.47rem;
+    padding-bottom: 0.47rem;
+    padding-left: 0.75rem;
+}
+
+/* Table row actions stay slightly compact */
+.page-content .table .btn-sm,
+.page-content table.dataTable .btn-sm {
+    font-size: var(--phu-font-size-compact);
+    padding: 0.25rem 0.5rem;
+}
+
+.page-content .small,
+.page-content small {
+    font-size: var(--phu-font-size-compact);
+}
+
+#sidebar-menu .metismenu > li > a {
+    font-size: var(--phu-font-size-base) !important;
+}

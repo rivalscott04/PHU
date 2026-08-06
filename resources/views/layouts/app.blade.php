@@ -18,6 +18,7 @@
     <!-- App Css -->
     <link href="{{ asset('css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/app-layout-footer.css') }}?v={{ filemtime(public_path('css/app-layout-footer.css')) }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('css/app-typography.css') }}?v={{ filemtime(public_path('css/app-typography.css')) }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/interactive-cursor.css') }}?v={{ filemtime(public_path('css/interactive-cursor.css')) }}" rel="stylesheet" type="text/css" />
     <!-- DataTables -->
     <link href="{{ asset('libs/datatables.net-bs4/css/dataTables.bootstrap4.min.css') }}" rel="stylesheet"

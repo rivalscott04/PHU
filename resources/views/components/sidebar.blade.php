@@ -87,7 +87,7 @@
     align-items: center !important;
     flex-wrap: nowrap !important;
     padding: 0.45rem 1.1rem !important;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     line-height: 1.3;
     border-radius: 6px;
     margin: 1px 0.5rem;
