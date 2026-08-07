@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Carbon\Carbon;
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\DateHelper;
 use App\Helpers\ValidationHelper;
 use App\Support\KabupatenResourceGuard;
@@ -239,7 +240,7 @@ class SertifikatController extends Controller
             \Log::error('QR Code generation failed:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal generate QR Code: ' . $e->getMessage()
+                'message' => ExceptionMessageHelper::forUser($e, 'Gagal membuat QR Code. Silakan coba lagi.')
             ], 500);
         }
 
@@ -289,7 +290,7 @@ class SertifikatController extends Controller
             \Log::error('PDF generation failed:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal generate PDF: ' . $e->getMessage()
+                'message' => ExceptionMessageHelper::forUser($e, 'Gagal membuat PDF. Silakan coba lagi.')
             ], 500);
         }
 
@@ -306,7 +307,7 @@ class SertifikatController extends Controller
             \Log::error('Database update failed:', ['error' => $e->getMessage()]);
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal update database: ' . $e->getMessage()
+                'message' => ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE)
             ], 500);
         }
 
@@ -737,7 +738,7 @@ class SertifikatController extends Controller
         } catch (\Exception $e) {
             \Log::error('Delete sertifikat failed:', ['error' => $e->getMessage()]);
             return redirect()->route('sertifikat.index')
-                ->with('error', 'Gagal menghapus sertifikat: ' . $e->getMessage());
+                ->with('error', ExceptionMessageHelper::forUser($e, 'Gagal menghapus sertifikat. Silakan coba lagi.'));
         }
     }
 

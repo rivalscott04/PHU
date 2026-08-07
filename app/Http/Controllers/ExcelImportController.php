@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Imports\DataImport;
 use Illuminate\Http\Request;
@@ -29,7 +30,7 @@ class ExcelImportController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Import error: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_IMPORT));
         }
     }
 }

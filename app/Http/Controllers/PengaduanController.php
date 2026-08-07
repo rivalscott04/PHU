@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Http\Requests\StorePengaduanRequest;
 use App\Models\Pengaduan;
@@ -282,7 +283,6 @@ class PengaduanController extends Controller
 
             return response()->json([
                 'error' => 'Terjadi kesalahan saat mengambil data pengaduan',
-                'message' => $e->getMessage(),
             ], 500);
         }
     }

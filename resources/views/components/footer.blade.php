@@ -7,6 +7,7 @@
         <p class="mb-2 small text-muted">
             <i class="bx bx-map me-1"></i>{{ config('app.kanwil.address') }}
         </p>
+        @include('partials.kanwil-contact', ['variant' => 'support'])
         <p class="mb-0 small text-muted">
             Didesain dan dibuat dengan <i class="bx bxs-heart text-danger"></i>
             oleh <strong class="text-body">{{ config('app.kanwil.short_name') }}</strong>

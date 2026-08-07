@@ -2,11 +2,23 @@
 
 namespace App\Support;
 
+use App\Models\SystemSetting;
+
 class KanwilContact
 {
     public static function get(string $key, ?string $default = null): string
     {
         return (string) config("app.kanwil.{$key}", $default ?? '');
+    }
+
+    public static function supportPhone(): string
+    {
+        return SystemSetting::supportPhone();
+    }
+
+    public static function supportEmail(): string
+    {
+        return SystemSetting::supportEmail();
     }
 
     public static function letterheadTitleHtml(): string

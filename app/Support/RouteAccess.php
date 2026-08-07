@@ -349,6 +349,10 @@ final class RouteAccess
             return $user->role === 'admin';
         }
 
+        if (self::matches($routeName, 'settings.support')) {
+            return $user->role === 'admin';
+        }
+
         if (self::matches($routeName, 'impersonate')) {
             return $user->role === 'admin';
         }

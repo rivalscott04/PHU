@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\User;
 use App\Models\TravelCompany;
@@ -123,7 +124,8 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
 
             return new User($userData);
         } catch (\Exception $e) {
-            $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": " . $e->getMessage();
+            $rowNumber = $this->successCount + count($this->errors) + 1;
+            $msg = ExceptionMessageHelper::forImportRow($e, $rowNumber);
             $this->errors[] = $msg;
 
             Log::error('UserTravelImport exception', [

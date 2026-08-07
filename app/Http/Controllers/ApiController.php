@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
@@ -23,7 +24,7 @@ class ApiController extends Controller
                 return response()->json(['error' => 'Failed to fetch provinces'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error fetching provinces: ' . $e->getMessage()], 500);
+            return response()->json(['error' => ExceptionMessageHelper::forUser($e, 'Gagal memuat data provinsi.')], 500);
         }
     }
 
@@ -48,7 +49,7 @@ class ApiController extends Controller
                 return response()->json(['error' => 'Failed to fetch cities'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error fetching cities: ' . $e->getMessage()], 500);
+            return response()->json(['error' => ExceptionMessageHelper::forUser($e, 'Gagal memuat data kota/kabupaten.')], 500);
         }
     }
 
@@ -73,7 +74,7 @@ class ApiController extends Controller
                 return response()->json(['error' => 'Failed to fetch districts'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['error' => 'Error fetching districts: ' . $e->getMessage()], 500);
+            return response()->json(['error' => ExceptionMessageHelper::forUser($e, 'Gagal memuat data kecamatan.')], 500);
         }
     }
 } 

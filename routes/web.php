@@ -39,6 +39,7 @@ use App\Http\Controllers\JamaahHajiKhususController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\UserManagementController;
+use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\PublicTravelController;
 use App\Http\Controllers\TravelRegistrationController;
 
@@ -264,6 +265,9 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');
+
+        Route::get('/settings/support', [SystemSettingController::class, 'editSupport'])->name('settings.support.edit');
+        Route::post('/settings/support', [SystemSettingController::class, 'updateSupport'])->name('settings.support.update');
     });
 });
 

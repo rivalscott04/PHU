@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\BapStatus;
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use Carbon\Carbon;
@@ -761,7 +762,7 @@ class BAPController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error saat verifikasi: ' . $e->getMessage()
+                'message' => ExceptionMessageHelper::forUser($e, 'Verifikasi gagal. Periksa kembali QR Code atau token.')
             ]);
         }
     }

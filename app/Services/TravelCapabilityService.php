@@ -358,6 +358,7 @@ class TravelCapabilityService
                     self::subItem('Jamaah Haji Khusus', 'jamaah.haji-khusus.index'),
                     self::subItem('Sertifikat PPIU', 'sertifikat.index'),
                     self::subItem('Kelola Pengguna', 'users.index'),
+                    self::subItem('Kontak Support', 'settings.support.edit'),
                     self::subItem('Atur Checklist', 'v2.checklist.index'),
                 ],
             ],

@@ -68,6 +68,8 @@ class ValidationHelper
         'pimpinan_cabang' => 'Pimpinan Cabang',
         'alamat_cabang' => 'Alamat Cabang',
         'telepon' => 'Telepon',
+        'support_phone' => 'Nomor Telepon Support',
+        'support_email' => 'Email Support',
         'nama_lengkap' => 'Nama Lengkap',
         'no_ktp' => 'NIK',
         'tempat_lahir' => 'Tempat Lahir',

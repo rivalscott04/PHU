@@ -1,10 +1,13 @@
 <?php
 
+use App\Helpers\ExceptionMessageHelper;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -47,6 +50,22 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->back()
                 ->withInput()
                 ->with('error', 'Anda tidak memiliki akses untuk aksi ini, atau pengawasan sudah ditutup.');
+        });
+
+        $exceptions->renderable(function (QueryException|PDOException $e, Request $request) {
+            Log::error('Database error', ['exception' => $e]);
+
+            $message = ExceptionMessageHelper::forUser($e);
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 422);
+            }
+
+            if ($request->isMethod('GET')) {
+                return response()->view('errors.500', [], 500);
+            }
+
+            return redirect()->back()->withInput()->with('error', $message);
         });
     })
     ->create();

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\Jamaah;
 use App\Exports\JamaahExport;
@@ -130,7 +131,7 @@ class JamaahController extends Controller
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.haji')->with('success', 'Data jamaah haji berhasil ditambahkan!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE));
         }
     }
 
@@ -154,7 +155,7 @@ class JamaahController extends Controller
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.umrah')->with('success', 'Data jamaah umrah berhasil ditambahkan!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE));
         }
     }
 
@@ -183,7 +184,7 @@ class JamaahController extends Controller
                 ->with('success', 'Data jamaah berhasil diperbarui!');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE));
         }
     }
 
@@ -200,7 +201,7 @@ class JamaahController extends Controller
                 ->with('success', 'Data jamaah ' . $jenisJamaah . ' berhasil dihapus!');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+                ->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE));
         }
     }
 
@@ -215,7 +216,7 @@ class JamaahController extends Controller
             Excel::import(new JamaahImport($request->jenis_jamaah), $request->file('file'));
             return redirect()->back()->with('success', 'Data berhasil diimport!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE));
         }
     }
 

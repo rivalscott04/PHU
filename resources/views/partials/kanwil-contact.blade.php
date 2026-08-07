@@ -92,4 +92,33 @@
     <i class="bi bi-telephone me-1"></i>{{ $kanwil['phone'] }}<br>
     <i class="bi bi-envelope me-1"></i>{{ $kanwil['email'] }}<br>
     <i class="bi bi-geo-alt me-1"></i>{{ $kanwil['address'] }}
+@elseif ($variant === 'support')
+    @php
+        use App\Support\KanwilContact;
+
+        $supportStyle = $supportStyle ?? 'inline';
+        $supportPhone = KanwilContact::supportPhone();
+        $supportEmail = KanwilContact::supportEmail();
+        $phoneHref = 'tel:'.preg_replace('/\D+/', '', $supportPhone);
+    @endphp
+
+    @if ($supportStyle === 'card')
+        <div class="mt-4 p-3 bg-light rounded text-center">
+            <p class="text-muted mb-2 small">
+                <i class="bx bx-support me-1"></i>Kendala login atau sistem?
+            </p>
+            <p class="mb-0 small">
+                <a href="{{ $phoneHref }}" class="text-primary">{{ $supportPhone }}</a>
+                <span class="text-muted mx-1">·</span>
+                <a href="mailto:{{ $supportEmail }}" class="text-primary">{{ $supportEmail }}</a>
+            </p>
+        </div>
+    @else
+        <p class="mb-2 small text-muted">
+            <i class="bx bx-support me-1"></i>Kendala sistem?
+            <a href="{{ $phoneHref }}" class="text-muted">{{ $supportPhone }}</a>
+            <span class="mx-1">·</span>
+            <a href="mailto:{{ $supportEmail }}" class="text-muted">{{ $supportEmail }}</a>
+        </p>
+    @endif
 @endif

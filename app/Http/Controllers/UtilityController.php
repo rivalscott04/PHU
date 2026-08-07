@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Log;
 
@@ -53,7 +54,7 @@ class UtilityController extends Controller
 
 			return response()->json([
 				'success' => false,
-				'message' => 'Error: ' . $e->getMessage(),
+				'message' => ExceptionMessageHelper::forUser($e, 'Gagal membuat storage link. Hubungi admin.'),
 			], 500);
 		}
 	}

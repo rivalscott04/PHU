@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\CabangTravel;
 use App\Enums\TravelRegistrationStatus;
@@ -141,7 +142,7 @@ class KanwilController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Validation error: ' . implode(', ', array_flatten($e->errors()))
+                'message' => 'Data tidak valid. Periksa kembali isian Anda.',
             ], 422);
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             \Log::error('Travel company not found', ['id' => $id]);
@@ -158,7 +159,7 @@ class KanwilController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+                'message' => ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_SAVE),
             ], 500);
         }
     }
@@ -390,7 +391,7 @@ class KanwilController extends Controller
             Excel::import(new CabangTravelImport, $request->file('file'));
             return redirect()->back()->with('success', 'Data berhasil diimport.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal import data: ' . $e->getMessage());
+            return redirect()->back()->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_IMPORT));
         }
     }
 

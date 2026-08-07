@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Enums\UserRole;
 use App\Enums\PengawasScopeMode;
@@ -725,7 +726,7 @@ class UserManagementController extends Controller
             ]);
 
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage())
+                ->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_IMPORT))
                 ->withInput();
         }
     }
@@ -803,7 +804,7 @@ class UserManagementController extends Controller
             ]);
 
             return redirect()->back()
-                ->with('error', 'Terjadi kesalahan saat import: ' . $e->getMessage())
+                ->with('error', ExceptionMessageHelper::forUser($e, ExceptionMessageHelper::GENERIC_IMPORT))
                 ->withInput();
         }
     }

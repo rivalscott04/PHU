@@ -64,6 +64,7 @@ final class RoleRouteMatrix
             'admin' => [
                 'home' => $allow,
                 'users.index' => $allow,
+                'settings.support.edit' => $allow,
                 'pengaduan' => $allow,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,
@@ -83,6 +84,7 @@ final class RoleRouteMatrix
             'pimpinan' => [
                 'home' => 302,
                 'users.index' => $deny,
+                'settings.support.edit' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,
@@ -102,6 +104,7 @@ final class RoleRouteMatrix
             'pengawas' => [
                 'home' => 302,
                 'users.index' => $deny,
+                'settings.support.edit' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,
@@ -121,6 +124,7 @@ final class RoleRouteMatrix
             'kabupaten' => [
                 'home' => $allow,
                 'users.index' => $deny,
+                'settings.support.edit' => $deny,
                 'pengaduan' => $allow,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,
@@ -138,6 +142,7 @@ final class RoleRouteMatrix
             'user' => [
                 'home' => $allow,
                 'users.index' => $deny,
+                'settings.support.edit' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,
                 'travel' => $allow,

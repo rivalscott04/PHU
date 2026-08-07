@@ -112,6 +112,8 @@
                                         </a>
                                     </div>
 
+                                    @include('partials.kanwil-contact', ['variant' => 'support', 'supportStyle' => 'card'])
+
                                 </form>
                             </div>
 
