@@ -29,14 +29,14 @@ class UserProfileController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true, ignoreUserId: $user->id),
-            'address' => 'nullable|string',
+            'address' => ValidationHelper::varcharRule(false),
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal' => 'nullable|string|max:10',
-            'about' => 'nullable|string',
-            'current_password' => 'nullable|string',
-            'new_password' => 'nullable|string|min:5',
-            'new_password_confirmation' => 'nullable|string|same:new_password',
+            'about' => ValidationHelper::textRule(false),
+            'current_password' => 'nullable|string|max:255',
+            'new_password' => 'nullable|string|min:5|max:255',
+            'new_password_confirmation' => 'nullable|string|max:255|same:new_password',
         ]);
 
         // Update basic profile data

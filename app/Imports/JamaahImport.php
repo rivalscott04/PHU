@@ -69,7 +69,7 @@ class JamaahImport implements ToModel, WithHeadingRow, WithValidation
         return [
             '*.nik' => ValidationHelper::nikRules(),
             '*.nama' => 'required|string|max:255',
-            '*.alamat' => 'required|string',
+            '*.alamat' => ValidationHelper::textRule(),
             '*.nomor_hp' => ValidationHelper::nomorHpRules(),
         ];
     }

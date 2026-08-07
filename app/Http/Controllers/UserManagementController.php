@@ -553,7 +553,7 @@ class UserManagementController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $id,
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true, ignoreUserId: (int) $id),
-            'address' => 'nullable|string',
+            'address' => ValidationHelper::varcharRule(false),
             'city' => 'nullable|string|max:255',
             'country' => 'nullable|string|max:255',
             'postal' => 'nullable|string|max:10',

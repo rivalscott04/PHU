@@ -131,7 +131,7 @@ class PengaduanController extends Controller
     {
         ValidationHelper::validate($request, [
             'status' => 'required|in:pending,in_progress,completed,rejected',
-            'admin_notes' => 'nullable|string',
+            'admin_notes' => ValidationHelper::textRule(false),
         ]);
 
         $pengaduan = Pengaduan::findOrFail($id);

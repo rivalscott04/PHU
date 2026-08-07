@@ -112,7 +112,7 @@ class FollowupController extends Controller
     {
         $this->authorize('approve', $followup);
 
-        $data = ValidationHelper::validate($request, ['remarks' => ['nullable', 'string']]);
+        $data = ValidationHelper::validate($request, ['remarks' => ['nullable', 'string', 'max:'.ValidationHelper::TEXT_MAX]]);
 
         try {
             $updated = $this->followupService->approve($followup, $data['remarks'] ?? null);
@@ -131,7 +131,7 @@ class FollowupController extends Controller
     {
         $this->authorize('approve', $followup);
 
-        $data = ValidationHelper::validate($request, ['remarks' => ['required', 'string', 'min:10']]);
+        $data = ValidationHelper::validate($request, ['remarks' => ['required', 'string', 'min:10', 'max:'.ValidationHelper::TEXT_MAX]]);
 
         try {
             $updated = $this->followupService->requestRevision($followup, $data['remarks']);

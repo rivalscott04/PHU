@@ -122,7 +122,7 @@
                                     <label for="alamat" class="form-label">Alamat Lengkap <span
                                             class="text-danger">*</span></label>
                                     <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" rows="3"
-                                        required>{{ old('alamat') }}</textarea>
+                                        maxlength="{{ \App\Helpers\ValidationHelper::VARCHAR_MAX }}" required>{{ old('alamat') }}</textarea>
                                     @error('alamat')
                                         <div class="invalid-tooltip">{{ $message }}</div>
                                     @enderror
@@ -358,7 +358,8 @@
                                 <div class="mb-3 position-relative">
                                     <label for="alergi" class="form-label">Alergi</label>
                                     <input type="text" class="form-control @error('alergi') is-invalid @enderror"
-                                        id="alergi" name="alergi" value="{{ old('alergi') }}">
+                                        id="alergi" name="alergi" value="{{ old('alergi') }}"
+                                        maxlength="{{ \App\Helpers\ValidationHelper::VARCHAR_MAX }}">
                                     @error('alergi')
                                         <div class="invalid-tooltip">{{ $message }}</div>
                                     @enderror
@@ -447,7 +448,8 @@
                                 <div class="mb-3 position-relative">
                                     <label for="catatan_khusus" class="form-label">Catatan Khusus</label>
                                     <textarea class="form-control @error('catatan_khusus') is-invalid @enderror" id="catatan_khusus"
-                                        name="catatan_khusus" rows="3">{{ old('catatan_khusus') }}</textarea>
+                                        name="catatan_khusus" rows="3"
+                                        maxlength="{{ \App\Helpers\ValidationHelper::TEXT_MAX }}">{{ old('catatan_khusus') }}</textarea>
                                     @error('catatan_khusus')
                                         <div class="invalid-tooltip">{{ $message }}</div>
                                     @enderror

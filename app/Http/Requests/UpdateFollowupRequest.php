@@ -24,7 +24,7 @@ class UpdateFollowupRequest extends FormRequest
             'status' => ['sometimes', Rule::in([
                 'SUBMITTED', 'PENDING', 'REVISION_REQUIRED', 'VERIFIED', 'REJECTED', 'CLOSED',
             ])],
-            'remarks' => ['nullable', 'string'],
+            'remarks' => ['nullable', 'string', 'max:'.ValidationHelper::TEXT_MAX],
         ];
     }
 

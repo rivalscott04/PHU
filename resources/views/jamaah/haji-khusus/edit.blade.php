@@ -110,7 +110,8 @@
                             <div class="mb-3">
                                 <label for="alamat" class="form-label">Alamat Lengkap <span class="text-danger">*</span></label>
                                 <textarea class="form-control @error('alamat') is-invalid @enderror" 
-                                          id="alamat" name="alamat" rows="3" required>{{ old('alamat', $jamaahHajiKhusus->alamat) }}</textarea>
+                                          id="alamat" name="alamat" rows="3"
+                                          maxlength="{{ \App\Helpers\ValidationHelper::VARCHAR_MAX }}" required>{{ old('alamat', $jamaahHajiKhusus->alamat) }}</textarea>
                                 @error('alamat')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -326,7 +327,8 @@
                             <div class="mb-3">
                                 <label for="alergi" class="form-label">Alergi</label>
                                 <textarea class="form-control @error('alergi') is-invalid @enderror" 
-                                          id="alergi" name="alergi" rows="2">{{ old('alergi', $jamaahHajiKhusus->alergi) }}</textarea>
+                                          id="alergi" name="alergi" rows="2"
+                                          maxlength="{{ \App\Helpers\ValidationHelper::VARCHAR_MAX }}">{{ old('alergi', $jamaahHajiKhusus->alergi) }}</textarea>
                                 @error('alergi')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror

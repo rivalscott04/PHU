@@ -722,8 +722,8 @@ class BAPController extends Controller
     public function verifyQRCode(Request $request)
     {
         ValidationHelper::validate($request, [
-            'qr_data' => 'nullable|string',
-            'token' => 'nullable|string'
+            'qr_data' => 'nullable|string|max:5000',
+            'token' => 'nullable|string|max:50',
         ]);
 
         try {

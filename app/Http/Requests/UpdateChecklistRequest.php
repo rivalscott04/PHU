@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -20,7 +21,7 @@ class UpdateChecklistRequest extends FormRequest
         return [
             'category_id' => ['sometimes', 'exists:master_checklist_categories,id'],
             'title' => ['sometimes', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
+            'description' => ['nullable', 'string', 'max:'.ValidationHelper::TEXT_MAX],
             'input_type' => ['sometimes', Rule::in(['BOOLEAN', 'OPTION', 'NUMBER', 'TEXT', 'FILE', 'PHOTO'])],
             'weight' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'required' => ['sometimes', 'boolean'],

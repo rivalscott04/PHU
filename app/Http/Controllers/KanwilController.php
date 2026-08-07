@@ -325,11 +325,11 @@ class KanwilController extends Controller
             'kabupaten' => 'required|string|max:255',
             'pusat' => 'nullable|string|max:255',
             'pimpinan_pusat' => 'required|string|max:255',
-            'alamat_pusat' => 'required|string',
+            'alamat_pusat' => ValidationHelper::textRule(),
             'SK_BA' => 'nullable|string|max:255',
             'tanggal' => 'nullable|date',
             'pimpinan_cabang' => 'required|string|max:255',
-            'alamat_cabang' => 'required|string',
+            'alamat_cabang' => ValidationHelper::textRule(),
             'telepon' => ValidationHelper::teleponRules(),
         ]);
 
@@ -423,11 +423,11 @@ class KanwilController extends Controller
             'kabupaten' => 'required|string|max:255',
             'pusat' => 'nullable|string|max:255',
             'pimpinan_pusat' => 'required|string|max:255',
-            'alamat_pusat' => 'required|string',
+            'alamat_pusat' => ValidationHelper::textRule(),
             'SK_BA' => 'nullable|string|max:255',
             'tanggal' => 'nullable|date',
             'pimpinan_cabang' => 'required|string|max:255',
-            'alamat_cabang' => 'required|string',
+            'alamat_cabang' => ValidationHelper::textRule(),
             'telepon' => ValidationHelper::teleponRules(),
         ]);
 

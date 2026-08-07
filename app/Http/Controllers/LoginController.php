@@ -32,8 +32,8 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         ValidationHelper::validate($request, [
-            'email_or_phone' => 'required|string',
-            'password' => 'required|string',
+            'email_or_phone' => 'required|string|max:255',
+            'password' => 'required|string|max:255',
         ]);
 
         $identifier = $request->input('email_or_phone');

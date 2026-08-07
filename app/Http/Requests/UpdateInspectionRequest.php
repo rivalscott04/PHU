@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\ValidationHelper;
 use App\Http\Requests\Concerns\UsesFriendlyValidation;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -21,7 +22,7 @@ class UpdateInspectionRequest extends FormRequest
             'travel_id' => ['sometimes', 'exists:travels,id', new \App\Rules\TravelInUserScope()],
             'inspection_date' => ['sometimes', 'date'],
             'inspection_type' => ['sometimes', Rule::in(['ROUTINE', 'SPOT_CHECK', 'COMPLAINT_BASED', 'SPECIAL'])],
-            'notes' => ['nullable', 'string'],
+            'notes' => ['nullable', 'string', 'max:'.ValidationHelper::TEXT_MAX],
             'status' => ['sometimes', Rule::in([
                 'DRAFT', 'SCHEDULED', 'ON_PROGRESS', 'WAITING_FOLLOWUP',
                 'FOLLOWUP_UPLOADED', 'VERIFIED', 'CLOSED', 'CANCELLED',

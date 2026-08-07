@@ -124,10 +124,10 @@ class SertifikatController extends Controller
         $sertifikatRules = [
             'nama_ppiu' => 'required|string|max:255',
             'nama_kepala' => 'required|string|max:255',
-            'alamat' => 'required|string',
+            'alamat' => ValidationHelper::textRule(),
             'tanggal_diterbitkan' => 'required|date',
             'nomor_surat' => 'required|numeric|min:1',
-            'nomor_dokumen' => 'required|string',
+            'nomor_dokumen' => ValidationHelper::varcharRule(),
             'bulan_surat' => 'required|numeric|min:1|max:12',
             'tahun_surat' => 'required|numeric|min:2020|max:2030',
             'tanggal_tandatangan' => 'required|date',
@@ -755,7 +755,7 @@ class SertifikatController extends Controller
         ValidationHelper::validate($request, [
             'nama_penandatangan' => 'required|string|max:255',
             'nip_penandatangan' => 'required|string|max:255',
-            'jabatan_penandatangan' => 'required|string|max:500',
+            'jabatan_penandatangan' => 'required|string|max:'.ValidationHelper::VARCHAR_MAX,
         ]);
 
         $settings = SertifikatSetting::first();

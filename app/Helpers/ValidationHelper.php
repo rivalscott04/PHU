@@ -255,6 +255,22 @@ class ValidationHelper
 
     public const NOMOR_HP_MAX = 16;
 
+    /** Default VARCHAR(255) column limit in migrations. */
+    public const VARCHAR_MAX = 255;
+
+    /** Reasonable upper bound for TEXT columns (prevents abuse, still generous). */
+    public const TEXT_MAX = 5000;
+
+    public static function varcharRule(bool $required = true): string
+    {
+        return ($required ? 'required' : 'nullable').'|string|max:'.self::VARCHAR_MAX;
+    }
+
+    public static function textRule(bool $required = true): string
+    {
+        return ($required ? 'required' : 'nullable').'|string|max:'.self::TEXT_MAX;
+    }
+
     /** @var list<string> */
     public const NIK_FIELD_NAMES = ['nik', 'no_ktp'];
 
@@ -390,8 +406,8 @@ class ValidationHelper
             'tanggal_akreditasi' => 'required|date',
             'lembaga_akreditasi' => 'required|string|max:255',
             'Pimpinan' => 'required|string|max:255',
-            'alamat_kantor_lama' => 'required|string',
-            'alamat_kantor_baru' => 'required|string',
+            'alamat_kantor_lama' => self::textRule(),
+            'alamat_kantor_baru' => self::textRule(),
             'Telepon' => ValidationHelper::teleponRules(),
             'kab_kota' => ['required', 'string', Rule::in(NtbKabupatenMap::names())],
             'Status' => 'required|in:PPIU,PIHK',
