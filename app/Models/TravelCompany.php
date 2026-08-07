@@ -191,6 +191,18 @@ class TravelCompany extends Model
     }
 
     /**
+     * @return list<string>
+     */
+    public function allowedJamaahTypes(): array
+    {
+        if ($this->Status === 'PIHK') {
+            return ['haji', 'umrah'];
+        }
+
+        return ['umrah'];
+    }
+
+    /**
      * Get travel type description
      */
     public function getTravelTypeDescription()

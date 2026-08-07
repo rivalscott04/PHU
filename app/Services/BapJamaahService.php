@@ -25,8 +25,8 @@ class BapJamaahService
         $query = Jamaah::query()->with('travel')->orderBy('nama');
 
         if ($user->role === 'user' && $travel) {
-            $jenis = $travel->Status === 'PIHK' ? 'haji' : 'umrah';
-            $query->where('travel_id', $travel->id)->where('jenis_jamaah', $jenis);
+            $query->where('travel_id', $travel->id)
+                ->whereIn('jenis_jamaah', $travel->allowedJamaahTypes());
         } elseif ($user->role === 'kabupaten') {
             KabupatenScopeFilter::applyOnTravelRelation(
                 $query,
@@ -146,8 +146,7 @@ class BapJamaahService
                 }
 
                 if ($travelUser) {
-                    $expectedJenis = $travelUser->Status === 'PIHK' ? 'haji' : 'umrah';
-                    if ($row->jenis_jamaah !== $expectedJenis) {
+                    if (! in_array($row->jenis_jamaah, $travelUser->allowedJamaahTypes(), true)) {
                         throw ValidationException::withMessages([
                             'jamaah_ids' => 'Jenis jamaah tidak sesuai izin travel.',
                         ]);

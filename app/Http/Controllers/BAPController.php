@@ -504,8 +504,8 @@ class BAPController extends Controller
                 return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
             }
 
-            $jenis = $travelData->Status === 'PIHK' ? 'haji' : 'umrah';
-            $jamaahCount = Jamaah::where('jenis_jamaah', $jenis)
+            $allowedTypes = $travelData->allowedJamaahTypes();
+            $jamaahCount = Jamaah::whereIn('jenis_jamaah', $allowedTypes)
                 ->where('travel_id', $user->travel_id)
                 ->count();
 
