@@ -42,7 +42,12 @@ class MonitoringController extends Controller
 
         $scope = RequestScope::fromRequest($request);
         $filters = $this->filterOptions($request);
-        $cards = $this->monitoringService->getKpiCards($scope->kabupaten, $scope->travelId);
+        $kpiLayout = $this->monitoringService->getKpiCards(
+            $scope->kabupaten,
+            $scope->travelId,
+            $request->user()->role,
+            $request->query(),
+        );
         $travels = $this->monitoringService->getTravelList(
             $scope->kabupaten,
             8,
@@ -56,7 +61,7 @@ class MonitoringController extends Controller
             return $this->jsonSuccess($this->monitoringService->getKpiSummary($scope->kabupaten, $scope->travelId));
         }
 
-        return view('v2.monitoring.index', compact('cards', 'travels', 'filters'));
+        return view('v2.monitoring.index', compact('kpiLayout', 'travels', 'filters'));
     }
 
     public function statistics(Request $request)

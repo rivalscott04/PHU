@@ -41,7 +41,7 @@
     @include('v2.partials.wilayah-scope')
     @include('v2.monitoring.partials.filters')
 
-    @include('v2.partials.kpi-cards', ['cards' => $cards, 'id' => 'monitoring-kpi'])
+    @include('v2.monitoring.partials.kpi-cards', ['kpiLayout' => $kpiLayout, 'id' => 'monitoring-kpi'])
 
     <div class="row">
         <div class="col-lg-8 mb-3">
@@ -67,7 +67,8 @@
             @include('v2.partials.quick-access')
 
             @php
-                $alertCount = ($cards['temuan_aktif']['value'] ?? 0) + ($cards['travel_risiko_tinggi']['value'] ?? 0);
+                $summary = $kpiLayout['summary'] ?? [];
+                $alertCount = (int) ($summary['temuan_aktif'] ?? 0) + (int) ($summary['travel_risiko_tinggi'] ?? 0);
             @endphp
             @if($alertCount > 0)
                 <div class="alert alert-warning border-0 shadow-sm mt-3 mb-0" role="alert">
@@ -76,8 +77,8 @@
                         <div>
                             <strong>Perlu perhatian</strong>
                             <p class="mb-0 small">
-                                Terdapat {{ number_format($cards['temuan_aktif']['value'] ?? 0) }} temuan aktif
-                                dan {{ number_format($cards['travel_risiko_tinggi']['value'] ?? 0) }} travel berisiko tinggi.
+                                Terdapat {{ number_format($summary['temuan_aktif'] ?? 0) }} temuan aktif
+                                dan {{ number_format($summary['travel_risiko_tinggi'] ?? 0) }} travel berisiko tinggi.
                             </p>
                         </div>
                     </div>
@@ -102,9 +103,16 @@ document.getElementById('btn-refresh-kpi')?.addEventListener('click', function (
     .then(r => r.json())
     .then(res => {
         if (!res.success) return;
+        const formatter = new Intl.NumberFormat('id-ID');
         Object.entries(res.data).forEach(([key, value]) => {
-            const el = document.querySelector(`[data-kpi="${key}"]`);
-            if (el) el.textContent = new Intl.NumberFormat('id-ID').format(value);
+            document.querySelectorAll(`[data-kpi="${key}"]`).forEach(el => {
+                el.textContent = formatter.format(value);
+            });
+        });
+        document.querySelectorAll('[data-kpi-composite]').forEach(el => {
+            const parts = (el.dataset.kpiParts || '').split(',').filter(Boolean);
+            const total = parts.reduce((sum, key) => sum + (Number(res.data[key]) || 0), 0);
+            el.textContent = formatter.format(total);
         });
     })
     .finally(() => {

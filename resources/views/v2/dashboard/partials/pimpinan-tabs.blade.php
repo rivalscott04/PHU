@@ -66,7 +66,6 @@
                 @include('v2.dashboard.partials.executive-summary', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.completion-rates', ['executive' => $executive ?? []])
                 @include('v2.dashboard.partials.warning')
-                @include('v2.dashboard.partials.cards', ['colClass' => 'col-xl-2 col-md-3 col-sm-6'])
             </div>
             <div class="tab-pane fade" id="pane-visualisasi" role="tabpanel" aria-labelledby="tab-visualisasi">
                 @include('v2.dashboard.partials.heatmap', ['compact' => true])

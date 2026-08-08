@@ -5,14 +5,17 @@
     }
 
     const BRAND = {
-        accent: '#e2a712',
-        accentHover: '#c8940e',
-        accentDark: '#a88a2b',
-        gold: '#C9A635',
-        cream: '#FAFAF8',
-        creamDeep: '#F5EDD6',
         text: '#333333',
         white: '#ffffff',
+    };
+
+    const HEAT = {
+        low: '#34c38f',
+        lowStroke: '#1e7e55',
+        medium: '#f1b44c',
+        mediumStroke: '#b8860b',
+        high: '#e74c3c',
+        highStroke: '#c0392b',
     };
 
     // Batas provinsi NTB: Lombok (barat) + Sumbawa (timur)
@@ -70,23 +73,26 @@
         fitMapView(regions || []);
     }
 
-    function getColor(value) {
-        if (value > 10) return BRAND.accentDark;
-        if (value > 5) return BRAND.accent;
-        if (value > 2) return BRAND.gold;
-        if (value > 0) return '#E8C547';
-        return BRAND.creamDeep;
+    function getHeatStyle(value) {
+        if (value >= 3) {
+            return { color: HEAT.high, stroke: HEAT.highStroke };
+        }
+
+        if (value > 0) {
+            return { color: HEAT.medium, stroke: HEAT.mediumStroke };
+        }
+
+        return { color: HEAT.low, stroke: HEAT.lowStroke };
     }
 
     function getMarkerSize(value) {
-        if (value > 10) return 46;
-        if (value > 5) return 42;
-        if (value > 2) return 38;
+        if (value >= 10) return 44;
+        if (value >= 3) return 40;
         if (value > 0) return 34;
         return 30;
     }
 
-    function markerHtml(color, size) {
+    function markerHtml(color, size, iconStroke) {
         const pinHeight = Math.round(size * 1.28);
 
         return `
@@ -96,10 +102,10 @@
                         fill="${color}" stroke="${BRAND.white}" stroke-width="2"/>
                     <circle cx="20" cy="19" r="11.5" fill="${BRAND.white}"/>
                     <g transform="translate(20 19) scale(0.24) translate(-32 -32)">
-                        <path d="M10 46V24L26 12L42 24V46H10Z" stroke="${BRAND.accentHover}" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
-                        <path d="M10 32H42" stroke="${BRAND.accentHover}" stroke-width="3.5"/>
-                        <circle cx="48" cy="40" r="13" stroke="${BRAND.accentHover}" stroke-width="3.5" fill="none"/>
-                        <path d="M57 49L62 54" stroke="${BRAND.accentHover}" stroke-width="3.5" stroke-linecap="round"/>
+                        <path d="M10 46V24L26 12L42 24V46H10Z" stroke="${iconStroke}" stroke-width="3.5" stroke-linejoin="round" fill="none"/>
+                        <path d="M10 32H42" stroke="${iconStroke}" stroke-width="3.5"/>
+                        <circle cx="48" cy="40" r="13" stroke="${iconStroke}" stroke-width="3.5" fill="none"/>
+                        <path d="M57 49L62 54" stroke="${iconStroke}" stroke-width="3.5" stroke-linecap="round"/>
                     </g>
                 </svg>
             </div>
@@ -109,10 +115,11 @@
     function createMarkerIcon(intensity) {
         const size = getMarkerSize(intensity);
         const pinHeight = Math.round(size * 1.28);
+        const heat = getHeatStyle(intensity);
 
         return L.divIcon({
             className: 'pantau-map-marker-wrap',
-            html: markerHtml(getColor(intensity), size),
+            html: markerHtml(heat.color, size, heat.stroke),
             iconSize: [size, pinHeight],
             iconAnchor: [size / 2, pinHeight],
             popupAnchor: [0, -pinHeight + 4],
@@ -129,7 +136,7 @@
                 </div>
                 <hr class="my-2">
                 <div>Travel: <strong>${region.travel}</strong></div>
-                <div>Pengawasan: <strong style="color:${BRAND.accent};">${region.pengawasan}</strong></div>
+                <div>Pengawasan: <strong style="color:${getHeatStyle(region.pengawasan ?? 0).color};">${region.pengawasan}</strong></div>
                 <div>Temuan aktif: <strong>${region.temuan_aktif}</strong></div>
                 <div>Rata-rata risiko: <strong>${region.avg_risk || 0}</strong></div>
             </div>
@@ -172,7 +179,7 @@
                 riseOnHover: true,
             })
                 .bindTooltip(
-                    `<strong style="color:${BRAND.text};">${region.kabupaten}</strong><br>Pengawasan: <strong style="color:${BRAND.accent};">${intensity}</strong>`,
+                    `<strong style="color:${BRAND.text};">${region.kabupaten}</strong><br>Pengawasan: <strong style="color:${getHeatStyle(intensity).color};">${intensity}</strong>`,
                     { direction: 'top', offset: [0, -6], sticky: true }
                 )
                 .bindPopup(popupHtml(region))

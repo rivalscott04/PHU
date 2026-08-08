@@ -27,6 +27,10 @@ class ExecutiveDashboardController extends Controller
 
         $filter = DashboardFilter::fromRequest($request);
         $overview = $this->dashboardService->getOverview($filter);
+        $overview['kpiLayout'] = \App\Support\DashboardKpiCards::formatForRole(
+            $request->user()->role,
+            $overview['stats'],
+        );
 
         if ($request->user()->role === UserRole::Pimpinan->value) {
             $overview['executive'] = $this->dashboardService->getExecutive($filter);

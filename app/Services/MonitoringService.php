@@ -25,11 +25,15 @@ class MonitoringService
         });
     }
 
-    public function getKpiCards(?string $kabupaten = null, ?int $travelId = null): array
+    public function getKpiCards(?string $kabupaten = null, ?int $travelId = null, ?string $role = null, array $query = []): array
     {
-        return \App\Support\MonitoringKpiCards::format(
-            $this->getKpiSummary($kabupaten, $travelId)
-        );
+        $summary = $this->getKpiSummary($kabupaten, $travelId);
+
+        if ($role !== null) {
+            return \App\Support\MonitoringKpiCards::formatForRole($role, $summary, $query);
+        }
+
+        return \App\Support\MonitoringKpiCards::format($summary);
     }
 
     public function getTravelList(

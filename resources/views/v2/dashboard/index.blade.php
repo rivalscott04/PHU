@@ -128,7 +128,7 @@
         @include('v2.dashboard.partials.pimpinan-tabs')
     @else
         @include('v2.dashboard.partials.warning')
-        @include('v2.dashboard.partials.cards')
+        @include('v2.dashboard.partials.cards', ['kpiLayout' => $kpiLayout ?? []])
         @include('v2.dashboard.partials.heatmap')
         @include('v2.dashboard.partials.chart')
         @include('v2.dashboard.partials.ranking')
@@ -616,9 +616,16 @@
         return Promise.all(requests).then((results) => {
             const [statsRes, chartsRes, warnRes, heatmapRes, executiveRes] = results;
             if (statsRes.success) {
+                const formatter = new Intl.NumberFormat('id-ID');
                 Object.entries(statsRes.data).forEach(([key, card]) => {
-                    const el = document.querySelector(`[data-kpi="${key}"]`);
-                    if (el) el.textContent = new Intl.NumberFormat('id-ID').format(card.value);
+                    document.querySelectorAll(`[data-kpi="${key}"]`).forEach(el => {
+                        el.textContent = formatter.format(card.value);
+                    });
+                });
+                document.querySelectorAll('[data-kpi-composite]').forEach(el => {
+                    const parts = (el.dataset.kpiParts || '').split(',').filter(Boolean);
+                    const total = parts.reduce((sum, key) => sum + (Number(statsRes.data[key]?.value) || 0), 0);
+                    el.textContent = formatter.format(total);
                 });
             }
             if (chartsRes.success) {
