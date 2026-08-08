@@ -16,19 +16,6 @@
                 @csrf
                 @if ($checklist) @method('PUT') @endif
                 <div class="row">
-                    @if ($checklist)
-                        <div class="col-12 mb-3">
-                            <label class="form-label">Kode</label>
-                            <input type="text" class="form-control" value="{{ $checklist->code }}" readonly disabled>
-                            <div class="form-text">Kode dibuat otomatis dan tidak dapat diubah.</div>
-                        </div>
-                    @else
-                        <div class="col-12 mb-3">
-                            <div class="alert alert-light border mb-0 py-2">
-                                <small class="text-muted">Kode dibuat otomatis saat disimpan, contoh: <strong>LEG{{ now()->format('Ym') }}001</strong> (kategori + bulan/tahun + urutan).</small>
-                            </div>
-                        </div>
-                    @endif
                     <div class="col-12 mb-3">
                         <label class="form-label">Judul @include('partials.required-star')</label>
                         <input type="text" name="title" class="form-control @error('title') is-invalid @enderror" value="{{ old('title', $checklist?->title ?? '') }}" required>

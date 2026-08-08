@@ -18,7 +18,7 @@
                 <div class="card-header ps-0 d-flex flex-wrap justify-content-between align-items-start gap-2">
                     <div>
                         <h5 class="mb-0">{{ $editing ? 'Ubah Draf BA Pemberangkatan' : 'Form BA Pemberangkatan' }}</h5>
-                        <small class="text-muted d-block">Langkah 1 dari 3 — isi data keberangkatan jamaah.</small>
+                        <small class="text-muted d-block">Langkah 1 dari 3: isi data keberangkatan jamaah.</small>
                     </div>
                     @if ($editing)
                         <a href="{{ route($bap->pdf_file_path ? 'bap.wizard.review' : 'bap.wizard.upload', $bap->id) }}"
@@ -94,6 +94,41 @@
                                 'jamaahTotalCount' => $jamaahTotalCount ?? 0,
                             ])
 
+                            @if (! $isStaff)
+                                @if (($travelPackages ?? collect())->isNotEmpty())
+                                    <div class="col-12 mb-3">
+                                        <label for="travel_package_select" class="form-label">Pilih Paket</label>
+                                        <select class="form-select" id="travel_package_select">
+                                            <option value="">Isi manual</option>
+                                            @foreach ($travelPackages as $pkg)
+                                                <option value="{{ $pkg->id }}"
+                                                    @selected(old('travel_package_id') == $pkg->id || ($editing && ($bap->package ?? '') === $pkg->name))>
+                                                    {{ $pkg->name }}, Rp {{ number_format($pkg->price, 0, ',', '.') }}{{ $pkg->days ? ', '.$pkg->days.' hari' : '' }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <small class="form-text text-muted">
+                                            Pilih paket untuk mengisi harga, durasi, dan maskapai otomatis.
+                                            <a href="{{ route('travel.packages') }}">Kelola paket</a>
+                                        </small>
+                                    </div>
+                                @else
+                                    <div class="col-12 mb-3">
+                                        <div class="alert alert-info mb-0 py-2">
+                                            <i class="bx bx-info-circle me-1"></i>
+                                            Belum ada paket tersimpan.
+                                            <a href="{{ route('travel.packages') }}" class="alert-link">Buat katalog paket</a>
+                                            agar harga terisi otomatis saat mengajukan BA.
+                                        </div>
+                                    </div>
+                                @endif
+                                <input type="hidden" name="package" id="package_name"
+                                    value="{{ old('package', $editing ? ($bap->package ?? '') : '') }}">
+                            @endif
+
+                            <div class="col-12 mb-1">
+                                <h6 class="text-uppercase text-muted small fw-semibold mb-0">Detail Paket</h6>
+                            </div>
                             <div class="col-md-6 mb-3">
                                 <label for="days" class="form-label">Jumlah Hari</label>
                                 <input type="number" class="form-control @error('days') is-invalid @enderror" id="days" name="days" required
@@ -109,12 +144,6 @@
                                 @error('price')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                 <small class="form-text text-muted">Harga paket umroh per jamaah (bukan total keseluruhan)</small>
                                 <input type="hidden" id="price_hidden" name="price" value="{{ old('price', $editing ? $bap->price : '') }}">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="datetime" class="form-label">Tanggal Berangkat</label>
-                                <input type="date" class="form-control @error('datetime') is-invalid @enderror" id="datetime" name="datetime"
-                                    value="{{ $value('datetime') ? \Carbon\Carbon::parse($value('datetime'))->format('Y-m-d') : '' }}" required>
-                                @error('datetime')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
 
                             @include('travel.partials.bap-airline-fields', [
@@ -137,6 +166,16 @@
 @endsection
 
 @push('js')
+    @php
+        $travelPackagesById = ($travelPackages ?? collect())->mapWithKeys(fn ($pkg) => [
+            $pkg->id => [
+                'name' => $pkg->name,
+                'price' => (float) $pkg->price,
+                'days' => $pkg->days,
+                'default_airline' => $pkg->default_airline,
+            ],
+        ]);
+    @endphp
     <script>
         function prepareBapSubmit() {
             const display = document.getElementById('price');
@@ -280,6 +319,84 @@
         });
 
         document.addEventListener('DOMContentLoaded', function () {
+            const travelPackagesById = @json($travelPackagesById);
+
+            function applyAirlineSelection(selectId, otherId, airlineName) {
+                const select = document.getElementById(selectId);
+                const other = document.getElementById(otherId);
+                if (!select || !airlineName) {
+                    return;
+                }
+
+                let matched = false;
+                for (const option of select.options) {
+                    if (option.value && option.value.toLowerCase() === airlineName.toLowerCase()) {
+                        select.value = option.value;
+                        matched = true;
+                        break;
+                    }
+                }
+
+                if (!matched) {
+                    select.value = '__other__';
+                    if (other) {
+                        other.value = airlineName;
+                    }
+                }
+
+                toggleAirlineOther(selectId, otherId);
+            }
+
+            function applyTravelPackage(packageId) {
+                const packageNameInput = document.getElementById('package_name');
+
+                if (!packageId) {
+                    if (packageNameInput) {
+                        packageNameInput.value = '';
+                    }
+                    return;
+                }
+
+                const pkg = travelPackagesById[packageId];
+                if (!pkg) {
+                    return;
+                }
+
+                if (packageNameInput) {
+                    packageNameInput.value = pkg.name;
+                }
+
+                const priceInput = document.getElementById('price');
+                const priceHidden = document.getElementById('price_hidden');
+                if (priceInput && priceHidden) {
+                    const raw = String(Math.round(pkg.price));
+                    priceHidden.value = raw;
+                    priceInput.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+                }
+
+                const daysInput = document.getElementById('days');
+                if (daysInput && pkg.days) {
+                    daysInput.value = pkg.days;
+                    calculateReturnDate();
+                }
+
+                if (pkg.default_airline) {
+                    applyAirlineSelection('airlines_select', 'airlines_other', pkg.default_airline);
+                    syncReturnAirline();
+                }
+            }
+
+            const packageSelect = document.getElementById('travel_package_select');
+            if (packageSelect) {
+                packageSelect.addEventListener('change', function () {
+                    applyTravelPackage(this.value);
+                });
+
+                if (packageSelect.value) {
+                    applyTravelPackage(packageSelect.value);
+                }
+            }
+
             const priceInput = document.getElementById('price');
             const priceHidden = document.getElementById('price_hidden');
             if (priceInput && priceHidden && priceInput.value && !priceHidden.value) {

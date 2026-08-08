@@ -107,14 +107,20 @@
 }
 
 #sidebar-menu .metismenu .has-arrow::after {
+    float: none;
+    display: block;
+    margin-left: auto;
+    flex-shrink: 0;
+    align-self: center;
+    line-height: 1;
     transition: transform 0.3s ease;
     color: rgba(255,255,255,0.7) !important;
-    top: 50%;
-    transform: translateY(-50%) rotate(-90deg);
+    transform: rotate(-90deg);
 }
 
-#sidebar-menu .metismenu .has-arrow[aria-expanded="true"]::after {
-    transform: translateY(-50%) rotate(0deg);
+#sidebar-menu .metismenu .has-arrow[aria-expanded="true"]::after,
+#sidebar-menu .metismenu .mm-active > .has-arrow::after {
+    transform: rotate(0deg);
     color: white !important;
 }
 

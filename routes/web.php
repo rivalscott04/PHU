@@ -42,6 +42,7 @@ use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\SystemSettingController;
 use App\Http\Controllers\PublicTravelController;
 use App\Http\Controllers\TravelRegistrationController;
+use App\Http\Controllers\TravelPackageController;
 
 Route::get('/jamaah/template-test', function () {
     return "Route Berhasil";
@@ -210,6 +211,11 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
 
     // Travel certificates (for travel companies to view their own certificates)
     Route::get('/travel/certificates', [SertifikatController::class, 'travelCertificates'])->name('travel.certificates');
+
+    Route::get('/travel/paket', [TravelPackageController::class, 'index'])->name('travel.packages');
+    Route::post('/travel/paket', [TravelPackageController::class, 'store'])->name('travel.packages.store');
+    Route::put('/travel/paket/{package}', [TravelPackageController::class, 'update'])->name('travel.packages.update');
+    Route::delete('/travel/paket/{package}', [TravelPackageController::class, 'destroy'])->name('travel.packages.destroy');
 
     // Cabang Travel routes - accessible by admin and kabupaten only
     Route::middleware(['kabupaten.access'])->group(function () {

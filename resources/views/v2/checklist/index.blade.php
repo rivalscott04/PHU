@@ -17,11 +17,10 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-bordered table-striped">
-                    <thead><tr><th>Kode</th><th>Judul</th><th>Kategori</th><th>Jenis</th><th>Bobot</th><th>Status</th><th>Aksi</th></tr></thead>
+                    <thead><tr><th>Judul</th><th>Kategori</th><th>Jenis</th><th>Bobot</th><th>Status</th><th>Aksi</th></tr></thead>
                     <tbody>
                         @foreach ($checklists as $checklist)
                             <tr>
-                                <td>{{ $checklist->code }}</td>
                                 <td>{{ $checklist->title }}</td>
                                 <td>{{ $checklist->category?->name }}</td>
                                 <td>{{ $checklist->input_type?->label() ?? '-' }}</td>

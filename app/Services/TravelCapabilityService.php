@@ -81,6 +81,7 @@ class TravelCapabilityService
                 'jamaah_umrah' => $travel ? $travel->canHandleUmrah() : false,
                 'jamaah_haji_khusus' => $travel ? $travel->canHandleHajiKhusus() : false,
                 'bap' => true,
+                'travel_packages' => true,
                 'pengaduan' => false,
                 'keberangkatan' => true,
                 'pengunduran' => false, // disabled: schema mismatch, re-enable after migration fix
@@ -258,6 +259,7 @@ class TravelCapabilityService
             'hasSubmenu' => true,
             'items' => [
                 self::subItem('BA Pemberangkatan', 'bap', hint: 'Pengajuan keberangkatan jamaah'),
+                self::subItem('Paket Umrah Saya', 'travel.packages', hint: 'Katalog harga paket untuk pengajuan BA'),
                 self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
             ],
         ];

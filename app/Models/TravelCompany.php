@@ -96,6 +96,11 @@ class TravelCompany extends Model
         return $this->hasOne(User::class, 'travel_id');
     }
 
+    public function packages()
+    {
+        return $this->hasMany(TravelPackage::class, 'travel_id');
+    }
+
     public function verifiedByUser()
     {
         return $this->belongsTo(User::class, 'verified_by');

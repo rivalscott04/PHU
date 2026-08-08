@@ -17,6 +17,7 @@ class DevTravelSeeder extends Seeder
             UpdateTravelCapabilitiesSeeder::class,
             TravelUserSeeder::class,
             CabangTravelSeeder::class,
+            MataramTravelPackageSeeder::class,
         ]);
 
         $this->command->warn('DevTravelSeeder: PT. Mataram Travel + mataram.travel@phu.com (development only).');

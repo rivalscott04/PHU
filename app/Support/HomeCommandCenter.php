@@ -157,12 +157,32 @@ final class HomeCommandCenter
             'tone' => $jamaahTotal > 0 ? 'success' : 'secondary',
         ];
 
+        $hasActivePackage = $isApproved
+            && Schema::hasTable('travel_packages')
+            && $travel
+            && \App\Models\TravelPackage::query()
+                ->where('travel_id', $travel->id)
+                ->where('is_active', true)
+                ->exists();
+
+        $steps[] = [
+            'label' => 'Atur paket umrah',
+            'done' => $hasActivePackage,
+            'hint' => $hasActivePackage
+                ? 'Paket aktif tersedia untuk pengisian BA otomatis.'
+                : ($isApproved
+                    ? 'Simpan harga standar agar form BA terisi otomatis.'
+                    : 'Tersedia setelah registrasi disetujui.'),
+            'url' => $isApproved ? route('travel.packages') : null,
+            'tone' => $hasActivePackage ? 'success' : 'secondary',
+        ];
+
         $steps[] = [
             'label' => 'Ajukan BA Pemberangkatan',
             'done' => $bapDiajukan + $bapDiproses + $bapDiterima > 0,
             'hint' => ($bapDiajukan + $bapDiproses + $bapDiterima) > 0
                 ? "{$bapDiajukan} diajukan, {$bapDiproses} diproses, {$bapDiterima} diterima"
-                : 'Siapkan tanggal berangkat, maskapai, dan harga paket sebelum mengisi form BA.',
+                : 'Pilih paket atau isi harga per orang, tanggal berangkat, dan maskapai.',
             'url' => $isApproved ? route('bap') : null,
             'tone' => $bapDiterima > 0 ? 'success' : (($bapDiajukan + $bapDiproses) > 0 ? 'warning' : 'secondary'),
         ];

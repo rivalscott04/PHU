@@ -11,6 +11,7 @@ use App\Models\BAP;
 use App\Models\BapAirline;
 use App\Models\BapSetting;
 use App\Models\Jamaah;
+use App\Models\TravelPackage;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -499,6 +500,7 @@ class BAPController extends Controller
             'jamaah_ids.*' => 'integer',
             'days' => 'required|integer|min:1',
             'price' => 'required|numeric',
+            'package' => 'nullable|string|max:255',
             'datetime' => 'required|date',
             'airlines_select' => 'required|string|max:255',
             'airlines_other' => 'nullable|string|max:255|required_if:airlines_select,__other__',
@@ -521,7 +523,6 @@ class BAPController extends Controller
         );
 
         $data = $request->except([
-            'package',
             'price_display',
             'jamaah_ids',
             'people',
@@ -532,8 +533,10 @@ class BAPController extends Controller
             'airlines2_select',
             'airlines2_other',
             'same_return_airline',
+            'travel_package_id',
         ]);
         $data['people'] = $selected->count();
+        $data['package'] = $request->filled('package') ? trim($request->string('package')->toString()) : null;
         $data['airlines'] = $airlines;
         $data['airlines2'] = $airlines2;
 
@@ -604,7 +607,17 @@ class BAPController extends Controller
             $selectedJamaah = $bap->jamaah()->get(['jamaah.id', 'nama', 'nik']);
         }
 
-        return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap')
+        $travelPackages = collect();
+        if ($user->role === 'user' && $user->travel_id) {
+            $travelPackages = TravelPackage::query()
+                ->where('travel_id', $user->travel_id)
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get();
+        }
+
+        return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap', 'travelPackages')
             + ['airlineOptions' => BapAirline::activeNames()];
     }
 

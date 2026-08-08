@@ -145,6 +145,7 @@ final class RoleRouteMatrix
                 'settings.support.edit' => $deny,
                 'pengaduan' => $deny,
                 'jamaah.umrah' => $allow,
+                'travel.packages' => $allow,
                 'travel' => $allow,
                 'v2.dashboard' => $deny,
                 'v2.antrian.index' => $deny,
