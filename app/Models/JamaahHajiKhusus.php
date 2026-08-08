@@ -63,6 +63,7 @@ class JamaahHajiKhusus extends Model
         'tanggal_lahir' => 'date',
         'tanggal_berlaku_paspor' => 'date',
         'tahun_pendaftaran' => 'date',
+        'tanggal_verifikasi' => 'datetime',
     ];
 
     /**
@@ -167,6 +168,16 @@ class JamaahHajiKhusus extends Model
     public function canAssignPorsiNumber()
     {
         return $this->isBuktiSetorVerified() && empty($this->nomor_porsi);
+    }
+
+    /**
+     * Siap disetujui Kanwil: bukti setor OK + SPPH sudah ada + masih menunggu.
+     */
+    public function canKanwilApprove()
+    {
+        return $this->status_pendaftaran === 'pending'
+            && $this->isBuktiSetorVerified()
+            && ! empty($this->nomor_porsi);
     }
 
     /**

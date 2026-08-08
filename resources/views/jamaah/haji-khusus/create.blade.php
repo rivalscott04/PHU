@@ -420,7 +420,10 @@
                                     </label>
                                     <input type="text" class="form-control @error('nomor_porsi') is-invalid @enderror"
                                         id="nomor_porsi" name="nomor_porsi" value="{{ old('nomor_porsi') }}"
-                                        maxlength="20" @if (auth()->user()->role === 'user') disabled @endif>
+                                        {!! \App\Helpers\ValidationHelper::renderInputAttributes(
+                                            \App\Helpers\ValidationHelper::nomorSpphInputAttributes()
+                                        ) !!}
+                                        @if (auth()->user()->role === 'user') disabled @endif>
                                     @if (auth()->user()->role === 'user')
                                         <small class="text-muted">Nomor SPPH akan ditetapkan oleh admin setelah verifikasi
                                             bukti setor bank</small>

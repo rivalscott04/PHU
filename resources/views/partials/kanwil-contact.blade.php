@@ -1,4 +1,6 @@
 @php
+    use App\Support\KanwilContact;
+
     $kanwil = config('app.kanwil');
     $variant = $variant ?? 'footer-full';
 @endphp
@@ -94,8 +96,6 @@
     <i class="bi bi-geo-alt me-1"></i>{{ $kanwil['address'] }}
 @elseif ($variant === 'support')
     @php
-        use App\Support\KanwilContact;
-
         $supportStyle = $supportStyle ?? 'inline';
         $supportPhone = KanwilContact::supportPhone();
         $supportEmail = KanwilContact::supportEmail();

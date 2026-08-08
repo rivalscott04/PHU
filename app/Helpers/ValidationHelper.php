@@ -90,7 +90,7 @@ class ValidationHelper
         'no_paspor' => 'Nomor Paspor',
         'tanggal_berlaku_paspor' => 'Masa Berlaku Paspor',
         'tempat_terbit_paspor' => 'Tempat Terbit Paspor',
-        'nomor_porsi' => 'Nomor Porsi',
+        'nomor_porsi' => 'Nomor SPPH',
         'tahun_pendaftaran' => 'Tahun Pendaftaran',
         'catatan_khusus' => 'Catatan Khusus',
         'dokumen_ktp' => 'Scan KTP',
@@ -255,6 +255,8 @@ class ValidationHelper
 
     public const NOMOR_HP_MAX = 16;
 
+    public const NOMOR_SPPH_LENGTH = 9;
+
     /** Default VARCHAR(255) column limit in migrations. */
     public const VARCHAR_MAX = 255;
 
@@ -304,6 +306,10 @@ class ValidationHelper
                 'fields' => self::PHONE_FIELD_NAMES,
                 'max' => self::NOMOR_HP_MAX,
             ],
+            'spph' => [
+                'fields' => ['nomor_porsi'],
+                'max' => self::NOMOR_SPPH_LENGTH,
+            ],
         ];
     }
 
@@ -338,6 +344,21 @@ class ValidationHelper
     }
 
     /**
+     * @param  array<string, string|bool|null>  $extra
+     * @return array<string, string|bool>
+     */
+    public static function nomorSpphInputAttributes(array $extra = []): array
+    {
+        return array_filter(array_merge([
+            'maxlength' => (string) self::NOMOR_SPPH_LENGTH,
+            'inputmode' => 'numeric',
+            'data-digits-only' => (string) self::NOMOR_SPPH_LENGTH,
+            'placeholder' => str_repeat('0', self::NOMOR_SPPH_LENGTH),
+            'autocomplete' => 'off',
+        ], $extra), static fn ($value) => $value !== null && $value !== false);
+    }
+
+    /**
      * @param  array<string, string|bool>  $attributes
      */
     public static function renderInputAttributes(array $attributes): string
@@ -365,6 +386,25 @@ class ValidationHelper
     public static function nikRules(): array
     {
         return ['required', 'digits:'.self::NIK_LENGTH];
+    }
+
+    /** @return list<string|\Illuminate\Validation\Rules\Unique> */
+    public static function nomorSpphRules(bool $required = true, ?int $ignoreJamaahId = null, bool $checkUnique = true): array
+    {
+        $rules = [
+            $required ? 'required' : 'nullable',
+            'digits:'.self::NOMOR_SPPH_LENGTH,
+        ];
+
+        if ($checkUnique) {
+            $unique = Rule::unique('jamaah_haji_khusus', 'nomor_porsi');
+            if ($ignoreJamaahId !== null) {
+                $unique->ignore($ignoreJamaahId);
+            }
+            $rules[] = $unique;
+        }
+
+        return $rules;
     }
 
     /** @return list<string|\Illuminate\Validation\Rules\Unique> */
@@ -507,6 +547,15 @@ class ValidationHelper
             return [
                 'no_ktp.digits' => "NIK harus tepat {$len} digit angka.",
                 'no_ktp.size' => "NIK harus tepat {$len} digit angka.",
+            ];
+        }
+
+        if ($field === 'nomor_porsi') {
+            $len = self::NOMOR_SPPH_LENGTH;
+
+            return [
+                'nomor_porsi.digits' => "Nomor SPPH harus tepat {$len} digit angka.",
+                'nomor_porsi.unique' => 'Nomor SPPH ini sudah digunakan.',
             ];
         }
 

@@ -3,6 +3,8 @@
 @section('content')
 @php
     $canVerifyBukti = in_array(auth()->user()->role, ['admin', 'kabupaten'], true);
+    $canAssignSpph = $canVerifyBukti;
+    $canUpdateStatus = auth()->user()->role === 'admin';
 @endphp
 <div class="row">
     <div class="col-12">
@@ -189,16 +191,17 @@
                                                                 <code>{{ $item->nomor_porsi ?? '-' }}</code>
                                                             </td>
                                                             <td>
-                                                                <span class="badge {{ $item->getStatusBadgeClass() }}">{{ $item->getStatusText() }}</span>
+                                                                @include('jamaah.haji-khusus.partials.status-pendaftaran-cell', [
+                                                                    'jamaah' => $item,
+                                                                    'canUpdateStatus' => $canUpdateStatus,
+                                                                ])
                                                             </td>
                                                             <td>
-                                                                <span class="badge {{ $item->getBuktiSetorStatusBadgeClass() }}">{{ $item->getBuktiSetorStatusText() }}</span>
-                                                                @if($canVerifyBukti)
-                                                                    <br>
-                                                                    <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $item->id }}')">
-                                                                        Verifikasi
-                                                                    </button>
-                                                                @endif
+                                                                @include('jamaah.haji-khusus.partials.bukti-setor-cell', [
+                                                                    'jamaah' => $item,
+                                                                    'canVerifyBukti' => $canVerifyBukti,
+                                                                    'canAssignSpph' => $canAssignSpph,
+                                                                ])
                                                             </td>
                                                             <td class="text-center">
                                                                 <div class="btn-group" role="group">
@@ -308,16 +311,17 @@
                                         <code>{{ $jamaah->nomor_porsi ?? '-' }}</code>
                                     </td>
                                     <td>
-                                        <span class="badge {{ $jamaah->getStatusBadgeClass() }}">{{ $jamaah->getStatusText() }}</span>
+                                        @include('jamaah.haji-khusus.partials.status-pendaftaran-cell', [
+                                            'jamaah' => $jamaah,
+                                            'canUpdateStatus' => $canUpdateStatus,
+                                        ])
                                     </td>
                                     <td>
-                                        <span class="badge {{ $jamaah->getBuktiSetorStatusBadgeClass() }}">{{ $jamaah->getBuktiSetorStatusText() }}</span>
-                                        @if($canVerifyBukti)
-                                            <br>
-                                            <button class="btn btn-sm btn-primary mt-1" onclick="verifikasiBuktiSetor('{{ $jamaah->id }}')">
-                                                Verifikasi
-                                            </button>
-                                        @endif
+                                        @include('jamaah.haji-khusus.partials.bukti-setor-cell', [
+                                            'jamaah' => $jamaah,
+                                            'canVerifyBukti' => $canVerifyBukti,
+                                            'canAssignSpph' => $canAssignSpph,
+                                        ])
                                     </td>
                                     <td>
                                         <div class="btn-group" role="group">
@@ -379,68 +383,10 @@
 @endsection
 
 @push('js')
+@if($canVerifyBukti || $canAssignSpph || $canUpdateStatus)
+    @include('jamaah.haji-khusus.partials.spph-assign-scripts')
+@endif
 <script>
-function verifikasiBuktiSetor(id) {
-    Swal.fire({
-        title: 'Verifikasi Bukti Setor',
-        input: 'select',
-        inputOptions: { verified: 'Terverifikasi', rejected: 'Ditolak' },
-        inputPlaceholder: 'Pilih status verifikasi',
-        showCancelButton: true,
-        confirmButtonText: 'Lanjut',
-        cancelButtonText: 'Batal',
-        confirmButtonColor: '#556ee6',
-    }).then((statusResult) => {
-        if (!statusResult.isConfirmed || !statusResult.value) return;
-        const status = statusResult.value;
-
-        Swal.fire({
-            title: 'Catatan Verifikasi',
-            input: 'textarea',
-            inputPlaceholder: 'Catatan verifikasi (opsional)',
-            showCancelButton: true,
-            confirmButtonText: 'Simpan',
-            cancelButtonText: 'Batal',
-            confirmButtonColor: '#556ee6',
-        }).then((catatanResult) => {
-            if (!catatanResult.isConfirmed) return;
-            const catatan = catatanResult.value;
-
-            fetch(`/jamaah/haji-khusus/${id}/verify-bukti-setor`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    status_verifikasi_bukti: status,
-                    catatan_verifikasi: catatan
-                })
-            })
-            .then(async (response) => {
-                const data = await response.json();
-                if (!response.ok || !data.success) {
-                    const message = data.message
-                        || (data.errors ? Object.values(data.errors).flat().join(' ') : null)
-                        || 'Gagal memperbarui status verifikasi';
-                    throw new Error(message);
-                }
-                return data;
-            })
-            .then(() => {
-                Swal.fire({ title: 'Berhasil', text: 'Status verifikasi berhasil diperbarui', icon: 'success', confirmButtonColor: '#556ee6' })
-                    .then(() => location.reload());
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                Swal.fire({ title: 'Gagal', text: error.message || 'Terjadi kesalahan saat memperbarui status verifikasi', icon: 'error', confirmButtonColor: '#556ee6' });
-            });
-        });
-    });
-}
-
-// Global search functionality
 function globalSearch() {
     const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
     const travelItems = document.querySelectorAll('.travel-item');

@@ -4,8 +4,10 @@
     const config = window.PHU_INPUT_LIMITS || {};
     const nikFields = new Set(config.nik?.fields || ['nik', 'no_ktp']);
     const phoneFields = new Set(config.phone?.fields || ['nomor_hp', 'no_hp', 'pic_nomor_hp', 'telepon', 'Telepon']);
+    const spphFields = new Set(config.spph?.fields || ['nomor_porsi']);
     const nikMax = config.nik?.max || 16;
     const phoneMax = config.phone?.max || 16;
+    const spphMax = config.spph?.max || 9;
 
     function resolveFieldKey(field) {
         return field.getAttribute('name') || field.id || '';
@@ -19,6 +21,9 @@
         if (kind === 'phone') {
             return phoneMax;
         }
+        if (kind === 'spph') {
+            return spphMax;
+        }
 
         return parseInt(field.dataset.digitsOnly || field.getAttribute('maxlength') || '32', 10);
     }
@@ -30,6 +35,9 @@
         }
         if (phoneFields.has(key)) {
             return 'phone';
+        }
+        if (spphFields.has(key)) {
+            return 'spph';
         }
 
         return null;

@@ -130,7 +130,7 @@ class JamaahHajiKhususController extends Controller
             'no_paspor' => 'nullable|string|max:255',
             'tanggal_berlaku_paspor' => 'nullable|date|after:today',
             'tempat_terbit_paspor' => 'nullable|string|max:255',
-            'nomor_porsi' => 'nullable|string|max:255',
+            'nomor_porsi' => ValidationHelper::nomorSpphRules(required: false),
             'tahun_pendaftaran' => 'nullable|date',
             'catatan_khusus' => ValidationHelper::textRule(false),
             'dokumen_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
@@ -243,7 +243,7 @@ class JamaahHajiKhususController extends Controller
             'no_paspor' => 'nullable|string|max:255',
             'tanggal_berlaku_paspor' => 'nullable|date|after:today',
             'tempat_terbit_paspor' => 'nullable|string|max:255',
-            'nomor_porsi' => 'nullable|string|max:255',
+            'nomor_porsi' => ValidationHelper::nomorSpphRules(required: false),
             'tahun_pendaftaran' => 'nullable|date',
             'catatan_khusus' => ValidationHelper::textRule(false),
             'dokumen_ktp' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:500',
@@ -322,19 +322,32 @@ class JamaahHajiKhususController extends Controller
         $jamaahHajiKhusus = JamaahHajiKhusus::with('travel')->findOrFail($id);
         $user = Auth::user();
 
-        if (! in_array($user->role, ['admin', 'kabupaten'], true)) {
-            abort(403);
+        if ($user->role !== 'admin') {
+            $message = 'Hanya Kanwil (Super Admin) yang dapat memperbarui status pendaftaran.';
+            if ($request->expectsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 403);
+            }
+            abort(403, $message);
         }
 
-        KabupatenResourceGuard::authorizeJamaahHajiKhusus($user, $jamaahHajiKhusus);
-
         ValidationHelper::validate($request, [
-            'status_pendaftaran' => 'required|in:pending,approved,rejected,completed'
+            'status_pendaftaran' => 'required|in:pending,approved,rejected,completed',
         ]);
 
         $jamaahHajiKhusus->update([
-            'status_pendaftaran' => $request->status_pendaftaran
+            'status_pendaftaran' => $request->status_pendaftaran,
         ]);
+
+        $statusText = $jamaahHajiKhusus->fresh()->getStatusText();
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Status pendaftaran diperbarui menjadi {$statusText}",
+                'status' => $request->status_pendaftaran,
+                'status_text' => $statusText,
+            ]);
+        }
 
         return redirect()->back()
             ->with('success', 'Status jamaah haji khusus berhasil diperbarui.');
@@ -563,7 +576,7 @@ class JamaahHajiKhususController extends Controller
         }
 
         ValidationHelper::validate($request, [
-            'nomor_porsi' => 'required|string|max:255|unique:jamaah_haji_khusus,nomor_porsi,' . $jamaahHajiKhusus->id,
+            'nomor_porsi' => ValidationHelper::nomorSpphRules(ignoreJamaahId: $jamaahHajiKhusus->id),
             'tahun_pendaftaran' => 'required|string|max:4',
         ]);
 
