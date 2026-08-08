@@ -186,7 +186,7 @@
                                         <th>Nama</th>
                                         <th class="text-center" style="width: 90px;">Urutan</th>
                                         <th class="text-center" style="width: 90px;">Aktif</th>
-                                        <th class="text-end" style="width: 90px;">Aksi</th>
+                                        <th class="text-end text-nowrap" style="width: 96px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="bapAirlinesTableBody">
@@ -437,9 +437,11 @@
                     '<td><input type="text" class="form-control form-control-sm airline-name" value="' + escapeHtml(airline.name) + '"></td>' +
                     '<td><input type="number" class="form-control form-control-sm airline-sort text-center" min="0" max="9999" value="' + airline.sort_order + '"></td>' +
                     '<td class="text-center"><input type="checkbox" class="form-check-input airline-active" ' + (airline.is_active ? 'checked' : '') + '></td>' +
-                    '<td class="text-end">' +
-                        '<button type="button" class="btn btn-sm btn-outline-primary me-1 save-airline">Simpan</button>' +
-                        '<button type="button" class="btn btn-sm btn-outline-danger delete-airline"><i class="bx bx-trash"></i></button>' +
+                    '<td class="text-end text-nowrap">' +
+                        '<div class="btn-group btn-group-sm" role="group">' +
+                            '<button type="button" class="btn btn-outline-primary save-airline" title="Simpan"><i class="bx bx-save"></i></button>' +
+                            '<button type="button" class="btn btn-outline-danger delete-airline" title="Hapus"><i class="bx bx-trash"></i></button>' +
+                        '</div>' +
                     '</td>' +
                 '</tr>';
             }).join('');
