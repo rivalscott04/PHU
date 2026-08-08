@@ -210,7 +210,7 @@ class TravelCapabilityService
                 'icon' => 'bx bx-search-alt',
                 'hasSubmenu' => true,
                 'items' => [
-                    self::subItem('Daftar Pemeriksaan', 'v2.pengawasan.index', hint: 'Inspeksi lapangan PPIU'),
+                    self::subItem('Daftar Pemeriksaan', 'v2.pengawasan.index'),
                     self::subItem('Buat Pemeriksaan', 'v2.pengawasan.create'),
                     self::subItem('Tindak Lanjut Temuan', 'v2.followup.index', badge: 'followup_verify'),
                 ],
@@ -258,8 +258,8 @@ class TravelCapabilityService
             'icon' => 'bx bx-calendar-event',
             'hasSubmenu' => true,
             'items' => [
-                self::subItem('BA Pemberangkatan', 'bap', hint: 'Pengajuan keberangkatan jamaah'),
-                self::subItem('Paket Umrah Saya', 'travel.packages', hint: 'Katalog harga paket untuk pengajuan BA'),
+                self::subItem('BA Pemberangkatan', 'bap'),
+                self::subItem('Paket Umrah Saya', 'travel.packages'),
                 self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
             ],
         ];
@@ -298,7 +298,7 @@ class TravelCapabilityService
                 'icon' => 'bx bx-calendar-event',
                 'hasSubmenu' => true,
                 'items' => [
-                    self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending', hint: 'Persetujuan keberangkatan jamaah'),
+                    self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending'),
                     self::subItem('Pengaduan', 'pengaduan', badge: 'pengaduan_open'),
                     self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
                 ],
@@ -332,18 +332,32 @@ class TravelCapabilityService
         return [
             self::link('Beranda', 'home', 'bx bx-home-circle', badge: 'home_queues'),
             self::link('Antrian Kerja', 'v2.antrian.index', 'bx bx-list-check', badge: 'antrian'),
+            self::link('Dashboard Pengawasan', 'v2.dashboard', 'bx bx-bar-chart-alt-2'),
+            self::link('Monitoring PPIU', 'v2.monitoring.index', 'bx bx-radar'),
             [
-                'name' => 'Pengawasan',
-                'icon' => 'bx bx-analyse',
+                'name' => 'Pemeriksaan',
+                'icon' => 'bx bx-search-alt',
                 'hasSubmenu' => true,
-                'groups' => self::pengawasanGroups(forPengawas: true, forAdmin: true, forTravel: false, includeAntrian: false),
+                'items' => [
+                    self::subItem('BA Pemeriksaan', 'v2.pengawasan.index'),
+                    self::subItem('Tindak Lanjut Temuan', 'v2.followup.index', badge: 'followup_verify'),
+                ],
+            ],
+            [
+                'name' => 'Analisis',
+                'icon' => 'bx bx-line-chart',
+                'hasSubmenu' => true,
+                'items' => [
+                    self::subItem('Skor Risiko', 'v2.risk.index'),
+                    self::subItem('Profil Kepatuhan PPIU', 'v2.compliance.index'),
+                ],
             ],
             [
                 'name' => 'Operasional',
                 'icon' => 'bx bx-calendar-event',
                 'hasSubmenu' => true,
                 'items' => [
-                    self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending', hint: 'Persetujuan keberangkatan jamaah'),
+                    self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending'),
                     self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
                     self::subItem('Pengaduan', 'pengaduan', badge: 'pengaduan_open'),
                     self::subItem('Registrasi Travel', 'travel', params: ['filter' => 'pending'], badge: 'registration_pending'),
@@ -364,72 +378,8 @@ class TravelCapabilityService
                     self::subItem('Atur Checklist', 'v2.checklist.index'),
                 ],
             ],
+            self::link('Log Aktivitas', 'v2.audit-log.index', 'bx bx-history'),
         ];
-    }
-
-    /**
-     * @return list<array{label: string, items: list<array<string, mixed>>}>
-     */
-    private static function pengawasanGroups(
-        bool $forPengawas,
-        bool $forAdmin,
-        bool $forTravel,
-        bool $includeAntrian = true,
-    ): array {
-        $groups = [];
-
-        if ($includeAntrian && ($forPengawas || $forAdmin)) {
-            $groups[] = [
-                'label' => 'Antrian',
-                'items' => [
-                    self::subItem('Antrian Kerja', 'v2.antrian.index', badge: 'antrian'),
-                ],
-            ];
-        }
-
-        $groups = array_merge($groups, [
-            [
-                'label' => 'Ringkasan',
-                'items' => [
-                    self::subItem('Dashboard Pengawasan', 'v2.dashboard'),
-                    self::subItem('Monitoring PPIU', 'v2.monitoring.index'),
-                ],
-            ],
-            [
-                'label' => 'Operasional',
-                'items' => array_values(array_filter([
-                    ($forPengawas || $forAdmin)
-                        ? self::subItem('BA Pemeriksaan', 'v2.pengawasan.index', hint: 'Inspeksi lapangan PPIU')
-                        : null,
-                    self::subItem(
-                        'Tindak Lanjut Temuan',
-                        'v2.followup.index',
-                        badge: $forTravel ? 'followup_action' : 'followup_verify',
-                    ),
-                ])),
-            ],
-            [
-                'label' => 'Analisis',
-                'items' => array_values(array_filter([
-                    ($forPengawas || $forAdmin)
-                        ? self::subItem('Skor Risiko', 'v2.risk.index')
-                        : null,
-                    self::subItem('Profil Kepatuhan PPIU', 'v2.compliance.index'),
-                ])),
-            ],
-            [
-                'label' => 'Pengaturan',
-                'items' => array_values(array_filter([
-                    $forAdmin ? self::subItem('Atur Checklist', 'v2.checklist.index') : null,
-                    ($forPengawas || $forAdmin) ? self::subItem('Log Aktivitas', 'v2.audit-log.index') : null,
-                ])),
-            ],
-        ]);
-
-        return array_values(array_filter(
-            $groups,
-            fn (array $group) => ($group['items'] ?? []) !== []
-        ));
     }
 
     /** @param  array<string, mixed>  $params */
@@ -455,14 +405,12 @@ class TravelCapabilityService
         string $name,
         string $route,
         array $params = [],
-        ?string $hint = null,
         ?string $badge = null,
     ): array {
         return [
             'name' => $name,
             'route' => $route,
             'params' => $params,
-            'hint' => $hint,
             'badge' => $badge,
             'visible' => true,
         ];

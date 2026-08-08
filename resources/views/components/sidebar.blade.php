@@ -91,6 +91,7 @@
     line-height: 1.3;
     border-radius: 6px;
     margin: 1px 0.5rem;
+    color: #e8eaef;
 }
 
 #sidebar-menu .metismenu > li > a i {
@@ -99,6 +100,7 @@
     margin-right: 0.55rem !important;
     font-size: 1.05rem;
     line-height: 1;
+    color: #a6b0cf;
 }
 
 #sidebar-menu .metismenu > li > a .sidebar-menu-text {
@@ -137,9 +139,11 @@
     border-radius: 6px;
     margin: 1px 0.5rem;
     padding: 0.4rem 0.85rem 0.4rem 2rem !important;
-    font-size: 0.78rem;
-    line-height: 1.25;
+    font-size: 0.8125rem;
+    line-height: 1.3;
     gap: 0.35rem;
+    color: #a6b0cf;
+    border-left: 3px solid transparent;
 }
 
 #sidebar-menu .metismenu .sub-menu li a i {
@@ -148,16 +152,40 @@
 
 #sidebar-menu .metismenu .sub-menu li a:hover,
 #sidebar-menu .metismenu > li > a:hover {
-    background-color: rgba(255,255,255,0.08);
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #fff;
+}
+
+#sidebar-menu .metismenu > li > a:hover i {
+    color: #fff;
+}
+
+#sidebar-menu .metismenu .sub-menu li.mm-active > a,
+#sidebar-menu .metismenu .sub-menu li a.active {
+    color: #fff !important;
+    background: rgba(85, 110, 230, 0.15);
+    border-left-color: #556ee6;
+    padding-left: calc(2rem - 3px) !important;
+}
+
+#sidebar-menu .metismenu > li.mm-active > a,
+#sidebar-menu .metismenu > li > a.active {
+    color: #fff;
+    background: rgba(85, 110, 230, 0.15);
+}
+
+#sidebar-menu .metismenu > li.mm-active > a i,
+#sidebar-menu .metismenu > li > a.active i {
+    color: #fff;
 }
 
 #sidebar-menu .metismenu .sub-menu .menu-heading {
     padding: 0.45rem 1rem 0.15rem 2rem;
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     font-weight: 600;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.55);
     pointer-events: none;
     user-select: none;
     margin: 0;
@@ -173,33 +201,37 @@
     margin: 0.5rem 0.5rem 0.35rem;
     padding: 0.5rem 0.75rem;
     border-radius: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.sidebar-scope-banner small {
+    color: rgba(255, 255, 255, 0.6) !important;
 }
 
 .sidebar-menu-badge {
-    font-size: 0.625rem;
-    min-width: 1.1rem;
-    padding: 0.15em 0.4em;
-    line-height: 1.1;
+    font-size: 0.6875rem;
+    min-width: 1.15rem;
+    padding: 0.15em 0.45em;
+    line-height: 1.15;
     flex-shrink: 0;
     margin-left: auto;
 }
 
-.sidebar-menu-label {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto;
-    min-width: 0;
+body[data-sidebar=dark] #sidebar-menu .metismenu > li > a {
+    color: #e8eaef;
 }
 
-.sidebar-menu-hint {
-    display: block;
-    font-size: 0.625rem;
-    color: rgba(255, 255, 255, 0.4);
-    line-height: 1.2;
-    margin-top: 0.05rem;
-    white-space: normal;
+body[data-sidebar=dark] #sidebar-menu .metismenu > li > a i {
+    color: #a6b0cf !important;
+}
+
+body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a {
+    color: #a6b0cf;
+}
+
+body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a:hover {
+    color: #fff;
 }
 </style>
 
@@ -261,12 +293,7 @@
                                                 @foreach($visibleGroupItems as $item)
                                                     <li>
                                                         <a href="{{ $itemUrl($item) }}">
-                                                            <span class="sidebar-menu-label">
-                                                                <span>{{ $item['name'] }}</span>
-                                                                @if(! empty($item['hint']))
-                                                                    <small class="sidebar-menu-hint">{{ $item['hint'] }}</small>
-                                                                @endif
-                                                            </span>
+                                                            <span class="sidebar-menu-text">{{ $item['name'] }}</span>
                                                             {!! $renderBadge($item['badge'] ?? null) !!}
                                                         </a>
                                                     </li>
@@ -278,12 +305,7 @@
                                             @if($canShowItem($item))
                                                 <li>
                                                     <a href="{{ $itemUrl($item) }}">
-                                                        <span class="sidebar-menu-label">
-                                                            <span>{{ $item['name'] }}</span>
-                                                            @if(! empty($item['hint']))
-                                                                <small class="sidebar-menu-hint">{{ $item['hint'] }}</small>
-                                                            @endif
-                                                        </span>
+                                                        <span class="sidebar-menu-text">{{ $item['name'] }}</span>
                                                         {!! $renderBadge($item['badge'] ?? null) !!}
                                                     </a>
                                                 </li>

@@ -78,3 +78,7 @@ body {
 #sidebar-menu .metismenu > li > a {
     font-size: var(--phu-font-size-base) !important;
 }
+
+#sidebar-menu .metismenu .sub-menu li a {
+    font-size: var(--phu-font-size-compact) !important;
+}
