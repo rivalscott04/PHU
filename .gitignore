@@ -18,13 +18,13 @@ yarn-error.log
 /.vscode
 /guidev2
 /storage/logs/laravel.log
-# E2E / Playwright (termasuk pengawasan-demo-pimpinan.spec.ts)
+# E2E / Playwright — semua lokal, jangan di-commit
 /e2e
 /scripts
-/database/seeders/E2eScenarioSeeder.php
-/playwright-report
-/test-results
-/blob-report
+/database/seeders/*E2e*Seeder.php
+/playwright-report/
+/test-results/
+/blob-report/
 
 # Demo artefak — hasil generator (screenshot, pptx, pdf, manifest), jangan di-commit
 /docs/demo-pengawasan/

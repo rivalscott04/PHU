@@ -8,6 +8,7 @@ use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use Carbon\Carbon;
 use App\Models\BAP;
+use App\Models\BapAirline;
 use App\Models\BapSetting;
 use App\Models\Jamaah;
 use Illuminate\Http\Request;
@@ -341,46 +342,75 @@ class BAPController extends Controller
         return "Pada hari ini {$hariText}, tanggal {$tanggalText}, bulan {$bulanText}, tahun {$tahunText}";
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
-        // Check if user is authenticated
-        if (!$user) {
+
+        if (! $user) {
             return redirect()->route('login')->with('error', 'Anda harus login terlebih dahulu.');
         }
 
-        if ($user->role === 'user') {
-            $data = BAP::query()
-                ->where('user_id', $user->id)
-                ->where('kab_kota', $user->kabupaten)
-                ->latest()
-                ->paginate(15)
-                ->withQueryString();
-        } elseif ($user->role === 'kabupaten') {
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            $data = BAP::query();
-            KabupatenScopeFilter::applyOnColumn($data, $filters, 'kab_kota');
-            $data = $data->latest()
-                ->paginate(15)
-                ->withQueryString();
-        } elseif ($user->role === 'admin') {
-            $data = BAP::query()
-                ->latest()
-                ->paginate(15)
-                ->withQueryString();
-        } else {
-            $data = BAP::query()
-                ->whereRaw('1 = 0')
-                ->latest()
-                ->paginate(15)
-                ->withQueryString();
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $data = $this->buildBapListingQuery($request, $user)
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('travel.partials.bap-table-body', compact('data'))->render(),
+                'pagination' => view('travel.partials.bap-pagination', compact('data'))->render(),
+                'pagination_info' => [
+                    'from' => $data->firstItem(),
+                    'to' => $data->lastItem(),
+                    'total' => $data->total(),
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                ],
+            ]);
         }
 
         $travel = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
         $jamaahCount = $this->bapJamaahService->countForForm($user, $travel);
 
         return view('travel.listBAP', compact('data', 'jamaahCount'));
+    }
+
+    private function buildBapListingQuery(Request $request, $user)
+    {
+        if ($user->role === 'user') {
+            $query = BAP::query()
+                ->where('user_id', $user->id)
+                ->where('kab_kota', $user->kabupaten);
+        } elseif ($user->role === 'kabupaten') {
+            $query = BAP::query();
+            KabupatenScopeFilter::applyOnColumn($query, KabupatenScopeFilter::filtersForUser($user), 'kab_kota');
+        } elseif ($user->role === 'admin') {
+            $query = BAP::query();
+        } else {
+            $query = BAP::query()->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('jabatan', 'like', "%{$search}%")
+                    ->orWhere('ppiuname', 'like', "%{$search}%")
+                    ->orWhere('address_phone', 'like', "%{$search}%")
+                    ->orWhere('kab_kota', 'like', "%{$search}%")
+                    ->orWhere('nomor_surat', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
     }
 
     public function export()
@@ -452,6 +482,13 @@ class BAPController extends Controller
      */
     private function validatedBapPayload(Request $request, $user, ?int $ignoreBapId = null): array
     {
+        if ($user->role === 'user') {
+            $travel = TravelCompany::find($user->travel_id);
+            if (! $travel?->isRegistrationApproved()) {
+                abort(403, 'Akun travel belum diverifikasi Kanwil.');
+            }
+        }
+
         ValidationHelper::validate($request, [
             'name' => 'required|string|max:255',
             'jabatan' => 'required|string|max:255',
@@ -463,10 +500,18 @@ class BAPController extends Controller
             'days' => 'required|integer|min:1',
             'price' => 'required|numeric',
             'datetime' => 'required|date',
-            'airlines' => 'required|string|max:255',
+            'airlines_select' => 'required|string|max:255',
+            'airlines_other' => 'nullable|string|max:255|required_if:airlines_select,__other__',
+            'airlines2_select' => 'required_unless:same_return_airline,1|nullable|string|max:255',
+            'airlines2_other' => 'nullable|string|max:255|required_if:airlines2_select,__other__',
             'returndate' => 'required|date',
-            'airlines2' => 'required|string|max:255',
+            'same_return_airline' => 'nullable|boolean',
         ]);
+
+        $airlines = $this->resolveAirlineInput($request, 'airlines');
+        $airlines2 = $request->boolean('same_return_airline')
+            ? $airlines
+            : $this->resolveAirlineInput($request, 'airlines2');
 
         $selected = $this->bapJamaahService->validateSelection(
             $request->input('jamaah_ids', []),
@@ -475,8 +520,22 @@ class BAPController extends Controller
             $ignoreBapId
         );
 
-        $data = $request->except(['package', 'price_display', 'jamaah_ids', 'people', '_method', '_token']);
+        $data = $request->except([
+            'package',
+            'price_display',
+            'jamaah_ids',
+            'people',
+            '_method',
+            '_token',
+            'airlines_select',
+            'airlines_other',
+            'airlines2_select',
+            'airlines2_other',
+            'same_return_airline',
+        ]);
         $data['people'] = $selected->count();
+        $data['airlines'] = $airlines;
+        $data['airlines2'] = $airlines2;
 
         return [
             'data' => $data,
@@ -503,6 +562,13 @@ class BAPController extends Controller
 
             if (! $travelData) {
                 return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
+            }
+
+            if ($user->role === 'user' && ! $travelData->isRegistrationApproved()) {
+                return redirect()->route('home')->with(
+                    'error',
+                    'Akun travel belum diverifikasi Kanwil. Maskapai dan pengajuan BA tersedia setelah registrasi disetujui.'
+                );
             }
 
             $allowedTypes = $travelData->allowedJamaahTypes();
@@ -538,7 +604,8 @@ class BAPController extends Controller
             $selectedJamaah = $bap->jamaah()->get(['jamaah.id', 'nama', 'nik']);
         }
 
-        return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap');
+        return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap')
+            + ['airlineOptions' => BapAirline::activeNames()];
     }
 
     public function uploadPDF(Request $request, $id)
@@ -923,6 +990,87 @@ class BAPController extends Controller
             'success' => true,
             'message' => 'Pengaturan penandatangan BA berhasil disimpan',
         ]);
+    }
+
+    public function listAirlines()
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        return response()->json(
+            BapAirline::query()
+                ->orderBy('sort_order')
+                ->orderBy('name')
+                ->get(['id', 'name', 'sort_order', 'is_active'])
+        );
+    }
+
+    public function storeAirline(Request $request)
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        ValidationHelper::validate($request, [
+            'name' => 'required|string|max:255|unique:bap_airlines,name',
+            'sort_order' => 'nullable|integer|min:0|max:9999',
+        ]);
+
+        $airline = BapAirline::create([
+            'name' => trim($request->string('name')->toString()),
+            'sort_order' => (int) ($request->input('sort_order') ?? (BapAirline::max('sort_order') + 1)),
+            'is_active' => true,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Maskapai berhasil ditambahkan',
+            'airline' => $airline,
+        ]);
+    }
+
+    public function updateAirline(Request $request, BapAirline $airline)
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        ValidationHelper::validate($request, [
+            'name' => 'required|string|max:255|unique:bap_airlines,name,'.$airline->id,
+            'sort_order' => 'nullable|integer|min:0|max:9999',
+            'is_active' => 'nullable|boolean',
+        ]);
+
+        $airline->name = trim($request->string('name')->toString());
+        $airline->sort_order = (int) $request->input('sort_order', $airline->sort_order);
+        if ($request->has('is_active')) {
+            $airline->is_active = $request->boolean('is_active');
+        }
+        $airline->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Maskapai berhasil diperbarui',
+            'airline' => $airline,
+        ]);
+    }
+
+    public function destroyAirline(BapAirline $airline)
+    {
+        KabupatenResourceGuard::requireAdmin(auth()->user());
+
+        $airline->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Maskapai berhasil dihapus',
+        ]);
+    }
+
+    private function resolveAirlineInput(Request $request, string $prefix): string
+    {
+        $select = trim((string) $request->input("{$prefix}_select", ''));
+
+        if ($select === '__other__') {
+            return trim((string) $request->input("{$prefix}_other", ''));
+        }
+
+        return $select;
     }
 
     public function showVerifyQR(Request $request)

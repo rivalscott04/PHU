@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\Jamaah;
+use App\Models\TravelCompany;
 use App\Exports\JamaahExport;
 use App\Exports\JamaahUmrahExport;
 use App\Exports\JamaahHajiExport;
@@ -25,70 +26,102 @@ class JamaahController extends Controller
         return Excel::download(new JamaahExport, 'template_jamaah.xlsx');
     }
 
-    public function indexHaji()
+    public function indexHaji(Request $request)
     {
         $user = auth()->user();
 
         if ($user->role === 'user') {
-            // User (travel) hanya bisa melihat jamaah dari kabupatennya
             $travel = $user->travel;
-            if (!$travel || $travel->Status !== 'PIHK') {
+            if (! $travel || $travel->Status !== 'PIHK') {
                 return redirect()->route('jamaah.umrah')
                     ->with('error', 'Travel Anda tidak memiliki izin untuk mengelola jamaah haji!');
             }
-            $jamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->where('travel_id', $user->travel_id)
-                ->orderBy('nama')
-                ->get();
-            $groupedJamaah = null;
-        } else if ($user->role === 'kabupaten') {
-            $jamaahQuery = Jamaah::where('jenis_jamaah', 'haji')->with('travel');
-            KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
-            $jamaah = $jamaahQuery->get();
-            $groupedJamaah = null;
-        } else if ($user->role === 'admin') {
-            // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
-            $jamaah = collect(); // Empty for admin view
-            $groupedJamaah = Jamaah::where('jenis_jamaah', 'haji')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-        } else {
-            $jamaah = collect();
-            $groupedJamaah = null;
         }
 
-        return view('jamaah.haji.index', compact('jamaah', 'groupedJamaah'));
+        return $this->renderJamaahListing($request, 'haji', 'jamaah.haji.index', 'jamaah.haji');
     }
 
-    public function indexUmrah()
+    private function renderJamaahListing(Request $request, string $jenis, string $viewName, string $listingRoute)
     {
         $user = auth()->user();
+        $showTravelColumn = in_array($user->role, ['admin', 'kabupaten'], true);
 
-        if ($user->role === 'user') {
-            $jamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->where('travel_id', $user->travel_id)
-                ->orderBy('nama')
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $jamaah = $this->buildJamaahListingQuery($jenis, $request, $user)
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $exportTravels = null;
+        if ($user->role === 'admin') {
+            $exportTravels = TravelCompany::query()
+                ->whereHas('jamaah', fn ($q) => $q->where('jenis_jamaah', $jenis))
+                ->withCount(['jamaah as jamaah_count' => fn ($q) => $q->where('jenis_jamaah', $jenis)])
+                ->orderBy('Penyelenggara')
                 ->get();
-            $groupedJamaah = null;
-        } else if ($user->role === 'kabupaten') {
-            $jamaahQuery = Jamaah::where('jenis_jamaah', 'umrah')->with('travel');
-            KabupatenScopeFilter::applyOnTravelRelation($jamaahQuery, KabupatenScopeFilter::filtersForUser($user));
-            $jamaah = $jamaahQuery->get();
-            $groupedJamaah = null;
-        } else if ($user->role === 'admin') {
-            // Admin bisa melihat semua jamaah, dikelompokkan berdasarkan travel
-            $jamaah = collect(); // Empty for admin view
-            $groupedJamaah = Jamaah::where('jenis_jamaah', 'umrah')
-                ->with('travel')
-                ->get()
-                ->groupBy('travel_id');
-        } else {
-            $jamaah = collect();
-            $groupedJamaah = null;
         }
 
-        return view('jamaah.umrah.index', compact('jamaah', 'groupedJamaah'));
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('jamaah.partials.table-body', compact('jamaah', 'showTravelColumn'))->render(),
+                'pagination' => view('jamaah.partials.pagination', compact('jamaah'))->render(),
+                'pagination_info' => [
+                    'from' => $jamaah->firstItem(),
+                    'to' => $jamaah->lastItem(),
+                    'total' => $jamaah->total(),
+                    'current_page' => $jamaah->currentPage(),
+                    'last_page' => $jamaah->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                ],
+            ]);
+        }
+
+        return view($viewName, compact(
+            'jamaah',
+            'exportTravels',
+            'listingRoute',
+            'showTravelColumn',
+        ));
+    }
+
+    private function buildJamaahListingQuery(string $jenis, Request $request, $user)
+    {
+        $query = Jamaah::query()
+            ->where('jenis_jamaah', $jenis)
+            ->with('travel:id,Penyelenggara,kab_kota');
+
+        if ($user->role === 'user') {
+            $query->where('travel_id', $user->travel_id);
+        } elseif ($user->role === 'kabupaten') {
+            KabupatenScopeFilter::applyOnTravelRelation($query, KabupatenScopeFilter::filtersForUser($user));
+        } elseif ($user->role !== 'admin') {
+            $query->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
+                    ->orWhere('nomor_hp', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%")
+                    ->orWhereHas('travel', function ($travelQuery) use ($search) {
+                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
+                            ->orWhere('kab_kota', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        return $query->orderBy('nama');
+    }
+
+    public function indexUmrah(Request $request)
+    {
+        return $this->renderJamaahListing($request, 'umrah', 'jamaah.umrah.index', 'jamaah.umrah');
     }
 
     public function createHaji()

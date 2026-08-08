@@ -3,6 +3,7 @@
     'title',
     'exportRoute',
     'groupedData' => null,
+    'exportTravels' => null,
     'orgLabel' => 'PPIU',
 ])
 
@@ -45,7 +46,14 @@
                                     <label for="{{ $modalId }}TravelSelect" class="form-label">Pilih {{ $orgLabel }}</label>
                                     <select class="form-select jamaah-export-travel-select" id="{{ $modalId }}TravelSelect" data-modal="{{ $modalId }}">
                                         <option value="">Pilih {{ $orgLabel }}...</option>
-                                        @if($groupedData)
+                                        @if($exportTravels && $exportTravels->isNotEmpty())
+                                            @foreach($exportTravels as $travel)
+                                                <option value="{{ $travel->id }}">
+                                                    {{ $travel->Penyelenggara ?? $orgLabel.' Tidak Diketahui' }}
+                                                    ({{ $travel->jamaah_count ?? 0 }} Jamaah)
+                                                </option>
+                                            @endforeach
+                                        @elseif($groupedData)
                                             @foreach($groupedData as $travelId => $jamaahGroup)
                                                 @php
                                                     $travel = $jamaahGroup->first()->travel;

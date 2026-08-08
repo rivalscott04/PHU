@@ -168,6 +168,10 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('bap/update-status/{id}', [BAPController::class, 'updateStatus'])->name('bap.updateStatus');
     Route::get('/bap/settings', [BAPController::class, 'getSettings'])->name('bap.settings');
     Route::post('/bap/settings', [BAPController::class, 'updateSettings'])->name('bap.settings.update');
+    Route::get('/bap/airlines', [BAPController::class, 'listAirlines'])->name('bap.airlines.index');
+    Route::post('/bap/airlines', [BAPController::class, 'storeAirline'])->name('bap.airlines.store');
+    Route::put('/bap/airlines/{airline}', [BAPController::class, 'updateAirline'])->name('bap.airlines.update');
+    Route::delete('/bap/airlines/{airline}', [BAPController::class, 'destroyAirline'])->name('bap.airlines.destroy');
     Route::get('/keberangkatan', [BAPController::class, 'showKeberangkatan'])->name('keberangkatan');
 
     Route::get('/travel', [KanwilController::class, 'showTravel'])->name('travel');

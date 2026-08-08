@@ -168,7 +168,7 @@ class RoleWorkflowGuide
             'hint' => 'Ikuti 3 langkah wizard: isi data → unggah PDF → review & ajukan.',
             'steps' => [
                 'Klik Tambah atau Lanjutkan draft yang masih pending',
-                'Isi / ubah data keberangkatan dan pilih jamaah (Langkah 1)',
+                'Isi tanggal berangkat, pilih maskapai berangkat/pulang, dan pilih jamaah (Langkah 1)',
                 'Unggah surat pernyataan PDF (Langkah 2)',
                 'Review data lalu klik Ajukan ke Kabupaten/Kanwil (Langkah 3)',
             ],

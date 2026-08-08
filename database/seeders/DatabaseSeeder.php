@@ -11,6 +11,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             V2MasterChecklistSeeder::class,
+            BapAirlineSeeder::class,
         ]);
     }
 }

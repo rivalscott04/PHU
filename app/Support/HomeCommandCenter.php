@@ -162,7 +162,7 @@ final class HomeCommandCenter
             'done' => $bapDiajukan + $bapDiproses + $bapDiterima > 0,
             'hint' => ($bapDiajukan + $bapDiproses + $bapDiterima) > 0
                 ? "{$bapDiajukan} diajukan, {$bapDiproses} diproses, {$bapDiterima} diterima"
-                : 'Buat pengajuan keberangkatan setelah data jamaah lengkap.',
+                : 'Siapkan tanggal berangkat, maskapai, dan harga paket sebelum mengisi form BA.',
             'url' => $isApproved ? route('bap') : null,
             'tone' => $bapDiterima > 0 ? 'success' : (($bapDiajukan + $bapDiproses) > 0 ? 'warning' : 'secondary'),
         ];

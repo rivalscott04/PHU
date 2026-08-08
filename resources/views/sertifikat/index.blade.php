@@ -29,6 +29,22 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
+                        <div class="row g-2 align-items-center mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white border-end-0"><i class="bx bx-search text-muted"></i></span>
+                                    <input type="text" class="form-control border-start-0" id="sertifikatSearchInput"
+                                        placeholder="Cari PPIU, kepala, nomor surat, jenis..." value="{{ request('search') }}" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select id="sertifikatPerPageFilter" class="form-select form-select-sm">
+                                    @foreach([10, 15, 25, 50] as $size)
+                                        <option value="{{ $size }}" @selected((int) request('per_page', 10) === $size)>{{ $size }} / halaman</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-striped table-hover align-middle mb-0">
                                 <thead class="table-light">
@@ -43,81 +59,14 @@
                                         <th>Aksi</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    @forelse($sertifikat as $index => $item)
-                                        <tr>
-                                            <td>{{ $index + 1 }}</td>
-                                            <td>{{ $item->nama_ppiu }}</td>
-                                            <td>{{ $item->nama_kepala }}</td>
-                                            <td>
-                                                <small class="text-muted">{{ $item->nomor_surat }}</small>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-info">
-                                                    {{ $item->jenis }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span
-                                                    class="badge bg-{{ $item->jenis_lokasi == 'pusat' ? 'primary' : 'warning' }}">
-                                                    {{ ucfirst($item->jenis_lokasi) }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span class="badge bg-{{ $item->getStatusColor() }}">
-                                                    {{ $item->getStatusText() }}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    @if ($item->pdf_path)
-                                                        <a href="{{ route('sertifikat.download', $item->id) }}"
-                                                            class="btn btn-sm btn-success" title="Download PDF">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </a>
-                                                        <a href="{{ route('sertifikat.view', $item->id) }}"
-                                                            class="btn btn-sm btn-info" title="Lihat PDF" target="_blank">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                    @else
-                                                        <button type="button" class="btn btn-sm btn-primary"
-                                                            onclick="generatePdf('{{ $item->id }}', '{{ $item->nama_ppiu }}')"
-                                                            title="Generate PDF">
-                                                            <i class="fas fa-file-pdf"></i>
-                                                        </button>
-                                                    @endif
-
-                                                    <a href="{{ route('sertifikat.verifikasi', $item->uuid) }}"
-                                                        class="btn btn-sm btn-warning" title="Verifikasi" target="_blank">
-                                                        <i class="fas fa-qrcode"></i>
-                                                    </a>
-
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        onclick="confirmDelete('{{ $item->id }}', '{{ $item->nama_ppiu }}', 'sertifikat')"
-                                                        title="Hapus">
-                                                        <i class="fas fa-trash"></i>
-                                                    </button>
-                                                </div>
-
-                                                <form id="delete-form-{{ $item->id }}"
-                                                    action="{{ route('sertifikat.destroy', $item->id) }}" method="POST"
-                                                    style="display: none;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @empty
-                                        <tr>
-                                            <td colspan="8" class="text-center">Tidak ada data sertifikat</td>
-                                        </tr>
-                                    @endforelse
+                                <tbody id="sertifikatTableBody">
+                                    @include('sertifikat.partials.table-body', compact('sertifikat'))
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="d-flex justify-content-center">
-                            {{ $sertifikat->links() }}
+                        <div id="sertifikatPaginationContainer">
+                            @include('sertifikat.partials.pagination', compact('sertifikat'))
                         </div>
                     </div>
                 </div>
@@ -385,6 +334,83 @@
                     });
                 });
         }
+
+        function initSertifikatListing() {
+            const searchInput = document.getElementById('sertifikatSearchInput');
+            const perPageFilter = document.getElementById('sertifikatPerPageFilter');
+
+            if (!searchInput) {
+                return;
+            }
+
+            let searchTimeout;
+
+            function updateResultsInfo(data) {
+                const info = data.pagination_info;
+                const bottom = document.getElementById('sertifikatResultsInfo');
+                if (bottom) {
+                    bottom.textContent = `Menampilkan ${info.from || 0} sampai ${info.to || 0} dari ${info.total} data`;
+                }
+            }
+
+            function fetchListing(params = {}) {
+                const queryParams = new URLSearchParams();
+                if (searchInput.value.trim()) {
+                    queryParams.append('search', searchInput.value.trim());
+                }
+                if (perPageFilter && perPageFilter.value) {
+                    queryParams.append('per_page', perPageFilter.value);
+                }
+                if (params.page) {
+                    queryParams.append('page', params.page);
+                }
+
+                fetch(`{{ route('sertifikat.index') }}?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            return;
+                        }
+
+                        document.getElementById('sertifikatTableBody').innerHTML = data.tableBody;
+                        document.getElementById('sertifikatPaginationContainer').innerHTML = data.pagination;
+                        updateResultsInfo(data);
+                        bindPaginationLinks();
+                    });
+            }
+
+            function bindPaginationLinks() {
+                document.querySelectorAll('#sertifikatPaginationContainer .pagination a.page-link').forEach(function(link) {
+                    link.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const url = new URL(this.href);
+                        const page = url.searchParams.get('page');
+                        if (page) {
+                            fetchListing({ page });
+                        }
+                    });
+                });
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(fetchListing, 350);
+            });
+
+            if (perPageFilter) {
+                perPageFilter.addEventListener('change', fetchListing);
+            }
+
+            bindPaginationLinks();
+        }
+
+        document.addEventListener('DOMContentLoaded', initSertifikatListing);
 
     </script>
 @endpush

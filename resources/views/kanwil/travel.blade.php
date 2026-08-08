@@ -72,20 +72,20 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-sm-auto">
-                            <label for="dataTable_length" class="form-label mb-1">Tampilkan</label>
-                            <select id="dataTable_length" class="form-select form-select-sm">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option value="50">50</option>
-                                <option value="100">100</option>
+                            <label for="travelPerPageFilter" class="form-label mb-1">Tampilkan</label>
+                            <select id="travelPerPageFilter" class="form-select form-select-sm">
+                                @foreach([10, 15, 25, 50] as $size)
+                                    <option value="{{ $size }}" @selected((int) request('per_page', 15) === $size)>{{ $size }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-sm-auto">
                             <span class="form-text">data per halaman</span>
                         </div>
                         <div class="col-sm-auto ms-sm-auto">
-                            <label for="dataTable_search" class="form-label mb-1">Cari</label>
-                            <input type="search" id="dataTable_search" class="form-control form-control-sm">
+                            <label for="travelSearchInput" class="form-label mb-1">Cari</label>
+                            <input type="search" id="travelSearchInput" class="form-control form-control-sm"
+                                placeholder="Penyelenggara, pimpinan, kab/kota..." value="{{ request('search') }}">
                         </div>
                     </div>
 
@@ -114,107 +114,13 @@
                                     <th>-</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($data as $item)
-                                    <tr class="text-center align-middle" data-travel-id="{{ $item->id }}">
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td class="text-start">{{ $item->Penyelenggara }}</td>
-                                        <td>{{ $item->Pusat }}</td>
-                                        <td>{{ date('d/m/Y', strtotime($item->Tanggal)) }}</td>
-                                        <td>{{ $item->nilai_akreditasi }}</td>
-                                        <td>{{ date('d/m/Y', strtotime($item->tanggal_akreditasi)) }}</td>
-                                        <td>{{ $item->lembaga_akreditasi }}</td>
-                                        <td>-</td>
-                                        <td>{{ $item->Pimpinan }}</td>
-                                        <td class="text-start">{{ $item->alamat_kantor_lama }}</td>
-                                        <td class="text-start">{{ $item->alamat_kantor_baru }}</td>
-                                        <td>{{ $item->Telepon }}</td>
-                                        <td>
-                                            <div class="d-flex flex-column align-items-center status-badge">
-                                                <span class="badge {{ $item->Status === 'PIHK' ? 'bg-success' : 'bg-info' }}">
-                                                    {{ $item->Status }}
-                                                </span>
-                                                <small class="text-muted mt-1">
-                                                    @if($item->Status === 'PIHK')
-                                                        Haji & Umrah
-                                                    @else
-                                                        Umrah Only
-                                                    @endif
-                                                </small>
-                                            </div>
-                                        </td>
-                                        <td>{{ $item->kab_kota }}</td>
-                                        <td>
-                                            @php
-                                                $regStatus = $item->registration_status ?? \App\Enums\TravelRegistrationStatus::Approved;
-                                            @endphp
-                                            <span class="badge {{ $regStatus->badgeClass() }}">
-                                                {{ $regStatus->label() }}
-                                            </span>
-                                            @if ($regStatus === \App\Enums\TravelRegistrationStatus::Pending && $item->user)
-                                                <div class="mt-1">
-                                                    <small class="text-muted d-block">{{ $item->user->nama }}</small>
-                                                    <small class="text-muted d-block">{{ $item->user->email }}</small>
-                                                </div>
-                                                @if ($item->dokumen_sk || $item->dokumen_akreditasi)
-                                                    <div class="mt-2 d-flex flex-column gap-1">
-                                                        @if ($item->dokumen_sk)
-                                                            @include('partials.document-preview-button', [
-                                                                'url' => route('travel.registration.document', ['id' => $item->id, 'type' => 'sk']),
-                                                                'path' => $item->dokumen_sk,
-                                                                'label' => 'SK / Izin',
-                                                            ])
-                                                        @endif
-                                                        @if ($item->dokumen_akreditasi)
-                                                            @include('partials.document-preview-button', [
-                                                                'url' => route('travel.registration.document', ['id' => $item->id, 'type' => 'akreditasi']),
-                                                                'path' => $item->dokumen_akreditasi,
-                                                                'label' => 'Akreditasi',
-                                                            ])
-                                                        @endif
-                                                    </div>
-                                                @endif
-                                            @endif
-                                            @if ($regStatus === \App\Enums\TravelRegistrationStatus::Rejected && $item->registration_notes)
-                                                <small class="text-danger d-block mt-1">{{ Str::limit($item->registration_notes, 60) }}</small>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="d-flex justify-content-center gap-1 flex-wrap">
-                                                @if (auth()->user()->role === 'admin' && ($item->registration_status ?? null) === \App\Enums\TravelRegistrationStatus::Pending)
-                                                    <form method="POST" action="{{ route('travel.registration.approve', $item->id) }}" class="d-inline" id="approve-form-{{ $item->id }}">
-                                                        @csrf
-                                                        <button type="button" class="btn btn-success btn-sm" title="Setujui"
-                                                                onclick='confirmApproveRegistration(document.getElementById("approve-form-{{ $item->id }}"), @json($item->Penyelenggara))'>
-                                                            <i class="bx bx-check me-1"></i> Setujui
-                                                        </button>
-                                                    </form>
-                                                    <button type="button" class="btn btn-danger btn-sm"
-                                                            onclick='openRejectModal({{ $item->id }}, @json($item->Penyelenggara))'
-                                                            title="Tolak">
-                                                        <i class="bx bx-x me-1"></i> Tolak
-                                                    </button>
-                                                @endif
-                                                <button type="button" class="btn btn-primary btn-sm" 
-                                                        onclick='editStatus({{ $item->id }}, @json($item->Status), @json($item->Penyelenggara))'
-                                                        title="Update Status">
-                                                    <i class="bx bx-edit me-1"></i>
-                                                    Status
-                                                </button>
-                                                <a href="{{ route('travel.edit', $item->id) }}" class="btn btn-sm btn-warning"
-                                                    title="Edit">
-                                                    <i class="bx bx-edit"></i>
-                                                </a>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                            <tbody id="travelTableBody">
+                                @include('kanwil.partials.travel-table-body', compact('data'))
                             </tbody>
                         </table>
 
-                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-3">
-                        <div id="dataTable_info" class="text-muted small"></div>
-                        <div id="dataTable_paginate"></div>
+                    <div id="travelPaginationContainer">
+                        @include('kanwil.partials.travel-pagination', compact('data'))
                     </div>
                     </div>
                 </div>
@@ -345,103 +251,87 @@
 @endsection
 
 @push('js')
-    <!-- Initialize DataTables -->
     <script>
-        $(document).ready(function() {
-            // Initialize DataTable with custom DOM and scrolling
-            var table = $('#dataTable').DataTable({
-                // Change responsive to false and use scrollX instead
-                responsive: false,
-                scrollX: true, // Enable horizontal scrolling
-                scrollCollapse: true,
-                dom: 't', // Only show table
-                language: {
-                    paginate: {
-                        previous: "<i class='fa fa-angle-left'></i>",
-                        next: "<i class='fa fa-angle-right'></i>"
+        function initTravelListing() {
+            const searchInput = document.getElementById('travelSearchInput');
+            const perPageFilter = document.getElementById('travelPerPageFilter');
+            const currentFilter = @json($filter ?? 'all');
+
+            if (!searchInput) {
+                return;
+            }
+
+            let searchTimeout;
+
+            function updateResultsInfo(data) {
+                const info = data.pagination_info;
+                const bottom = document.getElementById('travelResultsInfo');
+                if (bottom) {
+                    bottom.textContent = `Menampilkan ${info.from || 0} sampai ${info.to || 0} dari ${info.total} data`;
+                }
+            }
+
+            function fetchListing(params = {}) {
+                const queryParams = new URLSearchParams();
+                if (currentFilter && currentFilter !== 'all') {
+                    queryParams.append('filter', currentFilter);
+                }
+                if (searchInput.value.trim()) {
+                    queryParams.append('search', searchInput.value.trim());
+                }
+                if (perPageFilter && perPageFilter.value) {
+                    queryParams.append('per_page', perPageFilter.value);
+                }
+                if (params.page) {
+                    queryParams.append('page', params.page);
+                }
+
+                fetch(`{{ route('travel') }}?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
                     },
-                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 hingga 0 dari 0 data",
-                    lengthMenu: "Tampilkan _MENU_ data per halaman",
-                    search: "Cari:",
-                    zeroRecords: "Tidak ada data yang ditemukan",
-                    infoFiltered: "(disaring dari _MAX_ total data)"
-                },
-                columnDefs: [{
-                    orderable: false,
-                    targets: -1
-                }], // Disable sorting on action column
-                "drawCallback": function(settings) {
-                    // Update info text
-                    var info = this.api().page.info();
-                    $('#dataTable_info').html('Menampilkan ' + (info.start + 1) + ' hingga ' + info
-                        .end + ' dari ' + info.recordsTotal + ' data');
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            return;
+                        }
 
-                    // Build custom pagination
-                    var paginationHtml = '';
-                    var pages = this.api().page.info().pages;
-                    var currentPage = this.api().page.info().page;
+                        document.getElementById('travelTableBody').innerHTML = data.tableBody;
+                        document.getElementById('travelPaginationContainer').innerHTML = data.pagination;
+                        updateResultsInfo(data);
+                        bindPaginationLinks();
+                    });
+            }
 
-                    paginationHtml += '<ul class="pagination pagination-sm mb-0">';
-
-                    // Previous button
-                    paginationHtml += '<li class="page-item' + (currentPage === 0 ? ' disabled' : '') +
-                        '">';
-                    paginationHtml +=
-                        '<a class="page-link" href="#" data-page="prev"><i class="fas fa-chevron-left"></i></a></li>';
-
-                    // Page numbers
-                    var startPage = Math.max(0, currentPage - 2);
-                    var endPage = Math.min(pages - 1, currentPage + 2);
-
-                    for (var i = startPage; i <= endPage; i++) {
-                        paginationHtml += '<li class="page-item' + (i === currentPage ? ' active' :
-                            '') + '">';
-                        paginationHtml += '<a class="page-link" href="#" data-page="' + i + '">' + (i +
-                            1) + '</a></li>';
-                    }
-
-                    // Next button
-                    paginationHtml += '<li class="page-item' + (currentPage === pages - 1 ?
-                        ' disabled' : '') + '">';
-                    paginationHtml +=
-                        '<a class="page-link" href="#" data-page="next"><i class="fas fa-chevron-right"></i></a></li>';
-
-                    paginationHtml += '</ul>';
-
-                    $('#dataTable_paginate').html(paginationHtml);
-
-                    // Add event listeners to pagination
-                    $('#dataTable_paginate .page-link').on('click', function(e) {
-                        e.preventDefault();
-                        var page = $(this).data('page');
-
-                        if (page === 'prev') {
-                            table.page('previous').draw('page');
-                        } else if (page === 'next') {
-                            table.page('next').draw('page');
-                        } else {
-                            table.page(page).draw('page');
+            function bindPaginationLinks() {
+                document.querySelectorAll('#travelPaginationContainer .pagination a.page-link').forEach(function(link) {
+                    link.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const url = new URL(this.href);
+                        const page = url.searchParams.get('page');
+                        if (page) {
+                            fetchListing({ page });
                         }
                     });
-                }
+                });
+            }
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(fetchListing, 350);
             });
 
-            // Make sure the table redraws properly when window resizes
-            $(window).on('resize', function() {
-                table.columns.adjust().draw();
-            });
+            if (perPageFilter) {
+                perPageFilter.addEventListener('change', fetchListing);
+            }
 
-            // Custom length change
-            $('#dataTable_length').on('change', function() {
-                table.page.len($(this).val()).draw();
-            });
+            bindPaginationLinks();
+        }
 
-            // Custom search
-            $('#dataTable_search').on('keyup', function() {
-                table.search(this.value).draw();
-            });
-        });
+        document.addEventListener('DOMContentLoaded', initTravelListing);
     </script>
 
     <!-- Status Update JavaScript -->

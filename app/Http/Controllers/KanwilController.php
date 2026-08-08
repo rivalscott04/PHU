@@ -169,6 +169,51 @@ class KanwilController extends Controller
         $user = auth()->user();
         $filter = $request->get('filter', 'all');
 
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $data = $this->buildTravelListingQuery($request, $user)
+            ->orderByDesc('created_at')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('kanwil.partials.travel-table-body', compact('data'))->render(),
+                'pagination' => view('kanwil.partials.travel-pagination', compact('data'))->render(),
+                'pagination_info' => [
+                    'from' => $data->firstItem(),
+                    'to' => $data->lastItem(),
+                    'total' => $data->total(),
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                    'filter' => $filter,
+                ],
+            ]);
+        }
+
+        $pendingQuery = TravelCompany::pendingRegistration();
+        if ($user && $user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($pendingQuery, $filters, 'kab_kota');
+        }
+        $pendingCount = $pendingQuery->count();
+
+        return view('kanwil.travel', [
+            'data' => $data,
+            'filter' => $filter,
+            'pendingCount' => $pendingCount,
+        ]);
+    }
+
+    private function buildTravelListingQuery(Request $request, $user)
+    {
+        $filter = $request->get('filter', 'all');
+
         $query = TravelCompany::query()
             ->with('user:id,travel_id,nama,email,nomor_hp')
             ->select(
@@ -207,20 +252,18 @@ class KanwilController extends Controller
             $query->where('registration_status', TravelRegistrationStatus::Rejected);
         }
 
-        $data = $query->orderByDesc('created_at')->get();
-
-        $pendingQuery = TravelCompany::pendingRegistration();
-        if ($user && $user->role === 'kabupaten') {
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            KabupatenScopeFilter::applyOnColumn($pendingQuery, $filters, 'kab_kota');
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('Penyelenggara', 'like', "%{$search}%")
+                    ->orWhere('Pimpinan', 'like', "%{$search}%")
+                    ->orWhere('kab_kota', 'like', "%{$search}%")
+                    ->orWhere('Telepon', 'like', "%{$search}%")
+                    ->orWhere('Pusat', 'like', "%{$search}%");
+            });
         }
-        $pendingCount = $pendingQuery->count();
 
-        return view('kanwil.travel', [
-            'data' => $data,
-            'filter' => $filter,
-            'pendingCount' => $pendingCount,
-        ]);
+        return $query;
     }
 
     public function approveRegistration($id)
@@ -342,24 +385,78 @@ class KanwilController extends Controller
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil disimpan.');
     }
 
-    public function showCabangTravel()
+    public function showCabangTravel(Request $request)
     {
         $user = auth()->user();
 
-        if ($user->role === 'admin') {
-            // Admin can see all cabang travel - optimized query
-            $data = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon')->get();
-        } else if ($user->role === 'kabupaten') {
-            $dataQuery = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'SK_BA', 'tanggal', 'pimpinan_cabang', 'alamat_cabang', 'telepon');
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            KabupatenScopeFilter::applyOnColumn($dataQuery, $filters, 'kabupaten');
-            $data = $dataQuery->get();
-        } else {
-            // Other roles see empty data
-            $data = collect();
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $data = $this->buildCabangTravelListingQuery($request, $user)
+            ->orderByDesc('id_cabang')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('kanwil.partials.cabang-travel-table-body', compact('data'))->render(),
+                'pagination' => view('kanwil.partials.cabang-travel-pagination', compact('data'))->render(),
+                'pagination_info' => [
+                    'from' => $data->firstItem(),
+                    'to' => $data->lastItem(),
+                    'total' => $data->total(),
+                    'current_page' => $data->currentPage(),
+                    'last_page' => $data->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                ],
+            ]);
         }
 
-        return view('kanwil.cabangTravel', ['data' => $data]);
+        return view('kanwil.cabangTravel', compact('data'));
+    }
+
+    private function buildCabangTravelListingQuery(Request $request, $user)
+    {
+        $query = CabangTravel::query()->select(
+            'id_cabang',
+            'Penyelenggara',
+            'kabupaten',
+            'pusat',
+            'pimpinan_pusat',
+            'alamat_pusat',
+            'SK_BA',
+            'tanggal',
+            'pimpinan_cabang',
+            'alamat_cabang',
+            'telepon',
+        );
+
+        if ($user && $user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($query, $filters, 'kabupaten');
+        } elseif (! $user || $user->role !== 'admin') {
+            $query->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('Penyelenggara', 'like', "%{$search}%")
+                    ->orWhere('kabupaten', 'like', "%{$search}%")
+                    ->orWhere('pusat', 'like', "%{$search}%")
+                    ->orWhere('pimpinan_pusat', 'like', "%{$search}%")
+                    ->orWhere('pimpinan_cabang', 'like', "%{$search}%")
+                    ->orWhere('alamat_pusat', 'like', "%{$search}%")
+                    ->orWhere('alamat_cabang', 'like', "%{$search}%")
+                    ->orWhere('SK_BA', 'like', "%{$search}%")
+                    ->orWhere('telepon', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
     }
 
     public function downloadTemplate()

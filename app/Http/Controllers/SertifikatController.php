@@ -22,27 +22,64 @@ use Dompdf\Options;
 
 class SertifikatController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
-        if ($user->role === 'admin') {
-            // Admin can see all sertifikat
-            $sertifikat = Sertifikat::with(['travel', 'cabang'])
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-        } else if ($user->role === 'kabupaten') {
-            $sertifikatQuery = Sertifikat::with(['travel', 'cabang']);
-            KabupatenScopeFilter::applyOnSertifikat($sertifikatQuery, $user);
-            $sertifikat = $sertifikatQuery
-                ->orderBy('created_at', 'desc')
-                ->paginate(10);
-        } else {
-            // Other roles see empty data
-            $sertifikat = collect();
+
+        $perPage = (int) $request->get('per_page', 10);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 10;
+
+        $query = $this->buildSertifikatListingQuery($request, $user);
+
+        $sertifikat = (clone $query)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('sertifikat.partials.table-body', compact('sertifikat'))->render(),
+                'pagination' => view('sertifikat.partials.pagination', compact('sertifikat'))->render(),
+                'pagination_info' => [
+                    'from' => $sertifikat->firstItem(),
+                    'to' => $sertifikat->lastItem(),
+                    'total' => $sertifikat->total(),
+                    'current_page' => $sertifikat->currentPage(),
+                    'last_page' => $sertifikat->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                ],
+            ]);
         }
 
         return view('sertifikat.index', compact('sertifikat'));
+    }
+
+    private function buildSertifikatListingQuery(Request $request, $user)
+    {
+        if ($user->role === 'admin') {
+            $query = Sertifikat::query();
+        } elseif ($user->role === 'kabupaten') {
+            $query = Sertifikat::query();
+            KabupatenScopeFilter::applyOnSertifikat($query, $user);
+        } else {
+            return Sertifikat::query()->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_ppiu', 'like', "%{$search}%")
+                    ->orWhere('nama_kepala', 'like', "%{$search}%")
+                    ->orWhere('nomor_surat', 'like', "%{$search}%")
+                    ->orWhere('jenis', 'like', "%{$search}%")
+                    ->orWhere('status', 'like', "%{$search}%");
+            });
+        }
+
+        return $query;
     }
 
     public function create()

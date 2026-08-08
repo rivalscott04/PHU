@@ -78,24 +78,37 @@ class PengaduanController extends Controller
             ->with('success', 'Pengaduan berhasil dikirim! Kami akan memproses pengaduan Anda segera.');
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
-        
-        if ($user->role === 'admin') {
-            $pengaduanQuery = Pengaduan::query();
-        } elseif ($user->role === 'kabupaten') {
-            $pengaduanQuery = Pengaduan::query();
-            KabupatenScopeFilter::applyOnTravelRelation($pengaduanQuery, KabupatenScopeFilter::filtersForUser($user));
-        } else {
-            $pengaduanQuery = Pengaduan::query()->whereRaw('1 = 0');
-        }
+        $pengaduanQuery = $this->buildPengaduanListingQuery($request, $user);
 
-        $pengaduan = $pengaduanQuery
-            ->with('travel')
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $pengaduan = (clone $pengaduanQuery)
             ->latest()
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('pengaduan.partials.table-body', compact('pengaduan'))->render(),
+                'pagination' => view('pengaduan.partials.pagination', compact('pengaduan'))->render(),
+                'pagination_info' => [
+                    'from' => $pengaduan->firstItem(),
+                    'to' => $pengaduan->lastItem(),
+                    'total' => $pengaduan->total(),
+                    'current_page' => $pengaduan->currentPage(),
+                    'last_page' => $pengaduan->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                    'status' => $request->get('status'),
+                ],
+            ]);
+        }
 
         $statsRow = (clone $pengaduanQuery)->selectRaw("
             COUNT(*) as total,
@@ -112,8 +125,38 @@ class PengaduanController extends Controller
             'completed' => (int) ($statsRow->completed ?? 0),
             'rejected' => (int) ($statsRow->rejected ?? 0),
         ];
-        
+
         return view('pengaduan.index', compact('pengaduan', 'stats'));
+    }
+
+    private function buildPengaduanListingQuery(Request $request, $user)
+    {
+        if ($user->role === 'admin') {
+            $query = Pengaduan::query();
+        } elseif ($user->role === 'kabupaten') {
+            $query = Pengaduan::query();
+            KabupatenScopeFilter::applyOnTravelRelation($query, KabupatenScopeFilter::filtersForUser($user));
+        } else {
+            $query = Pengaduan::query()->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('hal_aduan', 'like', "%{$search}%")
+                    ->orWhere('nama_pengadu', 'like', "%{$search}%")
+                    ->orWhereHas('travel', function ($travelQuery) use ($search) {
+                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
+                            ->orWhere('kab_kota', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->string('status')->toString());
+        }
+
+        return $query->with('travel:id,Penyelenggara,kab_kota');
     }
 
     public function detail($id)

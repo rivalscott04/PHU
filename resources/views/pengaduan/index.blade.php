@@ -59,12 +59,33 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <h5 class="mb-0">Data Pengaduan</h5>
-                    <select id="statusFilter" class="form-select form-select-sm" style="width: auto;">
-                        <option value="">Semua Status</option>
-                        <option value="pending">Menunggu</option>
-                        <option value="in_progress">Sedang Diproses</option>
-                        <option value="completed">Selesai</option>
-                    </select>
+                    <small class="text-muted" id="pengaduanResultsInfoTop">Total halaman: <strong>{{ $pengaduan->total() }}</strong></small>
+                </div>
+                <div class="p-3 border-bottom bg-light">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-md-6">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bx bx-search text-muted"></i></span>
+                                <input type="text" class="form-control border-start-0" id="pengaduanSearchInput"
+                                    placeholder="Cari travel, hal aduan, pengadu..." value="{{ request('search') }}" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="pengaduanStatusFilter" class="form-select form-select-sm">
+                                <option value="">Semua Status</option>
+                                <option value="pending" @selected(request('status') === 'pending')>Menunggu</option>
+                                <option value="in_progress" @selected(request('status') === 'in_progress')>Sedang Diproses</option>
+                                <option value="completed" @selected(request('status') === 'completed')>Selesai</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <select id="pengaduanPerPageFilter" class="form-select form-select-sm">
+                                @foreach([10, 15, 25, 50] as $size)
+                                    <option value="{{ $size }}" @selected((int) request('per_page', 15) === $size)>{{ $size }} / halaman</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-responsive">
                     <table class="table table-striped table-hover align-middle mb-0">
@@ -79,54 +100,14 @@
                                 <th>Aksi</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            @foreach ($pengaduan as $item)
-                                <tr class="text-center">
-                                    <td>{{ $pengaduan->firstItem() + $loop->index }}</td>
-                                    <td>{{ $item->travel->Penyelenggara }}</td>
-                                    <td class="text-start" style="max-width: 300px;">{{ $item->hal_aduan }}</td>
-                                    <td>
-                                        @if ($item->berkas_aduan)
-                                            <a href="{{ route('pengaduan.download-berkas', $item->id) }}" target="_blank" rel="noopener noreferrer">
-                                                <i class="bx bx-file"></i>
-                                            </a>
-                                        @else
-                                            -
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <select class="form-select form-select-sm status-dropdown"
-                                                data-id="{{ $item->id }}"
-                                                data-current-status="{{ $item->status }}"
-                                                style="width: auto; min-width: 140px;">
-                                            <option value="pending" {{ $item->status == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                                            <option value="in_progress" {{ $item->status == 'in_progress' ? 'selected' : '' }}>Sedang Diproses</option>
-                                            <option value="completed" {{ $item->status == 'completed' ? 'selected' : '' }}>Selesai</option>
-                                        </select>
-                                    </td>
-                                    <td>{{ $item->created_at->format('d/m/Y') }}</td>
-                                    <td>
-                                        <div class="d-flex gap-1 justify-content-center flex-wrap">
-                                            <a href="{{ route('pengaduan.show', $item->id) }}" class="btn btn-sm btn-primary">
-                                                <i class="bx bx-info-circle me-1"></i> Detail
-                                            </a>
-                                            @if($item->status === 'completed' && $item->pdf_output)
-                                                <a href="{{ $item->getPublicDownloadUrl() }}" class="btn btn-sm btn-success" target="_blank">
-                                                    <i class="bx bx-download me-1"></i> PDF
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
+                        <tbody id="pengaduanTableBody">
+                            @include('pengaduan.partials.table-body', compact('pengaduan'))
                         </tbody>
                     </table>
                 </div>
-                @if ($pengaduan->hasPages())
-                    <div class="px-3 py-2 border-top">
-                        {{ $pengaduan->links() }}
-                    </div>
-                @endif
+                <div id="pengaduanPaginationContainer">
+                    @include('pengaduan.partials.pagination', compact('pengaduan'))
+                </div>
             </div>
         </div>
     </div>
@@ -182,16 +163,94 @@ document.addEventListener('change', function(e) {
     }
 });
 
-document.getElementById('statusFilter')?.addEventListener('change', function() {
-    const filterValue = this.value;
-    const rows = document.querySelectorAll('tbody tr');
+function initPengaduanListing() {
+    const searchInput = document.getElementById('pengaduanSearchInput');
+    const statusFilter = document.getElementById('pengaduanStatusFilter');
+    const perPageFilter = document.getElementById('pengaduanPerPageFilter');
 
-    rows.forEach(row => {
-        const statusDropdown = row.querySelector('.status-dropdown');
-        const status = statusDropdown ? statusDropdown.value : '';
+    if (!searchInput) {
+        return;
+    }
 
-        row.style.display = (!filterValue || status === filterValue) ? '' : 'none';
+    let searchTimeout;
+
+    function updateResultsInfo(data) {
+        const info = data.pagination_info;
+        const top = document.getElementById('pengaduanResultsInfoTop');
+        const bottom = document.getElementById('pengaduanResultsInfo');
+
+        if (top) {
+            top.innerHTML = `Total halaman: <strong>${info.total}</strong>`;
+        }
+        if (bottom) {
+            bottom.textContent = `Menampilkan ${info.from || 0} sampai ${info.to || 0} dari ${info.total} data`;
+        }
+    }
+
+    function fetchListing(params = {}) {
+        const queryParams = new URLSearchParams();
+        if (searchInput.value.trim()) {
+            queryParams.append('search', searchInput.value.trim());
+        }
+        if (statusFilter && statusFilter.value) {
+            queryParams.append('status', statusFilter.value);
+        }
+        if (perPageFilter && perPageFilter.value) {
+            queryParams.append('per_page', perPageFilter.value);
+        }
+        if (params.page) {
+            queryParams.append('page', params.page);
+        }
+
+        fetch(`{{ route('pengaduan') }}?${queryParams.toString()}`, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    return;
+                }
+
+                document.getElementById('pengaduanTableBody').innerHTML = data.tableBody;
+                document.getElementById('pengaduanPaginationContainer').innerHTML = data.pagination;
+                updateResultsInfo(data);
+                bindPaginationLinks();
+            });
+    }
+
+    function bindPaginationLinks() {
+        document.querySelectorAll('#pengaduanPaginationContainer .pagination a.page-link').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                const url = new URL(this.href);
+                const page = url.searchParams.get('page');
+                if (page) {
+                    fetchListing({ page });
+                }
+            });
+        });
+    }
+
+    searchInput.addEventListener('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(fetchListing, 350);
     });
-});
+
+    if (statusFilter) {
+        statusFilter.addEventListener('change', fetchListing);
+    }
+
+    if (perPageFilter) {
+        perPageFilter.addEventListener('change', fetchListing);
+    }
+
+    bindPaginationLinks();
+}
+
+document.addEventListener('DOMContentLoaded', initPengaduanListing);
 </script>
 @endpush

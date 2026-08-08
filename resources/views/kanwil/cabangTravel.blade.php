@@ -33,10 +33,30 @@
                 <div class="card-header">
                     <h5 class="mb-0">Daftar Cabang Travel</h5>
                 </div>
-                <div class="table-responsive">
-                    <table id="table" class="table table-striped table-hover align-middle mb-0">
-                        <thead class="table-light">
-                            <tr class="text-center">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-sm-auto">
+                            <label for="cabangTravelPerPageFilter" class="form-label mb-1">Tampilkan</label>
+                            <select id="cabangTravelPerPageFilter" class="form-select form-select-sm">
+                                @foreach([10, 15, 25, 50] as $size)
+                                    <option value="{{ $size }}" @selected((int) request('per_page', 15) === $size)>{{ $size }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-auto">
+                            <span class="form-text">data per halaman</span>
+                        </div>
+                        <div class="col-sm-auto ms-sm-auto">
+                            <label for="cabangTravelSearchInput" class="form-label mb-1">Cari</label>
+                            <input type="search" id="cabangTravelSearchInput" class="form-control form-control-sm"
+                                placeholder="Travel, pimpinan, kabupaten..." value="{{ request('search') }}">
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="cabangTravelTable" class="table table-striped table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr class="text-center">
                                     <th>No.</th>
                                     <th>Travel</th>
                                     <th>Kabupaten</th>
@@ -51,43 +71,15 @@
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                @foreach ($data as $item)
-                                    <tr class="text-center">
-                                        <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $item->Penyelenggara }}</td>
-                                        <td>{{ $item->kabupaten }}</td>
-                                        <td>{{ $item->pusat }}</td>
-                                        <td>{{ $item->pimpinan_pusat }}</td>
-                                        <td>{{ $item->alamat_pusat }}</td>
-                                        <td>{{ $item->SK_BA }}</td>
-                                        <td>{{ date('Y-m-d', strtotime($item->tanggal)) }}
-                                        </td>
-                                        <td>{{ $item->pimpinan_cabang }}</td>
-                                        <td>{{ $item->alamat_cabang }}</td>
-                                        <td>{{ $item->telepon }}</td>
-                                        <td>
-                                            <div class="btn-group" role="group">
-                                                <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}"
-                                                    class="btn btn-sm btn-warning">
-                                                    <i class="bx bx-edit"></i>
-                                                </a>
-                                                <form id="delete-form-{{ $item->id_cabang }}"
-                                                    action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
-                                                    method="POST" style="display: inline;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="button" class="btn btn-sm btn-danger"
-                                                        onclick="confirmDelete('{{ $item->id_cabang }}', '{{ $item->pimpinan_cabang }}', 'cabang travel')">
-                                                        <i class="bx bx-trash"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
+                            <tbody id="cabangTravelTableBody">
+                                @include('kanwil.partials.cabang-travel-table-body', compact('data'))
                             </tbody>
-                    </table>
+                        </table>
+
+                        <div id="cabangTravelPaginationContainer">
+                            @include('kanwil.partials.cabang-travel-pagination', compact('data'))
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -141,80 +133,81 @@
 
 @push('js')
     <script>
-        $(document).ready(function() {
-            // Add specific CSS for the No SK/BA column
-            $('head').append(`
-        <style>
-            #travelTable th:nth-child(7),
-            #travelTable td:nth-child(7) {
-                min-width: 150px !important;
-                width: 150px !important;
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
+        function initCabangTravelListing() {
+            const searchInput = document.getElementById('cabangTravelSearchInput');
+            const perPageFilter = document.getElementById('cabangTravelPerPageFilter');
+
+            if (!searchInput) {
+                return;
             }
 
-            /* Force all cells to maintain proper alignment */
-            #travelTable th, #travelTable td {
-                vertical-align: middle !important;
-            }
+            let searchTimeout;
 
-            /* Ensure proper table layout */
-            #travelTable {
-                table-layout: fixed !important;
-            }
-        </style>
-    `);
-
-            // Initialize DataTable with modified settings
-            var table = $('.table').DataTable({
-                scrollX: true,
-                scrollCollapse: true,
-                autoWidth: false,
-                dom: '<"d-flex justify-content-between align-items-center px-4 py-3"<"d-flex align-items-center"<"me-2 text-sm">l<"text-sm">>f>t<"d-flex justify-content-between align-items-center px-4 py-3"ip>',
-                language: {
-                    paginate: {
-                        previous: "<i class='fa fa-angle-left'></i>",
-                        next: "<i class='fa fa-angle-right'></i>"
-                    },
-                    info: "Menampilkan _START_ hingga _END_ dari _TOTAL_ data",
-                    infoEmpty: "Menampilkan 0 hingga 0 dari 0 data",
-                    lengthMenu: "Tampilkan _MENU_ data per halaman",
-                    search: "Cari:",
-                    zeroRecords: "Tidak ada data yang ditemukan",
-                    infoFiltered: "(disaring dari _MAX_ total data)"
-                },
-                lengthMenu: [
-                    [10, 25, 50, 100],
-                    [10, 25, 50, 100]
-                ],
-                createdRow: function(row, data, dataIndex) {
-                    // Force all SK/BA cells to maintain proper formatting
-                    $(row).children().eq(6).css({
-                        'min-width': '150px',
-                        'width': '150px',
-                        'white-space': 'nowrap',
-                        'overflow': 'hidden',
-                        'text-overflow': 'ellipsis'
-                    });
+            function updateResultsInfo(data) {
+                const info = data.pagination_info;
+                const bottom = document.getElementById('cabangTravelResultsInfo');
+                if (bottom) {
+                    bottom.textContent = `Menampilkan ${info.from || 0} sampai ${info.to || 0} dari ${info.total} data`;
                 }
-            });
+            }
 
-            // Forcefully adjust column widths after initialization
-            setTimeout(function() {
-                table.columns.adjust().draw();
+            function fetchListing(params = {}) {
+                const queryParams = new URLSearchParams();
+                if (searchInput.value.trim()) {
+                    queryParams.append('search', searchInput.value.trim());
+                }
+                if (perPageFilter && perPageFilter.value) {
+                    queryParams.append('per_page', perPageFilter.value);
+                }
+                if (params.page) {
+                    queryParams.append('page', params.page);
+                }
 
-                // Direct manipulation of the column width
-                table.column(6).nodes().each(function(cell, i) {
-                    cell.style.minWidth = '150px';
-                    cell.style.width = '150px';
+                fetch(`{{ route('cabang.travel') }}?${queryParams.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.success) {
+                            return;
+                        }
+
+                        document.getElementById('cabangTravelTableBody').innerHTML = data.tableBody;
+                        document.getElementById('cabangTravelPaginationContainer').innerHTML = data.pagination;
+                        updateResultsInfo(data);
+                        bindPaginationLinks();
+                    });
+            }
+
+            function bindPaginationLinks() {
+                document.querySelectorAll('#cabangTravelPaginationContainer .pagination a.page-link').forEach(function(link) {
+                    link.addEventListener('click', function(event) {
+                        event.preventDefault();
+                        const url = new URL(this.href);
+                        const page = url.searchParams.get('page');
+                        if (page) {
+                            fetchListing({ page });
+                        }
+                    });
                 });
-            }, 100);
+            }
 
-            // Make sure the table redraws properly when window resizes
-            $(window).on('resize', function() {
-                table.columns.adjust().draw();
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(fetchListing, 350);
             });
-        });
+
+            if (perPageFilter) {
+                perPageFilter.addEventListener('change', fetchListing);
+            }
+
+            bindPaginationLinks();
+        }
+
+        document.addEventListener('DOMContentLoaded', initCabangTravelListing);
     </script>
 @endpush

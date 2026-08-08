@@ -22,60 +22,86 @@ class JamaahHajiKhususController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
-        
+        $showTravelColumn = in_array($user->role, ['admin', 'kabupaten'], true);
+
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+
+        $jamaahHajiKhusus = $this->buildHajiKhususListingQuery($request, $user)
+            ->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $exportTravels = null;
         if ($user->role === 'admin') {
-            // Admin melihat data dikelompokkan berdasarkan travel
-            $query = JamaahHajiKhusus::with('travel');
-            
-            // Search functionality
-            if (request()->has('search') && !empty(request('search'))) {
-                $query->search(request('search'));
-            }
-
-            // Filter by status
-            if (request()->has('status') && !empty(request('status'))) {
-                $query->byStatus(request('status'));
-            }
-
-            $allJamaah = $query->latest()->get();
-            $jamaahHajiKhusus = $allJamaah; // For statistics
-            $groupedJamaahHajiKhusus = $allJamaah->groupBy('travel_id');
-        } else {
-            // User dan Kabupaten melihat data seperti biasa
-            $query = JamaahHajiKhusus::with('travel');
-
-            // Filter based on user role and kabupaten
-            if ($user->role === 'user') {
-                // User (travel) hanya bisa melihat jamaah dari kabupatennya
-                if ($user->travel) {
-                    $query->where('travel_id', $user->travel->id);
-                }
-                $query->whereHas('travel', function($q) use ($user) {
-                    $q->where('kab_kota', $user->kabupaten);
-                });
-            } else if ($user->role === 'kabupaten') {
-                $filters = KabupatenScopeFilter::filtersForUser($user);
-                KabupatenScopeFilter::applyOnTravelRelation($query, $filters);
-            }
-
-            // Search functionality
-            if (request()->has('search') && !empty(request('search'))) {
-                $query->search(request('search'));
-            }
-
-            // Filter by status
-            if (request()->has('status') && !empty(request('status'))) {
-                $query->byStatus(request('status'));
-            }
-
-            $jamaahHajiKhusus = $query->latest()->paginate(10);
-            $groupedJamaahHajiKhusus = null;
+            $exportTravels = TravelCompany::query()
+                ->whereHas('jamaahHajiKhusus')
+                ->withCount('jamaahHajiKhusus as jamaah_count')
+                ->orderBy('Penyelenggara')
+                ->get();
         }
 
-        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus', 'groupedJamaahHajiKhusus'));
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'tableBody' => view('jamaah.haji-khusus.partials.table-body', compact('jamaahHajiKhusus', 'showTravelColumn'))->render(),
+                'pagination' => view('jamaah.haji-khusus.partials.pagination', compact('jamaahHajiKhusus'))->render(),
+                'pagination_info' => [
+                    'from' => $jamaahHajiKhusus->firstItem(),
+                    'to' => $jamaahHajiKhusus->lastItem(),
+                    'total' => $jamaahHajiKhusus->total(),
+                    'current_page' => $jamaahHajiKhusus->currentPage(),
+                    'last_page' => $jamaahHajiKhusus->lastPage(),
+                ],
+                'filters' => [
+                    'search' => $request->get('search'),
+                    'status' => $request->get('status'),
+                ],
+            ]);
+        }
+
+        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus', 'exportTravels', 'showTravelColumn'));
+    }
+
+    private function buildHajiKhususListingQuery(Request $request, $user)
+    {
+        $query = JamaahHajiKhusus::query()->with('travel:id,Penyelenggara,kab_kota');
+
+        if ($user->role === 'user') {
+            if ($user->travel) {
+                $query->where('travel_id', $user->travel->id);
+            }
+            $query->whereHas('travel', function ($q) use ($user) {
+                $q->where('kab_kota', $user->kabupaten);
+            });
+        } elseif ($user->role === 'kabupaten') {
+            KabupatenScopeFilter::applyOnTravelRelation($query, KabupatenScopeFilter::filtersForUser($user));
+        } elseif ($user->role !== 'admin') {
+            $query->whereRaw('1 = 0');
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->string('search')->toString();
+            $query->where(function ($q) use ($search) {
+                $q->where('nama_lengkap', 'like', "%{$search}%")
+                    ->orWhere('no_ktp', 'like', "%{$search}%")
+                    ->orWhere('no_paspor', 'like', "%{$search}%")
+                    ->orWhere('nomor_porsi', 'like', "%{$search}%")
+                    ->orWhereHas('travel', function ($travelQuery) use ($search) {
+                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
+                            ->orWhere('kab_kota', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->byStatus($request->string('status')->toString());
+        }
+
+        return $query;
     }
 
     /**

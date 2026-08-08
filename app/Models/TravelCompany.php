@@ -151,6 +151,11 @@ class TravelCompany extends Model
         }
     }
 
+    public function jamaah()
+    {
+        return $this->hasMany(Jamaah::class, 'travel_id');
+    }
+
     public function jamaahHajiKhusus()
     {
         return $this->hasMany(JamaahHajiKhusus::class, 'travel_id');

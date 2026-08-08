@@ -116,23 +116,12 @@
                                     value="{{ $value('datetime') ? \Carbon\Carbon::parse($value('datetime'))->format('Y-m-d') : '' }}" required>
                                 @error('datetime')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="airlines" class="form-label">Nama Airline</label>
-                                <input type="text" class="form-control" id="airlines" name="airlines"
-                                    value="{{ $value('airlines') }}" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="returndate" class="form-label">Tanggal Kepulangan</label>
-                                <input type="date" class="form-control" id="returndate" name="returndate" readonly
-                                    value="{{ $value('returndate') ? \Carbon\Carbon::parse($value('returndate'))->format('Y-m-d') : '' }}">
-                                <small class="form-text text-muted">Otomatis dihitung berdasarkan jumlah hari dan tanggal
-                                    keberangkatan</small>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="airlines2" class="form-label">Nama Airline Kepulangan</label>
-                                <input type="text" class="form-control" id="airlines2" name="airlines2"
-                                    value="{{ $value('airlines2') }}" required>
-                            </div>
+
+                            @include('travel.partials.bap-airline-fields', [
+                                'airlineOptions' => $airlineOptions ?? [],
+                                'value' => $value,
+                                'editing' => $editing,
+                            ])
                         </div>
                         <div class="d-flex flex-wrap gap-2">
                             <button type="submit" class="btn btn-primary">
@@ -162,7 +151,101 @@
                 return false;
             }
 
+            if (!validateAirlineFields()) {
+                return false;
+            }
+
+            enableReturnAirlineForSubmit();
+
             return true;
+        }
+
+        function enableReturnAirlineForSubmit() {
+            const returnSelect = document.getElementById('airlines2_select');
+            const returnOther = document.getElementById('airlines2_other');
+            if (returnSelect) {
+                returnSelect.disabled = false;
+            }
+            if (returnOther) {
+                returnOther.disabled = false;
+            }
+        }
+
+        function validateAirlineFields() {
+            const departureSelect = document.getElementById('airlines_select');
+            const departureOther = document.getElementById('airlines_other');
+            const returnSelect = document.getElementById('airlines2_select');
+            const returnOther = document.getElementById('airlines2_other');
+            const sameReturn = document.getElementById('same_return_airline');
+
+            if (sameReturn?.checked) {
+                syncReturnAirline();
+            }
+
+            const departureValue = departureSelect.value === '__other__'
+                ? departureOther.value.trim()
+                : departureSelect.value.trim();
+            const returnValue = returnSelect.value === '__other__'
+                ? returnOther.value.trim()
+                : returnSelect.value.trim();
+
+            if (!departureValue) {
+                Swal.fire({ title: 'Perhatian', text: 'Pilih maskapai keberangkatan.', icon: 'warning', confirmButtonColor: '#556ee6' });
+                return false;
+            }
+
+            if (!returnValue) {
+                Swal.fire({ title: 'Perhatian', text: 'Pilih maskapai kepulangan.', icon: 'warning', confirmButtonColor: '#556ee6' });
+                return false;
+            }
+
+            return true;
+        }
+
+        function toggleAirlineOther(selectId, otherId) {
+            const select = document.getElementById(selectId);
+            const other = document.getElementById(otherId);
+            if (!select || !other) {
+                return;
+            }
+
+            const isOther = select.value === '__other__';
+            other.hidden = !isOther;
+            other.required = isOther;
+            if (!isOther) {
+                other.value = '';
+            }
+        }
+
+        function syncReturnAirline() {
+            const sameReturn = document.getElementById('same_return_airline');
+            const returnSelect = document.getElementById('airlines2_select');
+            const returnOther = document.getElementById('airlines2_other');
+            const departureSelect = document.getElementById('airlines_select');
+            const departureOther = document.getElementById('airlines_other');
+            const returnGroup = document.getElementById('returnAirlineGroup');
+
+            if (!sameReturn || !returnSelect || !departureSelect) {
+                return;
+            }
+
+            if (sameReturn.checked) {
+                returnSelect.value = departureSelect.value;
+                returnOther.value = departureOther.value;
+                returnSelect.disabled = true;
+                returnOther.hidden = departureSelect.value !== '__other__';
+                returnOther.disabled = departureSelect.value !== '__other__';
+                if (returnGroup) {
+                    returnGroup.classList.add('opacity-50');
+                }
+            } else {
+                returnSelect.disabled = false;
+                returnOther.disabled = false;
+                toggleAirlineOther('airlines2_select', 'airlines2_other');
+                if (returnGroup) {
+                    returnGroup.classList.remove('opacity-50');
+                }
+            }
         }
 
         function formatPrice(input) {
@@ -203,6 +286,35 @@
                 priceHidden.value = priceInput.value.replace(/[^0-9]/g, '');
             }
             calculateReturnDate();
+
+            ['airlines_select', 'airlines2_select'].forEach(function (selectId) {
+                const otherId = selectId === 'airlines_select' ? 'airlines_other' : 'airlines2_other';
+                const select = document.getElementById(selectId);
+                if (select) {
+                    select.addEventListener('change', function () {
+                        toggleAirlineOther(selectId, otherId);
+                        syncReturnAirline();
+                    });
+                }
+            });
+
+            const sameReturn = document.getElementById('same_return_airline');
+            if (sameReturn) {
+                sameReturn.addEventListener('change', syncReturnAirline);
+            }
+
+            const departureSelect = document.getElementById('airlines_select');
+            const departureOther = document.getElementById('airlines_other');
+            if (departureSelect) {
+                departureSelect.addEventListener('change', syncReturnAirline);
+            }
+            if (departureOther) {
+                departureOther.addEventListener('input', syncReturnAirline);
+            }
+
+            toggleAirlineOther('airlines_select', 'airlines_other');
+            toggleAirlineOther('airlines2_select', 'airlines2_other');
+            syncReturnAirline();
         });
     </script>
 @endpush
