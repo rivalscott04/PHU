@@ -1,6 +1,6 @@
 @php
     $wizardSteps = [
-        ['label' => 'Profil', 'full' => 'Profil Perusahaan'],
+        ['label' => 'Profil', 'full' => 'Profil Travel'],
         ['label' => 'Izin', 'full' => 'Izin Operasional'],
         ['label' => 'Akreditasi', 'full' => 'Data Akreditasi'],
         ['label' => 'Alamat', 'full' => 'Kontak & Alamat'],

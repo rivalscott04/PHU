@@ -11,7 +11,7 @@
 
         const reviewGroups = [
             {
-                title: 'Profil Perusahaan',
+                title: 'Profil Travel',
                 fields: ['Penyelenggara', 'Status', 'Pimpinan'],
             },
             {

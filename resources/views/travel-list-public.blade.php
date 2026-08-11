@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Daftar Travel Berizin | {{ config('app.name') }}</title>
-    <meta name="description" content="Daftar lengkap perusahaan travel berizin di wilayah NTB" />
+    <meta name="description" content="Daftar lengkap travel berizin di wilayah NTB" />
     <meta name="keywords" content="travel berizin, PPIU, PIHK, NTB, haji, umrah" />
 
     <!-- Favicons -->
@@ -39,7 +39,7 @@
             <div class="travel-page-head__content">
                 <p class="travel-page-head__eyebrow">Direktori Publik</p>
                 <h1>Daftar Travel Berizin</h1>
-                <p class="travel-page-head__subtitle">Perusahaan travel terdaftar di Kanwil Kementerian Haji dan Umroh NTB</p>
+                <p class="travel-page-head__subtitle">Travel terdaftar di Kanwil Kementerian Haji dan Umroh NTB</p>
             </div>
         </header>
 

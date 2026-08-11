@@ -14,7 +14,7 @@
                     @if($canVerify)
                         Kelola dan verifikasi bukti tindak lanjut hasil pengawasan
                     @else
-                        Riwayat bukti tindak lanjut perusahaan Anda
+                        Riwayat bukti tindak lanjut travel Anda
                     @endif
                 </p>
             </div>

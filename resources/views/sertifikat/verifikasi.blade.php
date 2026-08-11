@@ -109,7 +109,7 @@
                                                 <div class="col-md-6">
                                                     <div class="d-flex align-items-center mb-2">
                                                         <i class="bx bx-check text-success me-2"></i>
-                                                        <span>Data perusahaan terverifikasi</span>
+                                                        <span>Data travel terverifikasi</span>
                                                     </div>
                                                     @if($sertifikat->isActive())
                                                         <div class="d-flex align-items-center mb-2">

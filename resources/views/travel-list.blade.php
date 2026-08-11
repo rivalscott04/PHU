@@ -44,7 +44,7 @@
         <div class="row mb-4">
             <div class="col-12">
                 <h2 class="text-center fw-bold">Data Travel </h2>
-                <p class="text-center text-muted">Daftar Perusahaan Travel Terdaftar</p>
+                <p class="text-center text-muted">Daftar Travel Terdaftar</p>
             </div>
         </div>
         <div class="row">

@@ -11,12 +11,12 @@
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-start flex-wrap gap-2">
             <div>
-                <h4 class="mb-1 fw-semibold">Risk Score</h4>
+                <h4 class="mb-1 fw-semibold">Skor Risiko</h4>
                 <p class="text-muted mb-0">
                     @if(auth()->user()->role === 'kabupaten')
                         Prioritas risiko travel di wilayah {{ auth()->user()->getWilayahKerjaLabel() }} (baca saja)
                     @elseif(auth()->user()->role === 'user')
-                        Skor risiko perusahaan Anda
+                        Skor risiko travel Anda
                     @else
                         Prioritas pengawasan berbasis risiko seluruh NTB
                     @endif
@@ -50,7 +50,7 @@
 
     <div class="card border-0 shadow-sm">
         <div class="card-header bg-transparent border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h5 class="mb-0 fw-semibold">Ranking Risk Score</h5>
+            <h5 class="mb-0 fw-semibold">Peringkat Skor Risiko</h5>
             <form method="GET" class="d-flex gap-2 align-items-center">
                 <select name="risk_level" class="form-select form-select-sm" style="min-width:160px;" onchange="this.form.submit()">
                     <option value="">Semua Level</option>
@@ -100,7 +100,7 @@
                             <tr>
                                 <td colspan="7" class="text-center text-muted py-5">
                                     <i class="bx bx-shield-quarter d-block mb-2" style="font-size:2rem;"></i>
-                                    Belum ada data risk score{{ auth()->user()->role === 'kabupaten' ? ' di wilayah Anda' : '' }}.
+                                    Belum ada data skor risiko{{ auth()->user()->role === 'kabupaten' ? ' di wilayah Anda' : '' }}.
                                 </td>
                             </tr>
                         @endforelse
@@ -118,7 +118,7 @@
     @if($isReadOnly)
         <p class="text-muted small mt-2 mb-0">
             <i class="bx bx-info-circle me-1"></i>
-            Risk score dihitung otomatis oleh sistem dan tidak dapat diubah manual.
+            Skor risiko dihitung otomatis oleh sistem dan tidak dapat diubah manual.
         </p>
     @endif
 </div>

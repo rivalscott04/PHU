@@ -14,7 +14,7 @@
                     @if(auth()->user()->role === 'kabupaten')
                         Profil kepatuhan travel di wilayah {{ auth()->user()->getWilayahKerjaLabel() }}
                     @elseif(auth()->user()->role === 'user')
-                        Profil kepatuhan perusahaan Anda
+                        Profil kepatuhan travel Anda
                     @else
                         Profil kepatuhan seluruh PPIU dan PIHK
                     @endif

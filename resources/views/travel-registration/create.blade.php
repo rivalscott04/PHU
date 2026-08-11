@@ -49,7 +49,7 @@
                                     <section>
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-buildings',
-                                            'title' => 'Profil Perusahaan',
+                                            'title' => 'Profil Travel',
                                             'description' => 'Informasi dasar travel Anda. Isi sesuai data pada izin resmi.',
                                         ])
                                         @include('partials.travel-company-fields', [

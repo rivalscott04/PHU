@@ -69,7 +69,7 @@ class RiskCalculationService
             $this->auditLogService->log(
                 'risk',
                 'recalculate',
-                "menghitung ulang skor risiko untuk {$count} perusahaan travel"
+                "menghitung ulang skor risiko untuk {$count} travel"
             );
         }
 

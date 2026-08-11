@@ -10,7 +10,7 @@ class CalculateRiskScores extends Command
 {
     protected $signature = 'risk:calculate {--travel= : Hitung ulang untuk travel ID tertentu}';
 
-    protected $description = 'Hitung ulang risk score seluruh PPIU/PIHK berdasarkan indikator operasional';
+    protected $description = 'Hitung ulang skor risiko seluruh PPIU/PIHK berdasarkan indikator operasional';
 
     public function handle(RiskCalculationService $riskCalculationService, AuditLogService $auditLogService): int
     {
@@ -18,18 +18,18 @@ class CalculateRiskScores extends Command
 
         if ($travelId) {
             $risk = $riskCalculationService->recalculateForTravel((int) $travelId);
-            $this->info("Risk travel #{$travelId} dihitung: {$risk->total_score} ({$risk->risk_level?->value})");
+            $this->info("Skor risiko travel #{$travelId} dihitung: {$risk->total_score} ({$risk->risk_level?->value})");
 
             return self::SUCCESS;
         }
 
-        $this->info('Memulai perhitungan risk score...');
+        $this->info('Memulai perhitungan skor risiko...');
         $count = $riskCalculationService->recalculateAll(logAudit: false);
 
         $auditLogService->log(
             'risk',
             'recalculate',
-            "menghitung ulang skor risiko otomatis untuk {$count} perusahaan travel"
+            "menghitung ulang skor risiko otomatis untuk {$count} travel"
         );
 
         $this->info("Selesai. {$count} travel diperbarui.");

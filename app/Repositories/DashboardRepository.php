@@ -240,7 +240,7 @@ class DashboardRepository
         if ($highRisk > 0) {
             $warnings[] = [
                 'level' => 'critical',
-                'message' => "{$highRisk} travel memiliki risk score tinggi (≥80).",
+                'message' => "{$highRisk} travel memiliki skor risiko tinggi (≥80).",
             ];
         }
 

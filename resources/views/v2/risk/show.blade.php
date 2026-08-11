@@ -12,12 +12,12 @@
 <div class="container-fluid">
     <div class="row mb-3">
         <div class="col-12 d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <h4 class="mb-0">Risk: {{ $travel->Penyelenggara }}</h4>
+            <h4 class="mb-0">Skor Risiko: {{ $travel->Penyelenggara }}</h4>
             <div class="d-flex gap-2">
                 @if(auth()->user()->role === 'admin')
                     <form method="POST" action="{{ route('v2.risk.recalculate.travel', $travel) }}">
                         @csrf
-                        <button type="submit" class="btn btn-sm btn-warning">Recalculate</button>
+                        <button type="submit" class="btn btn-sm btn-warning">Hitung Ulang</button>
                     </form>
                 @endif
                 <a href="{{ route('v2.risk.index') }}" class="btn btn-sm btn-secondary">Kembali</a>
@@ -61,7 +61,7 @@
     </div>
 
     <div class="card mb-3">
-        <div class="card-header"><h5 class="mb-0">Breakdown Indikator</h5></div>
+        <div class="card-header"><h5 class="mb-0">Rincian Indikator</h5></div>
         <div class="card-body p-0">
             <table class="table table-striped mb-0">
                 <thead>
@@ -69,7 +69,7 @@
                         <th>Indikator</th>
                         <th>Bobot Maks</th>
                         <th>Skor</th>
-                        <th>Progress</th>
+                        <th>Proporsi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -117,7 +117,7 @@
 @push('js')
 @php
     $chartScores = array_values($breakdown['scores'] ?? []);
-    $chartLabels = ['Pengaduan', 'Temuan', 'Follow Up', 'BAP', 'Sertifikat', 'Aktivitas'];
+    $chartLabels = ['Pengaduan', 'Temuan', 'Tindak Lanjut', 'BAP', 'Sertifikat', 'Aktivitas'];
 @endphp
 <script>
 (function () {
