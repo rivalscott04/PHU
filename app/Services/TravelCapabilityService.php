@@ -25,7 +25,7 @@ class TravelCapabilityService
                 'bap' => true,
                 'pengaduan' => true,
                 'keberangkatan' => true,
-                'pengunduran' => false, // disabled: schema mismatch, re-enable after migration fix
+                'pengunduran' => false, // sengaja nonaktif: menunggu mekanisme resmi (proses & form). Jangan dihapus.
                 'travel_management' => true,
                 'cabang_travel' => true,
                 'user_management' => true,
@@ -39,7 +39,7 @@ class TravelCapabilityService
                 'bap' => true,
                 'pengaduan' => true,
                 'keberangkatan' => true,
-                'pengunduran' => false, // disabled: schema mismatch, re-enable after migration fix
+                'pengunduran' => false, // sengaja nonaktif: menunggu mekanisme resmi (proses & form). Jangan dihapus.
                 'travel_management' => true,
                 'cabang_travel' => true,
                 'user_management' => false,
@@ -84,7 +84,7 @@ class TravelCapabilityService
                 'travel_packages' => true,
                 'pengaduan' => false,
                 'keberangkatan' => true,
-                'pengunduran' => false, // disabled: schema mismatch, re-enable after migration fix
+                'pengunduran' => false, // sengaja nonaktif: menunggu mekanisme resmi (proses & form). Jangan dihapus.
                 'travel_management' => false,
                 'cabang_travel' => false,
                 'user_management' => false,

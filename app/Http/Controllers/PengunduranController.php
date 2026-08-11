@@ -10,6 +10,12 @@ use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
 use Illuminate\Support\Facades\Auth;
 
+/**
+ * Fitur pengunduran diri PPIU masih dimatikan lewat TravelCapabilityService
+ * karena mekanisme resminya (alur persetujuan dan bentuk formulirnya) belum
+ * ditetapkan. Kode ini sengaja dipertahankan, bukan sisa yang terlupakan:
+ * alurnya akan dirancang ulang saat aturannya turun, jadi jangan dihapus.
+ */
 class PengunduranController extends Controller
 {
     public function __construct()
