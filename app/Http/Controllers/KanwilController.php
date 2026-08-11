@@ -46,7 +46,7 @@ class KanwilController extends Controller
         $travelCompany->description = $travelCompany->getTravelTypeDescription();
         $travelCompany->save();
 
-        return redirect()->route('form')->with('success', 'Data berhasil disimpan.');
+        return redirect()->route('travel')->with('success', 'Data berhasil disimpan.');
     }
 
     public function edit($id)

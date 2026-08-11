@@ -6,7 +6,10 @@
             <div class="card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Detail Jamaah</h5>
-                    <div>
+                    <div class="d-flex gap-2">
+                        <a href="{{ route($jamaah->jenis_jamaah === 'haji' ? 'jamaah.haji' : 'jamaah.umrah') }}" class="btn btn-secondary">
+                            <i class="bx bx-arrow-back me-1"></i> Kembali
+                        </a>
                         <a href="{{ route('jamaah.edit', $jamaah->id) }}" class="btn btn-primary">Edit</a>
                     </div>
                 </div>

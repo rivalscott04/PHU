@@ -18,6 +18,9 @@
                     <h4 class="mb-sm-0">Tambah Data Travel</h4>
                     <p class="text-muted mb-0 small">Input data PPIU/PIHK baru</p>
                 </div>
+                <a href="{{ route('travel') }}" class="btn btn-sm btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                </a>
             </div>
         </div>
     </div>
@@ -38,7 +41,10 @@
                     <form method="POST" action="{{ route('post.travel') }}">
                         @csrf
                         @include('partials.travel-company-fields', ['kabupatens' => $kabupatens])
-                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('travel') }}" class="btn btn-sm btn-secondary">Batal</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        </div>
                     </form>
                 </div>
             </div>

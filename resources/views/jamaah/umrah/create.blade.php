@@ -56,7 +56,10 @@
                                 @enderror
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('jamaah.umrah') }}" class="btn btn-sm btn-secondary">Batal</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        </div>
                     </form>
                 </div>
             </div>

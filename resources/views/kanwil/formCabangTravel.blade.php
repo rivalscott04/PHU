@@ -8,6 +8,9 @@
                     <h4 class="mb-sm-0">Tambah Cabang Travel</h4>
                     <p class="text-muted mb-0 small">Input data cabang PPIU baru</p>
                 </div>
+                <a href="{{ route('cabang.travel') }}" class="btn btn-sm btn-secondary">
+                    <i class="bx bx-arrow-back me-1"></i> Kembali
+                </a>
             </div>
         </div>
     </div>
@@ -73,7 +76,10 @@
                                 <input type="text" class="form-control @error('telepon') is-invalid @enderror" id="telepon" name="telepon" maxlength="16" inputmode="numeric" required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{{ route('cabang.travel') }}" class="btn btn-sm btn-secondary">Batal</a>
+                            <button type="submit" class="btn btn-sm btn-primary">Simpan</button>
+                        </div>
                     </form>
                 </div>
             </div>

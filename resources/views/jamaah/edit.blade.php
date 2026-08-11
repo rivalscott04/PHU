@@ -59,7 +59,7 @@
 
                             <div class="col-12">
                                 <div class="d-flex justify-content-end gap-2">
-                                    <a href="{{ route('jamaah.detail', $jamaah->id) }}" class="btn btn-secondary">Batal</a>
+                                    <a href="{{ route($jamaah->jenis_jamaah === 'haji' ? 'jamaah.haji' : 'jamaah.umrah') }}" class="btn btn-secondary">Batal</a>
                                     <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
                                 </div>
                             </div>
