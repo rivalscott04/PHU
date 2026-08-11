@@ -5,8 +5,8 @@
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                 <div>
-                    <h4 class="mb-sm-0">Dashboard Travel</h4>
-                    <p class="text-muted mb-0 small">Selamat datang, {{ $username }}</p>
+                    <h4 class="mb-sm-0">Selamat datang, {{ \Illuminate\Support\Str::title($username) }}</h4>
+                    <p class="text-muted mb-0 small">Dashboard Travel</p>
                 </div>
                 @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'form.bap'))
                     <a href="{{ route('form.bap') }}" class="btn btn-sm btn-primary">
