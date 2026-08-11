@@ -42,7 +42,7 @@
     }
 
     .trust-intro__steps li i {
-        color: var(--phu-accent, #e2a712);
+        color: var(--phu-accent-text, #8a6100);
         margin-top: 0.2rem;
         flex-shrink: 0;
     }
@@ -67,7 +67,7 @@
     }
 
     .trust-legend__stars {
-        color: var(--phu-gold, #C9A635);
+        color: var(--phu-accent-text, #8a6100);
         letter-spacing: -1px;
     }
 
@@ -80,7 +80,7 @@
         align-items: center;
         justify-content: center;
         font-size: 1.4rem;
-        color: var(--phu-accent, #e2a712);
+        color: var(--phu-accent-text, #8a6100);
         flex-shrink: 0;
     }
 
@@ -129,7 +129,7 @@
 
     .trust-badge--success {
         background: rgba(226, 167, 18, 0.12);
-        color: var(--phu-accent-dark, #c8940e);
+        color: var(--phu-accent-text, #8a6100);
         border: 1px solid rgba(226, 167, 18, 0.3);
     }
 
@@ -172,6 +172,8 @@
         margin-top: -0.5rem;
     }
 
+    /* Aksi utama kartu, jadi diisi penuh: sebelumnya outline amber dengan teks
+       amber (2,15:1) dan berbobot sama dengan tombol utilitas seperti Export. */
     .btn-trust-profile {
         width: 100%;
         border-radius: 12px;
@@ -179,15 +181,15 @@
         font-size: clamp(14px, 2vw, 15px);
         padding: 0.65rem 1rem;
         border: 2px solid var(--phu-accent, #e2a712);
-        color: var(--phu-accent, #e2a712);
-        background: var(--phu-surface, #FFFFFF);
+        color: #3d2c00;
+        background: var(--phu-accent, #e2a712);
         transition: all 0.25s ease;
     }
 
     .btn-trust-profile:hover {
-        background: var(--phu-gold, #C9A635);
-        border-color: var(--phu-gold, #C9A635);
-        color: var(--phu-text, #333333);
+        background: var(--phu-accent-hover, #c8940e);
+        border-color: var(--phu-accent-hover, #c8940e);
+        color: #3d2c00;
     }
 
     .trust-hint-box {
@@ -249,7 +251,7 @@
         font-size: clamp(36px, 5vw, 44px);
         font-weight: 800;
         line-height: 1;
-        color: var(--phu-accent, #e2a712);
+        color: var(--phu-accent-text, #8a6100);
     }
 
     .trust-gauge__of {
@@ -268,7 +270,7 @@
     }
 
     .trust-gauge__stars {
-        color: var(--phu-gold, #C9A635);
+        color: var(--phu-accent-text, #8a6100);
         font-size: 1.1rem;
         margin-bottom: 0.5rem;
     }
@@ -298,9 +300,9 @@
         margin-bottom: 0.75rem;
     }
 
-    .signal-card__icon--success { background: rgba(226, 167, 18, 0.12); color: var(--phu-accent, #e2a712); }
-    .signal-card__icon--info { background: rgba(226, 167, 18, 0.08); color: var(--phu-accent, #e2a712); }
-    .signal-card__icon--warning { background: rgba(201, 166, 53, 0.15); color: var(--phu-gold, #C9A635); }
+    .signal-card__icon--success { background: rgba(226, 167, 18, 0.12); color: var(--phu-accent-text, #8a6100); }
+    .signal-card__icon--info { background: rgba(226, 167, 18, 0.08); color: var(--phu-accent-text, #8a6100); }
+    .signal-card__icon--warning { background: rgba(201, 166, 53, 0.15); color: var(--phu-accent-text, #8a6100); }
 
     .trust-disclaimer {
         background: rgba(255, 255, 255, 0.4);
@@ -320,7 +322,7 @@
 
     .trust-faq .accordion-button:not(.collapsed) {
         background: rgba(226, 167, 18, 0.08);
-        color: var(--phu-accent, #e2a712);
+        color: var(--phu-accent-text, #8a6100);
     }
 
     .trust-caveat {

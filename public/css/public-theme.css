@@ -11,6 +11,11 @@
   --phu-accent: #e2a712;
   --phu-accent-hover: #c8940e;
   --phu-accent-soft: rgba(226, 167, 18, 0.12);
+  /* Amber terang hanya 2,15:1 di latar terang — gagal WCAG AA. Dua varian di
+     bawah ini untuk teks/isian di latar terang; --phu-accent tetap untuk
+     bidang warna dan garis. */
+  --phu-accent-text: #8a6100;
+  --phu-accent-deep: #6b4a00;
   --phu-white: #FFFFFF;
   --phu-border: #E5E5E5;
   --phu-dark-bg: #3a2a06;
@@ -78,14 +83,14 @@ h3 { font-size: clamp(18px, 2.5vw, 22px); }
 p, li { color: var(--phu-text); }
 
 a {
-  color: var(--phu-accent);
+  color: var(--phu-accent-text);
   text-decoration: none;
   transition: color 0.2s ease;
 }
-a:hover { color: var(--phu-accent-hover); }
+a:hover { color: var(--phu-accent-deep); }
 
 /* ── Bootstrap remap ─────────────────────────────────────────── */
-.text-primary, .text-success, .text-info { color: var(--phu-accent) !important; }
+.text-primary, .text-success, .text-info { color: var(--phu-accent-text) !important; }
 .text-muted { color: var(--phu-text-muted) !important; }
 
 .btn-primary,
@@ -94,7 +99,7 @@ a:hover { color: var(--phu-accent-hover); }
 .btn-phu-primary {
   background-color: var(--phu-accent) !important;
   border-color: var(--phu-accent) !important;
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
   font-weight: 600;
   font-size: clamp(14px, 2vw, 16px);
   padding: 0.75em 1.5em;
@@ -108,7 +113,7 @@ a:hover { color: var(--phu-accent-hover); }
 .btn-phu-primary:hover {
   background-color: var(--phu-accent-hover) !important;
   border-color: var(--phu-accent-hover) !important;
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
 }
 
 .btn-secondary {
@@ -118,7 +123,7 @@ a:hover { color: var(--phu-accent-hover); }
 
 .btn-card, .btn-outline-phu {
   background: transparent !important;
-  color: var(--phu-accent) !important;
+  color: var(--phu-accent-text) !important;
   border: 1.5px solid var(--phu-accent) !important;
   border-radius: 8px;
   font-weight: 600;
@@ -128,18 +133,18 @@ a:hover { color: var(--phu-accent-hover); }
 
 .btn-card:hover, .btn-outline-phu:hover {
   background: var(--phu-accent) !important;
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
 }
 
 .btn-outline-primary {
-  color: var(--phu-accent) !important;
+  color: var(--phu-accent-text) !important;
   border-color: var(--phu-accent) !important;
   border-radius: 8px;
 }
 
 .btn-outline-primary:hover {
   background: var(--phu-accent) !important;
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
 }
 
 .btn-check-travel, .btn-phu-cta {
@@ -154,7 +159,7 @@ a:hover { color: var(--phu-accent-hover); }
 .btn-check-travel:hover, .btn-phu-cta:hover {
   background: var(--phu-accent) !important;
   border-color: var(--phu-accent) !important;
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
 }
 
 .bg-light { background-color: #F7F7F7 !important; }
@@ -618,16 +623,16 @@ section, .section,
 
 .back-btn:hover {
   background: var(--phu-accent);
-  color: var(--phu-white) !important;
+  color: #3d2c00 !important;
   border-color: var(--phu-accent);
 }
 
-.pagination .page-link { color: var(--phu-accent); }
+.pagination .page-link { color: var(--phu-accent-text); }
 .pagination .page-link:hover,
 .pagination .page-item.active .page-link {
   background-color: var(--phu-accent);
   border-color: var(--phu-accent);
-  color: var(--phu-white);
+  color: #3d2c00;
 }
 
 .spinner-border.text-primary { color: var(--phu-accent) !important; }

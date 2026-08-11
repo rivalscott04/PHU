@@ -138,7 +138,7 @@
 .travel-stats-bar__item strong {
   font-size: 0.95rem;
   font-weight: 700;
-  color: var(--phu-accent);
+  color: var(--phu-accent-text);
 }
 
 .travel-stats-bar__sep {
@@ -236,25 +236,28 @@
   font-size: 0.62rem;
   padding: 0.25rem 0.5rem;
   border-radius: 999px;
-  font-weight: 600;image.png
+  font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   flex-shrink: 0;
 }
 
+/* PIHK melayani haji + umrah, PPIU umrah saja. Warnanya dibuat sewarna
+   tetapi PIHK lebih pekat, supaya urutan tingkatannya terbaca. Sebelumnya
+   PIHK abu-abu, yang justru terbaca sebagai "nonaktif". */
 .status-ppiu {
   background: var(--phu-accent);
-  color: white;
+  color: #3d2c00;
 }
 
 .status-pihk {
-  background: #555;
-  color: white;
+  background: var(--phu-accent-deep);
+  color: #fff;
 }
 
 .status-cabang {
-  background: #888;
-  color: white;
+  background: #6b6b6b;
+  color: #fff;
 }
 
 .info-item {
@@ -289,7 +292,7 @@
 
 .dropdown-item:hover {
   background-color: var(--phu-accent);
-  color: white;
+  color: #3d2c00;
 }
 
 .travel-header .text-muted {
@@ -349,7 +352,7 @@
 .btn-check:checked + .btn-outline-secondary {
   background-color: var(--phu-accent);
   border-color: var(--phu-accent);
-  color: white;
+  color: #3d2c00;
 }
 
 .btn-outline-secondary {
