@@ -12,17 +12,12 @@
                 <a href="{{ route('jamaah.haji-khusus.create') }}" class="btn btn-sm btn-primary">
                     <i class="bx bx-plus me-1"></i> Tambah Jamaah
                 </a>
-                @if(in_array(auth()->user()->role, ['user', 'kabupaten'], true))
-                    @include('partials.export-dropdown', [
-                        'excelUrl' => route('jamaah.haji-khusus.export', ['format' => 'excel']),
-                        'pdfUrl' => route('jamaah.haji-khusus.export', ['format' => 'pdf']),
-                        'buttonClass' => 'btn-success',
-                    ])
-                @else
-                    <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
-                        <i class="bx bx-export me-1"></i> Unduh Data
-                    </button>
-                @endif
+                @include('partials.export-dropdown', [
+                    'excelUrl' => route('jamaah.haji-khusus.export', ['format' => 'excel']),
+                    'pdfUrl' => route('jamaah.haji-khusus.export', ['format' => 'pdf']),
+                    'buttonClass' => 'btn-success',
+                    'followsFilter' => true,
+                ])
             </div>
         </div>
     </div>
@@ -38,21 +33,13 @@
                 @include('jamaah.haji-khusus.partials.listing', [
                     'jamaahHajiKhusus' => $jamaahHajiKhusus,
                     'showTravelColumn' => $showTravelColumn,
+                    'travelOptions' => $travelOptions,
                 ])
             </div>
         </div>
     </div>
 </div>
 
-@if(auth()->user()->role === 'admin')
-    @include('partials.jamaah-export-modal', [
-        'modalId' => 'exportModal',
-        'title' => 'Unduh Data Jamaah Haji Khusus',
-        'exportRoute' => 'jamaah.haji-khusus.export',
-        'exportTravels' => $exportTravels,
-        'orgLabel' => 'PIHK',
-    ])
-@endif
 @endsection
 
 @push('js')

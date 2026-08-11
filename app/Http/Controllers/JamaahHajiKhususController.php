@@ -5,12 +5,11 @@ namespace App\Http\Controllers;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\JamaahHajiKhusus;
-use App\Models\TravelCompany;
 use App\Exports\JamaahHajiKhususExport;
 use App\Support\ExportFilename;
 use App\Support\JamaahExportScope;
+use App\Support\JamaahListingQuery;
 use App\Support\KabupatenResourceGuard;
-use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -35,15 +34,6 @@ class JamaahHajiKhususController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        $exportTravels = null;
-        if ($user->role === 'admin') {
-            $exportTravels = TravelCompany::query()
-                ->whereHas('jamaahHajiKhusus')
-                ->withCount('jamaahHajiKhusus as jamaah_count')
-                ->orderBy('Penyelenggara')
-                ->get();
-        }
-
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -59,49 +49,19 @@ class JamaahHajiKhususController extends Controller
                 'filters' => [
                     'search' => $request->get('search'),
                     'status' => $request->get('status'),
+                    'travel_id' => $request->get('travel_id'),
                 ],
             ]);
         }
 
-        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus', 'exportTravels', 'showTravelColumn'));
+        $travelOptions = JamaahListingQuery::travelOptionsHajiKhusus($user);
+
+        return view('jamaah.haji-khusus.index', compact('jamaahHajiKhusus', 'showTravelColumn', 'travelOptions'));
     }
 
     private function buildHajiKhususListingQuery(Request $request, $user)
     {
-        $query = JamaahHajiKhusus::query()->with('travel:id,Penyelenggara,kab_kota');
-
-        if ($user->role === 'user') {
-            if ($user->travel) {
-                $query->where('travel_id', $user->travel->id);
-            }
-            $query->whereHas('travel', function ($q) use ($user) {
-                $q->where('kab_kota', $user->kabupaten);
-            });
-        } elseif ($user->role === 'kabupaten') {
-            KabupatenScopeFilter::applyOnTravelRelation($query, KabupatenScopeFilter::filtersForUser($user));
-        } elseif ($user->role !== 'admin') {
-            $query->whereRaw('1 = 0');
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->string('search')->toString();
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_lengkap', 'like', "%{$search}%")
-                    ->orWhere('no_ktp', 'like', "%{$search}%")
-                    ->orWhere('no_paspor', 'like', "%{$search}%")
-                    ->orWhere('nomor_porsi', 'like', "%{$search}%")
-                    ->orWhereHas('travel', function ($travelQuery) use ($search) {
-                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
-                            ->orWhere('kab_kota', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->byStatus($request->string('status')->toString());
-        }
-
-        return $query;
+        return JamaahListingQuery::buildHajiKhusus($request, $user);
     }
 
     /**
@@ -462,7 +422,7 @@ class JamaahHajiKhususController extends Controller
                 $html .= '
                 <table>
                     <tr class="separator">
-                        <td colspan="10">PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . ' | Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total: ' . $jamaahGroup->count() . ' Jamaah | Status: ' . ($travel->Status ?? 'N/A') . '</td>
+                        <td colspan="10">PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . ' | Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total: ' . $jamaahGroup->count() . ' Jamaah | Status: ' . ($travel->Status ?? 'Tidak Diketahui') . '</td>
                     </tr>
                     <tr>
                         <th>No</th>
@@ -489,7 +449,7 @@ class JamaahHajiKhususController extends Controller
                         <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
                         <td>' . ($jamaah->travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
                         <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
-                        <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
+                        <td>' . ($jamaah->travel->Status ?? 'Tidak Diketahui') . '</td>
                     </tr>';
                 }
                 
@@ -523,7 +483,7 @@ class JamaahHajiKhususController extends Controller
                     <td>' . ($jamaah->nomor_porsi ?: '-') . '</td>
                     <td>' . ($jamaah->travel->Penyelenggara ?? 'Tidak Diketahui') . '</td>
                     <td>' . ($jamaah->travel->kab_kota ?? 'Tidak Diketahui') . '</td>
-                    <td>' . ($jamaah->travel->Status ?? 'N/A') . '</td>
+                    <td>' . ($jamaah->travel->Status ?? 'Tidak Diketahui') . '</td>
                 </tr>';
             }
             

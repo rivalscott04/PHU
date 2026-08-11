@@ -3,6 +3,7 @@
     'pdfUrl' => null,
     'label' => 'Unduh Data',
     'buttonClass' => 'btn-info',
+    'followsFilter' => false,
 ])
 
 <div class="btn-group">
@@ -11,13 +12,13 @@
     </button>
     <ul class="dropdown-menu dropdown-menu-end">
         <li>
-            <a class="dropdown-item" href="{{ $excelUrl }}">
+            <a class="dropdown-item" href="{{ $excelUrl }}" @if($followsFilter) data-jamaah-export-url="{{ $excelUrl }}" @endif>
                 <i class="bx bx-file me-2"></i> Excel
             </a>
         </li>
         @if($pdfUrl)
             <li>
-                <a class="dropdown-item" href="{{ $pdfUrl }}">
+                <a class="dropdown-item" href="{{ $pdfUrl }}" @if($followsFilter) data-jamaah-export-url="{{ $pdfUrl }}" @endif>
                     <i class="bx bx-file-pdf me-2"></i> PDF
                 </a>
             </li>

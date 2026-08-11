@@ -19,16 +19,11 @@
                     <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                         <i class="bx bx-upload me-1"></i> Upload Excel
                     </button>
-                    @if(in_array(auth()->user()->role, ['user', 'kabupaten'], true))
-                        @include('partials.export-dropdown', [
-                            'excelUrl' => route('jamaah.umrah.export', ['format' => 'excel']),
-                            'pdfUrl' => route('jamaah.umrah.export', ['format' => 'pdf']),
-                        ])
-                    @else
-                        <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exportModal">
-                            <i class="bx bx-export me-1"></i> Unduh Data
-                        </button>
-                    @endif
+                    @include('partials.export-dropdown', [
+                        'excelUrl' => route('jamaah.umrah.export', ['format' => 'excel']),
+                        'pdfUrl' => route('jamaah.umrah.export', ['format' => 'pdf']),
+                        'followsFilter' => true,
+                    ])
                 </div>
             </div>
         </div>
@@ -45,6 +40,7 @@
                         'listingRoute' => $listingRoute,
                         'jamaah' => $jamaah,
                         'showTravelColumn' => $showTravelColumn,
+                        'travelOptions' => $travelOptions,
                     ])
                 </div>
             </div>
@@ -82,13 +78,4 @@
         </div>
     </div>
 
-    @if(auth()->user()->role === 'admin')
-        @include('partials.jamaah-export-modal', [
-            'modalId' => 'exportModal',
-            'title' => 'Unduh Data Jamaah Umrah',
-            'exportRoute' => 'jamaah.umrah.export',
-            'exportTravels' => $exportTravels,
-            'orgLabel' => 'PPIU',
-        ])
-    @endif
 @endsection

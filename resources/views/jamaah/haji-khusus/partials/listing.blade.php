@@ -1,11 +1,18 @@
 @props([
     'jamaahHajiKhusus',
     'showTravelColumn' => false,
+    'travelOptions' => null,
 ])
+
+@php
+    $hasTravelFilter = ($showTravelColumn ?? false) && $travelOptions && $travelOptions->isNotEmpty();
+@endphp
+
+@include('jamaah.partials.listing-assets')
 
 <div class="p-3 border-bottom bg-light">
     <div class="row align-items-center g-2">
-        <div class="col-md-5">
+        <div class="{{ $hasTravelFilter ? 'col-md-3' : 'col-md-5' }}">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0">
                     <i class="bx bx-search text-muted"></i>
@@ -21,7 +28,19 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-3">
+        @if($hasTravelFilter)
+            <div class="col-md-3">
+                <select class="form-select" id="hajiKhususTravelFilter" data-placeholder="Semua PIHK">
+                    <option value="">Semua PIHK</option>
+                    @foreach($travelOptions as $travelOption)
+                        <option value="{{ $travelOption->id }}" @selected((int) request('travel_id') === $travelOption->id)>
+                            {{ $travelOption->Penyelenggara }} ({{ $travelOption->jamaah_count }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+        @endif
+        <div class="col-md-2">
             <select class="form-select form-select-sm" id="hajiKhususStatusFilter">
                 <option value="">Semua Status</option>
                 <option value="pending" @selected(request('status') === 'pending')>Menunggu</option>
@@ -80,6 +99,7 @@
                 const searchInput = document.getElementById('hajiKhususSearchInput');
                 const statusFilter = document.getElementById('hajiKhususStatusFilter');
                 const perPageFilter = document.getElementById('hajiKhususPerPageFilter');
+                const travelFilter = document.getElementById('hajiKhususTravelFilter');
                 const loadingEl = document.querySelector('.haji-khusus-search-loading');
 
                 if (!searchInput) {
@@ -87,6 +107,32 @@
                 }
 
                 let searchTimeout;
+
+                function activeFilters() {
+                    const params = new URLSearchParams();
+                    if (searchInput.value.trim()) {
+                        params.append('search', searchInput.value.trim());
+                    }
+                    if (statusFilter && statusFilter.value) {
+                        params.append('status', statusFilter.value);
+                    }
+                    if (travelFilter && travelFilter.value) {
+                        params.append('travel_id', travelFilter.value);
+                    }
+
+                    return params;
+                }
+
+                // Tautan unduh selalu membawa filter aktif, supaya isi file sama
+                // dengan yang terlihat di layar.
+                function syncExportLinks() {
+                    const filters = activeFilters().toString();
+
+                    document.querySelectorAll('[data-jamaah-export-url]').forEach(function (link) {
+                        const base = link.getAttribute('data-jamaah-export-url');
+                        link.href = filters ? `${base}&${filters}` : base;
+                    });
+                }
 
                 function updateResultsInfo(data) {
                     const info = data.pagination_info;
@@ -106,13 +152,9 @@
                         loadingEl.style.display = 'block';
                     }
 
-                    const queryParams = new URLSearchParams();
-                    if (searchInput.value.trim()) {
-                        queryParams.append('search', searchInput.value.trim());
-                    }
-                    if (statusFilter && statusFilter.value) {
-                        queryParams.append('status', statusFilter.value);
-                    }
+                    const queryParams = activeFilters();
+                    syncExportLinks();
+
                     if (perPageFilter && perPageFilter.value) {
                         queryParams.append('per_page', perPageFilter.value);
                     }
@@ -178,6 +220,25 @@
                     });
                 }
 
+                if (travelFilter) {
+                    if (window.jQuery && jQuery.fn.select2) {
+                        jQuery(travelFilter)
+                            .select2({
+                                width: '100%',
+                                placeholder: travelFilter.dataset.placeholder,
+                                allowClear: true,
+                            })
+                            .on('change', function () {
+                                fetchListing();
+                            });
+                    } else {
+                        travelFilter.addEventListener('change', function () {
+                            fetchListing();
+                        });
+                    }
+                }
+
+                syncExportLinks();
                 bindPaginationLinks();
             }
         </script>

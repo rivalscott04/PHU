@@ -271,7 +271,7 @@
                                     </div>
                                     <div class="col-sm-8">
                                         <span class="badge {{ $jamaahHajiKhusus->travel->Status === 'PPIU' ? 'bg-success' : 'bg-warning' }}">
-                                            {{ $jamaahHajiKhusus->travel->Status ?? 'N/A' }}
+                                            {{ $jamaahHajiKhusus->travel->Status ?? 'Tidak Diketahui' }}
                                         </span>
                                     </div>
                                 </div>

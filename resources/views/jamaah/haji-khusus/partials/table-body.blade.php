@@ -9,7 +9,7 @@
         <td>{{ $jamaahHajiKhusus->firstItem() + $loop->index }}</td>
         @if($showTravelColumn ?? false)
             <td>
-                <span class="badge bg-light text-dark">{{ $jamaah->travel->Penyelenggara ?? '-' }}</span>
+                <span class="badge badge-ppiu">{{ $jamaah->travel->Penyelenggara ?? '-' }}</span>
                 @if($jamaah->travel?->kab_kota)
                     <small class="d-block text-muted mt-1">{{ $jamaah->travel->kab_kota }}</small>
                 @endif

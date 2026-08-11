@@ -39,7 +39,7 @@ class JamaahHajiExport implements FromCollection, WithHeadings, WithMapping, Wit
                     'SEPARATOR' => 'PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui'),
                     'KABUPATEN' => $travel->kab_kota ?? 'Tidak Diketahui',
                     'TOTAL_JAMAAH' => $jamaahGroup->count(),
-                    'STATUS' => $travel->Status ?? 'N/A',
+                    'STATUS' => $travel->Status ?? 'Tidak Diketahui',
                     'NAMA' => '',
                     'ALAMAT' => '',
                     'NO_HP' => '',

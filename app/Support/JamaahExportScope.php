@@ -16,6 +16,12 @@ final class JamaahExportScope
      */
     public static function forJamaah(User $user, Request $request, string $jenis): array
     {
+        // Filter yang sedang aktif di layar menang: yang diunduh harus persis
+        // yang sedang dilihat.
+        if (JamaahListingQuery::hasActiveFilter($request)) {
+            return self::filteredJamaah($user, $request, $jenis);
+        }
+
         if ($user->role === UserRole::User->value) {
             return self::singleTravelJamaah($user, $jenis);
         }
@@ -43,6 +49,10 @@ final class JamaahExportScope
      */
     public static function forHajiKhusus(User $user, Request $request): array
     {
+        if (JamaahListingQuery::hasActiveFilter($request)) {
+            return self::filteredHajiKhusus($user, $request);
+        }
+
         if ($user->role === UserRole::User->value) {
             return self::singleTravelHajiKhusus($user);
         }
@@ -63,6 +73,27 @@ final class JamaahExportScope
         }
 
         return self::globalGroupedHajiKhusus();
+    }
+
+    /**
+     * Unduhan mengikuti filter daftar. Satu travel menghasilkan file tunggal,
+     * hasil pencarian lintas travel tetap dikelompokkan per travel.
+     *
+     * @return array{isGlobal: bool, data: mixed, travel: ?TravelCompany, error: ?string}
+     */
+    private static function filteredJamaah(User $user, Request $request, string $jenis): array
+    {
+        $jamaah = JamaahListingQuery::build($jenis, $request, $user)->get();
+
+        if ($jamaah->isEmpty()) {
+            return self::fail('Tidak ada data jamaah yang cocok dengan filter aktif.');
+        }
+
+        if ($request->filled('travel_id')) {
+            return self::ok(false, $jamaah, $jamaah->first()->travel);
+        }
+
+        return self::ok(true, $jamaah->groupBy('travel_id'), null);
     }
 
     /** @return array{isGlobal: bool, data: mixed, travel: ?TravelCompany, error: ?string} */
@@ -138,6 +169,22 @@ final class JamaahExportScope
         }
 
         return self::ok(true, $grouped, null);
+    }
+
+    /** @return array{isGlobal: bool, data: mixed, travel: ?TravelCompany, error: ?string} */
+    private static function filteredHajiKhusus(User $user, Request $request): array
+    {
+        $jamaah = JamaahListingQuery::buildHajiKhusus($request, $user)->orderBy('nama_lengkap')->get();
+
+        if ($jamaah->isEmpty()) {
+            return self::fail('Tidak ada data jamaah haji khusus yang cocok dengan filter aktif.');
+        }
+
+        if ($request->filled('travel_id')) {
+            return self::ok(false, $jamaah, $jamaah->first()->travel);
+        }
+
+        return self::ok(true, $jamaah->groupBy('travel_id'), null);
     }
 
     /** @return array{isGlobal: bool, data: mixed, travel: ?TravelCompany, error: ?string} */

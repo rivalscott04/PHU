@@ -22,13 +22,17 @@ class JamaahExport implements FromCollection, WithHeadings, WithStyles
         ]);
     }
 
+    /**
+     * Judul kolom dibaca manusia, tetapi tetap harus ter-slug menjadi
+     * nik / nama / alamat / nomor_hp seperti yang dibaca JamaahImport.
+     */
     public function headings(): array
     {
         return [
-            'nik',
-            'nama',
-            'alamat',
-            'nomor_hp'
+            'NIK',
+            'Nama',
+            'Alamat',
+            'Nomor HP',
         ];
     }
 

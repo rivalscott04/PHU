@@ -16,16 +16,11 @@
                         <button type="button" class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                             <i class="bx bx-upload me-1"></i> Upload Excel
                         </button>
-                        @if(in_array(auth()->user()->role, ['user', 'kabupaten'], true))
-                            @include('partials.export-dropdown', [
-                                'excelUrl' => route('jamaah.haji.export', ['format' => 'excel']),
-                                'pdfUrl' => route('jamaah.haji.export', ['format' => 'pdf']),
-                            ])
-                        @else
-                            <button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#exportModal">
-                                <i class="bx bx-export me-1"></i> Unduh Data
-                            </button>
-                        @endif
+                        @include('partials.export-dropdown', [
+                            'excelUrl' => route('jamaah.haji.export', ['format' => 'excel']),
+                            'pdfUrl' => route('jamaah.haji.export', ['format' => 'pdf']),
+                            'followsFilter' => true,
+                        ])
                     </div>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
@@ -33,6 +28,7 @@
                         'listingRoute' => $listingRoute,
                         'jamaah' => $jamaah,
                         'showTravelColumn' => $showTravelColumn,
+                        'travelOptions' => $travelOptions,
                     ])
                 </div>
             </div>
@@ -70,13 +66,4 @@
         </div>
     </div>
 
-    @if(auth()->user()->role === 'admin')
-        @include('partials.jamaah-export-modal', [
-            'modalId' => 'exportModal',
-            'title' => 'Unduh Data Jamaah Haji',
-            'exportRoute' => 'jamaah.haji.export',
-            'exportTravels' => $exportTravels,
-            'orgLabel' => 'PPIU',
-        ])
-    @endif
 @endsection

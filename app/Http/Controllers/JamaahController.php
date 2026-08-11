@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\Jamaah;
-use App\Models\TravelCompany;
 use App\Exports\JamaahExport;
 use App\Exports\JamaahUmrahExport;
 use App\Exports\JamaahHajiExport;
@@ -15,9 +14,9 @@ use Maatwebsite\Excel\Facades\Excel;
 use Dompdf\Dompdf;
 use App\Support\ExportFilename;
 use App\Support\JamaahExportScope;
+use App\Support\JamaahListingQuery;
 use App\Support\KanwilContact;
 use App\Support\KabupatenResourceGuard;
-use App\Support\KabupatenScopeFilter;
 
 class JamaahController extends Controller
 {
@@ -53,15 +52,6 @@ class JamaahController extends Controller
             ->paginate($perPage)
             ->withQueryString();
 
-        $exportTravels = null;
-        if ($user->role === 'admin') {
-            $exportTravels = TravelCompany::query()
-                ->whereHas('jamaah', fn ($q) => $q->where('jenis_jamaah', $jenis))
-                ->withCount(['jamaah as jamaah_count' => fn ($q) => $q->where('jenis_jamaah', $jenis)])
-                ->orderBy('Penyelenggara')
-                ->get();
-        }
-
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
@@ -76,47 +66,24 @@ class JamaahController extends Controller
                 ],
                 'filters' => [
                     'search' => $request->get('search'),
+                    'travel_id' => $request->get('travel_id'),
                 ],
             ]);
         }
 
+        $travelOptions = JamaahListingQuery::travelOptions($jenis, $user);
+
         return view($viewName, compact(
             'jamaah',
-            'exportTravels',
             'listingRoute',
             'showTravelColumn',
+            'travelOptions',
         ));
     }
 
     private function buildJamaahListingQuery(string $jenis, Request $request, $user)
     {
-        $query = Jamaah::query()
-            ->where('jenis_jamaah', $jenis)
-            ->with('travel:id,Penyelenggara,kab_kota');
-
-        if ($user->role === 'user') {
-            $query->where('travel_id', $user->travel_id);
-        } elseif ($user->role === 'kabupaten') {
-            KabupatenScopeFilter::applyOnTravelRelation($query, KabupatenScopeFilter::filtersForUser($user));
-        } elseif ($user->role !== 'admin') {
-            $query->whereRaw('1 = 0');
-        }
-
-        if ($request->filled('search')) {
-            $search = $request->string('search')->toString();
-            $query->where(function ($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                    ->orWhere('nik', 'like', "%{$search}%")
-                    ->orWhere('nomor_hp', 'like', "%{$search}%")
-                    ->orWhere('alamat', 'like', "%{$search}%")
-                    ->orWhereHas('travel', function ($travelQuery) use ($search) {
-                        $travelQuery->where('Penyelenggara', 'like', "%{$search}%")
-                            ->orWhere('kab_kota', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        return $query->orderBy('nama');
+        return JamaahListingQuery::build($jenis, $request, $user);
     }
 
     public function indexUmrah(Request $request)
@@ -530,7 +497,7 @@ class JamaahController extends Controller
                                 <tr class="separator">
                                     <td colspan="5">
                                         <strong>PPIU: ' . ($travel->Penyelenggara ?? 'Tidak Diketahui') . '</strong><br>
-                                        <small>Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total Jamaah: ' . $totalJamaah . ' | Status: ' . ($travel->Status ?? 'N/A') . '</small>
+                                        <small>Kabupaten: ' . ($travel->kab_kota ?? 'Tidak Diketahui') . ' | Total Jamaah: ' . $totalJamaah . ' | Status: ' . ($travel->Status ?? 'Tidak Diketahui') . '</small>
                                     </td>
                                 </tr>
                                 <tr>

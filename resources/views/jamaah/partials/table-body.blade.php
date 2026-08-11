@@ -4,7 +4,7 @@
         <td class="text-sm font-weight-bold">{{ $item->nama }}</td>
         @if($showTravelColumn ?? false)
             <td class="text-sm">
-                <span class="badge bg-light text-dark">{{ $item->travel->Penyelenggara ?? '-' }}</span>
+                <span class="badge badge-ppiu">{{ $item->travel->Penyelenggara ?? '-' }}</span>
                 @if($item->travel?->kab_kota)
                     <small class="d-block text-muted mt-1">{{ $item->travel->kab_kota }}</small>
                 @endif
