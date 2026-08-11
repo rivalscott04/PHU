@@ -2,9 +2,11 @@
 
 namespace App\Services;
 
+use App\Enums\UserRole;
 use App\Models\TravelCompany;
 use App\Models\User;
 use App\Notifications\V2\DeadlineReminderNotification;
+use App\Support\NtbKabupatenMap;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -74,6 +76,37 @@ class NotificationService
                     });
             })
             ->get();
+    }
+
+    /**
+     * Semua pihak yang harus menindaklanjuti kiriman travel: admin, pengawas
+     * berwenang, dan petugas kabupaten wilayah travel tersebut.
+     *
+     * @return Collection<int, User>
+     */
+    public function reviewersForTravel(TravelCompany $travel): Collection
+    {
+        $kabupatens = NtbKabupatenMap::queryValues($travel->kab_kota);
+
+        return User::query()
+            ->where(function ($query) use ($travel, $kabupatens) {
+                $query->where('role', UserRole::Admin->value)
+                    ->orWhere(fn ($scoped) => $scoped->pengawasForKabupaten($travel->kab_kota));
+
+                if ($kabupatens !== []) {
+                    $query->orWhere(fn ($kab) => $kab
+                        ->where('role', UserRole::Kabupaten->value)
+                        ->whereIn('kabupaten', $kabupatens));
+                }
+            })
+            ->get();
+    }
+
+    public function notifyReviewers(TravelCompany $travel, Notification $notification): void
+    {
+        $this->reviewersForTravel($travel)->each(
+            fn (User $user) => $this->safeNotify($user, $notification)
+        );
     }
 
     public function notifyTravelUsers(int $travelId, Notification $notification): void

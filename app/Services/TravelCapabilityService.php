@@ -210,7 +210,7 @@ class TravelCapabilityService
                 'icon' => 'bx bx-search-alt',
                 'hasSubmenu' => true,
                 'items' => [
-                    self::subItem('Daftar Pemeriksaan', 'v2.pengawasan.index'),
+                    self::subItem('Daftar Pemeriksaan', 'v2.pengawasan.index', badge: 'inspeksi_active'),
                     self::subItem('Buat Pemeriksaan', 'v2.pengawasan.create'),
                     self::subItem('Tindak Lanjut Temuan', 'v2.followup.index', badge: 'followup_verify'),
                 ],
@@ -258,7 +258,7 @@ class TravelCapabilityService
             'icon' => 'bx bx-calendar-event',
             'hasSubmenu' => true,
             'items' => [
-                self::subItem('BA Pemberangkatan', 'bap'),
+                self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_draft'),
                 self::subItem('Paket Umrah Saya', 'travel.packages'),
                 self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
             ],
@@ -339,7 +339,7 @@ class TravelCapabilityService
                 'icon' => 'bx bx-search-alt',
                 'hasSubmenu' => true,
                 'items' => [
-                    self::subItem('BA Pemeriksaan', 'v2.pengawasan.index'),
+                    self::subItem('BA Pemeriksaan', 'v2.pengawasan.index', badge: 'inspeksi_active'),
                     self::subItem('Tindak Lanjut Temuan', 'v2.followup.index', badge: 'followup_verify'),
                 ],
             ],

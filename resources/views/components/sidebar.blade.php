@@ -8,21 +8,29 @@
     $sidebarUser = auth()->user();
     $sidebarBadges = $sidebarUser ? SidebarBadges::forUser($sidebarUser) : [];
 
-    $renderBadge = static function (?string $badgeKey) use ($sidebarBadges): string {
-        if (! $badgeKey) {
+    // Badge selalu dirender (tersembunyi saat 0) supaya bisa dihidupkan ulang oleh JS realtime.
+    $badgeMarkup = static function (array $keys) use ($sidebarBadges): string {
+        $keys = array_values(array_unique(array_filter($keys)));
+
+        if ($keys === []) {
             return '';
         }
 
-        $count = (int) ($sidebarBadges[$badgeKey] ?? 0);
-
-        if ($count <= 0) {
-            return '';
+        $total = 0;
+        foreach ($keys as $key) {
+            $total += (int) ($sidebarBadges[$key] ?? 0);
         }
 
-        $label = $count > 99 ? '99+' : (string) $count;
+        $label = $total > 99 ? '99+' : (string) $total;
 
-        return '<span class="badge rounded-pill bg-danger sidebar-menu-badge">'.$label.'</span>';
+        return '<span class="badge rounded-pill bg-danger sidebar-menu-badge'.($total > 0 ? '' : ' d-none').'"'
+            .' data-badge-keys="'.e(implode(',', $keys)).'">'.$label.'</span>';
     };
+
+    $renderBadge = static fn (?string $badgeKey): string => $badgeMarkup([$badgeKey]);
+
+    // Badge induk = total badge anak yang terlihat, biar notif ketahuan saat submenu tertutup.
+    $renderParentBadge = static fn (array $items): string => $badgeMarkup(array_column($items, 'badge'));
 
     $canShowItem = static function (array $item) use ($sidebarUser): bool {
         if (! ($item['visible'] ?? true) || ! $sidebarUser) {
@@ -218,6 +226,10 @@
     margin-left: auto;
 }
 
+#sidebar-menu .metismenu > li > a.has-arrow .sidebar-menu-badge {
+    margin-right: 0.5rem;
+}
+
 body[data-sidebar=dark] #sidebar-menu .metismenu > li > a {
     color: #e8eaef;
 }
@@ -278,6 +290,7 @@ body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a:hover {
                                 <a href="javascript: void(0);" class="has-arrow waves-effect">
                                     <i class="{{ $menu['icon'] }}"></i>
                                     <span class="sidebar-menu-text">{{ $menu['name'] }}</span>
+                                    {!! $renderParentBadge($visibleItems) !!}
                                 </a>
                                 <ul class="sub-menu" aria-expanded="false">
                                     @if(isset($menu['groups']))
@@ -379,5 +392,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
         $menu.metisMenu({ toggle: true });
     })(jQuery);
+</script>
+<script>
+    // Badge sidebar ikut hidup lewat channel Reverb yang sama dengan lonceng notifikasi.
+    (function () {
+        var url = @json(route('v2.sidebar-badges'));
+
+        function refreshBadges() {
+            fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                credentials: 'same-origin',
+            })
+                .then(function (res) { return res.ok ? res.json() : null; })
+                .then(function (counts) {
+                    if (!counts) {
+                        return;
+                    }
+
+                    document.querySelectorAll('#side-menu [data-badge-keys]').forEach(function (el) {
+                        var total = el.getAttribute('data-badge-keys').split(',').reduce(function (sum, key) {
+                            return sum + (parseInt(counts[key], 10) || 0);
+                        }, 0);
+
+                        el.textContent = total > 99 ? '99+' : String(total);
+                        el.classList.toggle('d-none', total <= 0);
+                    });
+                })
+                .catch(function () {});
+        }
+
+        window.addEventListener('load', function () {
+            if (window.Echo && window.__PHU_REVERB__) {
+                window.Echo.private('App.Models.User.' + window.__PHU_REVERB__.userId)
+                    .notification(refreshBadges);
+
+                return;
+            }
+
+            // Reverb mati atau tidak dikonfigurasi: polling pelan, hanya saat tab aktif.
+            setInterval(function () {
+                if (!document.hidden) {
+                    refreshBadges();
+                }
+            }, 60000);
+        });
+    })();
 </script>
 @endpush

@@ -13,6 +13,7 @@ use App\Http\Controllers\V2\RiskController;
 use App\Http\Controllers\V2\WorkQueueController;
 use App\Models\Inspection;
 use App\Models\SupervisionWorkQueue;
+use App\Support\SidebarBadges;
 use Illuminate\Support\Facades\Route;
 
 Route::bind('pengawasan', fn (string $value) => Inspection::findOrFail($value));
@@ -81,6 +82,10 @@ Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v
         Route::get('/', [ComplianceProfileController::class, 'index'])->name('index');
         Route::get('/{travel}', [ComplianceProfileController::class, 'show'])->name('show');
     });
+
+    Route::get('/sidebar-badges', fn () => response()->json(
+        SidebarBadges::forUser(request()->user())
+    ))->name('sidebar-badges');
 
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');

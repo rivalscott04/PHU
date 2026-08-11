@@ -6,6 +6,8 @@ use App\Enums\TravelRegistrationStatus;
 use App\Enums\UserRole;
 use App\Models\TravelCompany;
 use App\Models\User;
+use App\Notifications\V2\TravelRegistrationSubmittedNotification;
+use App\Services\NotificationService;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Support\NtbKabupatenMap;
@@ -45,7 +47,7 @@ class TravelRegistrationController extends Controller
             ]
         ));
 
-        DB::transaction(function () use ($request, $validated) {
+        $travel = DB::transaction(function () use ($request, $validated) {
             $travelData = collect($validated)->only([
                 'Penyelenggara',
                 'Status',
@@ -85,7 +87,14 @@ class TravelRegistrationController extends Controller
                 'country' => 'Indonesia',
                 'is_password_changed' => false,
             ]);
+
+            return $travel;
         });
+
+        app(NotificationService::class)->notifyReviewers(
+            $travel,
+            new TravelRegistrationSubmittedNotification($travel)
+        );
 
         return redirect()
             ->route('travel.registration.success')

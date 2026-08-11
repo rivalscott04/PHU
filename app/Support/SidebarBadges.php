@@ -2,9 +2,13 @@
 
 namespace App\Support;
 
+use App\Enums\BapStatus;
 use App\Enums\FollowupStatus;
+use App\Enums\InspectionStatus;
 use App\Enums\UserRole;
+use App\Models\BAP;
 use App\Models\Followup;
+use App\Models\Inspection;
 use App\Models\User;
 use App\Repositories\WorkQueueRepository;
 use Illuminate\Support\Facades\Schema;
@@ -26,6 +30,8 @@ final class SidebarBadges
             'registration_pending' => self::countFromQueues($queues, 'registration_pending'),
             'followup_verify' => self::followupVerifyCount($user, $scope),
             'followup_action' => self::followupActionCount($user),
+            'bap_draft' => self::bapDraftCount($user),
+            'inspeksi_active' => self::inspeksiActiveCount($user),
         ];
     }
 
@@ -155,6 +161,40 @@ final class SidebarBadges
         return Followup::query()
             ->where('status', FollowupStatus::RevisionRequired->value)
             ->whereHas('finding.inspection', fn ($q) => $q->where('travel_id', $user->travel_id))
+            ->count();
+    }
+
+    /** BA Pemberangkatan yang masih draf: travel harus melengkapi lalu mengajukan. */
+    private static function bapDraftCount(User $user): int
+    {
+        if ($user->role !== UserRole::User->value || ! Schema::hasTable('bap')) {
+            return 0;
+        }
+
+        return BAP::query()
+            ->where('user_id', $user->id)
+            ->where('status', BapStatus::Pending->value)
+            ->count();
+    }
+
+    /** Pemeriksaan yang dibuat user ini dan belum ditutup. */
+    private static function inspeksiActiveCount(User $user): int
+    {
+        if (! in_array($user->role, [UserRole::Admin->value, UserRole::Pengawas->value], true)) {
+            return 0;
+        }
+
+        if (! Schema::hasTable('pengawasan')) {
+            return 0;
+        }
+
+        return Inspection::query()
+            ->where('created_by', $user->id)
+            ->whereIn('status', [
+                InspectionStatus::Draft->value,
+                InspectionStatus::Scheduled->value,
+                InspectionStatus::OnProgress->value,
+            ])
             ->count();
     }
 

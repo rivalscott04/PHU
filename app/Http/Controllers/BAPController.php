@@ -15,8 +15,10 @@ use App\Models\TravelPackage;
 use Illuminate\Http\Request;
 use App\Models\TravelCompany;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Notifications\V2\BapSubmittedNotification;
 use App\Services\BapJamaahService;
 use App\Services\BapVerificationService;
+use App\Services\NotificationService;
 use App\Exports\BapExport;
 use App\Support\ExportFilename;
 use App\Support\KabupatenResourceGuard;
@@ -29,6 +31,7 @@ class BAPController extends Controller
     public function __construct(
         private BapJamaahService $bapJamaahService,
         private BapVerificationService $bapVerificationService,
+        private NotificationService $notificationService,
     ) {}
     public function showFormBAP()
     {
@@ -660,6 +663,15 @@ class BAPController extends Controller
         if ($data->status === 'pending') {
             $data->status = 'diajukan';
             $data->save();
+
+            $travel = $data->user?->travel;
+
+            if ($travel) {
+                $this->notificationService->notifyReviewers(
+                    $travel,
+                    new BapSubmittedNotification($data)
+                );
+            }
         }
 
         return redirect()

@@ -298,6 +298,8 @@ Redis dipakai untuk:
 
 Reverb meneruskan notifikasi database ke browser secara real-time (bell icon di header). Tanpa Reverb, notifikasi tetap tersimpan di database tetapi **tidak muncul otomatis** — user harus refresh halaman.
 
+Badge angka di sidebar ikut channel yang sama: setiap notifikasi masuk, browser memanggil `GET /v2/sidebar-badges` lalu mengecat ulang badge. Jika Reverb mati, sidebar otomatis turun ke polling 60 detik — jadi angkanya tetap benar, hanya lebih lambat.
+
 ### 6.1 Jalankan manual (tes awal)
 
 ```bash
@@ -612,6 +614,7 @@ Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setela
 - [ ] Supervisor `phu-reverb` running
 - [ ] Nginx proxy `/app` ke `127.0.0.1:8080`
 - [ ] Tes: notifikasi muncul tanpa refresh halaman
+- [ ] Tes: badge sidebar bertambah tanpa refresh saat travel mengajukan BA / mendaftar
 
 ### Scheduler & opsional
 

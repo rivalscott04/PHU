@@ -365,7 +365,7 @@ final class HomeCommandCenter
                 'id' => $bap->id,
                 'package' => $bap->package ?: 'Paket keberangkatan',
                 'people' => (int) $bap->people,
-                'datetime' => Carbon::parse($bap->datetime)->format('d/m/Y H:i'),
+                'datetime' => Carbon::parse($bap->datetime)->format('d/m/Y'),
                 'airlines' => $bap->airlines,
                 'url' => route('detail.bap', $bap->id),
             ])
@@ -607,7 +607,7 @@ final class HomeCommandCenter
             'travel_name' => $bap->user?->travel?->Penyelenggara ?? $bap->ppiuname ?? 'Travel',
             'package' => $bap->package ?: 'Paket keberangkatan',
             'people' => (int) $bap->people,
-            'datetime' => Carbon::parse($bap->datetime)->format('d/m/Y H:i'),
+            'datetime' => Carbon::parse($bap->datetime)->format('d/m/Y'),
             'url' => route('detail.bap', $bap->id),
         ])->all();
     }
@@ -1014,6 +1014,13 @@ final class HomeCommandCenter
 
             return $query->count();
         });
+    }
+
+    /** Cache di atas hanya berlaku per-request; tes berbagi proses, jadi perlu direset. */
+    public static function flushCountCache(): void
+    {
+        self::$countCache = [];
+        self::$queueCache = [];
     }
 
     private static function cachedCount(string $key, callable $resolver): int
