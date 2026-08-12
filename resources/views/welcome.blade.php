@@ -1415,7 +1415,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <a href="#calendar-section" class="btn btn-primary" data-bs-dismiss="modal">Lihat Jadwal</a>
+                    <button type="button" class="btn btn-primary" data-scroll-target="#calendar-section">Lihat Jadwal</button>
                 </div>
             </div>
         </div>
@@ -1455,7 +1455,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                    <a href="#calendar-section" class="btn btn-primary" data-bs-dismiss="modal">Lihat Jadwal</a>
+                    <button type="button" class="btn btn-primary" data-scroll-target="#calendar-section">Lihat Jadwal</button>
                 </div>
             </div>
         </div>
@@ -1527,6 +1527,35 @@
     <script src="{{ asset('js/main.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Bootstrap membatalkan aksi bawaan pada <a data-bs-dismiss="modal">,
+            // jadi tautan #anchor di dalam modal tidak pernah dijalankan. Tutup
+            // modalnya dulu, baru gulir setelah benar-benar tertutup — kalau
+            // digulir saat modal masih menutup, Bootstrap mengembalikan posisi
+            // scroll dan halaman terlihat diam.
+            document.querySelectorAll('[data-scroll-target]').forEach(function(trigger) {
+                trigger.addEventListener('click', function() {
+                    const target = document.querySelector(trigger.dataset.scrollTarget);
+                    if (!target) {
+                        return;
+                    }
+
+                    const scroll = function() {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    };
+
+                    const modalEl = trigger.closest('.modal');
+                    const modal = modalEl ? bootstrap.Modal.getInstance(modalEl) : null;
+
+                    if (!modal) {
+                        scroll();
+                        return;
+                    }
+
+                    modalEl.addEventListener('hidden.bs.modal', scroll, { once: true });
+                    modal.hide();
+                });
+            });
+
             document.querySelectorAll('.stat-item[role="button"]').forEach(function(item) {
                 item.addEventListener('keydown', function(e) {
                     if (e.key === 'Enter' || e.key === ' ') {
