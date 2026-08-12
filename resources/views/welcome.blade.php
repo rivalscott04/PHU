@@ -510,8 +510,33 @@
             padding: 5px 0 !important;
         }
 
-        .hero {
+        /* Dipilih .hero.section, bukan .hero saja: ada aturan generik
+           `section, .section` ber-!important yang ditulis belakangan dengan
+           kekhususan sama, sehingga padding hero selalu kalah dan tersisa
+           min(5vw, 60px) — 25px di layar HP. */
+        .hero.section {
             padding: 140px 0 100px 0 !important;
+        }
+
+        /* Dasar hero ditempati dua hal sekaligus: ombak hiasan setinggi 60px
+           dan kartu aksi cepat yang sengaja ditarik naik 40px. Keduanya
+           menimpa tombol begitu kontennya menumpuk. Konten dinaikkan di atas
+           ombak, ombak dibuat tembus klik, dan ruang bawahnya dilebihkan
+           supaya tombol tidak masuk ke zona tumpang tindih. */
+        .hero .container {
+            z-index: 4;
+        }
+
+        .hero .hero-waves {
+            pointer-events: none;
+        }
+
+        /* Tombol mulai menumpuk saat kolom hero jadi selebar layar, yaitu di
+           bawah breakpoint lg Bootstrap (992px) — bukan 640px. */
+        @media (max-width: 991.98px) {
+            .hero.section {
+                padding-bottom: 140px !important;
+            }
         }
 
         .hero h1 {
