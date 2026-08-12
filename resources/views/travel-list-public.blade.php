@@ -70,10 +70,10 @@
                         </li>
                     </ul>
                     <div class="trust-legend" aria-label="Panduan bintang kepercayaan">
-                        <span class="trust-legend__item"><span class="trust-legend__stars">★★★★★</span> Sangat Dipercaya</span>
-                        <span class="trust-legend__item"><span class="trust-legend__stars">★★★★☆</span> Dipercaya</span>
-                        <span class="trust-legend__item"><span class="trust-legend__stars">★★★☆☆</span> Perlu Dicek</span>
-                        <span class="trust-legend__item"><span class="trust-legend__stars">★★☆☆☆</span> Kurang Dipercaya</span>
+                        <span class="trust-legend__item"><span class="trust-legend__stars trust-legend__stars--high">★★★★★</span> Sangat Dipercaya</span>
+                        <span class="trust-legend__item"><span class="trust-legend__stars trust-legend__stars--good">★★★★☆</span> Dipercaya</span>
+                        <span class="trust-legend__item"><span class="trust-legend__stars trust-legend__stars--watch">★★★☆☆</span> Perlu Dicek</span>
+                        <span class="trust-legend__item"><span class="trust-legend__stars trust-legend__stars--low">★★☆☆☆</span> Kurang Dipercaya</span>
                     </div>
                     <p class="trust-intro__note text-muted small mb-0 mt-3">
                         <i class="fas fa-info-circle me-1"></i>

@@ -71,6 +71,13 @@
         letter-spacing: -1px;
     }
 
+    /* Keterangan ikut warna pitanya, kalau tidak legenda mengajarkan satu warna
+       untuk empat tingkat yang sebenarnya berbeda warna. */
+    .trust-legend__stars--high { color: var(--phu-band-high, #157a52); }
+    .trust-legend__stars--good { color: var(--phu-band-good, #1c6bb0); }
+    .trust-legend__stars--watch { color: var(--phu-band-watch, #8a6100); }
+    .trust-legend__stars--low { color: var(--phu-band-low, #b3261e); }
+
     .trust-intro__icon {
         width: 52px;
         height: 52px;
@@ -127,27 +134,30 @@
         font-size: 0.65rem;
     }
 
+    /* Sewarna dengan pita di profil publik, supaya penilaian yang sama tidak
+       tampil beda antara halaman daftar dan halaman detail. */
     .trust-badge--success {
-        background: rgba(226, 167, 18, 0.12);
-        color: var(--phu-accent-text, #8a6100);
-        border: 1px solid rgba(226, 167, 18, 0.3);
+        background: rgba(21, 122, 82, 0.1);
+        color: var(--phu-band-high, #157a52);
+        border: 1px solid rgba(21, 122, 82, 0.25);
     }
 
     .trust-badge--info {
-        background: rgba(226, 167, 18, 0.1);
-        border: 1px solid rgba(226, 167, 18, 0.25);
+        background: rgba(28, 107, 176, 0.1);
+        color: var(--phu-band-good, #1c6bb0);
+        border: 1px solid rgba(28, 107, 176, 0.25);
     }
 
     .trust-badge--warning {
-        background: rgba(201, 166, 53, 0.15);
-        color: var(--phu-gold-dark, #a88a2b);
-        border: 1px solid rgba(201, 166, 53, 0.35);
+        background: rgba(138, 97, 0, 0.1);
+        color: var(--phu-band-watch, #8a6100);
+        border: 1px solid rgba(138, 97, 0, 0.25);
     }
 
     .trust-badge--danger {
-        background: rgba(220, 53, 69, 0.1);
-        color: #a71d2a;
-        border: 1px solid rgba(220, 53, 69, 0.25);
+        background: rgba(179, 38, 30, 0.1);
+        color: var(--phu-band-low, #b3261e);
+        border: 1px solid rgba(179, 38, 30, 0.25);
     }
 
     .trust-badge--muted {

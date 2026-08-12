@@ -16,6 +16,13 @@
      bidang warna dan garis. */
   --phu-accent-text: #8a6100;
   --phu-accent-deep: #6b4a00;
+  /* Pita indeks kepercayaan. Warnanya sengaja semantis (hijau..merah) karena
+     mengandung arti, bukan hiasan — tapi versi terangnya gagal kontras, jadi
+     dipakai yang gelap. Nilainya digandakan di PublicTrustIndex::colorForScore. */
+  --phu-band-high: #157a52;
+  --phu-band-good: #1c6bb0;
+  --phu-band-watch: #8a6100;
+  --phu-band-low: #b3261e;
   --phu-white: #FFFFFF;
   --phu-border: #E5E5E5;
   --phu-dark-bg: #3a2a06;

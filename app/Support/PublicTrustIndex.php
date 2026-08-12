@@ -135,13 +135,19 @@ class PublicTrustIndex
         };
     }
 
+    /**
+     * Dipakai sebagai warna cincin, angka, dan pil label di profil publik.
+     * Versi terang sebelumnya (#1acc8d dkk) hanya 1,85-2,95:1 di latar putih;
+     * nilai di bawah ini semuanya >= 4,9:1. Samakan dengan --phu-band-* di
+     * public-theme.css bila diubah.
+     */
     public static function colorForScore(int $score): string
     {
         return match (true) {
-            $score >= 80 => '#1acc8d',
-            $score >= 60 => '#50a5f1',
-            $score >= 40 => '#f1b44c',
-            default => '#f46a6a',
+            $score >= 80 => '#157a52',
+            $score >= 60 => '#1c6bb0',
+            $score >= 40 => '#8a6100',
+            default => '#b3261e',
         };
     }
 
