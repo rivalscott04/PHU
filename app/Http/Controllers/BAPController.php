@@ -703,8 +703,10 @@ class BAPController extends Controller
         
         $data->status = $request->status;
         
-        // Jika status berubah menjadi 'diterima', generate nomor surat otomatis
-        if ($request->status === 'diterima') {
+        // Nomor surat dan tanggal terbit hanya dibuat sekali. Menyetujui ulang BA
+        // yang sama tidak boleh menerbitkan nomor baru: dokumennya sama, dan
+        // nomor lama sudah beredar pada berkas yang dicetak sebelumnya.
+        if ($request->status === 'diterima' && ! $data->nomor_surat) {
             // Cari nomor urut terakhir untuk bulan dan tahun saat ini
             $currentMonth = date('m');
             $currentYear = date('Y');
@@ -728,6 +730,11 @@ class BAPController extends Controller
             
             $nomorSuratLengkap = "B-{$nextNumber}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
             $data->nomor_surat = $nomorSuratLengkap;
+
+            // Dibekukan sekali saat BA disetujui. Kalau tidak, narasi "Pada hari
+            // ini ..." ikut berubah tiap kali dokumen dicetak ulang, dan bisa
+            // bertentangan dengan bulan/tahun pada nomor suratnya sendiri.
+            $data->tanggal_terbit = $data->tanggal_terbit ?: now()->toDateString();
         }
 
         $data->save();

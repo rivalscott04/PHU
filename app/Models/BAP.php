@@ -34,8 +34,13 @@ class BAP extends Model
         'status',
         'pdf_file_path',
         'nomor_surat',
+        'tanggal_terbit',
         'travel_token',
         'kanwil_token',
+    ];
+
+    protected $casts = [
+        'tanggal_terbit' => 'date',
     ];
 
     public function jamaah()

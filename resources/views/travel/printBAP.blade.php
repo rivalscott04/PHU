@@ -246,7 +246,11 @@
         </div>
 
         <div class="content">
-            <p><b>{{ app('App\Http\Controllers\BAPController')->tanggalDalamFormatBaru(now()) }}</b>,
+            {{-- Tanggal terbit dibekukan saat BA disetujui. Memakai now() di sini
+                 membuat dokumen yang sama berbunyi lain setiap kali dicetak ulang.
+                 BA yang belum disetujui belum punya tanggal terbit (juga belum
+                 bernomor), jadi jatuh ke tanggal hari ini. --}}
+            <p><b>{{ app('App\Http\Controllers\BAPController')->tanggalDalamFormatBaru(optional($data->tanggal_terbit)->toDateString() ?? now()->toDateString()) }}</b>,
                 yang bertanda tangan dibawah ini :</p>
 
             <div class="form-group">
