@@ -16,10 +16,6 @@ use App\Http\Controllers\UtilityController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 use App\Http\Controllers\ResetPassword;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChangePassword;
