@@ -1437,6 +1437,17 @@
                         <p class="text-muted">Maskapai yang bekerja sama</p>
                     </div>
                     <hr>
+                    @if(count($airlines) > 0)
+                        <h6>Daftar Maskapai:</h6>
+                        <div class="row">
+                            @foreach($airlines as $airline)
+                                <div class="col-md-6 mb-2">
+                                    <i class="fas fa-plane me-2 text-success"></i>{{ $airline }}
+                                </div>
+                            @endforeach
+                        </div>
+                        <hr>
+                    @endif
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong>Info:</strong> Maskapai yang tersedia untuk penerbangan haji dan umrah dari wilayah NTB.

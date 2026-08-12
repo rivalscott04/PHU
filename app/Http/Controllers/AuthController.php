@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\BAP;
+use App\Models\BapAirline;
 use App\Models\User;
 use App\Models\Jamaah;
 use App\Models\CabangTravel;
@@ -149,11 +149,16 @@ class AuthController extends Controller
             ->selectRaw("SUM(CASE WHEN jenis_jamaah = 'umrah' THEN 1 ELSE 0 END) as umrah")
             ->first();
 
+        // Daftar resmi maskapai, bukan nama bebas yang pernah diketik di BAP —
+        // sumber yang sama dipakai form BAP dan paket travel, jadi salah ketik
+        // tidak lagi terhitung sebagai maskapai tersendiri.
+        $airlines = BapAirline::activeNames();
+
         $stats = [
             'travelCount' => $travelPusat->count() + $travelCabang->count(),
             'jamaahHajiCount' => (int) ($jamaahCounts->haji ?? 0),
             'jamaahUmrahCount' => (int) ($jamaahCounts->umrah ?? 0),
-            'airlineCount' => BAP::distinct('airlines')->count('airlines'),
+            'airlineCount' => count($airlines),
         ];
 
         $allKabupatens = $travelPusat->pluck('kab_kota')
@@ -163,7 +168,7 @@ class AuthController extends Controller
             ->sort()
             ->values();
 
-        return view('welcome', compact('stats', 'travels', 'travelPusat', 'travelCabang', 'allKabupatens'));
+        return view('welcome', compact('stats', 'travels', 'travelPusat', 'travelCabang', 'allKabupatens', 'airlines'));
     }
 
     public function showListTravel()
