@@ -421,6 +421,50 @@
             opacity: 0.8;
         }
 
+        /* Penanda "ada N jadwal di tanggal ini". Di layar sempit inilah satu-
+           satunya penanda yang muat, jadi dibuat sebagai lencana, bukan teks
+           yang terpotong di tepi kolom. */
+        .fc .fc-daygrid-more-link {
+            display: flex;
+            justify-content: center;
+            margin: 1px 0 2px;
+            padding: 0;
+        }
+
+        .fc-more-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.35rem;
+            padding: 0.05rem 0.35rem;
+            border-radius: 999px;
+            background: var(--phu-accent, #e2a712);
+            color: #3d2c00;
+            font-size: 0.7rem;
+            font-weight: 700;
+            line-height: 1.4;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 576px) {
+            .fc-more-badge__word {
+                display: none;
+            }
+
+            /* Kolom tanggal di layar HP terlalu pendek untuk menampung angka
+               tanggal sekaligus lencananya, dan FullCalendar tidak memotongnya —
+               lencana meluber ke baris di bawahnya, sehingga terbaca seolah milik
+               tanggal yang salah. Tingginya dikunci agar muat di kolomnya sendiri. */
+            .fc .fc-daygrid-day-frame {
+                min-height: 3.6rem;
+                overflow: hidden;
+            }
+
+            .fc .fc-daygrid-day-events {
+                margin-bottom: 0;
+            }
+        }
+
         @media (max-width: 768px) {
             .fc .fc-toolbar {
                 flex-direction: column;
@@ -865,6 +909,7 @@
             <div class="container" data-aos="fade-up" data-aos-delay="100">
                 <div class="calendar-legend" aria-label="Keterangan kalender">
                     <span class="calendar-legend__item"><span class="calendar-legend__dot"></span> Jadwal keberangkatan jamaah</span>
+                    <span class="calendar-legend__item"><i class="bi bi-123"></i> Angka pada tanggal menunjukkan jumlah keberangkatan hari itu</span>
                     <span class="calendar-legend__item"><i class="bi bi-hand-index"></i> Klik tanggal untuk detail</span>
                     <span class="calendar-legend__item"><i class="bi bi-calendar3"></i> Gunakan tombol Bulan/Tahun untuk navigasi</span>
                 </div>
@@ -1649,6 +1694,19 @@
                 },
                 dayMaxEvents: true,
                 displayEventTime: false,
+                // Bawaan FullCalendar menulis "+1 more" dalam bahasa Inggris dan
+                // terpotong di kolom tanggal selebar layar HP. Diganti lencana
+                // berisi angka, dengan kata "jadwal" yang hanya muncul kalau
+                // ruangnya cukup (lihat .fc-more-badge__word).
+                moreLinkContent: function(arg) {
+                    return {
+                        html: '<span class="fc-more-badge">' + arg.num +
+                            '<span class="fc-more-badge__word"> jadwal</span></span>'
+                    };
+                },
+                moreLinkHint: function(num) {
+                    return num + ' jadwal keberangkatan pada tanggal ini';
+                },
                 viewDidMount: function(info) {
                     // Trigger year selection modal when switching to multiMonth view
                     if (info.view.type === 'multiMonth') {
