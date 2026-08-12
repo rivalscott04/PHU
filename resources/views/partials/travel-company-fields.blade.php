@@ -78,6 +78,19 @@
             @error('Tanggal')<div class="invalid-feedback">{{ $message }}</div>@enderror
             @if ($compact)<div class="form-text">Tanggal terbit surat keputusan</div>@endif
         </div>
+
+        <div class="{{ $colClass }} {{ $fieldSpacing }}">
+            <label for="license_expiry" class="form-label">
+                Masa Berlaku Izin @if($requireLicenseExpiry ?? false)@include('partials.required-star')@endif
+            </label>
+            <input type="date" class="{{ $inputClass }} @error('license_expiry') is-invalid @enderror"
+                id="license_expiry" name="license_expiry" value="{{ $old('license_expiry') }}"
+                @if($requireLicenseExpiry ?? false) required @endif>
+            @error('license_expiry')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            <div class="form-text">
+                Tanggal izin operasional berakhir. Ditampilkan di direktori publik agar calon jamaah bisa memastikan izin masih berlaku.
+            </div>
+        </div>
     @endif
 
     @if ($show('akreditasi'))

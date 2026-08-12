@@ -450,6 +450,9 @@ class ValidationHelper
             'Penyelenggara' => ['required', 'string', 'max:255', self::uniquePenyelenggaraRule($ignoreTravelId)],
             'Pusat' => 'required|string|max:255',
             'Tanggal' => 'required|date',
+            // Longgar di sini supaya Kanwil bisa melengkapi data travel lama yang
+            // belum punya tanggal ini. Pendaftaran mandiri mewajibkannya.
+            'license_expiry' => 'nullable|date|after:Tanggal',
             'nilai_akreditasi' => 'required|string|max:255',
             'tanggal_akreditasi' => 'required|date',
             'lembaga_akreditasi' => 'required|string|max:255',

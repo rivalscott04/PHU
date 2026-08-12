@@ -49,12 +49,14 @@
                                     <span class="trust-gauge__number" style="color: {{ $trust['color'] }};">{{ $trust['score'] }}</span>
                                     <span class="trust-gauge__of">dari 100</span>
                                 </div>
-                                <div class="trust-gauge__stars">
+                                {{-- Cincin, bintang, dan pil memakai satu warna pita yang sama
+                                     supaya satu penilaian tidak tampil dalam tiga warna berbeda. --}}
+                                <div class="trust-gauge__stars" style="color: {{ $trust['color'] }};">
                                     @for ($i = 1; $i <= 5; $i++)
                                         <i class="fa{{ $i <= $trust['stars'] ? 's' : 'r' }} fa-star"></i>
                                     @endfor
                                 </div>
-                                <span class="trust-gauge__label bg-{{ $trust['bg_class'] }} text-white">
+                                <span class="trust-gauge__label" style="background: {{ $trust['color'] }}; color: #fff;">
                                     {{ $trust['label'] }}
                                 </span>
                                 <p class="text-muted mb-0 px-2">
@@ -98,24 +100,24 @@
                                     @endforelse
                                 </dd>
                             </div>
-                            <div class="col-sm-6">
-                                <dt>Status Izin</dt>
-                                <dd>
-                                    @php
-                                        $licenseBadge = match($travel->getLicenseStatus()) {
-                                            'Active' => 'success',
-                                            'Expired' => 'danger',
-                                            default => 'secondary',
-                                        };
-                                        $licenseLabel = match($travel->getLicenseStatus()) {
-                                            'Active' => 'Aktif',
-                                            'Expired' => 'Kedaluwarsa',
-                                            default => 'Tidak tersedia',
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $licenseBadge }}">{{ $licenseLabel }}</span>
-                                </dd>
-                            </div>
+                            {{-- Baris ini hanya muncul bila masa berlaku izin memang tercatat.
+                                 Sebelumnya kolom kosong ditampilkan sebagai "Tidak tersedia",
+                                 yang di direktori travel berizin terbaca seolah travelnya
+                                 tidak punya izin — padahal yang tidak ada cuma tanggalnya. --}}
+                            @if($travel->license_expiry)
+                                <div class="col-sm-6">
+                                    <dt>Masa Berlaku Izin</dt>
+                                    <dd>
+                                        @php
+                                            $izinKedaluwarsa = $travel->isLicenseExpired();
+                                        @endphp
+                                        <span class="badge" style="background: {{ $izinKedaluwarsa ? 'var(--phu-band-low, #b3261e)' : 'var(--phu-band-high, #157a52)' }}; color: #fff;">
+                                            {{ $izinKedaluwarsa ? 'Kedaluwarsa' : 'Berlaku' }}
+                                        </span>
+                                        <span class="ms-1">s.d. {{ $travel->license_expiry->translatedFormat('d F Y') }}</span>
+                                    </dd>
+                                </div>
+                            @endif
                             @if($travel->alamat_kantor_baru || $travel->alamat_kantor_lama)
                                 <div class="col-12">
                                     <dt>Alamat Kantor</dt>

@@ -16,7 +16,7 @@
             },
             {
                 title: 'Izin Operasional',
-                fields: ['Pusat', 'Tanggal'],
+                fields: ['Pusat', 'Tanggal', 'license_expiry'],
             },
             {
                 title: 'Data Akreditasi',

@@ -64,12 +64,13 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-file-blank',
                                             'title' => 'Izin Operasional',
-                                            'description' => 'Nomor dan tanggal Surat Keputusan (SK) izin travel.',
+                                            'description' => 'Nomor, tanggal, dan masa berlaku Surat Keputusan (SK) izin travel.',
                                         ])
                                         @include('partials.travel-company-fields', [
                                             'kabupatens' => $kabupatens,
                                             'section' => 'izin',
                                             'compact' => true,
+                                            'requireLicenseExpiry' => true,
                                         ])
                                     </section>
 
