@@ -47,6 +47,11 @@ final class KabupatenResourceGuard
         ResourceAccess::denyUnless(self::isAdmin($user));
     }
 
+    /**
+     * Akses baca terhadap satu travel. Akun travel boleh melihat datanya
+     * sendiri. JANGAN dipakai untuk jalur yang mengubah data izin, pakai
+     * authorizeTravelAsStaff().
+     */
     public static function authorizeTravel(User $user, TravelCompany $travel): void
     {
         if ($user->role === UserRole::User->value && $user->travel_id === $travel->id) {
@@ -56,9 +61,46 @@ final class KabupatenResourceGuard
         self::authorizeWilayah($user, $travel->kab_kota);
     }
 
+    /**
+     * Perubahan data izin travel hanya boleh dilakukan petugas.
+     *
+     * Nomor izin, tanggal izin, masa berlaku, nilai akreditasi, jenis izin
+     * PPIU atau PIHK, dan kabupaten pengawas semuanya fakta yang ditetapkan
+     * regulator dan ditampilkan ke publik sebagai penanda travel resmi.
+     * Membiarkan travel mengubahnya sendiri sama saja membiarkan pemegang izin
+     * menaikkan kelas izinnya, memperpanjang masa berlakunya, atau berpindah
+     * wilayah untuk lepas dari pengawasnya.
+     */
+    public static function authorizeTravelAsStaff(User $user, TravelCompany $travel): void
+    {
+        if (self::isAdmin($user)) {
+            return;
+        }
+
+        // Hanya Kabupaten/Kota wilayah travel tersebut. Pengawas sengaja tidak
+        // termasuk: tugasnya memeriksa kepatuhan, bukan menetapkan izin.
+        ResourceAccess::denyUnless(
+            $user->role === UserRole::Kabupaten->value
+            && NtbKabupatenMap::matches($user->kabupaten, $travel->kab_kota)
+        );
+    }
+
     public static function authorizeCabang(User $user, CabangTravel $cabang): void
     {
         self::authorizeWilayah($user, $cabang->kabupaten);
+    }
+
+    /** Pasangan authorizeTravelAsStaff() untuk cabang. Lihat penjelasannya di sana. */
+    public static function authorizeCabangAsStaff(User $user, CabangTravel $cabang): void
+    {
+        if (self::isAdmin($user)) {
+            return;
+        }
+
+        ResourceAccess::denyUnless(
+            $user->role === UserRole::Kabupaten->value
+            && NtbKabupatenMap::matches($user->kabupaten, $cabang->kabupaten)
+        );
     }
 
     public static function authorizeBap(User $user, BAP $bap): void
@@ -91,7 +133,11 @@ final class KabupatenResourceGuard
 
     public static function authorizeJamaah(User $user, Jamaah $jamaah): void
     {
-        if ($user->role === UserRole::User->value && $jamaah->travel_id === $user->travel_id) {
+        // Kepemilikan dinilai lewat OperatorScope, bukan travel_id saja. Untuk
+        // PIC cabang, travel_id-nya kosong sehingga perbandingan langsung selalu
+        // gagal dan dia terkunci dari data jamaahnya sendiri.
+        if ($user->role === UserRole::User->value
+            && OperatorScope::owns($user, $jamaah->travel_id, $jamaah->cabang_id)) {
             return;
         }
 
@@ -101,7 +147,8 @@ final class KabupatenResourceGuard
 
     public static function authorizeJamaahHajiKhusus(User $user, JamaahHajiKhusus $record): void
     {
-        if ($user->role === UserRole::User->value && $record->travel_id === $user->travel_id) {
+        if ($user->role === UserRole::User->value
+            && OperatorScope::owns($user, $record->travel_id, $record->cabang_id)) {
             return;
         }
 

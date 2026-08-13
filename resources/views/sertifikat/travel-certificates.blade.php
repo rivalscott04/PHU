@@ -36,7 +36,7 @@
                                         <th>Nomor Surat</th>
                                         <th>Nomor Dokumen</th>
                                         <th>Tanggal Diterbitkan</th>
-    
+                                        <th>Berlaku Sampai</th>
                                         <th>Status</th>
                                         <th>Lokasi</th>
                                         <th>Aksi</th>
@@ -49,7 +49,19 @@
                                             <td>{{ $cert->nomor_surat }}</td>
                                             <td>{{ $cert->nomor_dokumen }}</td>
                                             <td>{{ $cert->tanggal_diterbitkan->format('d F Y') }}</td>
-        
+                                            <td>
+                                                @if ($cert->tanggal_kadaluarsa)
+                                                    {{ $cert->tanggal_kadaluarsa->format('d F Y') }}
+                                                    @php($sisa = $cert->sisaHariBerlaku())
+                                                    @if ($cert->isKadaluarsa())
+                                                        <span class="badge bg-danger ms-1">Berakhir</span>
+                                                    @elseif ($sisa !== null && $sisa <= 30)
+                                                        <span class="badge bg-warning text-dark ms-1">{{ $sisa }} hari lagi</span>
+                                                    @endif
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <span class="badge bg-{{ $cert->getStatusColor() }}">
                                                     {{ $cert->getStatusText() }}

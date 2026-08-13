@@ -98,6 +98,44 @@ function confirmApproveRegistration(form, travelName) {
     });
 }
 
+function confirmApproveCabang(form, cabangName, tanpaRekomendasi = false) {
+    confirmAction({
+        title: `Setujui pendaftaran cabang ${cabangName}?`,
+        text: tanpaRekomendasi
+            ? 'Cabang ini belum ditinjau Kabupaten/Kota. Tahap rekomendasi akan dilewati.'
+            : 'Status menjadi Disetujui dan PIC cabang bisa login.',
+        icon: tanpaRekomendasi ? 'warning' : 'question',
+        confirmText: 'Ya, setujui',
+        confirmColor: PANTAU_SWAL.success,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+}
+
+function confirmRejectCabang(form, cabangName) {
+    const alasan = form.querySelector('[name="registration_notes"]');
+
+    if (!alasan || !alasan.value.trim()) {
+        alasan?.focus();
+        showValidationErrors('Isi alasan penolakan terlebih dahulu.');
+        return;
+    }
+
+    confirmAction({
+        title: `Tolak pendaftaran cabang ${cabangName}?`,
+        html: 'Akun PIC cabang akan <strong>dihapus</strong> dan pendaftar harus mendaftar ulang.',
+        icon: 'warning',
+        confirmText: 'Ya, tolak',
+        confirmColor: PANTAU_SWAL.danger,
+    }).then((result) => {
+        if (result.isConfirmed) {
+            form.submit();
+        }
+    });
+}
+
 function confirmPublicFormSubmit(form, options = {}) {
     return confirmAction({
         title: options.title || 'Konfirmasi',

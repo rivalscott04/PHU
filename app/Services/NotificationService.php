@@ -84,14 +84,14 @@ class NotificationService
      *
      * @return Collection<int, User>
      */
-    public function reviewersForTravel(TravelCompany $travel): Collection
+    public function reviewersForKabupaten(?string $kabupaten): Collection
     {
-        $kabupatens = NtbKabupatenMap::queryValues($travel->kab_kota);
+        $kabupatens = NtbKabupatenMap::queryValues($kabupaten);
 
         return User::query()
-            ->where(function ($query) use ($travel, $kabupatens) {
+            ->where(function ($query) use ($kabupaten, $kabupatens) {
                 $query->where('role', UserRole::Admin->value)
-                    ->orWhere(fn ($scoped) => $scoped->pengawasForKabupaten($travel->kab_kota));
+                    ->orWhere(fn ($scoped) => $scoped->pengawasForKabupaten($kabupaten));
 
                 if ($kabupatens !== []) {
                     $query->orWhere(fn ($kab) => $kab
@@ -102,11 +102,29 @@ class NotificationService
             ->get();
     }
 
+    public function reviewersForTravel(TravelCompany $travel): Collection
+    {
+        return $this->reviewersForKabupaten($travel->kab_kota);
+    }
+
     public function notifyReviewers(TravelCompany $travel, Notification $notification): void
     {
-        $this->reviewersForTravel($travel)->each(
+        $this->notifyReviewersInKabupaten($travel->kab_kota, $notification);
+    }
+
+    public function notifyReviewersInKabupaten(?string $kabupaten, Notification $notification): void
+    {
+        $this->reviewersForKabupaten($kabupaten)->each(
             fn (User $user) => $this->safeNotify($user, $notification)
         );
+    }
+
+    public function notifyAdmins(Notification $notification): void
+    {
+        User::query()
+            ->where('role', UserRole::Admin->value)
+            ->get()
+            ->each(fn (User $user) => $this->safeNotify($user, $notification));
     }
 
     public function notifyTravelUsers(int $travelId, Notification $notification): void
@@ -193,7 +211,7 @@ class NotificationService
      * Never let a broken Reverb/broadcast path block the main business action
      * (pengaduan, pengawasan, followup, etc.).
      */
-    private function safeNotify(User $user, Notification $notification): void
+    public function safeNotify(User $user, Notification $notification): void
     {
         try {
             $user->notify($notification);

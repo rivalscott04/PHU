@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ExceptionMessageHelper;
+use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\CabangTravel;
 use App\Enums\TravelRegistrationStatus;
+use App\Notifications\V2\CabangRecommendedNotification;
+use App\Services\NotificationService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\TravelCompany;
 use App\Imports\CabangTravelImport;
 use App\Exports\TravelPusatExport;
@@ -52,7 +56,7 @@ class KanwilController extends Controller
     public function edit($id)
     {
         $travelCompany = TravelCompany::with('user')->findOrFail($id);
-        KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
+        KabupatenResourceGuard::authorizeTravelAsStaff(auth()->user(), $travelCompany);
 
         return view('kanwil.editTravel', [
             'travelCompany' => $travelCompany,
@@ -63,7 +67,7 @@ class KanwilController extends Controller
     public function update(Request $request, $id)
     {
         $travelCompany = TravelCompany::with('user')->findOrFail($id);
-        KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
+        KabupatenResourceGuard::authorizeTravelAsStaff(auth()->user(), $travelCompany);
 
         $validatedData = ValidationHelper::validate(
             $request,
@@ -97,7 +101,7 @@ class KanwilController extends Controller
             ]);
 
             $travelCompany = TravelCompany::findOrFail($id);
-            KabupatenResourceGuard::authorizeTravel(auth()->user(), $travelCompany);
+            KabupatenResourceGuard::authorizeTravelAsStaff(auth()->user(), $travelCompany);
             $oldStatus = $travelCompany->Status;
             $newStatus = $request->Status;
 
@@ -151,6 +155,11 @@ class KanwilController extends Controller
                 'success' => false,
                 'message' => 'Travel company tidak ditemukan'
             ], 404);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            // Penolakan akses bukan kegagalan aplikasi. Tanpa ini, abort() dari
+            // penjaga ikut tertangkap catch di bawah dan dibalas 500, sehingga
+            // percobaan akses yang ditolak tercatat seolah sistemnya rusak.
+            throw $e;
         } catch (\Exception $e) {
             \Log::error('Error in updateStatus', [
                 'error' => $e->getMessage(),
@@ -316,6 +325,9 @@ class KanwilController extends Controller
         ]);
 
         $travel->user?->delete();
+        // Pendaftaran ditolak harus mendaftar ulang dari awal, jadi berkas
+        // lamanya tidak akan dipakai lagi dan tidak perlu menumpuk di storage.
+        $travel->deleteRegistrationDocuments();
 
         return redirect()
             ->route('travel', ['filter' => 'pending'])
@@ -345,27 +357,58 @@ class KanwilController extends Controller
 
     public function createCabangTravel()
     {
-        $user = auth()->user();
-        $travelsQuery = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara');
-
-        if ($user->role === 'kabupaten') {
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
-        }
-
-        $travels = $travelsQuery->get();
-
-        return view('kanwil.formCabangTravel', compact('travels'));
+        return view('kanwil.formCabangTravel', $this->cabangFormData());
     }
 
     public function storeCabangTravel(Request $request)
     {
         $user = auth()->user();
 
-        // Validate input
-        $validatedData = ValidationHelper::validate($request, [
+        $validatedData = ValidationHelper::validate($request, self::cabangDataRules());
+
+        if ($user->role === 'kabupaten') {
+            $validatedData['kabupaten'] = NtbKabupatenMap::normalize($user->kabupaten);
+        }
+
+        // Data yang diinput petugas dianggap sudah terverifikasi; alur peninjauan
+        // hanya berlaku untuk cabang yang mendaftar mandiri.
+        $validatedData['registration_status'] = TravelRegistrationStatus::Approved;
+        $validatedData['verified_at'] = now();
+        $validatedData['verified_by'] = $user->id;
+
+        CabangTravel::create($validatedData);
+
+        return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil disimpan.');
+    }
+
+    /** @return array<string, mixed> */
+    private function cabangFormData(): array
+    {
+        $user = auth()->user();
+        $travelsQuery = TravelCompany::approved()
+            ->select('id', 'Penyelenggara', 'Pusat', 'Pimpinan', 'alamat_kantor_lama', 'alamat_kantor_baru', 'kab_kota')
+            ->orderBy('Penyelenggara');
+
+        if ($user->role === 'kabupaten') {
+            $filters = KabupatenScopeFilter::filtersForUser($user);
+            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
+        }
+
+        return [
+            'travels' => $travelsQuery->get(),
+            'kabupatens' => NtbKabupatenMap::names(),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    private static function cabangDataRules(): array
+    {
+        return [
+            'travel_id' => ['nullable', 'integer', 'exists:travels,id'],
             'Penyelenggara' => 'required|string|max:255',
-            'kabupaten' => 'required|string|max:255',
+            // Kabupaten cabang menentukan Kabko mana yang berhak meninjau,
+            // jadi harus salah satu wilayah NTB, bukan teks bebas.
+            'kabupaten' => ['required', 'string', Rule::in(NtbKabupatenMap::names())],
             'pusat' => 'nullable|string|max:255',
             'pimpinan_pusat' => 'required|string|max:255',
             'alamat_pusat' => ValidationHelper::textRule(),
@@ -374,15 +417,7 @@ class KanwilController extends Controller
             'pimpinan_cabang' => 'required|string|max:255',
             'alamat_cabang' => ValidationHelper::textRule(),
             'telepon' => ValidationHelper::teleponRules(),
-        ]);
-
-        if ($user->role === 'kabupaten') {
-            $validatedData['kabupaten'] = NtbKabupatenMap::normalize($user->kabupaten);
-        }
-
-        CabangTravel::create($validatedData);
-
-        return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil disimpan.');
+        ];
     }
 
     public function showCabangTravel(Request $request)
@@ -411,17 +446,175 @@ class KanwilController extends Controller
                 ],
                 'filters' => [
                     'search' => $request->get('search'),
+                    'filter' => $request->get('filter'),
                 ],
             ]);
         }
 
-        return view('kanwil.cabangTravel', compact('data'));
+        return view('kanwil.cabangTravel', [
+            'data' => $data,
+            'antrian' => $this->cabangAntrianCounts($user),
+        ]);
+    }
+
+    /**
+     * Jumlah cabang yang masih menunggu tindakan, dipakai sebagai angka pada
+     * tab penyaring. Tanpa ini petugas tidak tahu ada antrean tanpa mengklik
+     * tabnya satu per satu.
+     *
+     * @return array{pending: int, menunggu_kanwil: int}
+     */
+    private function cabangAntrianCounts($user): array
+    {
+        $hitung = function (string $status) use ($user): int {
+            $query = CabangTravel::query()->where('registration_status', $status);
+
+            if ($user && $user->role === 'kabupaten') {
+                KabupatenScopeFilter::applyOnColumn(
+                    $query,
+                    KabupatenScopeFilter::filtersForUser($user),
+                    'kabupaten'
+                );
+            } elseif (! $user || $user->role !== 'admin') {
+                return 0;
+            }
+
+            return $query->count();
+        };
+
+        return [
+            'pending' => $hitung(TravelRegistrationStatus::Pending->value),
+            'menunggu_kanwil' => $hitung(TravelRegistrationStatus::MenungguKanwil->value),
+        ];
+    }
+
+    /**
+     * Kabupaten/Kota mengunggah rekomendasi (BA laporan peninjauan) lalu
+     * meneruskan cabang tersebut ke Kanwil untuk keputusan akhir.
+     */
+    public function recommendCabang(Request $request, $id_cabang)
+    {
+        $user = auth()->user();
+        $cabang = CabangTravel::findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang($user, $cabang);
+
+        if (! $cabang->isRegistrationPending()) {
+            return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
+        }
+
+        $fileMaxKb = ValidationHelper::fileMaxKb(1.5);
+
+        ValidationHelper::validate($request, [
+            'dokumen_rekomendasi' => "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
+            'catatan_rekomendasi' => 'nullable|string|max:1000',
+        ], ValidationHelper::fileMaxMb('dokumen_rekomendasi', 1.5));
+
+        $cabang->update([
+            'dokumen_rekomendasi' => StorageHelper::normalizePath(
+                $request->file('dokumen_rekomendasi')->store('registrasi-cabang/rekomendasi', 'public')
+            ),
+            'catatan_rekomendasi' => $request->input('catatan_rekomendasi'),
+            'registration_status' => TravelRegistrationStatus::MenungguKanwil,
+            'recommended_at' => now(),
+            'recommended_by' => $user->id,
+        ]);
+
+        // Yang perlu tahu hanya Kanwil. Kabko tidak perlu diberi tahu soal
+        // rekomendasi yang baru saja dia kirim sendiri.
+        app(NotificationService::class)->notifyAdmins(
+            new CabangRecommendedNotification($cabang)
+        );
+
+        return redirect()
+            ->route('cabang.travel', ['filter' => 'menunggu_kanwil'])
+            ->with('success', "Rekomendasi {$cabang->Penyelenggara} terkirim. Menunggu keputusan Kanwil.");
+    }
+
+    /** Keputusan akhir ada di Kanwil, baik lewat rekomendasi Kabko maupun langsung. */
+    public function approveCabang($id_cabang)
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        $cabang = CabangTravel::findOrFail($id_cabang);
+
+        if (! $cabang->isRegistrationOpen()) {
+            return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
+        }
+
+        // Sejalan dengan penjagaan pada pendaftaran pusat: jangan menyetujui
+        // berkas yang tercatat ada tetapi filenya sudah hilang dari storage.
+        if ($hilang = $cabang->missingRegistrationDocuments()) {
+            return back()->with(
+                'error',
+                'Berkas berikut tidak ditemukan di penyimpanan: ' . implode(', ', $hilang)
+                . '. Minta pendaftar mengunggah ulang sebelum disetujui.'
+            );
+        }
+
+        $cabang->update([
+            'registration_status' => TravelRegistrationStatus::Approved,
+            'registration_notes' => null,
+            'verified_at' => now(),
+            'verified_by' => auth()->id(),
+        ]);
+
+        return redirect()
+            ->route('cabang.travel', ['filter' => 'approved'])
+            ->with('success', "Pendaftaran cabang {$cabang->Penyelenggara} selesai dan disetujui.");
+    }
+
+    public function rejectCabang(Request $request, $id_cabang)
+    {
+        $user = auth()->user();
+        $cabang = CabangTravel::findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang($user, $cabang);
+
+        if (! $cabang->isRegistrationOpen()) {
+            return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
+        }
+
+        ValidationHelper::validate($request, [
+            'registration_notes' => 'required|string|max:1000',
+        ]);
+
+        $cabang->update([
+            'registration_status' => TravelRegistrationStatus::Rejected,
+            'registration_notes' => $request->registration_notes,
+            'verified_at' => now(),
+            'verified_by' => $user->id,
+        ]);
+
+        $cabang->user?->delete();
+        // Pendaftaran ditolak harus mendaftar ulang dari awal, jadi berkas
+        // lamanya tidak akan dipakai lagi dan tidak perlu menumpuk di storage.
+        $cabang->deleteRegistrationDocuments();
+
+        return redirect()
+            ->route('cabang.travel', ['filter' => 'rejected'])
+            ->with('success', "Pendaftaran cabang {$cabang->Penyelenggara} ditolak.");
+    }
+
+    public function showCabangDocument($id_cabang, string $type)
+    {
+        $cabang = CabangTravel::with('travel:id,dokumen_sk')->findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabang);
+
+        // SK pusat tidak diunggah cabang, dibaca langsung dari travel pusatnya.
+        $path = StorageHelper::normalizePath(
+            $type === 'sk_pusat' ? $cabang->skPusatPath() : $cabang->documentPath($type)
+        );
+
+        abort_unless($path && Storage::disk('public')->exists($path), 404);
+
+        return response()->file(Storage::disk('public')->path($path));
     }
 
     private function buildCabangTravelListingQuery(Request $request, $user)
     {
-        $query = CabangTravel::query()->select(
+        // dokumen_sk pusat dipakai tombol pratinjau "SK Pusat" di modal verifikasi.
+        $query = CabangTravel::query()->with('travel:id,dokumen_sk')->select(
             'id_cabang',
+            'travel_id',
             'Penyelenggara',
             'kabupaten',
             'pusat',
@@ -432,6 +625,16 @@ class KanwilController extends Controller
             'pimpinan_cabang',
             'alamat_cabang',
             'telepon',
+            'registration_status',
+            'registration_notes',
+            'dokumen_oss',
+            'dokumen_akta',
+            'dokumen_ktp_kepala',
+            'dokumen_sk_du',
+            'dokumen_rekomendasi',
+            'catatan_rekomendasi',
+            'recommended_at',
+            'verified_at',
         );
 
         if ($user && $user->role === 'kabupaten') {
@@ -439,6 +642,12 @@ class KanwilController extends Controller
             KabupatenScopeFilter::applyOnColumn($query, $filters, 'kabupaten');
         } elseif (! $user || $user->role !== 'admin') {
             $query->whereRaw('1 = 0');
+        }
+
+        $filter = $request->get('filter');
+
+        if (in_array($filter, ['pending', 'menunggu_kanwil', 'approved', 'rejected'], true)) {
+            $query->where('registration_status', $filter);
         }
 
         if ($request->filled('search')) {
@@ -497,17 +706,7 @@ class KanwilController extends Controller
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
         KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
 
-        $travelsQuery = TravelCompany::approved()->select('id', 'Penyelenggara', 'kab_kota')->orderBy('Penyelenggara');
-        $user = auth()->user();
-
-        if ($user->role === 'kabupaten') {
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
-        }
-
-        $travels = $travelsQuery->get();
-
-        return view('kanwil.editCabangTravel', compact('cabangTravel', 'travels'));
+        return view('kanwil.editCabangTravel', $this->cabangFormData() + compact('cabangTravel'));
     }
 
     public function updateCabangTravel(Request $request, $id_cabang)
@@ -515,20 +714,9 @@ class KanwilController extends Controller
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
         KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
 
-        ValidationHelper::validate($request, [
-            'Penyelenggara' => 'required|string|max:255',
-            'kabupaten' => 'required|string|max:255',
-            'pusat' => 'nullable|string|max:255',
-            'pimpinan_pusat' => 'required|string|max:255',
-            'alamat_pusat' => ValidationHelper::textRule(),
-            'SK_BA' => 'nullable|string|max:255',
-            'tanggal' => 'nullable|date',
-            'pimpinan_cabang' => 'required|string|max:255',
-            'alamat_cabang' => ValidationHelper::textRule(),
-            'telepon' => ValidationHelper::teleponRules(),
-        ]);
-
-        $updateData = $request->all();
+        // Hanya field tervalidasi yang disimpan. Form edit tidak boleh jadi jalan
+        // pintas untuk mengubah registration_status atau kolom verifikasi.
+        $updateData = ValidationHelper::validate($request, self::cabangDataRules());
 
         if (auth()->user()->role === 'kabupaten') {
             $updateData['kabupaten'] = NtbKabupatenMap::normalize(auth()->user()->kabupaten);

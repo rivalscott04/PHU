@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class TravelCompany extends Model
 {
     use HasFactory;
+    use \App\Models\Concerns\HasRegistrationStatus;
+
     protected $table = 'travels';
     protected $fillable = [
         'Penyelenggara',
@@ -106,29 +108,9 @@ class TravelCompany extends Model
         return $this->belongsTo(User::class, 'verified_by');
     }
 
-    public function scopeApproved(Builder $query): Builder
+    public function cabang()
     {
-        return $query->where('registration_status', TravelRegistrationStatus::Approved);
-    }
-
-    public function scopePendingRegistration(Builder $query): Builder
-    {
-        return $query->where('registration_status', TravelRegistrationStatus::Pending);
-    }
-
-    public function isRegistrationPending(): bool
-    {
-        return $this->registration_status === TravelRegistrationStatus::Pending;
-    }
-
-    public function isRegistrationApproved(): bool
-    {
-        return $this->registration_status === TravelRegistrationStatus::Approved;
-    }
-
-    public function isRegistrationRejected(): bool
-    {
-        return $this->registration_status === TravelRegistrationStatus::Rejected;
+        return $this->hasMany(CabangTravel::class, 'travel_id');
     }
 
     public function hasRegistrationDocument(string $type): bool
@@ -142,9 +124,23 @@ class TravelCompany extends Model
         return $path !== null && Storage::disk('public')->exists($path);
     }
 
+    /**
+     * Pusat hanya wajib melampirkan SK izin. Sertifikat akreditasi boleh
+     * menyusul, nilai akreditasinya sendiri sudah diisi sebagai data.
+     */
     public function hasCompleteRegistrationDocuments(): bool
     {
-        return $this->hasRegistrationDocument('sk') && $this->hasRegistrationDocument('akreditasi');
+        return $this->hasRegistrationDocument('sk');
+    }
+
+    /** Hapus berkas unggahan pendaftaran ini dari storage. */
+    public function deleteRegistrationDocuments(): void
+    {
+        foreach (['dokumen_sk', 'dokumen_akreditasi'] as $column) {
+            if ($this->{$column}) {
+                Storage::disk('public')->delete($this->{$column});
+            }
+        }
     }
 
     public function syncPicKabupaten(?string $kabupaten = null): void

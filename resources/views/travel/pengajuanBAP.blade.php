@@ -84,7 +84,7 @@
                             <div class="col-md-6 mb-3">
                                 <label for="kab_kota" class="form-label">Kab/Kota</label>
                                 <input type="text" class="form-control" id="kab_kota" name="kab_kota"
-                                    value="{{ $value('kab_kota', $isStaff ? '' : ($travelData->kab_kota ?? '')) }}"
+                                    value="{{ $value('kab_kota', $isStaff ? '' : ($defaultKabKota ?? $travelData->kab_kota ?? '')) }}"
                                     {{ $isStaff ? '' : 'readonly' }}>
                             </div>
 

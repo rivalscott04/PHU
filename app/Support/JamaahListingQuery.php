@@ -70,7 +70,7 @@ final class JamaahListingQuery
 
     /**
      * Travel yang boleh dilihat user ini dan benar-benar punya jamaah jenis
-     * tersebut — jadi filter tidak pernah menawarkan pilihan kosong.
+     * tersebut, jadi filter tidak pernah menawarkan pilihan kosong.
      *
      * @return Collection<int, TravelCompany>
      */
@@ -121,7 +121,7 @@ final class JamaahListingQuery
     private static function applyScope(Builder $query, User $user): void
     {
         if ($user->role === UserRole::User->value) {
-            $query->where('travel_id', $user->travel_id);
+            OperatorScope::apply($query, $user);
 
             return;
         }
@@ -141,11 +141,11 @@ final class JamaahListingQuery
     private static function applyHajiKhususScope(Builder $query, User $user): void
     {
         if ($user->role === UserRole::User->value) {
-            if ($user->travel) {
-                $query->where('travel_id', $user->travel->id);
-            }
-
-            $query->whereHas('travel', fn ($q) => $q->where('kab_kota', $user->kabupaten));
+            // Dulu filter travel dilewati kalau user->travel kosong, dan yang
+            // tersisa hanya penyaring wilayah. Untuk PIC cabang itu berarti
+            // jamaah haji khusus milik travel lain di kabupaten yang sama ikut
+            // terlihat. Kepemilikan sekarang dinilai eksplisit.
+            OperatorScope::apply($query, $user);
 
             return;
         }

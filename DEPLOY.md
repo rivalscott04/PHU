@@ -1,4 +1,4 @@
-# Panduan Deploy Production — PANTAU
+# Panduan Deploy Production: PANTAU
 
 Dokumen ini menjelaskan tata cara deploy aplikasi PANTAU ke server production, termasuk setup **Redis**, **Laravel Reverb** (notifikasi real-time), **Nginx**, **Supervisor**, dan **cron scheduler**.
 
@@ -26,9 +26,9 @@ Untuk instalasi development lokal, lihat [SETUP.md](./SETUP.md).
                     └──────────┘       └─────────────┘
 
 Proses latar belakang (Supervisor + cron):
-  • php artisan reverb:start     — WebSocket server (wajib jika notifikasi real-time)
-  • php artisan queue:work       — opsional (hanya jika QUEUE_CONNECTION ≠ sync)
-  • php artisan schedule:run     — cron setiap menit (wajib)
+  • php artisan reverb:start, WebSocket server (wajib jika notifikasi real-time)
+  • php artisan queue:work, opsional (hanya jika QUEUE_CONNECTION ≠ sync)
+  • php artisan schedule:run, cron setiap menit (wajib)
 ```
 
 | Komponen | Wajib? | Fungsi |
@@ -54,7 +54,7 @@ Proses latar belakang (Supervisor + cron):
 | MySQL / MariaDB | 8.0+ / 10.6+ |
 | Redis | 6.x+ |
 | Nginx | 1.18+ |
-| Node.js | Opsional (tidak wajib — asset frontend sudah pre-built) |
+| Node.js | Opsional (tidak wajib, asset frontend sudah pre-built) |
 
 ### Instalasi paket (Ubuntu)
 
@@ -118,18 +118,31 @@ cp .env.example .env
 php artisan key:generate
 ```
 
-Edit `/var/www/phu/.env` — lihat [bagian 4](#4-konfigurasi-env-production).
+Edit `/var/www/phu/.env`, lihat [bagian 4](#4-konfigurasi-env-production).
 
 ```bash
 # Migrasi & symlink storage
 php artisan migrate --force
 php artisan storage:link
 
+# Seed data awal (akun inti, master checklist, daftar maskapai)
+# WAJIB dijalankan terpisah setelah migrasi, bukan di tengah migrasi.
+php artisan db:seed --force
+
 # Optimasi Laravel
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
 ```
+
+> **Instalasi baru:** `db:seed` harus dijalankan sebagai langkah tersendiri.
+> Migrasi `2026_07_02_100018_run_all_seeders` dulu memanggil `DatabaseSeeder`
+> dari dalam migrasi, dan itu membuat instalasi baru gagal begitu ada seeder
+> yang menyentuh tabel dari migrasi yang lebih belakang. Migrasi itu sekarang
+> kosong. Server lama tidak terpengaruh karena catatannya sudah tersimpan.
+>
+> Jangan pernah menjalankan `DevTravelSeeder` di production. Isinya travel
+> contoh untuk development; data travel live datang dari registrasi mandiri.
 
 ### Permission folder
 
@@ -288,17 +301,17 @@ php artisan tinker
 
 Redis dipakai untuk:
 
-- **Cache dashboard V2** (`CACHE_DRIVER=redis`) — wajib disarankan di production
-- **Queue worker** — hanya jika `QUEUE_CONNECTION=redis`
-- **Reverb scaling** — hanya jika menjalankan lebih dari 1 instance Reverb (`REVERB_SCALING_ENABLED=true`)
+- **Cache dashboard V2** (`CACHE_DRIVER=redis`): wajib disarankan di production
+- **Queue worker**, hanya jika `QUEUE_CONNECTION=redis`
+- **Reverb scaling**, hanya jika menjalankan lebih dari 1 instance Reverb (`REVERB_SCALING_ENABLED=true`)
 
 ---
 
 ## 6. Setup Laravel Reverb
 
-Reverb meneruskan notifikasi database ke browser secara real-time (bell icon di header). Tanpa Reverb, notifikasi tetap tersimpan di database tetapi **tidak muncul otomatis** — user harus refresh halaman.
+Reverb meneruskan notifikasi database ke browser secara real-time (bell icon di header). Tanpa Reverb, notifikasi tetap tersimpan di database tetapi **tidak muncul otomatis**, user harus refresh halaman.
 
-Badge angka di sidebar ikut channel yang sama: setiap notifikasi masuk, browser memanggil `GET /v2/sidebar-badges` lalu mengecat ulang badge. Jika Reverb mati, sidebar otomatis turun ke polling 60 detik — jadi angkanya tetap benar, hanya lebih lambat.
+Badge angka di sidebar ikut channel yang sama: setiap notifikasi masuk, browser memanggil `GET /v2/sidebar-badges` lalu mengecat ulang badge. Jika Reverb mati, sidebar otomatis turun ke polling 60 detik, jadi angkanya tetap benar, hanya lebih lambat.
 
 ### 6.1 Jalankan manual (tes awal)
 
@@ -339,7 +352,7 @@ sudo supervisorctl status
 
 ### 6.3 Reverse proxy Nginx (WebSocket)
 
-Reverb listen di port **8080** internal. Browser connect via HTTPS port **443** — Nginx meneruskan koneksi WebSocket.
+Reverb listen di port **8080** internal. Browser connect via HTTPS port **443**, Nginx meneruskan koneksi WebSocket.
 
 Tambahkan di dalam block `server` Nginx (lihat juga [bagian 7](#7-konfigurasi-nginx)):
 
@@ -491,7 +504,7 @@ sudo -u www-data php /var/www/phu/artisan schedule:list
 
 ## 9. Queue worker (opsional)
 
-Default `QUEUE_CONNECTION=sync` — **tidak perlu worker**.
+Default `QUEUE_CONNECTION=sync`, **tidak perlu worker**.
 
 Jika ingin notifikasi/broadcast di background (disarankan untuk traffic tinggi):
 
@@ -558,7 +571,15 @@ sudo supervisorctl restart phu-reverb
 php artisan up
 ```
 
-> **Penting:** Perubahan tampilan dashboard (warna tenang, typography, partial Blade) **bukan** file CSS terpisah saja — sebagian besar ada di `resources/views/`. Jika hanya `git pull` tanpa `view:clear`, server bisa masih merender HTML/JS versi lama meskipun file di `public/css/` sudah baru.
+> **Penting:** Perubahan tampilan dashboard (warna tenang, typography, partial Blade) **bukan** file CSS terpisah saja, sebagian besar ada di `resources/views/`. Jika hanya `git pull` tanpa `view:clear`, server bisa masih merender HTML/JS versi lama meskipun file di `public/css/` sudah baru.
+
+> **Rilis alur registrasi cabang:** rilis ini menambah kolom pada tabel
+> `travel_cabang`, jadi `php artisan migrate --force` wajib jalan sebelum kode
+> baru dipakai. Layar PPIU Cabang membaca `registration_status` dan akan error
+> tanpa migrasi tersebut. Perubahan JavaScript ada di `public/js/pdf-preview.js`
+> dan `public/js/confirm-dialogs.js`, keduanya berkas statis, jadi minta petugas
+> melakukan hard refresh sekali setelah deploy. Detail alurnya ada di
+> [docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md).
 
 ### Verifikasi cepat setelah deploy
 
@@ -581,7 +602,7 @@ Di browser (DevTools → Elements → `<head>`), pastikan ada:
 
 Jika file CSS ada tapi tag `<link>` tidak muncul di HTML, jalankan ulang `php artisan view:clear && php artisan view:cache`.
 
-Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setelah deploy — file CSS statis biasanya sudah miss, tapi halaman Blade bisa tertahan di edge cache.
+Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setelah deploy, file CSS statis biasanya sudah miss, tapi halaman Blade bisa tertahan di edge cache.
 
 ---
 
@@ -598,7 +619,7 @@ Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setela
 
 ### Aplikasi
 
-- [ ] `.env` — `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` benar
+- [ ] `.env`, `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` benar
 - [ ] `php artisan migrate --force`
 - [ ] `php artisan storage:link`
 - [ ] Permission `storage/` & `bootstrap/cache/` OK
@@ -619,7 +640,7 @@ Jika pakai **Cloudflare**, purge cache untuk URL HTML (`/` atau `/login`) setela
 ### Scheduler & opsional
 
 - [ ] Cron `schedule:run` aktif (user `www-data`)
-- [ ] Queue worker — hanya jika `QUEUE_CONNECTION=redis`
+- [ ] Queue worker, hanya jika `QUEUE_CONNECTION=redis`
 - [ ] Backup database terjadwal
 - [ ] Akun Pengawas dibuat per kabupaten
 
@@ -651,7 +672,7 @@ tail -f storage/logs/reverb.log
 2. Di browser B (atau tab incognito), submit pengaduan publik
 3. Bell icon di browser A harus update badge **tanpa refresh**
 
-Jika tidak jalan, buka DevTools → Network → filter `WS` — harus ada koneksi WebSocket ke `wss://pantau.example.com/app/...`.
+Jika tidak jalan, buka DevTools → Network → filter `WS`, harus ada koneksi WebSocket ke `wss://pantau.example.com/app/...`.
 
 ---
 
@@ -671,6 +692,14 @@ Jika tidak jalan, buka DevTools → Network → filter `WS` — harus ada koneks
 | Risk score tidak update | Cron tidak aktif | Cek crontab `www-data`; jalankan manual `php artisan risk:calculate` |
 | Upload gagal | Permission storage | `chown -R www-data:www-data storage`; `chmod -R ug+rwx storage` |
 | Mixed content error (WS) | `REVERB_CLIENT_SCHEME=http` di HTTPS | Set `REVERB_CLIENT_SCHEME=https`, `REVERB_CLIENT_PORT=443` |
+| `Table 'bap_airlines' doesn't exist` saat instalasi baru | Seeder dipanggil dari dalam migrasi (sudah diperbaiki) | Pastikan kode terbaru; jalankan `php artisan migrate --force` lalu `php artisan db:seed --force` terpisah |
+| `Unknown column 'registration_status'` di layar cabang | Migrasi alur registrasi cabang belum jalan | `php artisan migrate --force`, lalu `php artisan optimize:clear` |
+| Travel di Lombok Utara tidak bisa daftar | Versi lama `NtbKabupatenMap` hanya punya 9 wilayah | Pastikan kode terbaru; `php artisan optimize:clear` |
+| Tombol verifikasi cabang tidak muncul | Cabang berstatus `approved` (data lama dianggap sah) | Normal. Tombol hanya untuk status `pending` dan `menunggu_kanwil` |
+| Cabang tidak muncul di daftar petugas kabupaten | Kolom `kabupaten` tidak cocok daftar kanonik NTB | Perbaiki lewat form edit cabang; nilai bebas hasil impor lama tidak akan cocok |
+| Tombol pratinjau dokumen tidak membuka apa apa | `storage:link` belum dibuat atau berkas hilang | `php artisan storage:link`; cek berkas ada di `storage/app/public` |
+| Halaman scroll aneh setelah menutup pratinjau dokumen | `public/js/pdf-preview.js` versi lama | Pastikan kode terbaru; `php artisan view:clear` dan hard refresh browser |
+| PIC diminta ganti password padahal buat sendiri | Versi lama menandai akun sebagai password default | Pastikan kode terbaru; akun lama bisa diperbaiki dengan set `is_password_changed = 1` |
 
 ### Perintah diagnostik
 
@@ -695,13 +724,13 @@ php artisan config:cache
 Untuk tes Reverb di mesin lokal:
 
 ```bash
-# Terminal 1 — aplikasi
+# Terminal 1: aplikasi
 php artisan serve
 
-# Terminal 2 — Reverb
+# Terminal 2: Reverb
 php artisan reverb:start
 
-# Terminal 3 — Redis (jika belum jalan)
+# Terminal 3: Redis (jika belum jalan)
 redis-server
 ```
 
@@ -724,6 +753,7 @@ Generate kredensial: `php artisan reverb:install`
 
 ## Dokumentasi terkait
 
-- [SETUP.md](./SETUP.md) — instalasi development, perintah artisan, modul V2
-- [.env.example](./.env.example) — template variabel environment
-- [README.md](./README.md) — ringkasan fitur aplikasi
+- [SETUP.md](./SETUP.md): instalasi development, perintah artisan, modul V2
+- [.env.example](./.env.example): template variabel environment
+- [README.md](./README.md): ringkasan fitur aplikasi
+- [docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md) : alur registrasi pusat dan cabang, verifikasi berjenjang, dan troubleshooting-nya

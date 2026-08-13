@@ -6,6 +6,7 @@ use App\Helpers\ValidationHelper;
 use App\Models\BAP;
 use App\Models\BapAirline;
 use App\Models\TravelPackage;
+use App\Support\OperatorScope;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -16,7 +17,7 @@ class TravelPackageController extends Controller
         $user = $this->authorizedTravelUser();
 
         $packages = TravelPackage::query()
-            ->where('travel_id', $user->travel_id)
+            ->tap(fn ($q) => OperatorScope::apply($q, $user))
             ->orderBy('sort_order')
             ->orderBy('name')
             ->get();
@@ -45,7 +46,7 @@ class TravelPackageController extends Controller
 
         TravelPackage::create([
             ...$data,
-            'travel_id' => $user->travel_id,
+            ...OperatorScope::ownerColumns($user),
         ]);
 
         return redirect()
@@ -81,11 +82,11 @@ class TravelPackageController extends Controller
     {
         $user = auth()->user();
 
-        if (! $user || $user->role !== 'user' || ! $user->travel_id) {
+        if (! $user || $user->role !== 'user' || ! $user->operatingTravelId()) {
             abort(403, 'Akses ditolak.');
         }
 
-        $travel = $user->travel;
+        $travel = $user->operatingTravel();
 
         if (! $travel?->isRegistrationApproved()) {
             abort(403, 'Akun travel belum diverifikasi Kanwil.');
@@ -96,7 +97,7 @@ class TravelPackageController extends Controller
 
     private function authorizePackage($user, TravelPackage $package): void
     {
-        if ((int) $package->travel_id !== (int) $user->travel_id) {
+        if (! OperatorScope::owns($user, $package->travel_id, $package->cabang_id)) {
             abort(403, 'Akses ditolak.');
         }
     }

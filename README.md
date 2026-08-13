@@ -173,8 +173,11 @@ Tugas utama:
 
 ## Alur kerja singkat
 
-**Registrasi travel mandiri**
-Travel isi form registrasi dan unggah dokumen → status menunggu verifikasi → Kanwil tinjau dan setujui atau tolak → jika disetujui, akun aktif dan fitur operasional terbuka.
+**Registrasi travel pusat**
+Travel pilih "Kantor Pusat" di form registrasi, isi data izin dan akreditasi, unggah SK izin → status menunggu verifikasi → Kanwil tinjau dan setujui atau tolak → jika disetujui, akun aktif dan fitur operasional terbuka.
+
+**Registrasi travel cabang**
+Cabang pilih "Kantor Cabang" dan menunjuk travel pusat yang izinnya sudah disetujui, lalu unggah OSS cabang, akta notaris, KTP kepala cabang, dan SK domisili usaha kelurahan (SK pusat terbaca otomatis, tidak perlu diunggah ulang) → Kantor Kemenag kabupaten/kota di wilayah cabang meninjau dan mengunggah rekomendasi atau berita acara peninjauan → status berpindah ke menunggu Kanwil → Kanwil beri keputusan akhir. Detailnya di [docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md).
 
 **Keberangkatan jamaah**
 Travel input jamaah → buat BA Pemberangkatan → ajukan ke Kanwil → admin atau kabupaten tinjau dan setujui → jadwal muncul di kalender → dokumen bisa dicetak dengan tanda tangan elektronik.
@@ -191,7 +194,8 @@ Warga kirim pengaduan dari halaman depan (dengan lampiran opsional) → masuk an
 
 Untuk instalasi development, perintah artisan, dan cron, lihat **[SETUP.md](./SETUP.md)**.  
 Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY.md](./DEPLOY.md)**.  
-Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](./docs/persiapan/README.md)**.
+Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](./docs/persiapan/README.md)**.  
+Untuk alur registrasi pusat dan cabang beserta troubleshooting-nya, lihat **[docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md)**.
 
 **Login awal** (setelah migrasi database):
 
@@ -202,7 +206,9 @@ Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](
 | Pengawas | `pengawas.mataram@phu.local` | `password123` |
 | Admin Kabupaten | `kota.mataram@phu.com` | `password123` |
 
-Akun **travel tidak di-seed** — data travel live dari registrasi mandiri (lihat [PERSIAPAN_TRAVEL.md](./docs/persiapan/PERSIAPAN_TRAVEL.md)). Untuk development lokal saja: `php artisan db:seed --class=DevTravelSeeder` (PT. Mataram Travel + `mataram.travel@phu.com`).
+Akun **travel tidak di-seed**, data travel live dari registrasi mandiri (lihat [PERSIAPAN_TRAVEL.md](./docs/persiapan/PERSIAPAN_TRAVEL.md)). Untuk development lokal saja: `php artisan db:seed --class=DevTravelSeeder` (PT. Mataram Travel + `mataram.travel@phu.com`), lengkap dengan satu cabang berstatus disetujui di Kota Mataram dan satu cabang berstatus menunggu verifikasi di Lombok Utara, supaya alur peninjauan bisa langsung dicoba.
+
+Seeding dijalankan sebagai langkah tersendiri setelah migrasi (`php artisan db:seed`), bukan dari dalam migrasi.
 
 Akun kabupaten baru wajib mengganti password saat pertama kali masuk.
 

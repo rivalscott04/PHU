@@ -72,7 +72,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check if user can create haji khusus
-        if ($user->role === 'user' && (!$user->travel || !$user->travel->canHandleHajiKhusus())) {
+        if ($user->role === 'user' && ! $user->operatingTravel()?->canHandleHajiKhusus()) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses untuk menambah jamaah haji khusus.');
         }
@@ -88,7 +88,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check if user can create haji khusus
-        if ($user->role === 'user' && (!$user->travel || !$user->travel->canHandleHajiKhusus())) {
+        if ($user->role === 'user' && ! $user->operatingTravel()?->canHandleHajiKhusus()) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses untuk menambah jamaah haji khusus.');
         }
@@ -135,7 +135,11 @@ class JamaahHajiKhususController extends Controller
         ));
 
         $data = $request->all();
-        $data['travel_id'] = $user->role === 'user' ? $user->travel->id : $request->travel_id;
+        if ($user->role === 'user') {
+            $data = array_merge($data, \App\Support\OperatorScope::ownerColumns($user));
+        } else {
+            $data['travel_id'] = $request->travel_id;
+        }
         $data['status_pendaftaran'] = 'pending';
 
         // Remove nomor_porsi if user is travel (role 'user')
@@ -167,7 +171,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check access
-        if ($user->role === 'user' && $jamaahHajiKhusus->travel_id !== $user->travel->id) {
+        if ($user->role === 'user' && ! \App\Support\OperatorScope::owns($user, $jamaahHajiKhusus->travel_id, $jamaahHajiKhusus->cabang_id)) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
@@ -184,7 +188,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check access
-        if ($user->role === 'user' && $jamaahHajiKhusus->travel_id !== $user->travel->id) {
+        if ($user->role === 'user' && ! \App\Support\OperatorScope::owns($user, $jamaahHajiKhusus->travel_id, $jamaahHajiKhusus->cabang_id)) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
@@ -201,7 +205,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check access
-        if ($user->role === 'user' && $jamaahHajiKhusus->travel_id !== $user->travel->id) {
+        if ($user->role === 'user' && ! \App\Support\OperatorScope::owns($user, $jamaahHajiKhusus->travel_id, $jamaahHajiKhusus->cabang_id)) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }
@@ -281,7 +285,7 @@ class JamaahHajiKhususController extends Controller
         $user = Auth::user();
         
         // Check access
-        if ($user->role === 'user' && $jamaahHajiKhusus->travel_id !== $user->travel->id) {
+        if ($user->role === 'user' && ! \App\Support\OperatorScope::owns($user, $jamaahHajiKhusus->travel_id, $jamaahHajiKhusus->cabang_id)) {
             return redirect()->route('jamaah.haji-khusus.index')
                 ->with('error', 'Anda tidak memiliki akses ke data ini.');
         }

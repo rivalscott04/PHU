@@ -103,7 +103,7 @@
                             {{-- Baris ini hanya muncul bila masa berlaku izin memang tercatat.
                                  Sebelumnya kolom kosong ditampilkan sebagai "Tidak tersedia",
                                  yang di direktori travel berizin terbaca seolah travelnya
-                                 tidak punya izin — padahal yang tidak ada cuma tanggalnya. --}}
+                                 tidak punya izin, padahal yang tidak ada cuma tanggalnya. --}}
                             @if($travel->license_expiry)
                                 <div class="col-sm-6">
                                     <dt>Masa Berlaku Izin</dt>
@@ -272,7 +272,7 @@
     @include('partials.kanwil-contact', ['variant' => 'footer-compact'])
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.js"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('js/confirm-dialogs.js') }}"></script>
     <script src="{{ asset('js/public-pengaduan-form.js') }}"></script>
 </body>

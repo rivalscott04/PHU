@@ -10,7 +10,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Data demo cepat: jamaah + BA diterima dengan tanggal dekat (kalender keberangkatan).
- * Tidak di-call dari DatabaseSeeder — jalankan manual saat demo.
+ * Tidak di-call dari DatabaseSeeder, jalankan manual saat demo.
  */
 class DemoKeberangkatanSeeder extends Seeder
 {

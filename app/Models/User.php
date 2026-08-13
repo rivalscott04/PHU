@@ -72,6 +72,48 @@ class User extends Authenticatable
     }
 
     /**
+     * Travel yang dipakai untuk operasional: jamaah, paket, dan BA Pemberangkatan.
+     *
+     * PIC pusat memakai travelnya sendiri. PIC cabang memakai travel pusat yang
+     * menaunginya, karena BA Pemberangkatan diterbitkan atas izin PPIU yang
+     * dipegang pusat. Yang membedakan cabang adalah wilayahnya, lihat
+     * getKabupaten(), sehingga peninjaunya tetap Kabko tempat cabang berada.
+     */
+    public function operatingTravelId(): ?int
+    {
+        if ($this->travel_id) {
+            return $this->travel_id;
+        }
+
+        $this->loadMissing('cabang');
+
+        return $this->cabang?->travel_id;
+    }
+
+    public function operatingTravel(): ?TravelCompany
+    {
+        $id = $this->operatingTravelId();
+
+        return $id ? TravelCompany::find($id) : null;
+    }
+
+    /**
+     * Entitas yang status pendaftarannya menentukan boleh tidaknya beroperasi.
+     * Untuk PIC cabang itu cabangnya sendiri, bukan travel pusat, karena cabang
+     * yang belum ditinjau tidak boleh ikut beroperasi walau pusatnya sah.
+     */
+    public function operatingRegistration(): TravelCompany|CabangTravel|null
+    {
+        if ($this->travel_id) {
+            return $this->travel;
+        }
+
+        $this->loadMissing('cabang');
+
+        return $this->cabang;
+    }
+
+    /**
      * Get travel company name (either pusat or cabang)
      */
     public function getTravelCompanyName()

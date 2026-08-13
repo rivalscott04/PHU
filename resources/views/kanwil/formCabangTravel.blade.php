@@ -34,16 +34,39 @@
                         @csrf
                         <div class="row">
                             <div class="col-md-6 mb-3">
+                                <label for="travel_id" class="form-label">Travel Pusat</label>
+                                <select class="form-select" id="travel_id" name="travel_id">
+                                    <option value="">Tidak terhubung (data lama)</option>
+                                    @foreach ($travels as $travel)
+                                        <option value="{{ $travel->id }}"
+                                            data-nama="{{ $travel->Penyelenggara }}"
+                                            data-sk="{{ $travel->Pusat }}"
+                                            data-pimpinan="{{ $travel->Pimpinan }}"
+                                            data-alamat="{{ $travel->alamat_kantor_baru ?: $travel->alamat_kantor_lama }}"
+                                            @selected(old('travel_id') == $travel->id)>
+                                            {{ $travel->Penyelenggara }} ({{ $travel->kab_kota }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Pilih untuk mengisi otomatis data pusat di bawah</small>
+                            </div>
+                            <div class="col-md-6 mb-3">
                                 <label for="Penyelenggara" class="form-label">Penyelenggara @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" required>
+                                <input type="text" class="form-control" id="Penyelenggara" name="Penyelenggara" value="{{ old('Penyelenggara') }}" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="kabupaten" class="form-label">Kabupaten @include('partials.required-star')</label>
-                                <input type="text" class="form-control" id="kabupaten" name="kabupaten" required>
+                                <select class="form-select @error('kabupaten') is-invalid @enderror" id="kabupaten" name="kabupaten" required>
+                                    <option value="">Pilih kabupaten/kota</option>
+                                    @foreach ($kabupatens as $kabupaten)
+                                        <option value="{{ $kabupaten }}" @selected(old('kabupaten') === $kabupaten)>{{ $kabupaten }}</option>
+                                    @endforeach
+                                </select>
+                                @error('kabupaten')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="pusat" class="form-label">Pusat</label>
-                                <input type="text" class="form-control" id="pusat" name="pusat">
+                                <label for="pusat" class="form-label">No. SK Pusat</label>
+                                <input type="text" class="form-control" id="pusat" name="pusat" value="{{ old('pusat') }}">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="pimpinan_pusat" class="form-label">Pimpinan Pusat @include('partials.required-star')</label>
@@ -85,6 +108,21 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('travel_id')?.addEventListener('change', function () {
+            const data = this.selectedOptions[0]?.dataset;
+
+            if (!this.value || !data) {
+                return;
+            }
+
+            document.getElementById('Penyelenggara').value = data.nama || '';
+            document.getElementById('pusat').value = data.sk || '';
+            document.getElementById('pimpinan_pusat').value = data.pimpinan || '';
+            document.getElementById('alamat_pusat').value = data.alamat || '';
+        });
+    </script>
 
     <!-- Upload Modal -->
     <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">

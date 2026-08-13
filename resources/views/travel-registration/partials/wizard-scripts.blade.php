@@ -1,3 +1,16 @@
+@php
+    // Default: ringkasan pendaftaran pusat. Formulir cabang mengoper grupnya sendiri.
+    // Satu grup = satu langkah isian; langkah Review selalu yang terakhir.
+    $reviewGroups = $reviewGroups ?? [
+        ['title' => 'Profil Travel', 'fields' => ['Penyelenggara', 'Status', 'Pimpinan']],
+        ['title' => 'Izin Operasional', 'fields' => ['Pusat', 'Tanggal', 'license_expiry']],
+        ['title' => 'Data Akreditasi', 'fields' => ['nilai_akreditasi', 'tanggal_akreditasi', 'lembaga_akreditasi']],
+        ['title' => 'Kontak & Alamat', 'fields' => ['Telepon', 'kab_kota', 'alamat_kantor_lama', 'alamat_kantor_baru']],
+        ['title' => 'Upload Dokumen', 'fields' => ['dokumen_sk', 'dokumen_akreditasi']],
+        ['title' => 'Akun PIC', 'fields' => ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password']],
+    ];
+@endphp
+
 <script src="{{ asset('libs/jquery-steps/build/jquery.steps.min.js') }}"></script>
 <script>
     (function () {
@@ -6,35 +19,13 @@
             return;
         }
 
-        const REVIEW_STEP_INDEX = 6;
         const MAX_FILE_SIZE = 1572864; // 1.5 MB
 
-        const reviewGroups = [
-            {
-                title: 'Profil Travel',
-                fields: ['Penyelenggara', 'Status', 'Pimpinan'],
-            },
-            {
-                title: 'Izin Operasional',
-                fields: ['Pusat', 'Tanggal', 'license_expiry'],
-            },
-            {
-                title: 'Data Akreditasi',
-                fields: ['nilai_akreditasi', 'tanggal_akreditasi', 'lembaga_akreditasi'],
-            },
-            {
-                title: 'Kontak & Alamat',
-                fields: ['Telepon', 'kab_kota', 'alamat_kantor_lama', 'alamat_kantor_baru'],
-            },
-            {
-                title: 'Upload Dokumen',
-                fields: ['dokumen_sk', 'dokumen_akreditasi'],
-            },
-            {
-                title: 'Akun PIC',
-                fields: ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password'],
-            },
-        ];
+        const reviewGroups = @json($reviewGroups);
+
+        // Review adalah langkah setelah semua langkah isian.
+        const REVIEW_STEP_INDEX = reviewGroups.length;
+        const ACCOUNT_STEP_INDEX = REVIEW_STEP_INDEX - 1;
 
         function getStepBody(stepIndex) {
             const wizard = document.getElementById('travel-registration-wizard');
@@ -57,7 +48,9 @@
                 return fieldId;
             }
 
-            return label.textContent.replace(/\s*\*.*$/, '').replace(/\([^)]*\)/g, '').trim();
+            // [\s\S] bukan titik, karena label diakhiri newline sehingga .*$ tidak
+            // pernah cocok dan tanda bintang wajib ikut terbawa ke ringkasan.
+            return label.textContent.replace(/\s*\*[\s\S]*$/, '').replace(/\([^)]*\)/g, '').trim();
         }
 
         function formatDateValue(value) {
@@ -295,7 +288,7 @@
                 }
             });
 
-            if (stepIndex === 5) {
+            if (stepIndex === ACCOUNT_STEP_INDEX) {
                 const password = form.querySelector('#password');
                 const confirm = form.querySelector('#password_confirmation');
                 if (password && confirm && password.value !== confirm.value) {

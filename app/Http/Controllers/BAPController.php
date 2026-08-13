@@ -71,7 +71,7 @@ class BAPController extends Controller
     public function downloadSuratPernyataanTemplate()
     {
         $user = auth()->user();
-        $travel = $user?->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $travel = $user?->operatingTravel();
 
         return Pdf::loadView('travel.pdf.template-surat-pernyataan', [
             'pimpinan' => $travel?->Pimpinan ?? '________________',
@@ -88,7 +88,7 @@ class BAPController extends Controller
             abort(403);
         }
 
-        $travel = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $travel = $user->operatingTravel();
         $ignoreBapId = $request->filled('ignore_bap_id') ? (int) $request->ignore_bap_id : null;
         $ppiuname = $request->string('ppiuname')->toString();
 
@@ -380,7 +380,7 @@ class BAPController extends Controller
             ]);
         }
 
-        $travel = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $travel = $user->operatingTravel();
         $jamaahCount = $this->bapJamaahService->countForForm($user, $travel);
 
         return view('travel.listBAP', compact('data', 'jamaahCount'));
@@ -389,9 +389,11 @@ class BAPController extends Controller
     private function buildBapListingQuery(Request $request, $user)
     {
         if ($user->role === 'user') {
+            // getKabupaten() ikut cabang kalau PIC-nya cabang, jadi daftar BA
+            // miliknya tidak kosong hanya karena users.kabupaten sempat basi.
             $query = BAP::query()
                 ->where('user_id', $user->id)
-                ->where('kab_kota', $user->kabupaten);
+                ->where('kab_kota', $user->getKabupaten());
         } elseif ($user->role === 'kabupaten') {
             $query = BAP::query();
             KabupatenScopeFilter::applyOnColumn($query, KabupatenScopeFilter::filtersForUser($user), 'kab_kota');
@@ -455,6 +457,9 @@ class BAPController extends Controller
 
         $data = $payload['data'];
         $data['user_id'] = $user->id;
+        // Menandai kantor pemilik BA. ppiuname tidak bisa dipakai membedakan,
+        // karena BA cabang memakai nama PPIU pusat.
+        $data['cabang_id'] = $user->cabang_id;
 
         $bap = BAP::create($data);
         $bap->jamaah()->sync($payload['jamaah_ids']);
@@ -487,9 +492,11 @@ class BAPController extends Controller
     private function validatedBapPayload(Request $request, $user, ?int $ignoreBapId = null): array
     {
         if ($user->role === 'user') {
-            $travel = TravelCompany::find($user->travel_id);
-            if (! $travel?->isRegistrationApproved()) {
-                abort(403, 'Akun travel belum diverifikasi Kanwil.');
+            // Untuk PIC cabang yang dinilai adalah status cabangnya sendiri.
+            // Cabang yang belum ditinjau tidak boleh mengajukan BA walau
+            // travel pusat yang menaunginya sudah sah.
+            if (! $user->operatingRegistration()?->isRegistrationApproved()) {
+                abort(403, 'Pendaftaran Anda belum disetujui Kanwil.');
             }
         }
 
@@ -564,22 +571,22 @@ class BAPController extends Controller
                 return redirect()->back()->with('error', 'Tidak bisa menambahkan, karena belum ada data jamaah.');
             }
         } elseif ($user->role !== 'kabupaten') {
-            $travelData = TravelCompany::find($user->travel_id);
+            $travelData = $user->operatingTravel();
 
             if (! $travelData) {
                 return redirect()->back()->with('error', 'Data travel tidak ditemukan.');
             }
 
-            if ($user->role === 'user' && ! $travelData->isRegistrationApproved()) {
+            if ($user->role === 'user' && ! $user->operatingRegistration()?->isRegistrationApproved()) {
                 return redirect()->route('home')->with(
                     'error',
-                    'Akun travel belum diverifikasi Kanwil. Maskapai dan pengajuan BA tersedia setelah registrasi disetujui.'
+                    'Pendaftaran Anda belum disetujui Kanwil. Maskapai dan pengajuan BA tersedia setelah disetujui.'
                 );
             }
 
             $allowedTypes = $travelData->allowedJamaahTypes();
             $jamaahCount = Jamaah::whereIn('jenis_jamaah', $allowedTypes)
-                ->where('travel_id', $user->travel_id)
+                ->where('travel_id', $travelData->id)
                 ->count();
 
             if ($jamaahCount === 0) {
@@ -611,9 +618,9 @@ class BAPController extends Controller
         }
 
         $travelPackages = collect();
-        if ($user->role === 'user' && $user->travel_id) {
+        if ($user->role === 'user' && $travelData) {
             $travelPackages = TravelPackage::query()
-                ->where('travel_id', $user->travel_id)
+                ->where('travel_id', $travelData->id)
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->orderBy('name')
@@ -621,7 +628,12 @@ class BAPController extends Controller
         }
 
         return compact('ppiuList', 'jamaahCount', 'travelData', 'jamaahTotalCount', 'selectedJamaah', 'bap', 'travelPackages')
-            + ['airlineOptions' => BapAirline::activeNames()];
+            + [
+                'airlineOptions' => BapAirline::activeNames(),
+                // Wilayah pengaju, bukan wilayah pusat. Untuk PIC cabang inilah
+                // yang menentukan Kabko mana yang meninjau BA-nya.
+                'defaultKabKota' => $user->getKabupaten(),
+            ];
     }
 
     public function uploadPDF(Request $request, $id)
@@ -664,14 +676,13 @@ class BAPController extends Controller
             $data->status = 'diajukan';
             $data->save();
 
-            $travel = $data->user?->travel;
-
-            if ($travel) {
-                $this->notificationService->notifyReviewers(
-                    $travel,
-                    new BapSubmittedNotification($data)
-                );
-            }
+            // Sebelumnya reviewer dicari lewat user->travel, yang NULL untuk PIC
+            // cabang, sehingga pengajuannya tidak menotifikasi siapa pun tanpa
+            // error. Wilayah BA sendiri sudah cukup dan berlaku untuk keduanya.
+            $this->notificationService->notifyReviewersInKabupaten(
+                $data->kab_kota,
+                new BapSubmittedNotification($data)
+            );
         }
 
         return redirect()
@@ -700,44 +711,32 @@ class BAPController extends Controller
         $data = BAP::findOrFail($id);
         KabupatenResourceGuard::authorizeBap($user, $data);
         $oldStatus = $data->status;
-        
-        $data->status = $request->status;
-        
-        // Nomor surat dan tanggal terbit hanya dibuat sekali. Menyetujui ulang BA
-        // yang sama tidak boleh menerbitkan nomor baru: dokumennya sama, dan
-        // nomor lama sudah beredar pada berkas yang dicetak sebelumnya.
-        if ($request->status === 'diterima' && ! $data->nomor_surat) {
-            // Cari nomor urut terakhir untuk bulan dan tahun saat ini
-            $currentMonth = date('m');
-            $currentYear = date('Y');
-            
-            $lastBAP = BAP::where('status', 'diterima')
-                         ->where('nomor_surat', 'like', "%/{$currentMonth}/{$currentYear}")
-                         ->orderBy('id', 'desc')
-                         ->first();
-            
-            $nextNumber = 1;
-            if ($lastBAP && $lastBAP->nomor_surat) {
-                // Extract nomor dari format B-{nomor}/Kw.18.04/2/Hj.00/{bulan}/{tahun}
-                if (preg_match('/B-(\d+)\/Kw\.18\.04\/2\/Hj\.00\/\d{2}\/\d{4}/', $lastBAP->nomor_surat, $matches)) {
-                    $nextNumber = intval($matches[1]) + 1;
-                }
-            }
-            
-            // Generate nomor surat lengkap
-            $bulan = str_pad($currentMonth, 2, '0', STR_PAD_LEFT);
-            $tahun = $currentYear;
-            
-            $nomorSuratLengkap = "B-{$nextNumber}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
-            $data->nomor_surat = $nomorSuratLengkap;
 
-            // Dibekukan sekali saat BA disetujui. Kalau tidak, narasi "Pada hari
-            // ini ..." ikut berubah tiap kali dokumen dicetak ulang, dan bisa
-            // bertentangan dengan bulan/tahun pada nomor suratnya sendiri.
-            $data->tanggal_terbit = $data->tanggal_terbit ?: now()->toDateString();
+        if (! BapStatus::canTransition($oldStatus, $request->status)) {
+            return redirect()->back()->with(
+                'error',
+                'BA yang sudah diterima tidak bisa dikembalikan ke status sebelumnya. '
+                . 'Nomor suratnya sudah terbit dan dokumennya bisa saja sudah beredar.'
+            );
         }
 
-        $data->save();
+        DB::transaction(function () use ($data, $request) {
+            $data->status = $request->status;
+
+            // Nomor surat dan tanggal terbit hanya dibuat sekali. Menyetujui ulang
+            // BA yang sama tidak boleh menerbitkan nomor baru: dokumennya sama, dan
+            // nomor lama sudah beredar pada berkas yang dicetak sebelumnya.
+            if ($request->status === 'diterima' && ! $data->nomor_surat) {
+                $data->nomor_surat = $this->terbitkanNomorSurat();
+
+                // Dibekukan sekali saat BA disetujui. Kalau tidak, narasi "Pada hari
+                // ini ..." ikut berubah tiap kali dokumen dicetak ulang, dan bisa
+                // bertentangan dengan bulan/tahun pada nomor suratnya sendiri.
+                $data->tanggal_terbit = $data->tanggal_terbit ?: now()->toDateString();
+            }
+
+            $data->save();
+        });
 
         if ($request->status === 'diterima') {
             $this->bapVerificationService->ensureKanwilToken($data->fresh());
@@ -749,6 +748,45 @@ class BAPController extends Controller
         }
 
         return redirect()->route('bap')->with('success', $message);
+    }
+
+    /**
+     * Nomor urut dibaca lalu ditulis, jadi harus dikunci. Tanpa kunci, dua
+     * petugas yang menyetujui BA berbeda pada saat bersamaan membaca nomor
+     * terakhir yang sama dan menerbitkan nomor kembar pada dua dokumen resmi.
+     *
+     * Dipanggil hanya dari dalam transaksi.
+     */
+    private function terbitkanNomorSurat(): string
+    {
+        $bulan = date('m');
+        $tahun = date('Y');
+
+        // Nomor urut berjalan sepanjang tahun, bukan per bulan. Bulan tetap
+        // dicantumkan pada nomornya sebagai keterangan bulan terbit, tetapi
+        // tidak mengulang hitungan. Pola pencariannya karena itu mencakup
+        // seluruh bulan pada tahun berjalan.
+        $pola = "B-%/Kw.18.04/2/Hj.00/%/{$tahun}";
+
+        // Urut berdasar panjang lalu nilai stringnya, supaya B-10 dianggap lebih
+        // besar dari B-9. Bagian setelah nomor selalu sama panjang, jadi urutan
+        // ini aman. Mengurutkan berdasar id keliru: urutan pembuatan baris tidak
+        // selalu sama dengan urutan nomor suratnya.
+        $terakhir = BAP::query()
+            ->whereNotNull('nomor_surat')
+            ->where('nomor_surat', 'like', $pola)
+            ->lockForUpdate()
+            ->orderByRaw('LENGTH(nomor_surat) DESC')
+            ->orderBy('nomor_surat', 'desc')
+            ->value('nomor_surat');
+
+        $berikutnya = 1;
+
+        if ($terakhir && preg_match('/^B-(\d+)\//', $terakhir, $cocok)) {
+            $berikutnya = ((int) $cocok[1]) + 1;
+        }
+
+        return "B-{$berikutnya}/Kw.18.04/2/Hj.00/{$bulan}/{$tahun}";
     }
 
     public function showKeberangkatan()

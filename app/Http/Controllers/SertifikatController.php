@@ -85,19 +85,25 @@ class SertifikatController extends Controller
     public function create()
     {
         $user = auth()->user();
-        
+
+        // Penerbitan sertifikat pekerjaan petugas. Tanpa penjagaan ini akun
+        // travel tetap bisa membuka formulirnya, meski daftarnya kosong.
+        \App\Support\ResourceAccess::denyUnless(
+            in_array($user->role, ['admin', 'kabupaten'], true)
+        );
+
         if ($user->role === 'admin') {
             // Admin can see all PPIU travel companies - optimized queries
             $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
                 ->where('Status', 'PPIU')->get();
-            $cabangs = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
+            $cabangs = CabangTravel::approved()->select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
         } else if ($user->role === 'kabupaten') {
             // Kabupaten users can only see PPIU travel companies in their area - optimized queries
             $travels = TravelCompany::select('id', 'Penyelenggara', 'kab_kota', 'Status')
                 ->where('Status', 'PPIU')
                 ->where('kab_kota', $user->kabupaten)
                 ->get();
-            $cabangs = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')
+            $cabangs = CabangTravel::approved()->select('id_cabang', 'Penyelenggara', 'kabupaten')
                 ->where('kabupaten', $user->kabupaten)->get();
         } else {
             // Other roles see empty data
@@ -105,11 +111,7 @@ class SertifikatController extends Controller
             $cabangs = collect();
         }
 
-        // Get next nomor surat and dokumen
-        $nextNomorSurat = \App\Models\Sertifikat::getNextNomorSurat();
-        $nextNomorDokumen = \App\Models\Sertifikat::getNextNomorDokumen();
-        
-        return view('sertifikat.create', compact('travels', 'cabangs', 'nextNomorSurat', 'nextNomorDokumen'));
+        return view('sertifikat.create', compact('travels', 'cabangs'));
     }
 
     public function getTravelData($id)
@@ -138,19 +140,6 @@ class SertifikatController extends Controller
         ]);
     }
 
-    public function getNextNomor(Request $request)
-    {
-        $bulan = $request->get('bulan');
-        $tahun = $request->get('tahun');
-        
-        $nomorSurat = \App\Models\Sertifikat::getNextNomorSurat($tahun, $bulan);
-        $nomorDokumen = \App\Models\Sertifikat::getNextNomorDokumen($tahun, $bulan);
-        
-        return response()->json([
-            'nomor_surat' => $nomorSurat,
-            'nomor_dokumen' => $nomorDokumen
-        ]);
-    }
 
     public function store(Request $request)
     {
@@ -163,10 +152,9 @@ class SertifikatController extends Controller
             'nama_kepala' => 'required|string|max:255',
             'alamat' => ValidationHelper::textRule(),
             'tanggal_diterbitkan' => 'required|date',
-            'nomor_surat' => 'required|numeric|min:1',
-            'nomor_dokumen' => ValidationHelper::varcharRule(),
-            'bulan_surat' => 'required|numeric|min:1|max:12',
-            'tahun_surat' => 'required|numeric|min:2020|max:2030',
+            // nomor_surat dan nomor_dokumen tidak lagi diterima dari formulir.
+            // Keduanya diterbitkan sistem di dalam transaksi, supaya urutannya
+            // tidak bergantung ketelitian petugas dan tidak bisa kembar.
             'tanggal_tandatangan' => 'required|date',
             'jenis_lokasi' => 'required|in:pusat,cabang',
         ];
@@ -184,16 +172,23 @@ class SertifikatController extends Controller
         }
 
         \Log::info('Validation passed');
-        $data = $request->all();
         $user = auth()->user();
 
+        // Hanya field tervalidasi. Sebelumnya seluruh isi request dipakai,
+        // sehingga kolom seperti uuid, status, dan path berkas bisa disuntikkan
+        // dari luar formulir.
+        $data = $request->only(array_merge(array_keys($sertifikatRules), ['travel_id', 'cabang_id']));
+
+        // Sertifikat adalah dokumen resmi yang diterbitkan regulator. Penjaganya
+        // harus menolak akun travel, bukan sekadar memeriksa wilayah, karena
+        // authorizeTravel() sengaja meloloskan travel atas datanya sendiri.
         if ($data['jenis_lokasi'] === 'pusat') {
-            KabupatenResourceGuard::authorizeTravel(
+            KabupatenResourceGuard::authorizeTravelAsStaff(
                 $user,
                 TravelCompany::findOrFail($request->travel_id)
             );
         } else {
-            KabupatenResourceGuard::authorizeCabang(
+            KabupatenResourceGuard::authorizeCabangAsStaff(
                 $user,
                 CabangTravel::findOrFail($request->cabang_id)
             );
@@ -218,16 +213,19 @@ class SertifikatController extends Controller
             \Log::info('Set cabang_id for CABANG:', ['cabang_id' => $request->cabang_id]);
         }
 
-        // Format nomor surat sesuai template menggunakan data dari form
-        $data['nomor_surat'] = "B-{$data['nomor_surat']}/Kw.18.01/HJ.00/2/" .
-            str_pad($data['bulan_surat'], 2, '0', STR_PAD_LEFT) . "/{$data['tahun_surat']}";
-        \Log::info('Formatted nomor_surat:', ['nomor_surat' => $data['nomor_surat']]);
-
-        // Nomor dokumen sudah dalam format yang benar dari form
-        \Log::info('Nomor dokumen from form:', ['nomor_dokumen' => $data['nomor_dokumen']]);
-
         \Log::info('Creating sertifikat with data:', $data);
-        $sertifikat = Sertifikat::create($data);
+
+        // Penomoran dibaca lalu ditulis, jadi harus dikunci. Tanpa transaksi,
+        // dua petugas yang menyimpan bersamaan mendapat nomor yang sama.
+        $sertifikat = \Illuminate\Support\Facades\DB::transaction(function () use ($data) {
+            $terbit = \Carbon\Carbon::parse($data['tanggal_diterbitkan']);
+
+            $data['nomor_surat'] = Sertifikat::terbitkanNomorSurat($terbit);
+            $data['nomor_dokumen'] = Sertifikat::terbitkanNomorDokumen($terbit);
+            $data['tanggal_kadaluarsa'] = Sertifikat::hitungKadaluarsa($terbit);
+
+            return Sertifikat::create($data);
+        });
         \Log::info('Sertifikat created successfully:', ['id' => $sertifikat->id, 'uuid' => $sertifikat->uuid]);
 
         return redirect()->route('sertifikat.index')
@@ -720,11 +718,15 @@ class SertifikatController extends Controller
         // Get certificates for the authenticated travel company
         $user = auth()->user();
 
-        if (!$user || !$user->travel_id) {
+        if (! $user || (! $user->travel_id && ! $user->cabang_id)) {
             return redirect()->route('home')->with('error', 'Akses ditolak');
         }
 
-        $sertifikat = Sertifikat::where('travel_id', $user->travel_id)
+        // Sertifikat cabang tercatat pada cabang_id, bukan travel_id, jadi PIC
+        // cabang tidak bisa dicari lewat travel pusatnya.
+        $sertifikat = Sertifikat::query()
+            ->when($user->cabang_id, fn ($query) => $query->where('cabang_id', $user->cabang_id))
+            ->when(! $user->cabang_id, fn ($query) => $query->where('travel_id', $user->travel_id))
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 

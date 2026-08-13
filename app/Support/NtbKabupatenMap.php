@@ -88,6 +88,7 @@ class NtbKabupatenMap
             'Lombok Barat' => ['lat' => -8.6781, 'lng' => 116.1319],
             'Lombok Tengah' => ['lat' => -8.7050, 'lng' => 116.2747],
             'Lombok Timur' => ['lat' => -8.6517, 'lng' => 116.5367],
+            'Lombok Utara' => ['lat' => -8.3500, 'lng' => 116.1667],
             'Sumbawa' => ['lat' => -8.4931, 'lng' => 117.4203],
             'Sumbawa Barat' => ['lat' => -8.7444, 'lng' => 116.8522],
             'Dompu' => ['lat' => -8.5369, 'lng' => 118.4631],

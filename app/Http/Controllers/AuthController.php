@@ -131,7 +131,9 @@ class AuthController extends Controller
 
     public function showLanding()
     {
-        $travelPusat = TravelCompany::select('id', 'public_uuid', 'Penyelenggara', 'kab_kota', 'Status')
+        // Halaman publik hanya boleh menampilkan pendaftaran yang sudah disetujui.
+        $travelPusat = TravelCompany::approved()
+            ->select('id', 'public_uuid', 'Penyelenggara', 'kab_kota', 'Status')
             ->with('riskScore')
             ->orderBy('Penyelenggara')
             ->get();
@@ -142,15 +144,14 @@ class AuthController extends Controller
             return $travel;
         });
 
-        $travelCabang = CabangTravel::select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
+        $travelCabang = CabangTravel::approved()->withActiveParent()->select('id_cabang', 'Penyelenggara', 'kabupaten')->get();
 
         $jamaahCounts = DB::table('jamaah')
             ->selectRaw("SUM(CASE WHEN jenis_jamaah = 'haji' THEN 1 ELSE 0 END) as haji")
             ->selectRaw("SUM(CASE WHEN jenis_jamaah = 'umrah' THEN 1 ELSE 0 END) as umrah")
             ->first();
 
-        // Daftar resmi maskapai, bukan nama bebas yang pernah diketik di BAP —
-        // sumber yang sama dipakai form BAP dan paket travel, jadi salah ketik
+        // Daftar resmi maskapai, bukan nama bebas yang pernah diketik di BAP, // sumber yang sama dipakai form BAP dan paket travel, jadi salah ketik
         // tidak lagi terhitung sebagai maskapai tersendiri.
         $airlines = BapAirline::activeNames();
 

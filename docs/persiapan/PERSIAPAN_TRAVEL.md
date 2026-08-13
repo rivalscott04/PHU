@@ -1,4 +1,4 @@
-# Data yang Harus Disiapkan — Travel (PPIU / PIHK)
+# Data yang Harus Disiapkan: Travel (PPIU / PIHK)
 
 **Untuk:** Penyelenggara Perjalanan Ibadah Umrah (PPIU) dan Penyelenggara Ibadah Haji Khusus (PIHK)  
 **Tujuan:** Agar saat testing live, data travel sudah lengkap dan siap diinput ke sistem PANTAU.
@@ -152,7 +152,7 @@ Siapkan **1 paket BA Pemberangkatan** untuk testing:
 
 ---
 
-## Checklist Ringkas — Travel
+## Checklist Ringkas: Travel
 
 Centang sebelum datang ke sesi presentasi/testing:
 

@@ -8,6 +8,7 @@ use App\Models\TravelCompany;
 use App\Models\User;
 use App\Support\KabupatenScopeFilter;
 use App\Support\NtbKabupatenMap;
+use App\Support\OperatorScope;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -25,7 +26,9 @@ class BapJamaahService
         $query = Jamaah::query()->with('travel')->orderBy('nama');
 
         if ($user->role === 'user' && $travel) {
-            $query->where('travel_id', $travel->id)
+            // Jenis jamaah dibatasi izin pusat, kepemilikan barisnya dibatasi
+            // entitas pengaju sendiri.
+            OperatorScope::apply($query, $user)
                 ->whereIn('jenis_jamaah', $travel->allowedJamaahTypes());
         } elseif ($user->role === 'kabupaten') {
             KabupatenScopeFilter::applyOnTravelRelation(
@@ -135,13 +138,13 @@ class BapJamaahService
             ]);
         }
 
-        $travelUser = $user->travel_id ? TravelCompany::find($user->travel_id) : null;
+        $travelUser = $user->operatingTravel();
 
         foreach ($jamaah as $row) {
             if ($user->role === 'user') {
-                if ($row->travel_id !== $user->travel_id) {
+                if (! OperatorScope::owns($user, $row->travel_id, $row->cabang_id)) {
                     throw ValidationException::withMessages([
-                        'jamaah_ids' => 'Jamaah yang dipilih bukan milik travel Anda.',
+                        'jamaah_ids' => 'Jamaah yang dipilih bukan milik kantor Anda.',
                     ]);
                 }
 

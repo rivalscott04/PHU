@@ -1,4 +1,4 @@
-# Setup & Deployment — PANTAU (termasuk Modul V2)
+# Setup & Deployment: PANTAU (termasuk Modul V2)
 
 Panduan ini mencakup konfigurasi environment, perintah `artisan`, scheduler, cache, queue, role **Pengawas**, dan **antrian kerja pengawasan** untuk menjalankan PANTAU (V1 + modul pengawasan V2).
 
@@ -6,8 +6,8 @@ Panduan ini mencakup konfigurasi environment, perintah `artisan`, scheduler, cac
 
 | Proses | Wajib? | Kapan / cara menjalankan |
 |--------|--------|--------------------------|
-| **Cron scheduler** (`schedule:run`) | **Ya** di production | Crontab setiap menit — lihat [bagian 5](#5-scheduler-cron--wajib-di-production) |
-| **Queue worker** (`queue:work`) | **Tidak** (default `sync`) | Hanya jika `QUEUE_CONNECTION` diubah ke `redis`/`database` — lihat [bagian 6](#6-queue-worker-opsional) |
+| **Cron scheduler** (`schedule:run`) | **Ya** di production | Crontab setiap menit, lihat [bagian 5](#5-scheduler-cron--wajib-di-production) |
+| **Queue worker** (`queue:work`) | **Tidak** (default `sync`) | Hanya jika `QUEUE_CONNECTION` diubah ke `redis`/`database`, lihat [bagian 6](#6-queue-worker-opsional) |
 | **Antrian kerja** (`/v2/antrian`) | **Tidak** (tanpa worker/cron) | Item masuk otomatis saat event bisnis; lihat [bagian 5.1](#51-antrian-kerja-pengawasan--tanpa-workercron) |
 
 ---
@@ -23,8 +23,8 @@ Panduan ini mencakup konfigurasi environment, perintah `artisan`, scheduler, cac
 
 **Opsional (production / performa):**
 
-- **Redis** — cache dashboard & monitoring (disarankan)
-- **Supervisor** — menjalankan queue worker (hanya jika `QUEUE_CONNECTION` ≠ `sync`)
+- **Redis**, cache dashboard & monitoring (disarankan)
+- **Supervisor**, menjalankan queue worker (hanya jika `QUEUE_CONNECTION` ≠ `sync`)
 
 ---
 
@@ -49,7 +49,7 @@ php artisan migrate
 # Symlink storage (upload BAP, sertifikat, dll.)
 php artisan storage:link
 
-# (Opsional) Data contoh — hanya 4 akun inti + master checklist V2
+# (Opsional) Data contoh: hanya 4 akun inti + master checklist V2
 php artisan db:seed
 
 # (Opsional, development saja) Satu travel contoh + akun mataram.travel@phu.com
@@ -73,7 +73,7 @@ Akses aplikasi: `http://localhost:8000`
 > **Travel tidak di-seed** di `DatabaseSeeder`. Data travel production dari registrasi mandiri.  
 > Untuk uji lokal / Playwright: `php artisan db:seed --class=DevTravelSeeder` → `mataram.travel@phu.com` / `password123`  
 > User travel/kabupaten **wajib ganti password** sebelum mengakses modul V2 (middleware `password.changed`).  
-> Akun **Pengawas** sudah `is_password_changed=true` — langsung bisa akses modul V2 di wilayah kabupatennya.
+> Akun **Pengawas** sudah `is_password_changed=true`, langsung bisa akses modul V2 di wilayah kabupatennya.
 
 Akun pengawas tambahan bisa dibuat lewat menu **Manajemen User** (role *Pengawas*). Atur wilayah akses: satu kabupaten, beberapa kabupaten, atau seluruh NTB.
 
@@ -99,7 +99,7 @@ DB_PASSWORD=
 FILESYSTEM_DISK=local  # upload followup & dokumen disimpan private (bukan public)
 ```
 
-### Disarankan — performa modul V2
+### Disarankan: performa modul V2
 
 Dashboard V2 mem-cache overview/statistik selama **5 menit**. Untuk production, gunakan Redis:
 
@@ -111,11 +111,11 @@ REDIS_PASSWORD=null
 REDIS_PORT=6379
 ```
 
-Tanpa Redis, cache memakai **file** (`CACHE_DRIVER=file`) — tetap jalan, tetapi lebih lambat di traffic tinggi.
+Tanpa Redis, cache memakai **file** (`CACHE_DRIVER=file`): tetap jalan, tetapi lebih lambat di traffic tinggi.
 
-### Opsional — queue (background job)
+### Opsional: queue (background job)
 
-Default: `QUEUE_CONNECTION=sync` — notifikasi database & perintah scheduler dijalankan **langsung**, tanpa worker.
+Default: `QUEUE_CONNECTION=sync`, notifikasi database & perintah scheduler dijalankan **langsung**, tanpa worker.
 
 Notifikasi modul V2 (pengaduan baru, reminder deadline, dll.) disimpan ke tabel `notifications` secara **sinkron**. Worker hanya diperlukan jika Anda mengubah driver queue:
 
@@ -177,7 +177,7 @@ php artisan migrate:rollback
 
 ---
 
-## 4. Perintah Artisan — referensi
+## 4. Perintah Artisan: referensi
 
 ### Setup & maintenance
 
@@ -186,7 +186,7 @@ php artisan migrate:rollback
 | `php artisan key:generate` | Sekali saat setup awal |
 | `php artisan migrate` | Setup awal & setiap deploy ada migrasi baru |
 | `php artisan db:seed` | Development / staging (data contoh) |
-| `php artisan storage:link` | Sekali — symlink `public/storage` |
+| `php artisan storage:link` | Sekali, symlink `public/storage` |
 | `php artisan config:clear` | Setelah ubah `.env` di development |
 | `php artisan cache:clear` | Setelah ubah logic cache / troubleshooting |
 | `php artisan route:clear` | Setelah ubah routes |
@@ -205,7 +205,7 @@ php artisan view:cache
 # php artisan event:cache   # jika memakai event discovery
 ```
 
-### Modul V2 — risk, notifikasi & antrian
+### Modul V2: risk, notifikasi & antrian
 
 | Perintah | Deskripsi |
 |----------|-----------|
@@ -213,7 +213,7 @@ php artisan view:cache
 | `php artisan risk:calculate --travel=ID` | Hitung ulang risk untuk satu travel |
 | `php artisan followup:send-deadline-reminders` | Kirim reminder deadline tindak lanjut (H-7, H-3, H, H+7, H+30, terlambat) |
 
-> **Antrian kerja** tidak punya perintah artisan sendiri — diisi otomatis oleh event aplikasi (lihat bagian 5.1).
+> **Antrian kerja** tidak punya perintah artisan sendiri, diisi otomatis oleh event aplikasi (lihat bagian 5.1).
 
 ### Testing
 
@@ -272,7 +272,7 @@ Fixture route diekspor ke `e2e/fixtures/accounts.json` setiap kali seeder dijala
 | 4 | Travel | Unggah bukti tindak lanjut → FOLLOWUP_UPLOADED |
 | 5 | Pengawas | Verifikasi TL → temuan VERIFIED |
 | 6 | Pengawas | Tutup pengawasan: VERIFIED → CLOSED |
-| 7 | Pengawas | Cek riwayat audit (`/v2/audit-log`) — create/update pengawasan, upload/approve TL |
+| 7 | Pengawas | Cek riwayat audit (`/v2/audit-log`): create/update pengawasan, upload/approve TL |
 
 Set `.env` → `E2E_TESTING=true` agar rate limit login tidak mengganggu pergantian peran.
 
@@ -286,7 +286,7 @@ php artisan tinker
 
 ---
 
-## 5. Scheduler (cron) — wajib di production
+## 5. Scheduler (cron): wajib di production
 
 Dua perintah V2 terdaftar di `app/Console/Kernel.php`:
 
@@ -319,7 +319,7 @@ php artisan risk:calculate
 php artisan followup:send-deadline-reminders
 ```
 
-### 5.1 Antrian kerja pengawasan — tanpa worker/cron
+### 5.1 Antrian kerja pengawasan: tanpa worker/cron
 
 Modul **Antrian Kerja** (`/v2/antrian`) **tidak memerlukan** queue worker atau cron terpisah. Item antrian dibuat/diperbarui secara real-time:
 
@@ -336,7 +336,7 @@ Modul **Antrian Kerja** (`/v2/antrian`) **tidak memerlukan** queue worker atau c
 
 ## 6. Queue worker (opsional)
 
-Default: `QUEUE_CONNECTION=sync` — **tidak perlu menjalankan worker**.
+Default: `QUEUE_CONNECTION=sync`, **tidak perlu menjalankan worker**.
 
 Worker hanya diperlukan jika Anda mengubah `.env` ke `redis` atau `database`:
 
@@ -345,14 +345,14 @@ Worker hanya diperlukan jika Anda mengubah `.env` ke `redis` atau `database`:
 php artisan queue:table
 php artisan migrate
 
-# Jalankan worker (development) — biarkan terminal terbuka
+# Jalankan worker (development): biarkan terminal terbuka
 php artisan queue:work --tries=3
 
 # Tes singkat: proses satu job lalu keluar
 php artisan queue:work --once
 ```
 
-**Production** — jalankan worker via Supervisor agar restart otomatis:
+**Production**, jalankan worker via Supervisor agar restart otomatis:
 
 ```ini
 ; /etc/supervisor/conf.d/phu-worker.conf
@@ -384,7 +384,7 @@ chown -R www-data:www-data storage bootstrap/cache
 chmod -R ug+rwx storage bootstrap/cache
 ```
 
-Pastikan `storage/app/followups/` dapat ditulis (upload lampiran tindak lanjut — disimpan **private**, diunduh via route terautentikasi).
+Pastikan `storage/app/followups/` dapat ditulis (upload lampiran tindak lanjut, disimpan **private**, diunduh via route terautentikasi).
 
 ---
 
@@ -409,12 +409,12 @@ Semua route V2 memakai prefix `/v2`, middleware `auth` + `password.changed`:
 
 > **Panduan lengkap production** (Nginx, Redis, Reverb WebSocket, Supervisor, SSL): lihat **[DEPLOY.md](./DEPLOY.md)**.
 
-- [ ] `.env` — `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` benar
+- [ ] `.env`, `APP_DEBUG=false`, `APP_ENV=production`, `APP_URL` benar
 - [ ] Database credentials & `php artisan migrate --force` (termasuk `pengawasan_antrian` & role `pengawas`)
 - [ ] Akun **Pengawas** dibuat per kabupaten (seeder atau Manajemen User)
 - [ ] `CACHE_DRIVER=redis` + Redis berjalan
 - [ ] Cron `schedule:run` aktif (wajib untuk risk score & reminder deadline)
-- [ ] Queue worker — **hanya** jika `QUEUE_CONNECTION` ≠ `sync`
+- [ ] Queue worker, **hanya** jika `QUEUE_CONNECTION` ≠ `sync`
 - [ ] `php artisan config:cache` & `route:cache`
 - [ ] `storage:link` & permission `storage/` OK
 - [ ] Mail SMTP dikonfigurasi (untuk reminder deadline)
@@ -443,7 +443,7 @@ Semua route V2 memakai prefix `/v2`, middleware `auth` + `password.changed`:
 
 ## Dokumentasi terkait
 
-- [DEPLOY.md](./DEPLOY.md) — panduan deploy production (Redis, Reverb, Nginx, Supervisor)
-- [README.md](./README.md) — ringkasan fitur dan peran pengguna
-- [guidev2/](./guidev2/) — spesifikasi modul V2 (dashboard, pengawasan, risk, dll.)
-- [.env.example](./.env.example) — template variabel environment
+- [DEPLOY.md](./DEPLOY.md): panduan deploy production (Redis, Reverb, Nginx, Supervisor)
+- [README.md](./README.md): ringkasan fitur dan peran pengguna
+- [guidev2/](./guidev2/): spesifikasi modul V2 (dashboard, pengawasan, risk, dll.)
+- [.env.example](./.env.example): template variabel environment

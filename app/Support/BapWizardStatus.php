@@ -61,7 +61,7 @@ final class BapWizardStatus
             }
 
             return [
-                'label' => 'Draf — Siap Diajukan',
+                'label' => 'Draf, Siap Diajukan',
                 'class' => 'bg-info text-dark',
                 'hint' => 'Data dan PDF sudah lengkap. Ajukan melalui wizard sebelum menunggu persetujuan.',
             ];

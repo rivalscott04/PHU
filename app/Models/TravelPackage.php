@@ -9,6 +9,7 @@ class TravelPackage extends Model
 {
     protected $fillable = [
         'travel_id',
+        'cabang_id',
         'name',
         'price',
         'days',

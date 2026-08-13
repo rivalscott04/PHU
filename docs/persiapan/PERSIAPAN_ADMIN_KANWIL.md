@@ -1,4 +1,4 @@
-# Data yang Harus Disiapkan — Admin Kanwil
+# Data yang Harus Disiapkan: Admin Kanwil
 
 **Untuk:** Tim Admin/Super Admin Kanwil Kementerian Haji dan Umroh NTB  
 **Tujuan:** Agar master data dan akun siap sebelum travel, admin kabupaten, dan pengawas mulai testing live.
@@ -128,7 +128,7 @@ Sebelum testing live, pastikan sudah koordinasi:
 
 ---
 
-## Checklist Ringkas — Admin Kanwil
+## Checklist Ringkas: Admin Kanwil
 
 Centang sebelum mulai testing live:
 

@@ -21,6 +21,7 @@ class JamaahHajiKhusus extends Model
     
     protected $fillable = [
         'travel_id',
+        'cabang_id',
         'nama_lengkap',
         'no_ktp',
         'tempat_lahir',

@@ -16,11 +16,14 @@
 
     <div class="{{ $colClass }} mb-3">
         <label for="dokumen_akreditasi" class="form-label">
-            Scan Sertifikat Akreditasi @include('partials.required-star')
+            Scan Sertifikat Akreditasi <span class="text-muted fw-normal">(opsional)</span>
         </label>
         <input type="file" class="form-control @error('dokumen_akreditasi') is-invalid @enderror"
-            id="dokumen_akreditasi" name="dokumen_akreditasi" accept=".pdf,.jpg,.jpeg,.png" required>
+            id="dokumen_akreditasi" name="dokumen_akreditasi" accept=".pdf,.jpg,.jpeg,.png">
         @error('dokumen_akreditasi')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
+        <div class="form-text">
+            Boleh menyusul. Nilai akreditasi yang Anda isi sudah cukup untuk verifikasi.
+            PDF atau foto (JPG/PNG), maksimal 1,5 MB.
+        </div>
     </div>
 </div>

@@ -9,6 +9,7 @@
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('css/app.min.css') }}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet" type="text/css" />
     @include('travel-registration.partials.wizard-styles')
 </head>
 <body>
@@ -20,11 +21,13 @@
                         <a href="{{ route('login') }}">
                             <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="40">
                         </a>
-                        <h4 class="mt-3 mb-1">Registrasi Travel (PPIU / PIHK)</h4>
+                        <h4 class="mt-3 mb-1">Registrasi Travel</h4>
                         <p class="text-muted mb-0 mx-auto" style="max-width: 520px">
                             Isi formulir langkah demi langkah. Setiap halaman hanya beberapa pertanyaan. Tidak perlu diisi sekaligus.
                         </p>
                     </div>
+
+                    @include('travel-registration.partials.jenis-switcher', ['jenis' => 'pusat'])
 
                     @if ($errors->any())
                         <div class="alert alert-danger col-lg-8 mx-auto">
@@ -152,6 +155,8 @@
 
     <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('js/confirm-dialogs.js') }}"></script>
     @include('partials.input-limits-script')
     @include('travel-registration.partials.wizard-scripts')
 </body>

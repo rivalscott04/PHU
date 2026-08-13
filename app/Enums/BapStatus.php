@@ -32,4 +32,22 @@ enum BapStatus: string
             self::Diterima => 'success',
         };
     }
+
+    /**
+     * Diterima adalah status akhir. Begitu BA disetujui, nomor suratnya terbit
+     * dan dokumennya bisa dicetak serta diverifikasi lewat QR. Mengembalikannya
+     * ke status sebelumnya membuat dokumen yang sudah beredar mendadak tidak
+     * valid, tanpa jejak alasan apa pun.
+     *
+     * Selain itu status boleh bergerak bebas, termasuk mundur, karena petugas
+     * memang kadang perlu mengembalikan BA ke travel untuk diperbaiki.
+     */
+    public static function canTransition(?string $from, ?string $to): bool
+    {
+        if ($from === $to) {
+            return true;
+        }
+
+        return $from !== self::Diterima->value;
+    }
 }

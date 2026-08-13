@@ -96,15 +96,21 @@ final class HomeCommandCenter
      */
     public static function travelChecklist(User $user): array
     {
-        $user->loadMissing('travel');
-        $travel = $user->travel;
+        $user->loadMissing('travel', 'cabang');
+        $cabang = $user->travel_id ? null : $user->cabang;
+        // Cabang beroperasi memakai izin travel pusat yang menaunginya.
+        $travel = $user->operatingTravel();
 
-        $registrationStatus = $travel?->registration_status ?? TravelRegistrationStatus::Approved;
-        $isApproved = $travel === null || $registrationStatus === TravelRegistrationStatus::Approved;
+        // Yang menentukan boleh tidaknya beroperasi adalah status pendaftaran
+        // milik entitas pengaju sendiri: cabang dinilai dari cabangnya, bukan
+        // dari pusatnya.
+        $registration = $cabang ?? $travel;
+        $registrationStatus = $registration?->registration_status ?? TravelRegistrationStatus::Approved;
+        $isApproved = $registration === null || $registrationStatus === TravelRegistrationStatus::Approved;
 
         $jamaahTotal = 0;
         if ($travel && Schema::hasTable('jamaah')) {
-            $jamaahTotal = Jamaah::query()->where('travel_id', $travel->id)->count();
+            $jamaahTotal = Jamaah::query()->tap(fn ($q) => OperatorScope::apply($q, $user))->count();
         }
 
         $bapStats = Schema::hasTable('bap')
@@ -126,23 +132,34 @@ final class HomeCommandCenter
 
         if ($registrationStatus === TravelRegistrationStatus::Pending) {
             $steps[] = [
-                'label' => 'Registrasi menunggu verifikasi Kanwil',
+                'label' => $cabang ? 'Menunggu peninjauan Kabupaten/Kota' : 'Registrasi menunggu verifikasi Kanwil',
                 'done' => false,
-                'hint' => 'Tim Kanwil sedang memeriksa data dan dokumen Anda.',
+                'hint' => $cabang
+                    ? 'Petugas Kemenag ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda.'
+                    : 'Tim Kanwil sedang memeriksa data dan dokumen Anda.',
+                'tone' => 'warning',
+            ];
+        } elseif ($registrationStatus === TravelRegistrationStatus::MenungguKanwil) {
+            $steps[] = [
+                'label' => 'Menunggu keputusan Kanwil',
+                'done' => false,
+                'hint' => 'Rekomendasi dari ' . ($cabang?->kabupaten ?: 'Kabupaten/Kota') . ' sudah dikirim ke Kanwil.',
                 'tone' => 'warning',
             ];
         } elseif ($registrationStatus === TravelRegistrationStatus::Rejected) {
             $steps[] = [
-                'label' => 'Registrasi ditolak',
+                'label' => $cabang ? 'Pendaftaran cabang ditolak' : 'Registrasi ditolak',
                 'done' => false,
-                'hint' => $travel?->registration_notes ?: 'Silakan hubungi Kanwil atau daftar ulang.',
+                'hint' => $registration?->registration_notes ?: 'Silakan hubungi Kanwil atau daftar ulang.',
                 'tone' => 'danger',
             ];
         } else {
             $steps[] = [
-                'label' => 'Akun travel aktif',
+                'label' => $cabang ? 'Cabang terdaftar resmi' : 'Akun travel aktif',
                 'done' => true,
-                'hint' => $travel?->Penyelenggara ?: 'Registrasi disetujui',
+                'hint' => $cabang
+                    ? $cabang->Penyelenggara . ' cabang ' . $cabang->kabupaten
+                    : ($travel?->Penyelenggara ?: 'Registrasi disetujui'),
                 'tone' => 'success',
             ];
         }
@@ -161,7 +178,7 @@ final class HomeCommandCenter
             && Schema::hasTable('travel_packages')
             && $travel
             && \App\Models\TravelPackage::query()
-                ->where('travel_id', $travel->id)
+                ->tap(fn ($q) => OperatorScope::apply($q, $user))
                 ->where('is_active', true)
                 ->exists();
 
@@ -198,9 +215,11 @@ final class HomeCommandCenter
         ];
 
         return [
-            'travel_name' => $travel?->Penyelenggara,
+            'travel_name' => $cabang
+                ? $cabang->Penyelenggara . ' (Cabang ' . $cabang->kabupaten . ')'
+                : $travel?->Penyelenggara,
             'registration_status' => $registrationStatus,
-            'registration_notes' => $travel?->registration_notes,
+            'registration_notes' => $registration?->registration_notes,
             'steps' => $steps,
             'stats' => [
                 'bap_diajukan' => $bapDiajukan,
@@ -352,8 +371,13 @@ final class HomeCommandCenter
             ->where('datetime', '>=', now()->startOfDay())
             ->orderBy('datetime');
 
+        // Menyaring dengan ppiuname saja membuat pusat ikut melihat
+        // keberangkatan cabangnya, karena BA cabang memakai nama PPIU pusat.
         if ($user->travel?->Penyelenggara) {
-            $query->where('ppiuname', $user->travel->Penyelenggara);
+            $query->where('ppiuname', $user->travel->Penyelenggara)
+                ->whereNull('cabang_id');
+        } elseif ($user->cabang_id) {
+            $query->where('cabang_id', $user->cabang_id);
         } else {
             $query->where('user_id', $user->id);
         }

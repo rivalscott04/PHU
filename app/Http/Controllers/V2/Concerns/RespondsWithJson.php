@@ -18,6 +18,15 @@ trait RespondsWithJson
         }
 
         if ($user->role === 'user') {
+            // Filter di repositori dipasang dengan when(), jadi nilai null
+            // membuat penyaringnya lenyap dan seluruh data pengawasan NTB ikut
+            // terbaca. Akun travel yang tidak punya travel_id harus ditolak,
+            // bukan dibiarkan lewat tanpa penyaring.
+            //
+            // Pengawasan menyasar pemegang izin, dan datanya milik pusat. PIC
+            // cabang tidak diberi akses ke sini.
+            abort_unless($user->travel_id, 403, 'Akun ini tidak punya akses ke data pengawasan.');
+
             $filters['travel_id'] = $user->travel_id;
         }
 

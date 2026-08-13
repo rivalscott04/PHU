@@ -102,36 +102,15 @@
   }
   window.addEventListener('load', aosInit);
 
-  /**
-   * Initiate glightbox
+  /*
+   * GLightbox, PureCounter, dan Swiper dihapus dari sini.
+   *
+   * Ketiganya bawaan template dan pustakanya tidak pernah dimuat halaman ini,
+   * sementara selectornya (.glightbox, .init-swiper) nol dipakai di seluruh
+   * view. Akibatnya baris GLightbox melempar ReferenceError dan menghentikan
+   * sisa berkas ini, sehingga koreksi scroll untuk tautan hash dan scrollspy
+   * menu tidak pernah jalan.
    */
-  const glightbox = GLightbox({
-    selector: '.glightbox'
-  });
-
-  /**
-   * Initiate Pure Counter
-   */
-  new PureCounter();
-
-  /**
-   * Init swiper sliders
-   */
-  function initSwiper() {
-    document.querySelectorAll(".init-swiper").forEach(function(swiperElement) {
-      let config = JSON.parse(
-        swiperElement.querySelector(".swiper-config").innerHTML.trim()
-      );
-
-      if (swiperElement.classList.contains("swiper-tab")) {
-        initSwiperWithCustomPagination(swiperElement, config);
-      } else {
-        new Swiper(swiperElement, config);
-      }
-    });
-  }
-
-  window.addEventListener("load", initSwiper);
 
   /**
    * Frequently Asked Questions Toggle

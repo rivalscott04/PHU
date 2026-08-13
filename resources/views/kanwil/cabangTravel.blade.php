@@ -34,6 +34,27 @@
                     <h5 class="mb-0">Daftar Cabang Travel</h5>
                 </div>
                 <div class="card-body">
+                    <ul class="nav nav-pills mb-3 flex-wrap gap-1">
+                        @foreach ([
+                            '' => 'Semua',
+                            'pending' => 'Menunggu Verifikasi',
+                            'menunggu_kanwil' => 'Menunggu Kanwil',
+                            'approved' => 'Disetujui',
+                            'rejected' => 'Ditolak',
+                        ] as $value => $label)
+                            @php($jumlah = $antrian[$value] ?? 0)
+                            <li class="nav-item">
+                                <a class="nav-link py-1 px-3 {{ request('filter', '') === $value ? 'active' : '' }}"
+                                    href="{{ route('cabang.travel', array_filter(['filter' => $value, 'search' => request('search')])) }}">
+                                    {{ $label }}
+                                    @if ($jumlah > 0)
+                                        <span class="badge bg-danger ms-1">{{ $jumlah }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                        @endforeach
+                    </ul>
+
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-sm-auto">
                             <label for="cabangTravelPerPageFilter" class="form-label mb-1">Tampilkan</label>
@@ -60,13 +81,11 @@
                                     <th>No.</th>
                                     <th>Travel</th>
                                     <th>Kabupaten</th>
-                                    <th>Pusat</th>
-                                    <th>Pimpinan Pusat</th>
-                                    <th>Alamat Pusat</th>
+                                    <th>Status</th>
+                                    <th>No. SK Pusat</th>
                                     <th>No SK / BA</th>
                                     <th>Tanggal</th>
-                                    <th>Pimpinan Cabang</th>
-                                    <th>Alamat Cabang</th>
+                                    <th>Kepala Cabang</th>
                                     <th>Telepon</th>
                                     <th>Aksi</th>
                                 </tr>

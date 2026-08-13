@@ -27,7 +27,7 @@
     @if ($isAdminPicker)
         <small class="text-muted d-block mb-2">Pilih PPIU terlebih dahulu. Daftar jamaah dimuat bertahap saat scroll.</small>
     @else
-        <small class="text-muted d-block mb-2">Centang jamaah yang berangkat. Daftar dimuat per halaman — scroll ke bawah untuk memuat lebih banyak.</small>
+        <small class="text-muted d-block mb-2">Centang jamaah yang berangkat. Daftar dimuat per halaman, scroll ke bawah untuk memuat lebih banyak.</small>
     @endif
 
     @error('jamaah_ids')
@@ -74,7 +74,7 @@
     <input type="hidden" id="people" name="people" value="{{ $selectedJamaah->count() }}">
 
     <small class="text-muted d-block mt-2" id="jamaahPickerHint">
-        Total {{ (int) ($jamaahTotalCount ?? 0) }} jamaah — scroll ke bawah untuk memuat halaman berikutnya.
+        Total {{ (int) ($jamaahTotalCount ?? 0) }} jamaah, scroll ke bawah untuk memuat halaman berikutnya.
     </small>
 </div>
 
@@ -199,7 +199,7 @@
                         : '<span class="badge bg-success" style="font-size:10px;">Tersedia</span>';
 
                     const ppiuCell = isAdminPicker
-                        ? `<td class="small">${item.ppiuname || '—'}</td>`
+                        ? `<td class="small">${item.ppiuname || ''}</td>`
                         : '';
 
                     tr.innerHTML = `
@@ -209,7 +209,7 @@
                                 ${selected.has(item.id) ? 'checked' : ''}>
                         </td>
                         <td>${item.nama}</td>
-                        <td class="text-muted small">${item.nik || '—'}</td>
+                        <td class="text-muted small">${item.nik || ''}</td>
                         ${ppiuCell}
                         <td>${statusBadge}</td>
                     `;
@@ -374,7 +374,7 @@
                             const id = Number(row.dataset.id);
                             const nama = row.children[1]?.textContent || `Jamaah #${id}`;
                             const nik = row.children[2]?.textContent?.trim();
-                            rowMap.set(id, { id, nama, nik: nik === '—' ? '' : nik });
+                            rowMap.set(id, { id, nama, nik: nik === '' ? '' : nik });
                         });
                         (payload.ids || []).forEach((id) => {
                             const numId = Number(id);

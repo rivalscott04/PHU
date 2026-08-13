@@ -1,4 +1,4 @@
-# Data yang Harus Disiapkan — Pengawas
+# Data yang Harus Disiapkan: Pengawas
 
 **Untuk:** Pengawas lapangan Kanwil Kementerian Haji dan Umroh NTB  
 **Tujuan:** Agar saat testing live, pengawas sudah siap melakukan pemeriksaan travel di wilayah tugasnya.
@@ -43,7 +43,7 @@ Per travel, catat:
 | 5 | Nama pimpinan | ✅ |
 | 6 | Nomor telepon | ✅ |
 
-**Target minimal testing:** pilih **1–2 travel** di wilayah Anda untuk inspeksi percobaan.
+**Target minimal testing:** pilih **12 travel** di wilayah Anda untuk inspeksi percobaan.
 
 ---
 
@@ -106,14 +106,14 @@ Sebelum pengawas mulai testing, pastikan sudah ada (koordinasi dengan admin Kanw
 
 ---
 
-## Checklist Ringkas — Pengawas
+## Checklist Ringkas: Pengawas
 
 Centang sebelum datang ke sesi presentasi/testing:
 
 - [ ] Data akun sudah siap (nama, email, HP)
 - [ ] Wilayah tugas sudah ditentukan
 - [ ] Daftar travel di wilayah sudah dikumpulkan
-- [ ] Sudah pilih 1–2 travel untuk inspeksi percobaan
+- [ ] Sudah pilih 12 travel untuk inspeksi percobaan
 - [ ] HP kamera siap untuk dokumentasi
 - [ ] Laptop + koneksi internet untuk sesi testing
 

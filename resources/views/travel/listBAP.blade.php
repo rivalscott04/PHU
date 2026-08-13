@@ -207,7 +207,7 @@
 @endsection
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
     <script>
         function checkJamaah(jamaahCount) {
             if (jamaahCount == 0) {

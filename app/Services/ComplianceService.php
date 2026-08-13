@@ -38,7 +38,7 @@ class ComplianceService
     }
 
     /**
-     * Ringan untuk halaman publik — tanpa riwayat inspeksi & rekomendasi internal.
+     * Ringan untuk halaman publik, tanpa riwayat inspeksi & rekomendasi internal.
      *
      * @return array{travel?: TravelCompany, statistics?: array<string, mixed>}
      */

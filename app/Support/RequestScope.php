@@ -36,6 +36,10 @@ class RequestScope
         }
 
         if ($user->role === 'user') {
+            // travelId null membuat penyaring when() di repositori lenyap dan
+            // seluruh data NTB terbaca. Akun tanpa travel_id ditolak di sini.
+            abort_unless($user->travel_id, 403, 'Akun ini tidak punya akses ke data pengawasan.');
+
             return new self(travelId: $user->travel_id);
         }
 

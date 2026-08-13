@@ -20,6 +20,7 @@ class Jamaah extends Model
         'nomor_hp',
         'jenis_jamaah',
         'travel_id',
+        'cabang_id',
         'user_id',
     ];
 

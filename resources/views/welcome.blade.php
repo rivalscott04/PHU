@@ -18,7 +18,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet" />
     <link href='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/main.min.css' rel='stylesheet' />
-    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="{{ asset('libs/select2/css/select2.min.css') }}" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Main CSS File -->
@@ -452,8 +452,7 @@
             }
 
             /* Kolom tanggal di layar HP terlalu pendek untuk menampung angka
-               tanggal sekaligus lencananya, dan FullCalendar tidak memotongnya —
-               lencana meluber ke baris di bawahnya, sehingga terbaca seolah milik
+               tanggal sekaligus lencananya, dan FullCalendar tidak memotongnya, lencana meluber ke baris di bawahnya, sehingga terbaca seolah milik
                tanggal yang salah. Tingginya dikunci agar muat di kolomnya sendiri. */
             .fc .fc-daygrid-day-frame {
                 min-height: 3.6rem;
@@ -513,7 +512,7 @@
         /* Dipilih .hero.section, bukan .hero saja: ada aturan generik
            `section, .section` ber-!important yang ditulis belakangan dengan
            kekhususan sama, sehingga padding hero selalu kalah dan tersisa
-           min(5vw, 60px) — 25px di layar HP. */
+           min(5vw, 60px), 25px di layar HP. */
         .hero.section {
             padding: 140px 0 100px 0 !important;
         }
@@ -532,7 +531,7 @@
         }
 
         /* Tombol mulai menumpuk saat kolom hero jadi selebar layar, yaitu di
-           bawah breakpoint lg Bootstrap (992px) — bukan 640px. */
+           bawah breakpoint lg Bootstrap (992px), bukan 640px. */
         @media (max-width: 991.98px) {
             .hero.section {
                 padding-bottom: 140px !important;
@@ -642,7 +641,7 @@
             }
         }
 
-        /* Branding — page-specific only; base tokens in public-theme.css */
+        /* Branding, page-specific only; base tokens in public-theme.css */
         section, .section {
             padding: min(5vw, 60px) 0 !important;
         }
@@ -1586,12 +1585,12 @@
     <div id="preloader"></div>
 
     <!-- Vendor JS Files -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="{{ asset('libs/jquery/jquery.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.8/index.global.min.js'></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="{{ asset('libs/select2/js/select2.min.js') }}"></script>
 
     <!-- Main JS File -->
     <script src="{{ asset('js/main.js') }}"></script>
@@ -1599,7 +1598,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Bootstrap membatalkan aksi bawaan pada <a data-bs-dismiss="modal">,
             // jadi tautan #anchor di dalam modal tidak pernah dijalankan. Tutup
-            // modalnya dulu, baru gulir setelah benar-benar tertutup — kalau
+            // modalnya dulu, baru gulir setelah benar-benar tertutup, kalau
             // digulir saat modal masih menutup, Bootstrap mengembalikan posisi
             // scroll dan halaman terlihat diam.
             document.querySelectorAll('[data-scroll-target]').forEach(function(trigger) {
@@ -2204,7 +2203,7 @@
             if (last <= 1) {
                 return total > 0
                     ? `<div class="d-flex justify-content-between align-items-center mt-3 riwayat-pengaduan-meta">
-                            <span>Menampilkan ${from}–${to} dari ${total} pengaduan</span>
+                            <span>Menampilkan ${from}${to} dari ${total} pengaduan</span>
                        </div>`
                     : '';
             }
@@ -2230,7 +2229,7 @@
 
             return `
                 <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 mt-3">
-                    <span class="riwayat-pengaduan-meta">Menampilkan ${from}–${to} dari ${total} pengaduan</span>
+                    <span class="riwayat-pengaduan-meta">Menampilkan ${from}${to} dari ${total} pengaduan</span>
                     <nav aria-label="Paginasi riwayat pengaduan">
                         <ul class="pagination pagination-sm mb-0">${pages}</ul>
                     </nav>

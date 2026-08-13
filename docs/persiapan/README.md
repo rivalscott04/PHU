@@ -2,7 +2,7 @@
 
 Dokumen ini berisi **daftar data yang harus disiapkan masing-masing pihak** sebelum sesi testing live PANTAU.
 
-Cara input ke sistem **tidak** ada di sini — itu akan dijelaskan saat presentasi.
+Cara input ke sistem **tidak** ada di sini, itu akan dijelaskan saat presentasi.
 
 ---
 

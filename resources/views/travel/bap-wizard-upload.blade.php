@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header ps-0">
                     <h5 class="mb-0">Upload Surat Pernyataan</h5>
-                    <small class="text-muted d-block">Langkah 2 dari 3 — lampirkan surat pernyataan dalam format PDF.</small>
+                    <small class="text-muted d-block">Langkah 2 dari 3, lampirkan surat pernyataan dalam format PDF.</small>
                 </div>
                 <div class="card-body">
                     @include('travel.partials.bap-wizard-progress', ['currentStep' => 2])

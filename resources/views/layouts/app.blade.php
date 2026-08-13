@@ -30,7 +30,7 @@
     <link href="{{ asset('libs/datatables.net-responsive-bs4/css/responsive.bootstrap4.min.css') }}" rel="stylesheet"
         type="text/css" />
     <!-- SweetAlert2 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.css" rel="stylesheet">
+    <link href="{{ asset('libs/sweetalert2/sweetalert2.min.css') }}" rel="stylesheet">
 
     @stack('styles')
 </head>
@@ -106,7 +106,7 @@
     <script src="{{ asset('libs/apexcharts/apexcharts.min.js') }}"></script>
 
     <!-- Sweet Alerts js (must match CSS version above) -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.10.1/dist/sweetalert2.min.js"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
     <script src="{{ asset('js/confirm-dialogs.js') }}"></script>
     <script src="{{ asset('js/pdf-preview.js') }}"></script>
 

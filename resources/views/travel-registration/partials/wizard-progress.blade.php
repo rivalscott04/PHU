@@ -1,5 +1,6 @@
 @php
-    $wizardSteps = [
+    // Default: langkah pendaftaran pusat. Formulir cabang mengoper daftarnya sendiri.
+    $wizardSteps = $wizardSteps ?? [
         ['label' => 'Profil', 'full' => 'Profil Travel'],
         ['label' => 'Izin', 'full' => 'Izin Operasional'],
         ['label' => 'Akreditasi', 'full' => 'Data Akreditasi'],

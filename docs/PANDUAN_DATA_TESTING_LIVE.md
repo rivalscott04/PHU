@@ -1,6 +1,6 @@
 # Panduan Persiapan Data Testing Live
 
-Dokumen ini sudah dipindah ke format terpisah per peran — **hanya berisi daftar data yang harus disiapkan**, tanpa cara pakai sistem.
+Dokumen ini sudah dipindah ke format terpisah per peran, **hanya berisi daftar data yang harus disiapkan**, tanpa cara pakai sistem.
 
 Lihat folder **[docs/persiapan/](./persiapan/)**:
 

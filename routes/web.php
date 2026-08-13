@@ -56,6 +56,8 @@ Route::middleware('throttle:public')->group(function () {
     Route::middleware('guest')->group(function () {
         Route::get('/registrasi-travel', [TravelRegistrationController::class, 'create'])->name('travel.registration.create');
         Route::post('/registrasi-travel', [TravelRegistrationController::class, 'store'])->name('travel.registration.store');
+        Route::get('/registrasi-cabang', [TravelRegistrationController::class, 'createCabang'])->name('cabang.registration.create');
+        Route::post('/registrasi-cabang', [TravelRegistrationController::class, 'storeCabang'])->name('cabang.registration.store');
         Route::get('/registrasi-travel/sukses', [TravelRegistrationController::class, 'success'])->name('travel.registration.success');
     });
 });
@@ -194,13 +196,17 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         ->whereNumber('id')
         ->whereIn('type', ['sk', 'akreditasi']);
 
+    // Keputusan akhir cabang ada di Kanwil (dicek admin di controller).
+    Route::post('/cabang-travel/{id}/setujui', [KanwilController::class, 'approveCabang'])
+        ->name('cabang.travel.approve')
+        ->whereNumber('id');
+
     // Sertifikat routes
     Route::resource('sertifikat', SertifikatController::class)->except(['show', 'edit', 'update']);
     Route::get('/sertifikat/{id}/generate', [SertifikatController::class, 'generate'])->name('sertifikat.generate');
     Route::get('/sertifikat/{id}/download', [SertifikatController::class, 'download'])->name('sertifikat.download');
     Route::get('/sertifikat/travel-data/{id}', [SertifikatController::class, 'getTravelData'])->name('sertifikat.travel-data');
     Route::get('/sertifikat/cabang-data/{id}', [SertifikatController::class, 'getCabangData'])->name('sertifikat.cabang-data');
-    Route::get('/sertifikat/get-next-nomor', [SertifikatController::class, 'getNextNomor'])->name('sertifikat.get-next-nomor');
     Route::get('/sertifikat/{id}/view', [SertifikatController::class, 'view'])->name('sertifikat.view');
     Route::get('/sertifikat/settings', [SertifikatController::class, 'getSettings'])->name('sertifikat.settings');
     Route::post('/sertifikat/settings', [SertifikatController::class, 'updateSettings'])->name('sertifikat.settings.update');
@@ -221,6 +227,13 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/cabang-travel/{id}/edit', [KanwilController::class, 'editCabangTravel'])->name('cabang.travel.edit');
         Route::put('/cabang-travel/{id}', [KanwilController::class, 'updateCabangTravel'])->name('cabang.travel.update');
         Route::delete('/cabang-travel/{id}', [KanwilController::class, 'destroyCabangTravel'])->name('cabang.travel.destroy');
+        // Alur verifikasi cabang: Kabko unggah rekomendasi -> Kanwil putuskan.
+        Route::post('/cabang-travel/{id}/rekomendasi', [KanwilController::class, 'recommendCabang'])->name('cabang.travel.recommend');
+        Route::post('/cabang-travel/{id}/tolak', [KanwilController::class, 'rejectCabang'])->name('cabang.travel.reject');
+        Route::get('/cabang-travel/{id}/dokumen/{type}', [KanwilController::class, 'showCabangDocument'])
+            ->name('cabang.travel.document')
+            ->whereNumber('id')
+            ->whereIn('type', ['oss', 'akta', 'ktp_kepala', 'sk_du', 'rekomendasi', 'sk_pusat']);
         Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
         Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
         Route::get('/cabang-travel/export', [KanwilController::class, 'exportTravelCabang'])->name('cabang.travel.export');

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8">
-    <title>Terjadi Kesalahan — {{ config('app.name') }}</title>
+    <title>Terjadi Kesalahan, {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('css/icons.min.css') }}" rel="stylesheet">

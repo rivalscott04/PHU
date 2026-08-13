@@ -1,3 +1,27 @@
+@php
+    // Cabang ditinjau Kabupaten/Kota dulu, pusat langsung ke Kanwil.
+    $isCabang = ($jenis ?? 'pusat') === 'cabang';
+
+    $ringkas = $isCabang
+        ? 'Menunggu peninjauan Kantor Kemenag Kabupaten/Kota.'
+        : 'Menunggu verifikasi Admin Kanwil.';
+
+    $penjelasan = $isCabang
+        ? 'menunggu peninjauan Kantor Kemenag Kabupaten/Kota'
+        : 'menunggu verifikasi Admin Kanwil';
+
+    $langkah = $isCabang
+        ? [
+            'Petugas Kabupaten/Kota meninjau kantor cabang Anda',
+            'Hasil peninjauan diteruskan ke Kanwil untuk keputusan akhir',
+            'Setelah disetujui Kanwil, masuk dengan email/HP dan password Anda',
+        ]
+        : [
+            'Tunggu konfirmasi Admin Kanwil (biasanya 1 s.d. 3 hari kerja)',
+            'Setelah disetujui, buka halaman login',
+            'Masuk dengan email/HP dan password Anda',
+        ];
+@endphp
 <!doctype html>
 <html lang="id">
 <head>
@@ -20,7 +44,7 @@
                                 <div class="col-7">
                                     <div class="text-success p-4">
                                         <h5 class="text-success">Pendaftaran Terkirim</h5>
-                                        <p class="mb-0">Menunggu verifikasi Admin Kanwil.</p>
+                                        <p class="mb-0">{{ $ringkas }}</p>
                                     </div>
                                 </div>
                                 <div class="col-5 align-self-end">
@@ -47,7 +71,7 @@
                                     </div>
                                     <p class="text-muted">
                                         Terima kasih. Data travel Anda sudah kami terima dan sedang
-                                        <strong>menunggu verifikasi Admin Kanwil</strong>.
+                                        <strong>{{ $penjelasan }}</strong>.
                                         Setelah disetujui, Anda bisa login dengan email/HP dan password yang didaftarkan.
                                     </p>
                                 </div>
@@ -55,9 +79,9 @@
                                 <div class="alert alert-info text-start mb-4">
                                     <h6 class="alert-heading">Langkah selanjutnya</h6>
                                     <ol class="mb-0 ps-3">
-                                        <li>Tunggu konfirmasi Admin Kanwil (biasanya 1 s.d. 3 hari kerja)</li>
-                                        <li>Setelah disetujui, buka halaman login</li>
-                                        <li>Masuk dengan email/HP dan password Anda</li>
+                                        @foreach ($langkah as $item)
+                                            <li>{{ $item }}</li>
+                                        @endforeach
                                     </ol>
                                 </div>
 

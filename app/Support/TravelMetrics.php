@@ -119,6 +119,7 @@ class TravelMetrics
             ...$typeCounts,
             'total_cabang' => Schema::hasTable('travel_cabang')
                 ? CabangTravel::query()
+                    ->approved()
                     ->when($kabupaten, fn ($q) => $q->where('kabupaten', $kabupaten))
                     ->count()
                 : 0,
@@ -187,6 +188,7 @@ class TravelMetrics
             'total_pihk' => (int) ($travelStats->total_pihk ?? 0),
             'total_cabang' => Schema::hasTable('travel_cabang')
                 ? CabangTravel::query()
+                    ->approved()
                     ->when($kabupaten, fn ($q) => $q->where('kabupaten', $kabupaten))
                     ->count()
                 : 0,

@@ -56,5 +56,16 @@ function openImagePreview(url, title) {
 document.addEventListener('DOMContentLoaded', function () {
     const modalEl = document.getElementById('pdfPreviewModal');
     if (!modalEl) return;
-    modalEl.addEventListener('hidden.bs.modal', resetPreviewModal);
+
+    modalEl.addEventListener('hidden.bs.modal', function () {
+        resetPreviewModal();
+
+        // Pratinjau bisa dipanggil dari dalam modal lain, misalnya modal
+        // verifikasi cabang. Bootstrap melepas kunci scroll body setiap kali
+        // modal mana pun ditutup, jadi kembalikan selama masih ada modal
+        // yang terbuka di belakangnya.
+        if (document.querySelector('.modal.show')) {
+            document.body.classList.add('modal-open');
+        }
+    });
 });

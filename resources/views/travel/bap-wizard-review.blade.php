@@ -7,7 +7,7 @@
             <div class="card">
                 <div class="card-header ps-0">
                     <h5 class="mb-0">Review & Ajukan</h5>
-                    <small class="text-muted d-block">Langkah 3 dari 3 — periksa kembali data sebelum mengirim ke Kabupaten/Kanwil.</small>
+                    <small class="text-muted d-block">Langkah 3 dari 3, periksa kembali data sebelum mengirim ke Kabupaten/Kanwil.</small>
                 </div>
                 <div class="card-body">
                     @include('travel.partials.bap-wizard-progress', ['currentStep' => 3])
@@ -63,7 +63,7 @@
 @endsection
 
 @push('js')
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="{{ asset('libs/sweetalert2/sweetalert2.min.js') }}"></script>
     <script>
         document.getElementById('btnAjukan')?.addEventListener('click', function () {
             Swal.fire({

@@ -43,22 +43,25 @@ class LoginController extends Controller
         $user = User::findByEmailOrPhone($identifier);
 
         if ($user && Hash::check($password, $user->password)) {
-            if ($user->role === UserRole::User->value && $user->travel) {
-                $registrationStatus = $user->travel->registration_status;
+            // Pendaftar cabang punya akun sendiri lewat cabang_id, gerbangnya sama.
+            $registration = $user->travel ?? $user->cabang;
 
-                if ($registrationStatus?->value === 'pending') {
+            if ($user->role === UserRole::User->value && $registration) {
+                $registrationStatus = $registration->registration_status;
+
+                if (in_array($registrationStatus?->value, ['pending', 'menunggu_kanwil'], true)) {
                     return redirect()->back()->withErrors([
-                        'email_or_phone' => 'Pendaftaran travel Anda masih menunggu verifikasi Admin Kanwil. Silakan coba lagi setelah disetujui.',
+                        'email_or_phone' => 'Pendaftaran Anda masih diproses (' . $registrationStatus->label() . '). Silakan coba lagi setelah disetujui.',
                     ]);
                 }
 
                 if ($registrationStatus?->value === 'rejected') {
-                    $note = $user->travel->registration_notes
-                        ? ' Alasan: ' . $user->travel->registration_notes
+                    $note = $registration->registration_notes
+                        ? ' Alasan: ' . $registration->registration_notes
                         : '';
 
                     return redirect()->back()->withErrors([
-                        'email_or_phone' => 'Pendaftaran travel Anda ditolak.' . $note,
+                        'email_or_phone' => 'Pendaftaran Anda ditolak.' . $note,
                     ]);
                 }
             }

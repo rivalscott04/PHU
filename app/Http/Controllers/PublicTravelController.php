@@ -48,6 +48,8 @@ class PublicTravelController extends Controller
         $pusatByName = $travelPusat->keyBy('Penyelenggara');
 
         $travelCabang = CabangTravel::query()
+            ->approved()
+            ->withActiveParent()
             ->select('id_cabang', 'Penyelenggara', 'kabupaten', 'pusat', 'pimpinan_cabang', 'telepon', 'alamat_cabang', 'SK_BA', 'tanggal')
             ->get()
             ->map(function ($item) use ($pusatByName) {

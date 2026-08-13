@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\ValidationHelper;
+use App\Support\OperatorScope;
 use App\Models\Jamaah;
 use App\Exports\JamaahExport;
 use App\Exports\JamaahUmrahExport;
@@ -126,7 +127,7 @@ class JamaahController extends Controller
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'haji';
             $jamaahData['user_id'] = $user->id;
-            $jamaahData['travel_id'] = $user->travel_id;
+            $jamaahData = array_merge($jamaahData, OperatorScope::ownerColumns($user));
 
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.haji')->with('success', 'Data jamaah haji berhasil ditambahkan!');
@@ -150,7 +151,7 @@ class JamaahController extends Controller
             $jamaahData = $request->all();
             $jamaahData['jenis_jamaah'] = 'umrah';
             $jamaahData['user_id'] = $user->id;
-            $jamaahData['travel_id'] = $user->travel_id;
+            $jamaahData = array_merge($jamaahData, OperatorScope::ownerColumns($user));
 
             Jamaah::create($jamaahData);
             return redirect()->route('jamaah.umrah')->with('success', 'Data jamaah umrah berhasil ditambahkan!');

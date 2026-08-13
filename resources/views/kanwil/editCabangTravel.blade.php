@@ -25,14 +25,30 @@
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="kabupaten" class="form-label">Kabupaten</label>
-                                <input type="text" class="form-control" id="kabupaten" name="kabupaten"
-                                    value="{{ old('kabupaten', $cabangTravel->kabupaten) }}" required>
+                                @php($kabupatenTerpilih = old('kabupaten', $cabangTravel->kabupaten))
+                                <select class="form-select @error('kabupaten') is-invalid @enderror" id="kabupaten" name="kabupaten" required>
+                                    <option value="">Pilih kabupaten/kota</option>
+                                    @foreach ($kabupatens as $kabupaten)
+                                        <option value="{{ $kabupaten }}" @selected(\App\Support\NtbKabupatenMap::matches($kabupatenTerpilih, $kabupaten))>{{ $kabupaten }}</option>
+                                    @endforeach
+                                </select>
                                 @error('kabupaten')
                                     <div class="text-danger">{{ $message }}</div>
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="pusat" class="form-label">Pusat</label>
+                                <label for="travel_id" class="form-label">Travel Pusat</label>
+                                <select class="form-select" id="travel_id" name="travel_id">
+                                    <option value="">Tidak terhubung (data lama)</option>
+                                    @foreach ($travels as $travel)
+                                        <option value="{{ $travel->id }}" @selected(old('travel_id', $cabangTravel->travel_id) == $travel->id)>
+                                            {{ $travel->Penyelenggara }} ({{ $travel->kab_kota }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="pusat" class="form-label">No. SK Pusat</label>
                                 <input type="text" class="form-control" id="pusat" name="pusat"
                                     value="{{ old('pusat', $cabangTravel->pusat) }}">
                                 @error('pusat')

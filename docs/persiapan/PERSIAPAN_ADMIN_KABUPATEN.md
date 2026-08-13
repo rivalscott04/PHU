@@ -1,4 +1,4 @@
-# Data yang Harus Disiapkan — Admin Kabupaten/Kota
+# Data yang Harus Disiapkan: Admin Kabupaten/Kota
 
 **Untuk:** Admin Kabupaten/Kota di bawah Kanwil Kementerian Haji dan Umroh NTB  
 **Tujuan:** Agar saat testing live, admin kabupaten sudah punya data lengkap untuk memproses travel di wilayahnya.
@@ -79,7 +79,7 @@ Siapkan informasi berikut **per travel** yang akan diterbitkan sertifikatnya:
 
 ## 5. Data Pejabat Penandatangan Sertifikat
 
-Koordinasikan dengan Kanwil — data ini biasanya diinput **sekali** oleh admin Kanwil:
+Koordinasikan dengan Kanwil, data ini biasanya diinput **sekali** oleh admin Kanwil:
 
 | No | Data | Wajib |
 |----|------|-------|
@@ -127,7 +127,7 @@ Agar paham **data apa yang dibutuhkan**, ini alur kerja admin kabupaten:
 
 ---
 
-## Checklist Ringkas — Admin Kabupaten
+## Checklist Ringkas: Admin Kabupaten
 
 Centang sebelum datang ke sesi presentasi/testing:
 

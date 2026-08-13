@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 
 /**
  * Data contoh travel untuk development / automated test saja.
- * Jangan jalankan di production — travel live dari registrasi mandiri.
+ * Jangan jalankan di production, travel live dari registrasi mandiri.
  */
 class DevTravelSeeder extends Seeder
 {
