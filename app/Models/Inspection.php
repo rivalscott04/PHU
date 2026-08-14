@@ -4,10 +4,13 @@ namespace App\Models;
 
 use App\Enums\InspectionStatus;
 use App\Enums\InspectionType;
+use App\Observers\InspectionObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+#[ObservedBy(InspectionObserver::class)]
 class Inspection extends Model
 {
     protected $table = 'pengawasan';
@@ -62,5 +65,10 @@ class Inspection extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(InspectionPhoto::class, 'inspection_id');
+    }
+
+    public function statusLogs(): HasMany
+    {
+        return $this->hasMany(InspectionStatusLog::class, 'inspection_id');
     }
 }
