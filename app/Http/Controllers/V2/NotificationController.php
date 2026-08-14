@@ -5,6 +5,7 @@ namespace App\Http\Controllers\V2;
 use App\Helpers\ValidationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
+use App\Support\NotificationUrl;
 use Illuminate\Http\Request;
 
 class NotificationController extends Controller
@@ -49,6 +50,29 @@ class NotificationController extends Controller
         return $request->expectsJson()
             ? $this->jsonSuccess(null, 'Notifikasi ditandai sudah dibaca.')
             : back()->with('success', 'Notifikasi ditandai sudah dibaca.');
+    }
+
+    /**
+     * Buka satu notifikasi: tandai sudah dibaca lalu antar ke halaman tujuannya.
+     *
+     * Item di lonceng dulu menaut langsung ke tujuan, sehingga notifikasi tidak
+     * pernah tertandai dan angka di lonceng tidak pernah berkurang meski sudah
+     * diklik. Dikerjakan di server, bukan lewat JavaScript, supaya satu klik
+     * cukup satu permintaan dan tetap bekerja walau skrip gagal dimuat.
+     */
+    public function open(Request $request, string $notification)
+    {
+        $row = $request->user()
+            ->notifications()
+            ->where('id', $notification)
+            ->firstOrFail();
+
+        $row->markAsRead();
+
+        $tujuan = NotificationUrl::normalize($row->data['url'] ?? null)
+            ?? route('v2.notifications.index');
+
+        return redirect()->to($tujuan);
     }
 
     public function markAllRead(Request $request)

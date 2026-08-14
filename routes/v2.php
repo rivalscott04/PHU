@@ -89,6 +89,9 @@ Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v
 
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::get('/{notification}/buka', [NotificationController::class, 'open'])
+            ->name('open')
+            ->whereUuid('notification');
         Route::post('/read', [NotificationController::class, 'markRead'])->name('read');
         Route::post('/read-all', [NotificationController::class, 'markAllRead'])->name('read-all');
     });

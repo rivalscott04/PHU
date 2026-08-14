@@ -32,8 +32,9 @@
             @forelse ($recentNotifications as $notification)
                 @php
                     $data = $notification->data;
-                    $url = \App\Support\NotificationUrl::normalize($data['url'] ?? null)
-                        ?? route('v2.notifications.index');
+                    // Lewat rute buka, bukan langsung ke tujuan, supaya notifikasi
+                    // tertandai sudah dibaca dan angka di lonceng ikut berkurang.
+                    $url = route('v2.notifications.open', $notification->id);
                 @endphp
                 <a href="{{ $url }}" class="dropdown-item notify-item py-2 border-bottom notification-static-item">
                     <div class="d-flex">

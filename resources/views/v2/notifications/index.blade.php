@@ -31,7 +31,10 @@
                             </div>
                             <div class="d-flex flex-column gap-1">
                                 @if($url)
-                                    <a href="{{ $url }}" class="btn btn-sm btn-outline-primary">Buka</a>
+                                    {{-- Sama seperti di lonceng: membuka notifikasi
+                                         sekaligus menandainya sudah dibaca. --}}
+                                    <a href="{{ route('v2.notifications.open', $notification->id) }}"
+                                        class="btn btn-sm btn-outline-primary">Buka</a>
                                 @endif
                                 @unless($notification->read_at)
                                     <form method="POST" action="{{ route('v2.notifications.read') }}">
