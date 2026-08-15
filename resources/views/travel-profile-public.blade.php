@@ -129,6 +129,58 @@
                 </div>
             </div>
 
+            {{-- Penipuan umrah biasanya tidak memalsukan travelnya, tapi memalsukan
+                 cabang atau koordinator di daerah. Travelnya asli dan lolos dicek,
+                 yang tidak terdaftar justru orang yang menerima setoran. Daftar ini
+                 menutup celah itu, termasuk saat daftarnya kosong. --}}
+            <section class="profile-section-block">
+                <div class="profile-section-block__head">
+                    <h2>Kantor Cabang Terdaftar</h2>
+                    <p>
+                        Setoran dan pendaftaran hanya aman melalui kantor pusat atau cabang yang terdaftar di bawah ini.
+                        Cocokkan alamat dan nomor teleponnya sebelum menyerahkan uang.
+                    </p>
+                </div>
+
+                @forelse ($cabang as $item)
+                    @if ($loop->first)
+                        <div class="row g-2">
+                    @endif
+                    <div class="col-md-6">
+                        <div class="card signal-card h-100">
+                            <div class="signal-card__icon signal-card__icon--positive">
+                                <i class="fas fa-building-shield"></i>
+                            </div>
+                            <h6 class="fw-bold mb-1">{{ $item->Penyelenggara }}</h6>
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-location-dot me-1"></i>{{ $item->kabupaten ?: 'Kabupaten tidak tercatat' }}
+                            </p>
+                            @if ($item->alamat_cabang)
+                                <p class="mb-1">{{ $item->alamat_cabang }}</p>
+                            @endif
+                            @if ($item->pimpinan_cabang)
+                                <p class="text-muted mb-1"><strong>Pimpinan:</strong> {{ $item->pimpinan_cabang }}</p>
+                            @endif
+                            @if ($item->telepon)
+                                <p class="mb-0"><i class="fas fa-phone me-1"></i>{{ $item->telepon }}</p>
+                            @endif
+                        </div>
+                    </div>
+                    @if ($loop->last)
+                        </div>
+                    @endif
+                @empty
+                    <div class="trust-disclaimer">
+                        <i class="fas fa-triangle-exclamation me-1"></i>
+                        <strong>Travel ini tidak memiliki kantor cabang terdaftar.</strong>
+                        Seluruh urusan pendaftaran dan pembayaran hanya melalui kantor pusatnya.
+                        <span class="trust-caveat">Siapa pun yang mengaku sebagai cabang, perwakilan, atau
+                        koordinator travel ini tidak terdaftar di Kanwil Kemenhaj NTB.</span>
+                        Pastikan lebih dulu ke kantor pusat sebelum menyerahkan uang.
+                    </div>
+                @endforelse
+            </section>
+
             <section class="profile-section-block">
                 <div class="profile-section-block__head">
                     <h2>Apa yang Membentuk Indeks Ini?</h2>
