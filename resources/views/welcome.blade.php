@@ -75,6 +75,65 @@
             line-height: 1.45;
         }
 
+        /* Kontak darurat */
+        .emergency-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1rem;
+        }
+
+        .emergency-call {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+            min-height: 72px;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+            background: #c62828;
+            color: #fff;
+            text-decoration: none;
+            box-shadow: 0 4px 14px rgba(198, 40, 40, 0.22);
+            transition: all 0.3s ease;
+        }
+
+        .emergency-call:hover,
+        .emergency-call:focus {
+            background: #a81f1f;
+            color: #fff;
+            transform: translateY(-3px);
+        }
+
+        .emergency-call--wa {
+            background: #1f8a4c;
+            box-shadow: 0 4px 14px rgba(31, 138, 76, 0.22);
+        }
+
+        .emergency-call--wa:hover,
+        .emergency-call--wa:focus {
+            background: #17703d;
+        }
+
+        .emergency-call i {
+            font-size: 1.7rem;
+            flex-shrink: 0;
+        }
+
+        .emergency-call__num {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .emergency-call__label {
+            font-size: 0.8rem;
+            opacity: 0.92;
+        }
+
+        .kontak-instansi__intro {
+            margin: 2.5rem 0 1.25rem;
+            font-weight: 600;
+        }
+
         /* Stats Section Styles */
         .stats-section {
             padding: 60px 0;
@@ -748,6 +807,7 @@
                     <li><a href="{{ route('travel.public') }}">Daftar Travel</a></li>
                     <li><a href="#calendar-section">Jadwal Keberangkatan</a></li>
                     <li><a href="#informasi">Informasi</a></li>
+                    <li><a href="#kontak-darurat">Kontak Darurat</a></li>
                     <li><a href="#contact">Pengaduan</a></li>
                 </ul>
                 <i class="mobile-nav-toggle d-xl-none bi bi-list"></i>
@@ -1228,6 +1288,69 @@
             </div>
         </section>
         <!-- /Details Section -->
+
+        <!-- Kontak Darurat Section -->
+        <section id="kontak-darurat" class="kontak-darurat section light-background">
+            <!-- Section Title -->
+            <div class="container section-title" data-aos="fade-up">
+                <h2>Kontak Darurat</h2>
+                <div>
+                    <span>Kontak</span>
+                    <span class="description-title">Darurat</span>
+                </div>
+            </div>
+            <!-- End Section Title -->
+
+            @php
+                // TODO: ganti nomor placeholder dengan nomor resmi sebelum rilis.
+                // Nomor instansi jarang berubah, jadi masih hardcode di sini. Pindahkan ke
+                // tabel hanya kalau Kanwil perlu mengubahnya sendiri tanpa deploy.
+                $panggilanDarurat = [
+                    ['label' => 'Polisi', 'nomor' => '110', 'href' => 'tel:110', 'icon' => 'bi-shield-exclamation'],
+                    ['label' => 'Ambulans dan Gawat Darurat', 'nomor' => '119', 'href' => 'tel:119', 'icon' => 'bi-heart-pulse'],
+                    ['label' => 'Piket Kanwil Kemenag NTB', 'nomor' => '+62 370 000000', 'href' => 'tel:+62370000000', 'icon' => 'bi-telephone-inbound'],
+                    ['label' => 'WhatsApp Piket Kanwil', 'nomor' => 'Chat WhatsApp', 'href' => 'https://wa.me/62370000000', 'wa' => true, 'icon' => 'bi-whatsapp'],
+                ];
+
+                $kontakInstansi = [
+                    ['nama' => 'Kantor Imigrasi Mataram', 'ket' => 'Paspor, visa, dan dokumen keimigrasian jamaah.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-passport'],
+                    ['nama' => 'Bea Cukai Mataram', 'ket' => 'Barang bawaan, kepabeanan, dan barang tertahan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-box-seam'],
+                    ['nama' => 'Dinas Kesehatan Provinsi NTB', 'ket' => 'Vaksinasi meningitis, ICV, dan rujukan kesehatan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-hospital'],
+                    ['nama' => 'Kanwil Kemenag NTB, Bidang PHU', 'ket' => 'Perizinan travel, pembatalan, dan tindak lanjut pengaduan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-building'],
+                ];
+            @endphp
+
+            <div class="container" data-aos="fade-up" data-aos-delay="100">
+                <div class="emergency-strip">
+                    @foreach ($panggilanDarurat as $darurat)
+                        <a class="emergency-call @isset($darurat['wa']) emergency-call--wa @endisset"
+                            href="{{ $darurat['href'] }}">
+                            <i class="bi {{ $darurat['icon'] }}" aria-hidden="true"></i>
+                            <span>
+                                <span class="emergency-call__num d-block">{{ $darurat['nomor'] }}</span>
+                                <span class="emergency-call__label">{{ $darurat['label'] }}</span>
+                            </span>
+                        </a>
+                    @endforeach
+                </div>
+
+                <p class="kontak-instansi__intro">Instansi terkait layanan haji dan umrah</p>
+
+                <div class="row g-3">
+                    @foreach ($kontakInstansi as $instansi)
+                        <div class="col-md-6 col-lg-3">
+                            <a href="tel:{{ $instansi['tel'] }}" class="quick-action-card">
+                                <i class="bi {{ $instansi['icon'] }} quick-action-card__icon" aria-hidden="true"></i>
+                                <h3 class="quick-action-card__title">{{ $instansi['nama'] }}</h3>
+                                <p class="quick-action-card__desc">{{ $instansi['ket'] }}</p>
+                                <span class="quick-action-card__title">{{ $instansi['nomor'] }}</span>
+                            </a>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </section>
+        <!-- /Kontak Darurat Section -->
 
         <!-- Contact Section -->
         <section id="contact" class="contact section">
