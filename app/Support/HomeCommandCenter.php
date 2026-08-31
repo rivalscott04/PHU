@@ -135,7 +135,7 @@ final class HomeCommandCenter
                 'label' => $cabang ? 'Menunggu peninjauan Kabupaten/Kota' : 'Registrasi menunggu verifikasi Kanwil',
                 'done' => false,
                 'hint' => $cabang
-                    ? 'Petugas Kemenag ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda.'
+                    ? 'Petugas Kemenhaj ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda.'
                     : 'Tim Kanwil sedang memeriksa data dan dokumen Anda.',
                 'tone' => 'warning',
             ];

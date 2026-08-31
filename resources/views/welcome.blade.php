@@ -1308,7 +1308,7 @@
                 $panggilanDarurat = [
                     ['label' => 'Polisi', 'nomor' => '110', 'href' => 'tel:110', 'icon' => 'bi-shield-exclamation'],
                     ['label' => 'Ambulans dan Gawat Darurat', 'nomor' => '119', 'href' => 'tel:119', 'icon' => 'bi-heart-pulse'],
-                    ['label' => 'Piket Kanwil Kemenag NTB', 'nomor' => '+62 370 000000', 'href' => 'tel:+62370000000', 'icon' => 'bi-telephone-inbound'],
+                    ['label' => 'Piket Kanwil Kemenhaj NTB', 'nomor' => '+62 370 000000', 'href' => 'tel:+62370000000', 'icon' => 'bi-telephone-inbound'],
                     ['label' => 'WhatsApp Piket Kanwil', 'nomor' => 'Chat WhatsApp', 'href' => 'https://wa.me/62370000000', 'wa' => true, 'icon' => 'bi-whatsapp'],
                 ];
 
@@ -1316,7 +1316,7 @@
                     ['nama' => 'Kantor Imigrasi Mataram', 'ket' => 'Paspor, visa, dan dokumen keimigrasian jamaah.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-passport'],
                     ['nama' => 'Bea Cukai Mataram', 'ket' => 'Barang bawaan, kepabeanan, dan barang tertahan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-box-seam'],
                     ['nama' => 'Dinas Kesehatan Provinsi NTB', 'ket' => 'Vaksinasi meningitis, ICV, dan rujukan kesehatan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-hospital'],
-                    ['nama' => 'Kanwil Kemenag NTB, Bidang PHU', 'ket' => 'Perizinan travel, pembatalan, dan tindak lanjut pengaduan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-building'],
+                    ['nama' => 'Kanwil Kemenhaj NTB, Bidang PHU', 'ket' => 'Perizinan travel, pembatalan, dan tindak lanjut pengaduan.', 'nomor' => '+62 370 000000', 'tel' => '+62370000000', 'icon' => 'bi-building'],
                 ];
             @endphp
 

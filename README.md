@@ -177,7 +177,7 @@ Tugas utama:
 Travel pilih "Kantor Pusat" di form registrasi, isi data izin dan akreditasi, unggah SK izin → status menunggu verifikasi → Kanwil tinjau dan setujui atau tolak → jika disetujui, akun aktif dan fitur operasional terbuka.
 
 **Registrasi travel cabang**
-Cabang pilih "Kantor Cabang" dan menunjuk travel pusat yang izinnya sudah disetujui, lalu unggah OSS cabang, akta notaris, KTP kepala cabang, dan SK domisili usaha kelurahan (SK pusat terbaca otomatis, tidak perlu diunggah ulang) → Kantor Kemenag kabupaten/kota di wilayah cabang meninjau dan mengunggah rekomendasi atau berita acara peninjauan → status berpindah ke menunggu Kanwil → Kanwil beri keputusan akhir. Detailnya di [docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md).
+Cabang pilih "Kantor Cabang" dan menunjuk travel pusat yang izinnya sudah disetujui, lalu unggah OSS cabang, akta notaris, KTP kepala cabang, dan SK domisili usaha kelurahan (SK pusat terbaca otomatis, tidak perlu diunggah ulang) → Kantor Kemenhaj kabupaten/kota di wilayah cabang meninjau dan mengunggah rekomendasi atau berita acara peninjauan → status berpindah ke menunggu Kanwil → Kanwil beri keputusan akhir. Detailnya di [docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md).
 
 **Keberangkatan jamaah**
 Travel input jamaah → buat BA Pemberangkatan → ajukan ke Kanwil → admin atau kabupaten tinjau dan setujui → jadwal muncul di kalender → dokumen bisa dicetak dengan tanda tangan elektronik.

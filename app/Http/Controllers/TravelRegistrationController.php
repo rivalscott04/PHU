@@ -230,7 +230,7 @@ class TravelRegistrationController extends Controller
         return redirect()
             ->route('travel.registration.success')
             ->with('jenis_pendaftaran', 'cabang')
-            ->with('success', 'Pendaftaran cabang berhasil dikirim. Kantor Kemenag Kabupaten/Kota akan melakukan peninjauan terlebih dahulu.');
+            ->with('success', 'Pendaftaran cabang berhasil dikirim. Kantor Kemenhaj Kabupaten/Kota akan melakukan peninjauan terlebih dahulu.');
     }
 
     private function releaseRejectedRegistrationCredentials(Request $request): void

@@ -3,11 +3,11 @@
     $isCabang = ($jenis ?? 'pusat') === 'cabang';
 
     $ringkas = $isCabang
-        ? 'Menunggu peninjauan Kantor Kemenag Kabupaten/Kota.'
+        ? 'Menunggu peninjauan Kantor Kemenhaj Kabupaten/Kota.'
         : 'Menunggu verifikasi Admin Kanwil.';
 
     $penjelasan = $isCabang
-        ? 'menunggu peninjauan Kantor Kemenag Kabupaten/Kota'
+        ? 'menunggu peninjauan Kantor Kemenhaj Kabupaten/Kota'
         : 'menunggu verifikasi Admin Kanwil';
 
     $langkah = $isCabang

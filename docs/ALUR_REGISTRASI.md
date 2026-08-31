@@ -30,7 +30,7 @@ Cabang mendaftar  ->  Menunggu Verifikasi  ->  Kabko unggah rekomendasi
                                                                 \-> Kanwil tolak   ->  Ditolak
 ```
 
-Yang berhak meninjau adalah kantor Kemenag di kabupaten/kota yang dipilih cabang,
+Yang berhak meninjau adalah kantor Kemenhaj di kabupaten/kota yang dipilih cabang,
 bukan kabupaten pusatnya. Kanwil tetap bisa menyetujui langsung tanpa menunggu
 rekomendasi, misalnya untuk kasus mendesak, dan dialog konfirmasinya menyebut
 eksplisit bahwa tahap peninjauan sedang dilewati.

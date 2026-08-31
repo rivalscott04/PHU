@@ -86,7 +86,7 @@
                 </div>
                 <div class="modal-body">
                     <p class="text-muted small">
-                        Data ini muncul di blok tanda tangan sertifikat PPIU. Kop surat memakai branding Kementerian Haji dan Umroh (bukan Kemenag).
+                        Data ini muncul di blok tanda tangan sertifikat PPIU. Kop surat memakai branding Kementerian Haji dan Umroh.
                     </p>
                     <form id="settingsForm">
                         @csrf

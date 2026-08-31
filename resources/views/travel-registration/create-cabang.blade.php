@@ -110,7 +110,7 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-map',
                                             'title' => 'Data Cabang',
-                                            'description' => 'Kabupaten/kota menentukan kantor Kemenag mana yang meninjau cabang Anda.',
+                                            'description' => 'Kabupaten/kota menentukan kantor Kemenhaj mana yang meninjau cabang Anda.',
                                         ])
 
                                         <div class="row">
