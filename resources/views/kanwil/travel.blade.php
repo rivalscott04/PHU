@@ -111,7 +111,7 @@
                                     <th>Jml Akre</th>
                                     <th>Tanggal Akredi</th>
                                     <th>Lembaga Akred</th>
-                                    <th>-</th>
+                                    <th>Masa Berlaku</th>
                                 </tr>
                             </thead>
                             <tbody id="travelTableBody">

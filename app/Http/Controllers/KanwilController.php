@@ -233,6 +233,7 @@ class KanwilController extends Controller
                 'nilai_akreditasi',
                 'tanggal_akreditasi',
                 'lembaga_akreditasi',
+                'license_expiry',
                 'Pimpinan',
                 'alamat_kantor_lama',
                 'alamat_kantor_baru',

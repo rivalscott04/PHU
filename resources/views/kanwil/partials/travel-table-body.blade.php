@@ -7,7 +7,7 @@
         <td>{{ $item->nilai_akreditasi }}</td>
         <td>{{ $item->tanggal_akreditasi ? date('d/m/Y', strtotime($item->tanggal_akreditasi)) : '-' }}</td>
         <td>{{ $item->lembaga_akreditasi }}</td>
-        <td>-</td>
+        <td>{{ $item->license_expiry ? $item->license_expiry->format('d/m/Y') : '-' }}</td>
         <td>{{ $item->Pimpinan }}</td>
         <td class="text-start">{{ $item->alamat_kantor_lama }}</td>
         <td class="text-start">{{ $item->alamat_kantor_baru }}</td>
