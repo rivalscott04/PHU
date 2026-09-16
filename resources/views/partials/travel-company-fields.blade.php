@@ -80,11 +80,17 @@
         </div>
 
         <div class="{{ $colClass }} {{ $fieldSpacing }}">
-            <label for="license_expiry" class="form-label">Terakhir akreditasi</label>
+            <label for="license_expiry" class="form-label">
+                Terakhir akreditasi
+                <span class="text-muted fw-normal">(opsional)</span>
+            </label>
             <input type="date" class="{{ $inputClass }} @error('license_expiry') is-invalid @enderror"
                 id="license_expiry" name="license_expiry" value="{{ $old('license_expiry') }}">
             @error('license_expiry')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            <div class="form-text">Tidak wajib diisi.</div>
+            <div class="alert alert-light border small py-2 mb-0 mt-2">
+                <i class="bx bx-info-circle text-primary me-1"></i>
+                Diisi bagi yang sudah akreditasi.
+            </div>
         </div>
     @endif
 

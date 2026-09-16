@@ -147,6 +147,10 @@
                                                 <input type="date" class="form-control form-control-lg @error('tanggal') is-invalid @enderror"
                                                     id="tanggal" name="tanggal" value="{{ old('tanggal') }}" required>
                                                 @error('tanggal')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                <div class="alert alert-light border small py-2 mb-0 mt-2">
+                                                    <i class="bx bx-info-circle text-primary me-1"></i>
+                                                    Tanggal dibuka sesuai akta notaris.
+                                                </div>
                                             </div>
 
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
