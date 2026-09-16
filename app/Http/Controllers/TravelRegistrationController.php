@@ -42,9 +42,6 @@ class TravelRegistrationController extends Controller
             // sendiri sudah diisi sebagai data pada langkah akreditasi.
             'dokumen_sk' => "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
             'dokumen_akreditasi' => "nullable|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
-            // Wajib untuk pendaftar baru: masa berlaku izin adalah yang membedakan
-            // travel resmi dari travel bodong, dan ditampilkan ke publik.
-            'license_expiry' => 'required|date|after:today',
         ]);
 
         $validated = ValidationHelper::validate($request, $rules, array_merge(
@@ -52,8 +49,6 @@ class TravelRegistrationController extends Controller
             ValidationHelper::fileMaxMb('dokumen_akreditasi', 1.5),
             [
                 'kab_kota.in' => 'Pilih kabupaten/kota yang ada di NTB.',
-                'license_expiry.required' => 'Isi masa berlaku izin operasional Anda.',
-                'license_expiry.after' => 'Masa berlaku izin harus melewati hari ini. Perpanjang izin sebelum mendaftar.',
             ]
         ));
 

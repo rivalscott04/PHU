@@ -80,16 +80,11 @@
         </div>
 
         <div class="{{ $colClass }} {{ $fieldSpacing }}">
-            <label for="license_expiry" class="form-label">
-                Masa Berlaku Izin @if($requireLicenseExpiry ?? false)@include('partials.required-star')@endif
-            </label>
+            <label for="license_expiry" class="form-label">Terakhir akreditasi</label>
             <input type="date" class="{{ $inputClass }} @error('license_expiry') is-invalid @enderror"
-                id="license_expiry" name="license_expiry" value="{{ $old('license_expiry') }}"
-                @if($requireLicenseExpiry ?? false) required @endif>
+                id="license_expiry" name="license_expiry" value="{{ $old('license_expiry') }}">
             @error('license_expiry')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            <div class="form-text">
-                Tanggal izin operasional berakhir. Ditampilkan di direktori publik agar calon jamaah bisa memastikan izin masih berlaku.
-            </div>
+            <div class="form-text">Tidak wajib diisi.</div>
         </div>
     @endif
 
