@@ -21,6 +21,7 @@ final class SchemaTables
         'pengawasan',
         'pengawasan_temuan',
         'pengawasan_followups',
+        'pengawasan_antrian',
         'travel_cabang',
         'jamaah_haji_khusus',
         'audit_logs',

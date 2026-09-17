@@ -43,7 +43,7 @@ class LoginController extends Controller
         $user = User::findByEmailOrPhone($identifier);
 
         if ($user && Hash::check($password, $user->password)) {
-            // Pendaftar cabang punya akun sendiri lewat cabang_id, gerbangnya sama.
+            $user->loadMissing(['travel', 'cabang']);
             $registration = $user->travel ?? $user->cabang;
 
             if ($user->role === UserRole::User->value && $registration) {

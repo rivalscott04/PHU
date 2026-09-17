@@ -12,7 +12,7 @@ class EagerLoadAuthRelations
     {
         $user = $request->user();
 
-        if ($user && ($user->travel_id || $user->cabang_id)) {
+        if ($user) {
             $user->loadMissing(['travel', 'cabang']);
         }
 

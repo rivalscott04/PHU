@@ -17,6 +17,7 @@ use App\Models\Pengaduan;
 use App\Models\RiskScore;
 use App\Models\TravelCompany;
 use App\Support\DashboardFilter;
+use App\Support\SchemaTables;
 use App\Support\TravelMetrics;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -216,11 +217,14 @@ class DashboardRepository
             }
         }
 
-        $waitingFollowup = InspectionFinding::query()
-            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
-            ->whereIn('pengawasan.travel_id', $travelIds)
-            ->whereIn('pengawasan_temuan.status', ['OPEN', 'WAITING_RESPONSE', 'REVISION_REQUIRED'])
-            ->count();
+        $waitingFollowup = 0;
+        if (SchemaTables::has('pengawasan_temuan') && SchemaTables::has('pengawasan')) {
+            $waitingFollowup = InspectionFinding::query()
+                ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+                ->whereIn('pengawasan.travel_id', $travelIds)
+                ->whereIn('pengawasan_temuan.status', ['OPEN', 'WAITING_RESPONSE', 'REVISION_REQUIRED'])
+                ->count();
+        }
 
         if ($waitingFollowup > 0) {
             $warnings[] = [
@@ -266,16 +270,20 @@ class DashboardRepository
         $travelIds = $this->travelIdsFor($filter);
         $closedStatuses = [FindingStatus::Closed->value, FindingStatus::Verified->value];
 
-        $temuanTotal = InspectionFinding::query()
-            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
-            ->whereIn('pengawasan.travel_id', $travelIds)
-            ->count();
+        $temuanTotal = 0;
+        $temuanSelesai = 0;
+        if (SchemaTables::has('pengawasan_temuan') && SchemaTables::has('pengawasan')) {
+            $temuanTotal = InspectionFinding::query()
+                ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+                ->whereIn('pengawasan.travel_id', $travelIds)
+                ->count();
 
-        $temuanSelesai = InspectionFinding::query()
-            ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
-            ->whereIn('pengawasan.travel_id', $travelIds)
-            ->whereIn('pengawasan_temuan.status', $closedStatuses)
-            ->count();
+            $temuanSelesai = InspectionFinding::query()
+                ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
+                ->whereIn('pengawasan.travel_id', $travelIds)
+                ->whereIn('pengawasan_temuan.status', $closedStatuses)
+                ->count();
+        }
 
         $pengaduanTotal = 0;
         $pengaduanSelesai = 0;
@@ -392,6 +400,7 @@ class DashboardRepository
                 ];
             });
 
+        if (SchemaTables::has('pengawasan_temuan') && SchemaTables::has('pengawasan')) {
         InspectionFinding::query()
             ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
@@ -419,6 +428,7 @@ class DashboardRepository
                     'category' => 'temuan',
                 ];
             });
+        }
 
         if (Schema::hasTable('pengaduan')) {
             Pengaduan::query()
@@ -541,7 +551,9 @@ class DashboardRepository
             ->pluck('total', 'kabupaten')
             ->map(fn ($count) => (int) $count);
 
-        $temuanAktif = InspectionFinding::query()
+        $temuanAktif = collect();
+        if (SchemaTables::has('pengawasan_temuan') && SchemaTables::has('pengawasan')) {
+            $temuanAktif = InspectionFinding::query()
             ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
             ->when($filter->hasKabupatenRestriction(), function ($q) use ($filter) {
@@ -554,6 +566,7 @@ class DashboardRepository
             ->groupBy('travels.kab_kota')
             ->pluck('total', 'kabupaten')
             ->map(fn ($count) => (int) $count);
+        }
 
         $pengaduan = collect();
         if (Schema::hasTable('pengaduan')) {
@@ -676,6 +689,10 @@ class DashboardRepository
 
     public function getActiveFindings(int $limit = 10, ?string $kabupaten = null): Collection
     {
+        if (! SchemaTables::has('pengawasan_temuan')) {
+            return new Collection();
+        }
+
         return InspectionFinding::query()
             ->with(['inspection.travel'])
             ->whereNotIn('status', ['CLOSED', 'VERIFIED'])
@@ -729,7 +746,9 @@ class DashboardRepository
             ->groupBy('travels.kab_kota')
             ->pluck('total', 'kabupaten');
 
-        $temuanCounts = InspectionFinding::query()
+        $temuanCounts = collect();
+        if (SchemaTables::has('pengawasan_temuan') && SchemaTables::has('pengawasan')) {
+            $temuanCounts = InspectionFinding::query()
             ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
             ->join('travels', 'travels.id', '=', 'pengawasan.travel_id')
             ->when($filter->jenisTravel, fn ($q) => $q->where('travels.Status', $filter->jenisTravel))
@@ -738,6 +757,7 @@ class DashboardRepository
             ->selectRaw('travels.kab_kota as kabupaten, COUNT(*) as total')
             ->groupBy('travels.kab_kota')
             ->pluck('total', 'kabupaten');
+        }
 
         $riskAverages = RiskScore::query()
             ->join('travels', 'travels.id', '=', 'risk_scores.travel_id')
@@ -958,6 +978,15 @@ class DashboardRepository
     /** @param \Illuminate\Support\Collection<int, int> $travelIds */
     private function getTemuanSeverityChart($travelIds): array
     {
+        $empty = [
+            'labels' => array_map(fn (FindingSeverity $case) => $case->label(), FindingSeverity::cases()),
+            'series' => array_fill(0, count(FindingSeverity::cases()), 0),
+        ];
+
+        if (! SchemaTables::has('pengawasan_temuan') || ! SchemaTables::has('pengawasan')) {
+            return $empty;
+        }
+
         $rows = InspectionFinding::query()
             ->join('pengawasan', 'pengawasan.id', '=', 'pengawasan_temuan.inspection_id')
             ->whereIn('pengawasan.travel_id', $travelIds)
@@ -966,7 +995,7 @@ class DashboardRepository
             ->pluck('total', 'severity');
 
         return [
-            'labels' => array_map(fn (FindingSeverity $case) => $case->label(), FindingSeverity::cases()),
+            'labels' => $empty['labels'],
             'series' => array_map(
                 fn (FindingSeverity $case) => (int) ($rows[$case->value] ?? 0),
                 FindingSeverity::cases()

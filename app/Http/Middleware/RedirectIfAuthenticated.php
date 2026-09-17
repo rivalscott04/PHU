@@ -20,11 +20,13 @@ class RedirectIfAuthenticated
                 // Redirect berdasarkan role
                 switch ($user->role) {
                     case 'admin':
-                        return redirect()->route('home');
                     case 'kabupaten':
-                        return redirect()->route('home');
                     case 'user':
                         return redirect()->route('home');
+                    case 'pengawas':
+                        return redirect()->route('v2.antrian.index');
+                    case 'pimpinan':
+                        return redirect()->route('v2.dashboard');
                     default:
                         return redirect('/');
                 }

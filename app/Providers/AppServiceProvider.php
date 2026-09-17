@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
 
         Carbon::setLocale('id');
 
-        if (! app()->isProduction() && ! filter_var(env('E2E_TESTING', false), FILTER_VALIDATE_BOOL)) {
+        if (! app()->isProduction() && ! config('app.e2e_testing')) {
             Model::preventLazyLoading();
         }
 
@@ -45,7 +45,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         RateLimiter::for('auth', function (Request $request) {
-            if (app()->environment('local') && filter_var(env('E2E_TESTING', false), FILTER_VALIDATE_BOOL)) {
+            if (app()->environment('local') && config('app.e2e_testing')) {
                 return Limit::none();
             }
 

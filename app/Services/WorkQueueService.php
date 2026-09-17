@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Notifications\V2\PengaduanReceivedNotification;
 use App\Repositories\WorkQueueRepository;
 use App\Support\KabupatenScopeFilter;
+use App\Support\SchemaTables;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Schema;
 
@@ -224,6 +225,16 @@ class WorkQueueService
     /** @return array<string, mixed> */
     public function getSummary(array $filters = []): array
     {
+        if (! SchemaTables::has('pengawasan_antrian')) {
+            return [
+                'total_open' => 0,
+                'pengaduan' => 0,
+                'risiko_tinggi' => 0,
+                'deadline_temuan' => 0,
+                'verifikasi_followup' => 0,
+            ];
+        }
+
         $byType = $this->repository->countOpenByType($filters);
 
         return [
@@ -276,6 +287,10 @@ class WorkQueueService
 
     public function paginate(User $user, array $filters = [], int $perPage = 15): LengthAwarePaginator
     {
+        if (! SchemaTables::has('pengawasan_antrian')) {
+            return new \Illuminate\Pagination\LengthAwarePaginator([], 0, $perPage);
+        }
+
         if ($user->role === 'pengawas') {
             $filters = array_merge($filters, KabupatenScopeFilter::pengawasFilters($user));
         }

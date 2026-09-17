@@ -17,8 +17,15 @@ class CheckPasswordChanged
      */
     public function handle(Request $request, Closure $next)
     {
-        // Never redirect the password-change or logout endpoints themselves
-        if ($request->routeIs('user.changePassword', 'user.updatePassword', 'logout')) {
+        // Never redirect the password-change, logout, or impersonate endpoints themselves
+        if ($request->routeIs(
+            'user.changePassword',
+            'user.updatePassword',
+            'logout',
+            'impersonate.take',
+            'impersonate.leave',
+            'impersonate.index',
+        )) {
             return $next($request);
         }
 
