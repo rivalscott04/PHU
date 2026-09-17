@@ -2,7 +2,10 @@
 
 Dokumen ini berisi **daftar data yang harus disiapkan masing-masing pihak** sebelum sesi testing live PANTAU.
 
-Cara input ke sistem **tidak** ada di sini, itu akan dijelaskan saat presentasi.
+Untuk **cara mengisi data, langkah verifikasi, dan alur menu sistem**, lihat:
+- [Panduan Travel](../PANDUAN_TRAVEL.md) · [Word](../PANDUAN_TRAVEL.docx)
+- [Panduan Admin Kabupaten/Kota](../PANDUAN_ADMIN_KABUPATEN.md) · [Word](../PANDUAN_ADMIN_KABUPATEN.docx)
+- Cara ulang screenshot: [PANDUAN_SCREENSHOTS.md](../PANDUAN_SCREENSHOTS.md)
 
 ---
 

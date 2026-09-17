@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 
 
 <head>
 
     <meta charset="utf-8" />
-    <title>Login | {{ config('app.name') }}</title>
+    <title>Lupa Password | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="PANTAU, Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
     <meta content="PANTAU" name="author" />
@@ -34,8 +34,8 @@
                             <div class="row">
                                 <div class="col-7">
                                     <div class="text-primary p-4">
-                                        <h5 class="text-primary">Selamat Datang !</h5>
-                                        <p>Masuk untuk melanjutkan.</p>
+                                        <h5 class="text-primary">Lupa Password</h5>
+                                        <p>Buat password baru melalui tautan pemulihan akun.</p>
                                     </div>
                                 </div>
                                 <div class="col-5 align-self-end">
@@ -70,62 +70,41 @@
                                     </div>
                                 @endif
 
-                                <form class="form-horizontal" action="{{ route('login.perform') }}" method="POST">
+                                @if (! config('auth.password_reset_email_enabled'))
+                                    <p>Hubungi petugas Kanwil untuk meminta tautan set password melalui nomor yang terdaftar pada akun Anda.</p>
+                                    @include('partials.kanwil-contact', ['variant' => 'support', 'supportStyle' => 'card'])
+                                    <a href="{{ route('login') }}">Kembali ke halaman masuk</a>
+                                @else
+                                <form class="form-horizontal" action="{{ route('password.email') }}" method="POST">
                                     @csrf
                                     <div class="mb-3">
-                                        <label for="email_or_phone" class="form-label">Email atau Nomor HP</label>
-                                        <input type="text" class="form-control @error('email_or_phone') is-invalid @enderror" 
-                                               id="email_or_phone" name="email_or_phone"
-                                               placeholder="Masukkan email atau nomor HP"
-                                               value="{{ old('email_or_phone') }}">
-                                        @error('email_or_phone')
+                                        <label for="email" class="form-label">Email akun</label>
+                                        <input type="email" class="form-control @error('email') is-invalid @enderror"
+                                               id="email" name="email" placeholder="Masukkan email akun Anda"
+                                               value="{{ old('email') }}" autofocus>
+                                        @error('email')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                         @enderror
-                                        <small class="form-text text-muted">Bisa menggunakan email atau nomor HP untuk login</small>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Password</label>
-                                        <div class="input-group auth-pass-inputgroup">
-                                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password"
-                                                placeholder="Masukkan password" aria-label="Password"
-                                                aria-describedby="password-addon">
-                                            <button class="btn btn-light " type="button" id="password-addon"><i
-                                                    class="mdi mdi-eye-outline"></i></button>
-                                        </div>
-                                        @error('password')
-                                            <div class="invalid-feedback d-block">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="remember-check"
-                                                name="remember">
-                                            <label class="form-check-label" for="remember-check">
-                                                Ingat saya
-                                            </label>
-                                        </div>
-                                        <a href="{{ route('password.request') }}" class="text-muted">
-                                            <i class="mdi mdi-lock-reset me-1"></i> Lupa password?
-                                        </a>
+                                        <small class="form-text text-muted">Tautan hanya dikirim ke email yang terdaftar pada akun, dan berlaku 60 menit.</small>
                                     </div>
 
                                     <div class="mt-3 d-grid">
-                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Log
-                                            In</button>
+                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Kirim Tautan</button>
                                     </div>
 
                                     <div class="mt-4 text-center">
-                                        <p class="text-muted mb-2">Belum terdaftar sebagai travel?</p>
-                                        <a href="{{ route('travel.registration.create') }}" class="btn btn-outline-primary btn-sm w-100">
-                                            <i class="bx bx-building-house me-1"></i> Registrasi Travel (PPIU / PIHK)
+                                        <a href="{{ route('login') }}" class="text-muted">
+                                            <i class="mdi mdi-arrow-left me-1"></i> Kembali ke halaman masuk
                                         </a>
                                     </div>
 
-                                    @include('partials.kanwil-contact', ['variant' => 'support', 'supportStyle' => 'card'])
+                                    <div class="mt-4">
+                                        <p class="text-muted mb-0">Tidak ingat email akun, atau emailnya sudah tidak aktif? Hubungi petugas Kanwil atau Kantor Kemenag Kabupaten/Kota Anda. Petugas dapat menerbitkan tautan dan mengirimkannya ke nomor WhatsApp yang terdaftar pada akun Anda.</p>
+                                    </div>
 
+                                    @include('partials.kanwil-contact', ['variant' => 'support', 'supportStyle' => 'card'])
                                 </form>
+                                @endif
                             </div>
 
                         </div>

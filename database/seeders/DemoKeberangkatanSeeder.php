@@ -31,7 +31,7 @@ class DemoKeberangkatanSeeder extends Seeder
             $travels = TravelCompany::query()->orderBy('id')->limit(4)->get()->keyBy('Penyelenggara');
         }
 
-        $travelUser = User::query()->where('email', 'mataram.travel@phu.com')->first()
+        $travelUser = User::query()->where('email', 'mataram.travel@pantau.kemenhaj.id')->first()
             ?? User::query()->where('role', 'user')->whereNotNull('travel_id')->first();
 
         $jamaahNames = [

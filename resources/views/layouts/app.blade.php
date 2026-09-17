@@ -76,6 +76,55 @@
                         {{ session('error') }}
                     </div>
                 @endif
+                @if (session('reset_link'))
+                    @php($resetLink = session('reset_link'))
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="mb-1">Tautan set password untuk {{ $resetLink['nama'] }}</h6>
+                        <p class="mb-2">Kirim tautan ini hanya ke pemilik akun, yaitu {{ $resetLink['email'] }}
+                            @if ($resetLink['nomor_hp'])
+                                atau nomor terdaftar {{ $resetLink['nomor_hp'] }}
+                            @endif
+                            . Tautan berlaku 60 menit, sekali pakai, dan tidak dapat dilihat lagi setelah halaman ini ditutup.
+                        </p>
+                        <div class="input-group mb-2">
+                            <input type="text" class="form-control" id="reset-link-value" value="{{ $resetLink['link'] }}" readonly
+                                   aria-label="Tautan set password">
+                            <button class="btn btn-primary" type="button" id="reset-link-copy">
+                                <i class="bx bx-copy me-1"></i> Salin tautan
+                            </button>
+                        </div>
+                        @if ($resetLink['wa_url'])
+                            <a href="{{ $resetLink['wa_url'] }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm">
+                                <i class="bx bxl-whatsapp me-1"></i> Kirim ke WhatsApp {{ $resetLink['nomor_hp'] }}
+                            </a>
+                        @else
+                            <span class="text-muted">Akun ini belum punya nomor HP terdaftar, jadi tautan harus dikirim lewat email.</span>
+                        @endif
+                    </div>
+                    <script>
+                        document.getElementById('reset-link-copy').addEventListener('click', function () {
+                            var field = document.getElementById('reset-link-value');
+                            var button = this;
+                            field.select();
+                            field.setSelectionRange(0, field.value.length);
+
+                            var done = function () {
+                                button.innerHTML = '<i class="bx bx-check me-1"></i> Tautan tersalin';
+                            };
+                            var failed = function () {
+                                button.innerHTML = '<i class="bx bx-error me-1"></i> Gagal menyalin, salin manual';
+                            };
+
+                            if (navigator.clipboard) {
+                                navigator.clipboard.writeText(field.value).then(done, failed);
+                            } else if (document.execCommand('copy')) {
+                                done();
+                            } else {
+                                failed();
+                            }
+                        });
+                    </script>
+                @endif
                 @if ($errors->any())
                     <div class="alert alert-danger">
                         <ul>

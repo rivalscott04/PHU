@@ -42,12 +42,21 @@
                 <a href="{{ route('users.edit', $managedUser->id) }}" class="btn btn-warning btn-sm" title="Edit">
                     <i class="bx bx-edit"></i>
                 </a>
+                <button type="button" class="btn btn-info btn-sm"
+                    onclick="document.getElementById('reset-link-form-{{ $managedUser->id }}').submit()"
+                    title="Terbitkan tautan set password">
+                    <i class="bx bx-key"></i>
+                </button>
                 <button type="button" class="btn btn-danger btn-sm"
                     onclick="confirmDelete({{ $managedUser->id }}, '{{ $managedUser->nama }}')"
                     title="Hapus">
                     <i class="bx bx-trash"></i>
                 </button>
             </div>
+            <form id="reset-link-form-{{ $managedUser->id }}"
+                action="{{ route('users.reset-link', $managedUser->id) }}" method="POST" style="display:none;">
+                @csrf
+            </form>
             <form id="delete-form-{{ $managedUser->id }}"
                 action="{{ route('users.destroy', $managedUser->id) }}" method="POST" style="display:none;">
                 @csrf

@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\Importable;
-use Illuminate\Support\Facades\Hash;
+use App\Support\AccountInvite;
 use Illuminate\Support\Facades\Log;
 
 class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
@@ -40,6 +40,7 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
         try {
             // Convert keys to lowercase
             $row = array_change_key_case($row, CASE_LOWER);
+            unset($row['password']); // Ignore credentials from legacy templates before logging.
 
             // Log setiap row sebelum diproses
             Log::debug('UserCabangImport: Processing row', $row);
@@ -57,14 +58,10 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
                 $row['email'] = $normalizedEmail;
             }
 
-            // Convert password to string (handle Excel number formatting)
-            if (!empty($row['password'])) {
-                $row['password'] = strval($row['password']);
-            }
 
             // Validate required fields
-            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password']) || empty($row['travel_company'])) {
-                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Semua field wajib diisi (nama, email, nomor_hp, password, travel_company)";
+            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['travel_company'])) {
+                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Semua field wajib diisi (nama, email, nomor_hp, travel_company)";
                 $this->errors[] = $msg;
                 Log::warning("UserCabangImport warning: $msg", $row);
                 return null;
@@ -108,7 +105,7 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
                 'nama' => $row['nama'],
                 'email' => $row['email'],
                 'nomor_hp' => $row['nomor_hp'],
-                'password' => Hash::make($row['password']),
+                'password' => AccountInvite::placeholderPassword(),
                 'travel_id' => null, // No pusat reference
                 'cabang_id' => $cabang->id_cabang, // Use cabang ID
                 'role' => 'user',
@@ -120,7 +117,7 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
             $this->successCount++;
             $this->existingEmails[$row['email']] = true;
             $this->existingPhones[$row['nomor_hp']] = true;
-            Log::info("UserCabangImport: User berhasil dibuat (Row {$this->successCount})", $userData);
+            Log::info("UserCabangImport: User berhasil dibuat (Row {$this->successCount})", array_diff_key($userData, ['password' => true]));
 
             return new User($userData);
         } catch (\Exception $e) {
@@ -186,6 +183,7 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
     {
         // Make a working copy
         $normalized = $row;
+        unset($normalized['password']);
 
         // --- Normalize email: trim, lowercase, replace spaces with dots, remove weird chars ---
         if (!empty($normalized['email'])) {
@@ -225,10 +223,6 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
             $normalized['nomor_hp'] = substr($digits, 0, ValidationHelper::NOMOR_HP_MAX);
         }
 
-        // --- Normalize password: convert to string to handle Excel number formatting ---
-        if (!empty($normalized['password'])) {
-            $normalized['password'] = strval($normalized['password']);
-        }
 
         return $normalized;
     }
@@ -239,7 +233,6 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
             '*.nama' => 'required|string|max:255',
             '*.email' => 'required|email|max:255',
             '*.nomor_hp' => ValidationHelper::nomorHpRules(),
-            '*.password' => 'required|min:6',
             '*.travel_company' => 'required|string|max:255',
         ];
     }
@@ -259,8 +252,6 @@ class UserCabangImport implements ToModel, WithHeadingRow, WithValidation
             '*.nomor_hp.string' => 'Nomor HP harus berupa teks',
             '*.nomor_hp.max' => "Nomor HP maksimal {$hpMax} karakter",
             '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
-            '*.password.required' => 'Password wajib diisi',
-            '*.password.min' => 'Password minimal 6 karakter',
             '*.travel_company.required' => 'Travel company wajib diisi',
             '*.travel_company.string' => 'Travel company harus berupa teks',
             '*.travel_company.max' => 'Travel company maksimal 255 karakter',

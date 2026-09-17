@@ -40,12 +40,8 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" required>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <label class="form-label">Password</label>
+                                <p class="form-control-plaintext text-muted mb-0">Dibuat sendiri oleh pemilik akun lewat tautan set password yang muncul setelah akun tersimpan.</p>
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="travel_id" class="form-label">Travel Company <span class="text-danger">*</span></label>

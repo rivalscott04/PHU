@@ -52,7 +52,7 @@ php artisan storage:link
 # (Opsional) Data contoh: hanya 4 akun inti + master checklist V2
 php artisan db:seed
 
-# (Opsional, development saja) Satu travel contoh + akun mataram.travel@phu.com
+# (Opsional, development saja) Satu travel contoh + akun mataram.travel@pantau.kemenhaj.id
 php artisan db:seed --class=DevTravelSeeder
 
 # Jalankan server lokal
@@ -65,13 +65,13 @@ Akses aplikasi: `http://localhost:8000`
 
 | Role | Email | Password |
 |------|-------|----------|
-| Admin Kanwil | `admin@phu.com` | `admin123` |
-| Pimpinan Kanwil | `pimpinan@phu.local` | `password123` |
-| Pengawas Kota Mataram | `pengawas.mataram@phu.local` | `password123` |
-| Admin kabupaten Mataram | `kota.mataram@phu.com` | `password123` |
+| Admin Kanwil | `admin@pantau.kemenhaj.id` | `password123` |
+| Pimpinan Kanwil | `pimpinan@pantau.kemenhaj.id` | `password123` |
+| Pengawas Kota Mataram | `pengawas.mataram@pantau.kemenhaj.id` | `password123` |
+| Admin kabupaten Mataram | `kota.mataram@pantau.kemenhaj.id` | `password123` |
 
 > **Travel tidak di-seed** di `DatabaseSeeder`. Data travel production dari registrasi mandiri.  
-> Untuk uji lokal / Playwright: `php artisan db:seed --class=DevTravelSeeder` → `mataram.travel@phu.com` / `password123`  
+> Untuk uji lokal / Playwright: `php artisan db:seed --class=DevTravelSeeder` → `mataram.travel@pantau.kemenhaj.id` / `password123`  
 > User travel/kabupaten **wajib ganti password** sebelum mengakses modul V2 (middleware `password.changed`).  
 > Akun **Pengawas** sudah `is_password_changed=true`, langsung bisa akses modul V2 di wilayah kabupatennya.
 
@@ -130,7 +130,7 @@ Lalu jalankan worker (lihat [bagian 6](#6-queue-worker-opsional)).
 ```dotenv
 MAIL_MAILER=log        # development: tulis ke log
 # MAIL_MAILER=smtp     # production: SMTP sesungguhnya
-MAIL_FROM_ADDRESS=noreply@phu.local
+MAIL_FROM_ADDRESS=noreply@pantau.kemenhaj.id
 MAIL_FROM_NAME="${APP_NAME}"
 ```
 
@@ -242,11 +242,11 @@ Akun contoh (password sudah di-set `is_password_changed = true`):
 
 | Role | Email | Password |
 |------|-------|----------|
-| Super Admin | `admin@phu.com` | `admin123` |
-| Pimpinan | `pimpinan@phu.local` | `password123` |
-| Pengawas | `pengawas.lombokbarat@phu.local` | `password123` |
-| Kabupaten | `kabupaten.lombokbarat@phu.com` | `password123` |
-| User Travel | `lombokbarat.travel@phu.com` | `password123` |
+| Super Admin | `admin@pantau.kemenhaj.id` | `password123` |
+| Pimpinan | `pimpinan@pantau.kemenhaj.id` | `password123` |
+| Pengawas | `pengawas.lombokbarat@pantau.kemenhaj.id` | `password123` |
+| Kabupaten | `kabupaten.lombokbarat@pantau.kemenhaj.id` | `password123` |
+| User Travel | `lombokbarat.travel@pantau.kemenhaj.id` | `password123` |
 
 Browser (Playwright + Chrome):
 

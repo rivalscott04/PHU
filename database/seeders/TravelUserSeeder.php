@@ -24,7 +24,7 @@ class TravelUserSeeder extends Seeder
 
         $this->seedUser([
             'nama' => 'User PT Mataram Travel',
-            'email' => 'mataram.travel@phu.com',
+            'email' => 'mataram.travel@pantau.kemenhaj.id',
             'nomor_hp' => '081300000001',
             'role' => 'user',
             'travel_id' => $travelCompany->id,
@@ -34,6 +34,6 @@ class TravelUserSeeder extends Seeder
             'about' => "Akun travel {$travelCompany->Penyelenggara}",
         ]);
 
-        $this->command->info('Travel user seeded: mataram.travel@phu.com / password123');
+        $this->command->info('Travel user seeded: mataram.travel@pantau.kemenhaj.id / password123');
     }
 }

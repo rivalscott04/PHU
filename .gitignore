@@ -32,6 +32,16 @@ yarn-error.log
 /database/seeders/DemoPengawasanScreenshotSeeder.php
 /database/seeders/DemoPublicScreenshotSeeder.php
 
+# Panduan screenshots — hasil capture lokal, jangan di-commit
+/docs/assets/**
+!/docs/assets/**/
+!/docs/assets/**/.gitkeep
+/docs/**/*.png
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.webp
+/docs/**/*.gif
+
 .DS_Store
 **/.DS_Store
 
@@ -49,3 +59,7 @@ graphify-out/
 
 # PDF.js vendor (jangan commit, pratinjau pakai iframe native browser)
 /public/libs/pdfjs/
+
+.chrome-home/
+.playwright-browsers/
+storage/app/tmp/

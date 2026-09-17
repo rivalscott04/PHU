@@ -20,6 +20,6 @@ class DevTravelSeeder extends Seeder
             MataramTravelPackageSeeder::class,
         ]);
 
-        $this->command->warn('DevTravelSeeder: PT. Mataram Travel + mataram.travel@phu.com (development only).');
+        $this->command->warn('DevTravelSeeder: PT. Mataram Travel + mataram.travel@pantau.kemenhaj.id (development only).');
     }
 }

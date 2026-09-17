@@ -44,7 +44,7 @@ class PpiuTestSeeder extends Seeder
 
         $this->seedUser([
             'nama' => 'User PT Demo PPIU NTB',
-            'email' => 'ppiu.test@phu.com',
+            'email' => 'ppiu.test@pantau.kemenhaj.id',
             'nomor_hp' => '081300000099',
             'role' => 'user',
             'travel_id' => $travelCompany->id,
@@ -59,7 +59,7 @@ class PpiuTestSeeder extends Seeder
         $this->command->table(
             ['Field', 'Value'],
             [
-                ['Email', 'ppiu.test@phu.com'],
+                ['Email', 'ppiu.test@pantau.kemenhaj.id'],
                 ['Password', 'password123'],
                 ['Travel', 'PT. Demo PPIU NTB'],
                 ['Status', 'PPIU (approved)'],

@@ -34,8 +34,8 @@ class UserProfileController extends Controller
             'country' => 'nullable|string|max:255',
             'postal' => 'nullable|string|max:10',
             'about' => ValidationHelper::textRule(false),
-            'current_password' => 'nullable|string|max:255',
-            'new_password' => 'nullable|string|min:5|max:255',
+            'current_password' => 'required_with:new_password|string|max:255',
+            'new_password' => 'nullable|string|min:8|max:255',
             'new_password_confirmation' => 'nullable|string|max:255|same:new_password',
         ]);
 
@@ -53,11 +53,8 @@ class UserProfileController extends Controller
 
         // Handle password change if provided
         if ($request->filled('new_password')) {
-            // Verify current password if provided
-            if ($request->filled('current_password')) {
-                if (!Hash::check($request->current_password, $user->password)) {
-                    return redirect()->back()->with('error', 'Password saat ini tidak benar.');
-                }
+            if (!Hash::check($request->current_password, $user->password)) {
+                return redirect()->back()->with('error', 'Password saat ini tidak benar.');
             }
             
             $updateData['password'] = Hash::make($request->new_password);

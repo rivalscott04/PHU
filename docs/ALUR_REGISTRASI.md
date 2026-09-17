@@ -253,8 +253,8 @@ Akun untuk mencoba:
 
 | Peran | Email | Password |
 |-------|-------|----------|
-| Kanwil | `admin@phu.com` | `admin123` |
-| Kabupaten Kota Mataram | `kota.mataram@phu.com` | `password123` |
+| Kanwil | `admin@pantau.kemenhaj.id` | `password123` |
+| Kabupaten Kota Mataram | `kota.mataram@pantau.kemenhaj.id` | `password123` |
 
 Cabang uji ada di Lombok Utara, jadi untuk mencobanya sebagai Kabko perlu akun
 kabupaten Lombok Utara. Buat lewat menu Kelola Pengguna, atau ubah wilayah

@@ -6,7 +6,7 @@ use App\Models\TravelCompany;
 
 /**
  * Matriks akses route V1 & V2 per role, dipakai seeder, PHPUnit, dan Playwright.
- * Akun travel (mataram.travel@phu.com) hanya ada setelah DevTravelSeeder, bukan seed default.
+ * Akun travel (mataram.travel@pantau.kemenhaj.id) hanya ada setelah DevTravelSeeder, bukan seed default.
  */
 final class RoleRouteMatrix
 {
@@ -14,11 +14,11 @@ final class RoleRouteMatrix
     public static function accounts(): array
     {
         return [
-            ['role' => 'admin', 'email' => 'admin@phu.com', 'password' => 'admin123', 'label' => 'Super Admin'],
-            ['role' => 'pimpinan', 'email' => 'pimpinan@phu.local', 'password' => 'password123', 'label' => 'Pimpinan Kanwil'],
-            ['role' => 'pengawas', 'email' => 'pengawas.mataram@phu.local', 'password' => 'password123', 'label' => 'Pengawas Mataram'],
-            ['role' => 'kabupaten', 'email' => 'kota.mataram@phu.com', 'password' => 'password123', 'label' => 'Admin Mataram'],
-            ['role' => 'user', 'email' => 'mataram.travel@phu.com', 'password' => 'password123', 'label' => 'User Travel'],
+            ['role' => 'admin', 'email' => 'admin@pantau.kemenhaj.id', 'password' => 'password123', 'label' => 'Super Admin'],
+            ['role' => 'pimpinan', 'email' => 'pimpinan@pantau.kemenhaj.id', 'password' => 'password123', 'label' => 'Pimpinan Kanwil'],
+            ['role' => 'pengawas', 'email' => 'pengawas.mataram@pantau.kemenhaj.id', 'password' => 'password123', 'label' => 'Pengawas Mataram'],
+            ['role' => 'kabupaten', 'email' => 'kota.mataram@pantau.kemenhaj.id', 'password' => 'password123', 'label' => 'Admin Mataram'],
+            ['role' => 'user', 'email' => 'mataram.travel@pantau.kemenhaj.id', 'password' => 'password123', 'label' => 'User Travel'],
         ];
     }
 

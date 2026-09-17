@@ -79,7 +79,6 @@
                                     <li><strong>nama</strong>: Wajib diisi</li>
                                     <li><strong>email</strong>: Wajib diisi</li>
                                     <li><strong>nomor_hp</strong>: Wajib diisi</li>
-                                    <li><strong>password</strong>: Wajib diisi</li>
                                     <li><strong>travel_company</strong>: Wajib diisi</li>
                                 </ul>
 
@@ -88,7 +87,7 @@
                                 <h6>Catatan Penting:</h6>
                                 <ul class="list-unstyled small">
                                     <li>• Email dan nomor HP harus unik</li>
-                                    <li>• Password minimal 6 karakter</li>
+                                    <li>• Setelah impor, buka daftar pengguna dan gunakan tombol tautan set password untuk setiap akun. Kolom password dari template lama diabaikan.</li>
                                     <li>• Travel company akan dicocokkan dengan data CABANG (bukan pusat)</li>
                                     <li>• Fuzzy matching dengan threshold 90% similarity</li>
                                     <li>• Toleransi typo pada nama travel company hingga 10%</li>
@@ -131,7 +130,6 @@
                                                 <th>nama</th>
                                                 <th>email</th>
                                                 <th>nomor_hp</th>
-                                                <th>password</th>
                                                 <th>travel_company</th>
                                             </tr>
                                         </thead>
@@ -140,28 +138,24 @@
                                                 <td>John Doe</td>
                                                 <td>john.doe@travel1.com</td>
                                                 <td>081234567890</td>
-                                                <td>password123</td>
                                                 <td>PT. HIRA CAHAYA ILAHI</td>
                                             </tr>
                                             <tr>
                                                 <td>Jane Smith</td>
                                                 <td>jane.smith@travel1.com</td>
                                                 <td>081234567891</td>
-                                                <td>password123</td>
                                                 <td>PT. AT TAYIBAH</td>
                                             </tr>
                                             <tr>
                                                 <td>Ahmad Wijaya</td>
                                                 <td>ahmad.wijaya@travel2.com</td>
                                                 <td>081234567892</td>
-                                                <td>password123</td>
                                                 <td>PT. NABILA INTI PERSADA TOUR AND TRAVEL</td>
                                             </tr>
                                             <tr>
                                                 <td>Siti Rahayu</td>
                                                 <td>siti.rahayu@travel2.com</td>
                                                 <td>081234567893</td>
-                                                <td>password123</td>
                                                 <td>PT. MASYARIL HARAM TOUR & TRAVEL</td>
                                             </tr>
                                         </tbody>

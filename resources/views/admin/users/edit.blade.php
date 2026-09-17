@@ -63,10 +63,8 @@
                                 </div>
                             @endif
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password Baru (kosongkan jika tidak ingin mengubah)</label>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror"
-                                       id="password" name="password">
-                                @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <label class="form-label">Password</label>
+                                <p class="form-control-plaintext text-muted mb-0">Password tidak dapat diubah dari sini. Pakai tombol kunci pada daftar pengguna untuk menerbitkan tautan, lalu kirimkan ke pemilik akun.</p>
                             </div>
                             @if($user->role === 'user')
                                 <div class="col-md-6 mb-3">

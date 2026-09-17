@@ -49,12 +49,8 @@
                                 @enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password @include('partials.required-star')</label>
-                                <input type="password" class="form-control @error('password') is-invalid @enderror" 
-                                       id="password" name="password" required>
-                                @error('password')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
+                                <label class="form-label">Password</label>
+                                <p class="form-control-plaintext text-muted mb-0">Dibuat sendiri oleh pemilik akun lewat tautan set password yang muncul setelah akun tersimpan.</p>
                             </div>
                         </div>
                         <div class="mt-3">

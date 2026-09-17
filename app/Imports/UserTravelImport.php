@@ -10,7 +10,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Concerns\Importable;
-use Illuminate\Support\Facades\Hash;
+use App\Support\AccountInvite;
 use Illuminate\Support\Facades\Log;
 
 class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
@@ -40,6 +40,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
         try {
             // Convert keys to lowercase
             $row = array_change_key_case($row, CASE_LOWER);
+            unset($row['password']); // Ignore credentials from legacy templates before logging.
 
             // Log setiap row sebelum diproses
             Log::debug('UserTravelImport: Processing row', $row);
@@ -57,16 +58,12 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 $row['email'] = $normalizedEmail;
             }
 
-            // Convert password to string (handle Excel number formatting)
-            if (!empty($row['password'])) {
-                $row['password'] = strval($row['password']);
-            }
 
             // Note: nomor_hp normalization is handled in prepareForValidation() method
 
             // Validate required fields
-            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['password']) || empty($row['travel_company'])) {
-                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, password, dan travel company wajib diisi";
+            if (empty($row['nama']) || empty($row['email']) || empty($row['nomor_hp']) || empty($row['travel_company'])) {
+                $msg = "Row " . ($this->successCount + count($this->errors) + 1) . ": Nama, email, nomor HP, dan travel company wajib diisi";
                 $this->errors[] = $msg;
                 Log::warning("UserTravelImport warning: $msg", $row);
                 return null;
@@ -109,7 +106,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
                 'nama' => $row['nama'],
                 'email' => $row['email'],
                 'nomor_hp' => $row['nomor_hp'],
-                'password' => Hash::make($row['password']),
+                'password' => AccountInvite::placeholderPassword(),
                 'travel_id' => $travel->id,
                 'role' => 'user',
                 'kabupaten' => $travel->kab_kota,
@@ -120,7 +117,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             $this->successCount++;
             $this->existingEmails[$row['email']] = true;
             $this->existingPhones[$row['nomor_hp']] = true;
-            Log::info("UserTravelImport: User berhasil dibuat (Row {$this->successCount})", $userData);
+            Log::info("UserTravelImport: User berhasil dibuat (Row {$this->successCount})", array_diff_key($userData, ['password' => true]));
 
             return new User($userData);
         } catch (\Exception $e) {
@@ -186,6 +183,7 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
     {
         // Make a working copy
         $normalized = $row;
+        unset($normalized['password']);
 
         // --- Normalize email: trim, lowercase, replace spaces with dots, remove weird chars ---
         if (!empty($normalized['email'])) {
@@ -246,7 +244,6 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.nama' => 'required|string|max:255',
             '*.email' => 'required|string|max:255',
             '*.nomor_hp' => ValidationHelper::nomorHpRules(),
-            '*.password' => 'required|min:5',
             '*.travel_company' => 'required|string|max:255',
         ];
     }
@@ -266,9 +263,6 @@ class UserTravelImport implements ToModel, WithHeadingRow, WithValidation
             '*.nomor_hp.string' => 'Nomor HP harus berupa teks',
             '*.nomor_hp.max' => "Nomor HP maksimal {$hpMax} karakter",
             '*.nomor_hp.regex' => 'Nomor HP harus diawali dengan 08',
-            '*.password.required' => 'Password wajib diisi',
-            '*.password.string' => 'Password harus berupa teks',
-            '*.password.min' => 'Password minimal 5 karakter',
             '*.travel_company.required' => 'Travel company wajib diisi',
             '*.travel_company.string' => 'Travel company harus berupa teks',
             '*.travel_company.max' => 'Travel company maksimal 255 karakter',

@@ -27,8 +27,8 @@
                                     value="{{ old('nomor_hp') }}" maxlength="16" inputmode="numeric" placeholder="08xxxxxxxxxx" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" id="password" name="password" required>
+                                <label class="form-label">Password</label>
+                                <p class="form-control-plaintext text-muted mb-0">Dibuat sendiri oleh pemilik akun lewat tautan set password yang muncul setelah akun tersimpan.</p>
                             </div>
                             <div class="col-12 mb-3">
                                 <label for="travel_id" class="form-label">Pilih Travel</label>

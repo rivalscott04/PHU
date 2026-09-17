@@ -24,6 +24,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\JamaahController;
 use App\Http\Controllers\KanwilController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PengaduanController;
@@ -65,6 +66,15 @@ Route::middleware('throttle:public')->group(function () {
 Route::post('/register', [RegisterController::class, 'store'])->middleware(['guest', 'throttle:auth'])->name('register.perform');
 Route::get('/login', [LoginController::class, 'show'])->middleware('guest')->name('login');
 Route::post('/login', [LoginController::class, 'login'])->middleware(['guest', 'throttle:auth'])->name('login.perform');
+// Satu alur untuk undangan akun baru dan lupa password. Token sekali pakai,
+// disimpan ter-hash oleh broker Laravel, umurnya 60 menit.
+Route::middleware(['guest', 'throttle:5,1'])->group(function () {
+    Route::get('/lupa-password', [PasswordResetController::class, 'request'])->name('password.request');
+    Route::post('/lupa-password', [PasswordResetController::class, 'email'])->name('password.email');
+    Route::get('/set-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/set-password', [PasswordResetController::class, 'update'])->name('password.update');
+});
+
 Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
 
 Route::get('/test', function () {
@@ -281,6 +291,9 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::get('/cabang-users/template', [UserManagementController::class, 'downloadCabangUserTemplate'])->name('cabang.template');
 
         // General User Management
+        Route::post('/users/{id}/reset-link', [UserManagementController::class, 'issueResetLink'])
+            ->name('users.reset-link')
+            ->whereNumber('id');
         Route::get('/users/{id}/edit', [UserManagementController::class, 'edit'])->name('users.edit');
         Route::put('/users/{id}', [UserManagementController::class, 'update'])->name('users.update');
         Route::delete('/users/{id}', [UserManagementController::class, 'destroy'])->name('users.destroy');

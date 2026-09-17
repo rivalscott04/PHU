@@ -26,6 +26,8 @@ class User extends Authenticatable
         'travel_id',
         'cabang_id',
         'nama',
+        'nip',
+        'jabatan',
         'email',
         'nomor_hp',
         'password',

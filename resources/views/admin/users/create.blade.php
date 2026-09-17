@@ -49,9 +49,8 @@
                                 @error('nomor_hp')<div class="invalid-feedback">{{ $message }}</div>@enderror
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label for="password" class="form-label">Password Awal @include('partials.required-star')</label>
-                                <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
-                                @error('password')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                <label class="form-label">Password</label>
+                                <p class="form-control-plaintext text-muted mb-0">Dibuat sendiri oleh pemilik akun lewat tautan set password yang muncul setelah akun tersimpan.</p>
                             </div>
                         </div>
 

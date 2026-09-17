@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\BapAirline;
 use App\Models\User;
+use App\Support\AccountInvite;
 use App\Models\Jamaah;
 use App\Models\CabangTravel;
 use Illuminate\Http\Request;
@@ -16,8 +17,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    private $defaultPassword = 'password123'; // Password Default
-
     public function showForm()
     {
         $user = auth()->user();
@@ -44,7 +43,6 @@ class AuthController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
-            'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
         ]);
 
@@ -67,7 +65,7 @@ class AuthController extends Controller
             'nama' => $request->nama,
             'email' => $request->email,
             'nomor_hp' => $request->nomor_hp,
-            'password' => Hash::make($request->password),
+            'password' => AccountInvite::placeholderPassword(),
             'role' => 'user',
             'travel_id' => $travel->id,
             'kabupaten' => $travel->kab_kota,
@@ -76,7 +74,9 @@ class AuthController extends Controller
         ]);
 
         // Kembalikan response sukses
-        return redirect()->route('form.addUser')->with('success', 'Akun berhasil dibuat.');
+        return redirect()->route('form.addUser')
+            ->with('success', 'Akun berhasil dibuat. Kirimkan tautan di bawah supaya PIC travel membuat passwordnya sendiri.')
+            ->with('reset_link', AccountInvite::flashPayload($user));
     }
 
     // Method untuk menampilkan data user
@@ -91,11 +91,9 @@ class AuthController extends Controller
     {
         $user = User::find($id);
         if ($user && $user->role === 'user') {
-            $user->password = Hash::make('password123');
-            $user->is_password_changed = false;
-
-            $user->save();
-            return redirect()->route('travels')->with('success', 'Password berhasil direset.');
+            return redirect()->route('travels')
+                ->with('success', 'Tautan set password berhasil diterbitkan untuk '.$user->nama.'.')
+                ->with('reset_link', AccountInvite::flashPayload($user));
         }
         return redirect()->route('travels')->with('error', 'User tidak ditemukan atau bukan user dengan role "user".');
     }

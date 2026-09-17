@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="en">
+<html lang="id">
 
 
 <head>
 
     <meta charset="utf-8" />
-    <title>Login | {{ config('app.name') }}</title>
+    <title>Buat Password | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="PANTAU, Sistem Pengawasan Haji dan Umrah Kanwil NTB" name="description" />
     <meta content="PANTAU" name="author" />
@@ -34,8 +34,8 @@
                             <div class="row">
                                 <div class="col-7">
                                     <div class="text-primary p-4">
-                                        <h5 class="text-primary">Selamat Datang !</h5>
-                                        <p>Masuk untuk melanjutkan.</p>
+                                        <h5 class="text-primary">Buat Password</h5>
+                                        <p>Password ini yang Anda pakai untuk masuk.</p>
                                     </div>
                                 </div>
                                 <div class="col-5 align-self-end">
@@ -64,33 +64,29 @@
                                 </a>
                             </div>
                             <div class="p-2">
-                                @if (session('success'))
-                                    <div class="alert alert-success" role="alert">
-                                        {{ session('success') }}
+                                @if ($errors->any())
+                                    <div class="alert alert-danger" role="alert">
+                                        {{ $errors->first() }}
                                     </div>
                                 @endif
 
-                                <form class="form-horizontal" action="{{ route('login.perform') }}" method="POST">
+                                <form class="form-horizontal" action="{{ route('password.update') }}" method="POST">
                                     @csrf
+                                    <input type="hidden" name="token" value="{{ $token }}">
+
                                     <div class="mb-3">
-                                        <label for="email_or_phone" class="form-label">Email atau Nomor HP</label>
-                                        <input type="text" class="form-control @error('email_or_phone') is-invalid @enderror" 
-                                               id="email_or_phone" name="email_or_phone"
-                                               placeholder="Masukkan email atau nomor HP"
-                                               value="{{ old('email_or_phone') }}">
-                                        @error('email_or_phone')
-                                            <div class="invalid-feedback">{{ $message }}</div>
-                                        @enderror
-                                        <small class="form-text text-muted">Bisa menggunakan email atau nomor HP untuk login</small>
+                                        <label for="email" class="form-label">Email akun</label>
+                                        <input type="email" class="form-control" id="email" name="email"
+                                               value="{{ old('email', $email) }}" readonly>
                                     </div>
 
                                     <div class="mb-3">
-                                        <label class="form-label">Password</label>
+                                        <label for="password" class="form-label">Password baru</label>
                                         <div class="input-group auth-pass-inputgroup">
-                                            <input type="password" class="form-control @error('password') is-invalid @enderror" name="password"
-                                                placeholder="Masukkan password" aria-label="Password"
-                                                aria-describedby="password-addon">
-                                            <button class="btn btn-light " type="button" id="password-addon"><i
+                                            <input type="password" class="form-control @error('password') is-invalid @enderror"
+                                                   id="password" name="password" placeholder="Minimal 8 karakter"
+                                                   aria-label="Password baru" aria-describedby="password-addon" autofocus>
+                                            <button class="btn btn-light" type="button" id="password-addon"><i
                                                     class="mdi mdi-eye-outline"></i></button>
                                         </div>
                                         @error('password')
@@ -98,33 +94,21 @@
                                         @enderror
                                     </div>
 
-                                    <div class="d-flex justify-content-between align-items-center">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" id="remember-check"
-                                                name="remember">
-                                            <label class="form-check-label" for="remember-check">
-                                                Ingat saya
-                                            </label>
-                                        </div>
-                                        <a href="{{ route('password.request') }}" class="text-muted">
-                                            <i class="mdi mdi-lock-reset me-1"></i> Lupa password?
-                                        </a>
+                                    <div class="mb-3">
+                                        <label for="password_confirmation" class="form-label">Ulangi password baru</label>
+                                        <input type="password" class="form-control" id="password_confirmation"
+                                               name="password_confirmation" placeholder="Ketik ulang password baru">
                                     </div>
 
                                     <div class="mt-3 d-grid">
-                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Log
-                                            In</button>
+                                        <button class="btn btn-primary waves-effect waves-light" type="submit">Simpan Password</button>
                                     </div>
 
                                     <div class="mt-4 text-center">
-                                        <p class="text-muted mb-2">Belum terdaftar sebagai travel?</p>
-                                        <a href="{{ route('travel.registration.create') }}" class="btn btn-outline-primary btn-sm w-100">
-                                            <i class="bx bx-building-house me-1"></i> Registrasi Travel (PPIU / PIHK)
+                                        <a href="{{ route('login') }}" class="text-muted">
+                                            <i class="mdi mdi-arrow-left me-1"></i> Kembali ke halaman masuk
                                         </a>
                                     </div>
-
-                                    @include('partials.kanwil-contact', ['variant' => 'support', 'supportStyle' => 'card'])
-
                                 </form>
                             </div>
 

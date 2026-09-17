@@ -195,18 +195,21 @@ Warga kirim pengaduan dari halaman depan (dengan lampiran opsional) → masuk an
 Untuk instalasi development, perintah artisan, dan cron, lihat **[SETUP.md](./SETUP.md)**.  
 Untuk deploy production (Nginx, Redis, Reverb, Supervisor, SSL), lihat **[DEPLOY.md](./DEPLOY.md)**.  
 Untuk persiapan data testing live per peran, lihat **[docs/persiapan/README.md](./docs/persiapan/README.md)**.  
+Untuk panduan isi data dan verifikasi (bahasa operasional), lihat **[docs/PANDUAN_TRAVEL.md](./docs/PANDUAN_TRAVEL.md)** dan **[docs/PANDUAN_ADMIN_KABUPATEN.md](./docs/PANDUAN_ADMIN_KABUPATEN.md)**.  
+Versi Word (dengan screenshot): **[docs/PANDUAN_TRAVEL.docx](./docs/PANDUAN_TRAVEL.docx)** dan **[docs/PANDUAN_ADMIN_KABUPATEN.docx](./docs/PANDUAN_ADMIN_KABUPATEN.docx)** (`npm run panduan:docx`).  
+Untuk menghasilkan ulang screenshot panduan, lihat **[docs/PANDUAN_SCREENSHOTS.md](./docs/PANDUAN_SCREENSHOTS.md)**.  
 Untuk alur registrasi pusat dan cabang beserta troubleshooting-nya, lihat **[docs/ALUR_REGISTRASI.md](./docs/ALUR_REGISTRASI.md)**.
 
 **Login awal** (setelah migrasi database):
 
 | Peran | Email contoh | Password |
 |-------|--------------|----------|
-| Super Admin | `admin@phu.com` | `admin123` |
-| Pimpinan Kanwil | `pimpinan@phu.local` | `password123` |
-| Pengawas | `pengawas.mataram@phu.local` | `password123` |
-| Admin Kabupaten | `kota.mataram@phu.com` | `password123` |
+| Super Admin | `admin@pantau.kemenhaj.id` | `password123` |
+| Pimpinan Kanwil | `pimpinan@pantau.kemenhaj.id` | `password123` |
+| Pengawas | `pengawas.mataram@pantau.kemenhaj.id` | `password123` |
+| Admin Kabupaten | `kota.mataram@pantau.kemenhaj.id` | `password123` |
 
-Akun **travel tidak di-seed**, data travel live dari registrasi mandiri (lihat [PERSIAPAN_TRAVEL.md](./docs/persiapan/PERSIAPAN_TRAVEL.md)). Untuk development lokal saja: `php artisan db:seed --class=DevTravelSeeder` (PT. Mataram Travel + `mataram.travel@phu.com`), lengkap dengan satu cabang berstatus disetujui di Kota Mataram dan satu cabang berstatus menunggu verifikasi di Lombok Utara, supaya alur peninjauan bisa langsung dicoba.
+Akun **travel tidak di-seed**, data travel live dari registrasi mandiri (lihat [PERSIAPAN_TRAVEL.md](./docs/persiapan/PERSIAPAN_TRAVEL.md)). Untuk development lokal saja: `php artisan db:seed --class=DevTravelSeeder` (PT. Mataram Travel + `mataram.travel@pantau.kemenhaj.id`), lengkap dengan satu cabang berstatus disetujui di Kota Mataram dan satu cabang berstatus menunggu verifikasi di Lombok Utara, supaya alur peninjauan bisa langsung dicoba.
 
 Seeding dijalankan sebagai langkah tersendiri setelah migrasi (`php artisan db:seed`), bukan dari dalam migrasi.
 

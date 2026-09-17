@@ -7,14 +7,15 @@ use App\Helpers\ValidationHelper;
 use App\Enums\UserRole;
 use App\Enums\PengawasScopeMode;
 use App\Support\NtbKabupatenMap;
+use App\Support\AccountInvite;
 use App\Support\KabupatenScopeFilter;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\TravelCompany;
 use App\Imports\UserTravelImport;
 use App\Imports\UserCabangImport;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 
 class UserManagementController extends Controller
@@ -170,14 +171,18 @@ class UserManagementController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
-            'password' => 'required|string|min:8',
             'role' => 'required|in:'.implode(',', $assignableRoles),
         ];
 
         $role = UserRole::from($request->input('role'));
 
         if ($role === UserRole::Kabupaten) {
-            $rules['kabupaten'] = 'required|string|max:255';
+            $rules['kabupaten'] = [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'kabupaten')->where('role', UserRole::Kabupaten->value),
+            ];
         }
 
         if ($role === UserRole::Pengawas) {
@@ -194,7 +199,7 @@ class UserManagementController extends Controller
             'nama' => $validated['nama'],
             'email' => $validated['email'],
             'nomor_hp' => $validated['nomor_hp'],
-            'password' => Hash::make($validated['password']),
+            'password' => AccountInvite::placeholderPassword(),
             'role' => $role->value,
             'country' => 'Indonesia',
             'is_password_changed' => false,
@@ -216,11 +221,12 @@ class UserManagementController extends Controller
             $payload['kabupaten'] = $travel->kab_kota;
         }
 
-        User::create($payload);
+        $user = User::create($payload);
 
         return redirect()
             ->route('users.index', ['tab' => $role->value])
-            ->with('success', 'Pengguna '.$role->label().' berhasil ditambahkan.');
+            ->with('success', 'Pengguna '.$role->label().' berhasil ditambahkan. Kirimkan tautan di bawah supaya yang bersangkutan membuat passwordnya sendiri.')
+            ->with('reset_link', AccountInvite::flashPayload($user));
     }
 
     /**
@@ -435,22 +441,28 @@ class UserManagementController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
-            'kabupaten' => 'required|string|max:255',
-            'password' => 'required|string|min:8',
+            'kabupaten' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'kabupaten')->where('role', UserRole::Kabupaten->value),
+            ],
         ]);
 
-        User::create([
+        $user = User::create([
             'nama' => $request->nama,
             'email' => $request->email,
             'nomor_hp' => $request->nomor_hp,
             'kabupaten' => $request->kabupaten,
-            'password' => Hash::make($request->password),
+            'password' => AccountInvite::placeholderPassword(),
             'role' => 'kabupaten',
             'country' => 'Indonesia', // Default value
             'is_password_changed' => 0,
         ]);
 
-        return redirect()->route('kabupaten.index')->with('success', 'User Kabupaten berhasil ditambahkan!');
+        return redirect()->route('users.index', ['tab' => 'kabupaten'])
+            ->with('success', 'User Kabupaten berhasil ditambahkan. Kirimkan tautan di bawah supaya yang bersangkutan membuat passwordnya sendiri.')
+            ->with('reset_link', AccountInvite::flashPayload($user));
     }
 
     /**
@@ -464,7 +476,6 @@ class UserManagementController extends Controller
             'nama' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
-            'password' => 'required|string|min:5',
             'travel_id' => 'required|exists:travels,id',
         ]);
 
@@ -479,11 +490,11 @@ class UserManagementController extends Controller
         // Get travel company data for auto-fill
         $travelCompany = TravelCompany::find($request->travel_id);
 
-        User::create([
+        $created = User::create([
             'nama' => $request->nama,
             'email' => $request->email,
             'nomor_hp' => $request->nomor_hp,
-            'password' => Hash::make($request->password),
+            'password' => AccountInvite::placeholderPassword(),
             'role' => 'user',
             'travel_id' => $request->travel_id,
             'kabupaten' => $travelCompany->kab_kota,
@@ -491,7 +502,23 @@ class UserManagementController extends Controller
             'is_password_changed' => false,
         ]);
 
-        return redirect()->route('travels.index')->with('success', 'User Travel berhasil ditambahkan!');
+        return redirect()->route('users.index', ['tab' => 'user'])
+            ->with('success', 'User Travel berhasil ditambahkan. Kirimkan tautan di bawah supaya PIC travel membuat passwordnya sendiri.')
+            ->with('reset_link', AccountInvite::flashPayload($created));
+    }
+
+    /**
+     * Terbitkan tautan set password untuk satu akun. Dipakai kalau pemilik akun
+     * lupa password dan emailnya tidak bisa diakses, petugas mengirim tautannya
+     * ke nomor WhatsApp yang terdaftar pada akun itu.
+     */
+    public function issueResetLink($id)
+    {
+        $user = User::findOrFail($id);
+
+        return back()
+            ->with('success', 'Tautan set password berhasil diterbitkan untuk '.$user->nama.'.')
+            ->with('reset_link', AccountInvite::flashPayload($user));
     }
 
     /**
@@ -562,7 +589,14 @@ class UserManagementController extends Controller
         // Add kabupaten validation for scoped roles
         $role = UserRole::tryFromString($user->role);
         if ($role === UserRole::Kabupaten) {
-            $validationRules['kabupaten'] = 'required|string|max:255';
+            $validationRules['kabupaten'] = [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('users', 'kabupaten')
+                    ->where('role', UserRole::Kabupaten->value)
+                    ->ignore($user->id),
+            ];
         }
 
         if ($role === UserRole::Pengawas) {
@@ -572,8 +606,6 @@ class UserManagementController extends Controller
         if ($user->role === UserRole::User->value) {
             $validationRules['travel_id'] = 'required|exists:travels,id';
         }
-
-        $validationRules['password'] = 'nullable|string|min:8';
 
         ValidationHelper::validate($request, $validationRules);
 
@@ -600,13 +632,6 @@ class UserManagementController extends Controller
         }
 
         $user->update($updateData);
-
-        if ($request->filled('password')) {
-            $user->update([
-                'password' => Hash::make($request->password),
-                'is_password_changed' => 0,
-            ]);
-        }
 
         return redirect()
             ->route('users.index', ['tab' => $user->role === UserRole::Admin->value ? UserRole::Kabupaten->value : $user->role])
@@ -713,7 +738,7 @@ class UserManagementController extends Controller
                 session()->flash('import_errors', $errors);
             }
 
-            return redirect()->route('travels.index')
+            return redirect()->route('users.index', ['tab' => 'user'])
                 ->with($messageType, $message);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -791,7 +816,7 @@ class UserManagementController extends Controller
                 session()->flash('import_errors', $errors);
             }
 
-            return redirect()->route('travels.index')
+            return redirect()->route('users.index', ['tab' => 'user'])
                 ->with($messageType, $message);
         } catch (\Exception $e) {
             DB::rollBack();
@@ -815,13 +840,7 @@ class UserManagementController extends Controller
      */
     public function downloadTravelUserTemplate()
     {
-        $filePath = public_path('template/templateuser.xlsx');
-
-        if (!file_exists($filePath)) {
-            return redirect()->back()->with('error', 'Template file tidak ditemukan.');
-        }
-
-        return response()->download($filePath, 'Template_Import_User_Travel_PUSAT.xlsx');
+        return Excel::download(new \App\Exports\AccountImportTemplate(), 'Template_Import_User_Travel_PUSAT.xlsx');
     }
 
     /**
@@ -829,13 +848,7 @@ class UserManagementController extends Controller
      */
     public function downloadCabangUserTemplate()
     {
-        $filePath = public_path('template/templateuser.xlsx');
-
-        if (!file_exists($filePath)) {
-            return redirect()->back()->with('error', 'Template file tidak ditemukan.');
-        }
-
-        return response()->download($filePath, 'Template_Import_User_Travel_CABANG.xlsx');
+        return Excel::download(new \App\Exports\AccountImportTemplate(), 'Template_Import_User_Travel_CABANG.xlsx');
     }
 
     /** @return array<string, mixed> */

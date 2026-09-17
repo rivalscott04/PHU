@@ -90,6 +90,9 @@ return [
     |
     */
 
+    // Enable only after configuring a working email transport.
+    'password_reset_email_enabled' => env('PHU_PASSWORD_RESET_EMAIL_ENABLED', false),
+
     'passwords' => [
         'users' => [
             'provider' => 'users',

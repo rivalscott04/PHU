@@ -29,7 +29,7 @@ class CheckPasswordChanged
 
         $user = Auth::user();
 
-        if ($user && in_array($user->role, ['user', 'kabupaten', 'pengawas', 'pimpinan'], true) && ! $user->is_password_changed) {
+        if ($user && in_array($user->role, ['admin', 'user', 'kabupaten', 'pengawas', 'pimpinan'], true) && ! $user->is_password_changed) {
             return redirect()->route('user.changePassword')->with('warning', 'Anda harus mengganti password default Anda.');
         }
 

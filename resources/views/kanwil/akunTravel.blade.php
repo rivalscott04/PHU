@@ -40,9 +40,9 @@
                                                         Impersonate
                                                     </a>
                                                     <button type="button" class="btn btn-danger btn-sm waves-effect waves-light"
-                                                        onclick="confirmResetPassword({{ $user->id }})" title="Reset Password">
+                                                        onclick="confirmResetPassword({{ $user->id }})" title="Tautan Set Password">
                                                         <i class="bx bx-refresh me-1"></i>
-                                                        Reset Password
+                                                        Tautan Set Password
                                                     </button>
                                                 </div>
                                                 <form id="reset-password-form-{{ $user->id }}"
@@ -69,12 +69,12 @@
         function confirmResetPassword(userId) {
             Swal.fire({
                 title: "Apakah Anda yakin?",
-                text: "Password pengguna akan di-reset ke default!",
+                text: "Tautan set password baru akan diterbitkan. Tautan sebelumnya tidak berlaku lagi.",
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonColor: "#34c38f",
                 cancelButtonColor: "#f46a6a",
-                confirmButtonText: "Ya, reset password!",
+                confirmButtonText: "Terbitkan tautan",
                 cancelButtonText: "Batal"
             }).then((result) => {
                 if (result.isConfirmed) {

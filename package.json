@@ -19,7 +19,13 @@
         "demo:public:shots": "HEADLESS=1 playwright test e2e/journey/public-demo.spec.ts --config=e2e/playwright.config.ts",
         "demo:public:ppt": "python3 scripts/build-public-ppt.py",
         "demo:public:pdf": "bash scripts/public-ppt-to-pdf.sh",
-        "demo:public": "npm run demo:public:shots && npm run demo:public:ppt && npm run demo:public:pdf"
+        "demo:public": "npm run demo:public:shots && npm run demo:public:ppt && npm run demo:public:pdf",
+        "panduan:prepare": "bash scripts/panduan-shots-prepare.sh",
+        "panduan:shots": "bash scripts/panduan-shots-chrome.sh",
+        "panduan:shots:headed": "HEADLESS=0 bash scripts/panduan-shots-chrome.sh",
+        "panduan:shots:headless": "HEADLESS=1 bash scripts/panduan-shots-chrome.sh",
+        "panduan:docx": "python3 scripts/build-panduan-docx.py",
+        "panduan": "npm run panduan:prepare && echo \"Server: php -d upload_tmp_dir=\\$(pwd)/storage/app/tmp artisan serve --host=127.0.0.1 --port=8000  |  Shots: npm run panduan:shots:headed  |  Word: npm run panduan:docx\""
     },
     "devDependencies": {
         "@playwright/test": "^1.49.0",
