@@ -316,17 +316,32 @@ class User extends Authenticatable
      */
     public static function findByEmailOrPhone($identifier)
     {
+        $identifier = trim((string) $identifier);
+
         // Check if identifier is email format
         if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
             return static::where('email', $identifier)->first();
         }
-        
-        // Check if identifier is phone number format (basic check)
-        if (preg_match('/^[0-9+\-\s()]+$/', $identifier)) {
-            return static::where('nomor_hp', $identifier)->first();
+
+        // Nomor disimpan berformat 08xxx, jadi +62 812-3456-7890 dan sejenisnya
+        // disamakan dulu. Nilai mentah ikut dicari untuk data lama yang formatnya lain.
+        if (preg_match('/^[0-9+\-\s().]+$/', $identifier)) {
+            return static::whereIn('nomor_hp', array_unique([self::normalizeNomorHp($identifier), $identifier]))->first();
         }
-        
+
         return null;
+    }
+
+    /** Samakan nomor HP Indonesia ke format 08xxx: +62 / 62 / 8 di depan jadi 08. */
+    public static function normalizeNomorHp(string $nomor): string
+    {
+        $digits = preg_replace('/\D+/', '', $nomor);
+
+        return match (true) {
+            str_starts_with($digits, '62') => '0'.substr($digits, 2),
+            str_starts_with($digits, '8') => '0'.$digits,
+            default => $digits,
+        };
     }
 
     /**

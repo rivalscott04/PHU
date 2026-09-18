@@ -46,7 +46,7 @@
                                     <div class="d-flex align-items-center">
                                         <div class="avatar-xs me-3">
                                             <span class="avatar-title rounded-circle bg-primary">
-                                                {{ strtoupper(substr($user->nama, 0, 1)) }}
+                                                {{ strtoupper(substr((string) ($user->nama ?? '?'), 0, 1)) }}
                                             </span>
                                         </div>
                                         <div>
@@ -71,7 +71,7 @@
                                 <td>
                                     <a href="{{ route('impersonate.take', $user->id) }}"
                                        class="btn btn-primary btn-sm waves-effect waves-light"
-                                       onclick="return confirmImpersonate(event, '{{ $user->nama }}')">
+                                       onclick="return confirmImpersonate(event, @js($user->nama))">
                                         <i class="bx bx-user-check me-1"></i>
                                         Impersonate
                                     </a>
