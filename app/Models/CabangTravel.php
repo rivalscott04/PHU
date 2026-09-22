@@ -43,6 +43,7 @@ class CabangTravel extends Model
         'dokumen_akta',
         'dokumen_ktp_kepala',
         'dokumen_sk_du',
+        'dokumen_sk_pusat',
         'dokumen_rekomendasi',
         'catatan_rekomendasi',
         'recommended_at',
@@ -115,10 +116,13 @@ class CabangTravel extends Model
         return $path !== null && Storage::disk('public')->exists($path);
     }
 
-    /** SK pusat tidak diunggah ulang, dibaca dari travel pusat yang dipilih. */
+    /**
+     * SK pusat dibaca dari travel pusat yang dipilih. Pusat yang tidak terdata
+     * (misalnya berkantor di luar NTB) mengunggah SK-nya sendiri.
+     */
     public function skPusatPath(): ?string
     {
-        return $this->travel?->dokumen_sk;
+        return $this->travel?->dokumen_sk ?: $this->dokumen_sk_pusat;
     }
 
     /**
@@ -146,6 +150,7 @@ class CabangTravel extends Model
     {
         $kolom = array_column(self::DOKUMEN_PENDAFTARAN, 'column');
         $kolom[] = 'dokumen_rekomendasi';
+        $kolom[] = 'dokumen_sk_pusat';
 
         foreach ($kolom as $column) {
             if ($this->{$column}) {

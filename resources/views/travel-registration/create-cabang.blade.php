@@ -8,11 +8,13 @@
     ];
 
     $reviewGroups = [
-        ['title' => 'Travel Pusat', 'fields' => ['travel_id']],
+        ['title' => 'Travel Pusat', 'fields' => ['travel_id', 'Penyelenggara', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'dokumen_sk_pusat']],
         ['title' => 'Data Cabang', 'fields' => ['kabupaten', 'pimpinan_cabang', 'SK_BA', 'tanggal', 'telepon', 'alamat_cabang']],
         ['title' => 'Dokumen Cabang', 'fields' => array_column(\App\Models\CabangTravel::DOKUMEN_PENDAFTARAN, 'column')],
         ['title' => 'Akun PIC', 'fields' => ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password']],
     ];
+
+    $pusatTerdaftar = old('pusat_terdaftar', '1') === '1';
 @endphp
 <!doctype html>
 <html lang="id">
@@ -70,10 +72,24 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-buildings',
                                             'title' => 'Travel Pusat',
-                                            'description' => 'Pilih travel pusat yang menaungi cabang ini. Nomor SK pusat terbaca otomatis, tidak perlu diunggah ulang.',
+                                            'description' => 'Pusat yang sudah terdaftar cukup dipilih. Pusat di luar NTB yang belum terdaftar diisi manual beserta SK izinnya.',
                                         ])
 
                                         <div class="row">
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <div class="form-label">Travel pusat sudah terdaftar di sistem? @include('partials.required-star')</div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_ya" value="1" @checked($pusatTerdaftar)>
+                                                    <label class="form-check-label" for="pusat_terdaftar_ya">Sudah, pilih dari daftar</label>
+                                                </div>
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_tidak" value="0" @checked(! $pusatTerdaftar)>
+                                                    <label class="form-check-label" for="pusat_terdaftar_tidak">Belum, pusat berada di luar NTB</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" id="pusat-terdaftar-fields">
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="travel_id" class="form-label">Travel Pusat @include('partials.required-star')</label>
                                                 <select class="form-select form-select-lg @error('travel_id') is-invalid @enderror"
@@ -90,7 +106,7 @@
                                                 </select>
                                                 @error('travel_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                 <div class="form-text">
-                                                    Pusat belum terdaftar?
+                                                    Pusat di NTB tapi belum ada di daftar?
                                                     <a href="{{ route('travel.registration.create') }}">Daftarkan pusat lebih dulu</a>.
                                                 </div>
                                             </div>
@@ -101,6 +117,45 @@
                                                     <div><strong>No. SK Pusat:</strong> <span id="pusat-sk">-</span></div>
                                                     <div><strong>Pimpinan Pusat:</strong> <span id="pusat-pimpinan">-</span></div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row" id="pusat-manual-fields">
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <label for="Penyelenggara" class="form-label">Nama Travel Pusat @include('partials.required-star')</label>
+                                                <input type="text" class="form-control form-control-lg @error('Penyelenggara') is-invalid @enderror"
+                                                    id="Penyelenggara" name="Penyelenggara" value="{{ old('Penyelenggara') }}"
+                                                    placeholder="Nama PT sesuai izin PPIU" required>
+                                                @error('Penyelenggara')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <label for="pusat" class="form-label">No. SK Izin PPIU Pusat @include('partials.required-star')</label>
+                                                <input type="text" class="form-control form-control-lg @error('pusat') is-invalid @enderror"
+                                                    id="pusat" name="pusat" value="{{ old('pusat') }}" required>
+                                                @error('pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <label for="pimpinan_pusat" class="form-label">Nama Pimpinan Pusat @include('partials.required-star')</label>
+                                                <input type="text" class="form-control form-control-lg @error('pimpinan_pusat') is-invalid @enderror"
+                                                    id="pimpinan_pusat" name="pimpinan_pusat" value="{{ old('pimpinan_pusat') }}" required>
+                                                @error('pimpinan_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <label for="alamat_pusat" class="form-label">Alamat Kantor Pusat @include('partials.required-star')</label>
+                                                <textarea class="form-control @error('alamat_pusat') is-invalid @enderror"
+                                                    id="alamat_pusat" name="alamat_pusat" rows="3" required>{{ old('alamat_pusat') }}</textarea>
+                                                @error('alamat_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                            </div>
+
+                                            <div class="col-12 col-lg-8 mx-auto mb-4">
+                                                <label for="dokumen_sk_pusat" class="form-label">SK Izin PPIU Pusat @include('partials.required-star')</label>
+                                                <input type="file" class="form-control @error('dokumen_sk_pusat') is-invalid @enderror"
+                                                    id="dokumen_sk_pusat" name="dokumen_sk_pusat" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                @error('dokumen_sk_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
                                             </div>
                                         </div>
                                     </section>
@@ -195,7 +250,7 @@
                                             <div class="col-12 col-lg-8 mx-auto">
                                                 <div class="alert alert-light border mb-0 small">
                                                     <i class="bx bx-info-circle text-primary me-1"></i>
-                                                    SK izin pusat tidak perlu diunggah. Sistem membacanya dari travel pusat yang Anda pilih.
+                                                    SK izin pusat tidak diunggah di sini. Pusat terdaftar dibaca dari sistem, pusat luar NTB sudah diunggah di langkah Pusat.
                                                 </div>
                                             </div>
                                         </div>
@@ -247,6 +302,25 @@
     @include('partials.input-limits-script')
     @include('travel-registration.partials.wizard-scripts', ['reviewGroups' => $reviewGroups])
     <script>
+        // Kelompok isian yang tidak dipakai di-disable, supaya tidak ikut
+        // divalidasi wizard, tidak terkirim, dan tidak muncul di Review.
+        function togglePusatFields() {
+            const terdaftar = document.getElementById('pusat_terdaftar_ya').checked;
+
+            [['pusat-terdaftar-fields', terdaftar], ['pusat-manual-fields', !terdaftar]].forEach(function ([id, aktif]) {
+                const box = document.getElementById(id);
+                box.classList.toggle('d-none', !aktif);
+                box.querySelectorAll('input, select, textarea').forEach(function (field) {
+                    field.disabled = !aktif;
+                });
+            });
+        }
+
+        document.querySelectorAll('input[name="pusat_terdaftar"]').forEach(function (radio) {
+            radio.addEventListener('change', togglePusatFields);
+        });
+        togglePusatFields();
+
         document.getElementById('travel_id').addEventListener('change', function () {
             const option = this.selectedOptions[0];
             const box = document.getElementById('pusat-info');

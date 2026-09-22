@@ -137,9 +137,17 @@ class TravelRegistrationController extends Controller
         }
 
         $validated = ValidationHelper::validate($request, array_merge([
-            // Cabang harus menempel pada pusat yang izinnya sudah disetujui, karena
-            // dari sinilah nomor SK pusat dan identitas pusat dibaca.
-            'travel_id' => ['required', 'integer', Rule::exists('travels', 'id')->where('registration_status', TravelRegistrationStatus::Approved->value)],
+            // Pusat yang terdata dipilih dari daftar travel yang izinnya sudah
+            // disetujui, dari sinilah nomor SK dan identitas pusat dibaca. Pusat
+            // di luar NTB belum tentu terdata, jadi identitas dan SK-nya diisi
+            // manual lalu diperiksa Kabupaten/Kota dan Kanwil seperti berkas lain.
+            'pusat_terdaftar' => 'required|boolean',
+            'travel_id' => ['exclude_unless:pusat_terdaftar,1', 'required', 'integer', Rule::exists('travels', 'id')->where('registration_status', TravelRegistrationStatus::Approved->value)],
+            'Penyelenggara' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
+            'pusat' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
+            'pimpinan_pusat' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
+            'alamat_pusat' => 'exclude_unless:pusat_terdaftar,0|'.ValidationHelper::textRule(),
+            'dokumen_sk_pusat' => "exclude_unless:pusat_terdaftar,0|required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
             // Satu pusat hanya boleh punya satu pendaftaran cabang aktif per
             // wilayah. Tanpa ini kantor yang sama bisa didaftarkan berkali kali
             // asal memakai email PIC berbeda, dan Kabko melihat antrean ganda.
@@ -148,7 +156,11 @@ class TravelRegistrationController extends Controller
                 'string',
                 Rule::in(NtbKabupatenMap::names()),
                 Rule::unique('travel_cabang', 'kabupaten')->where(fn ($query) => $query
-                    ->where('travel_id', $request->input('travel_id'))
+                    ->when(
+                        $request->boolean('pusat_terdaftar'),
+                        fn ($q) => $q->where('travel_id', $request->input('travel_id')),
+                        fn ($q) => $q->whereNull('travel_id')->where('Penyelenggara', $request->input('Penyelenggara')),
+                    )
                     ->whereIn('registration_status', [
                         TravelRegistrationStatus::Pending->value,
                         TravelRegistrationStatus::MenungguKanwil->value,
@@ -165,7 +177,12 @@ class TravelRegistrationController extends Controller
             'pic_nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:8|confirmed',
         ], $dokumenRules), array_merge($dokumenMessages, [
+            'pusat_terdaftar.required' => 'Pilih apakah travel pusat sudah terdaftar di sistem.',
             'travel_id.required' => 'Pilih travel pusat yang menaungi cabang ini.',
+            'Penyelenggara.required' => 'Isi nama travel pusat.',
+            'pusat.required' => 'Isi nomor SK izin PPIU pusat.',
+            'pimpinan_pusat.required' => 'Isi nama pimpinan pusat.',
+            'dokumen_sk_pusat.required' => 'Unggah SK izin PPIU pusat.',
             'travel_id.exists' => 'Travel pusat tidak ditemukan atau izinnya belum disetujui.',
             'kabupaten.in' => 'Pilih kabupaten/kota yang ada di NTB.',
             'kabupaten.unique' => 'Cabang travel ini di kabupaten/kota tersebut sudah pernah didaftarkan. Hubungi Kanwil bila statusnya belum juga diproses.',
@@ -173,10 +190,12 @@ class TravelRegistrationController extends Controller
         ]));
 
         $cabang = DB::transaction(function () use ($request, $validated) {
-            $pusat = TravelCompany::findOrFail($validated['travel_id']);
-
             $data = collect($validated)->only([
                 'travel_id',
+                'Penyelenggara',
+                'pusat',
+                'pimpinan_pusat',
+                'alamat_pusat',
                 'kabupaten',
                 'SK_BA',
                 'tanggal',
@@ -185,11 +204,18 @@ class TravelRegistrationController extends Controller
                 'telepon',
             ])->all();
 
-            // Identitas pusat tidak diketik ulang, ikut data pusat yang dipilih.
-            $data['Penyelenggara'] = $pusat->Penyelenggara;
-            $data['pusat'] = $pusat->Pusat;
-            $data['pimpinan_pusat'] = $pusat->Pimpinan;
-            $data['alamat_pusat'] = $pusat->alamat_kantor_baru ?: $pusat->alamat_kantor_lama;
+            if (isset($validated['travel_id'])) {
+                // Identitas pusat tidak diketik ulang, ikut data pusat yang dipilih.
+                $pusat = TravelCompany::findOrFail($validated['travel_id']);
+                $data['Penyelenggara'] = $pusat->Penyelenggara;
+                $data['pusat'] = $pusat->Pusat;
+                $data['pimpinan_pusat'] = $pusat->Pimpinan;
+                $data['alamat_pusat'] = $pusat->alamat_kantor_baru ?: $pusat->alamat_kantor_lama;
+            } else {
+                $data['dokumen_sk_pusat'] = StorageHelper::normalizePath(
+                    $request->file('dokumen_sk_pusat')->store('registrasi-cabang/sk_pusat', 'public')
+                );
+            }
             $data['registration_status'] = TravelRegistrationStatus::Pending;
 
             foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {
