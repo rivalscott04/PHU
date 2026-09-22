@@ -302,6 +302,9 @@
     @include('partials.input-limits-script')
     @include('travel-registration.partials.wizard-scripts', ['reviewGroups' => $reviewGroups])
     <script>
+        // Wizard membangun ulang DOM saat DOMContentLoaded, jadi listener yang
+        // dipasang langsung ke elemen hilang. Dengarkan dari document saja.
+        //
         // Kelompok isian yang tidak dipakai di-disable, supaya tidak ikut
         // divalidasi wizard, tidak terkirim, dan tidak muncul di Review.
         function togglePusatFields() {
@@ -316,19 +319,21 @@
             });
         }
 
-        document.querySelectorAll('input[name="pusat_terdaftar"]').forEach(function (radio) {
-            radio.addEventListener('change', togglePusatFields);
-        });
-        togglePusatFields();
+        document.addEventListener('change', function (event) {
+            if (event.target.name === 'pusat_terdaftar') {
+                togglePusatFields();
+            }
 
-        document.getElementById('travel_id').addEventListener('change', function () {
-            const option = this.selectedOptions[0];
-            const box = document.getElementById('pusat-info');
+            if (event.target.id === 'travel_id') {
+                const option = event.target.selectedOptions[0];
 
-            box.classList.toggle('d-none', !this.value);
-            document.getElementById('pusat-sk').textContent = option?.dataset.sk || '-';
-            document.getElementById('pusat-pimpinan').textContent = option?.dataset.pimpinan || '-';
+                document.getElementById('pusat-info').classList.toggle('d-none', !event.target.value);
+                document.getElementById('pusat-sk').textContent = option?.dataset.sk || '-';
+                document.getElementById('pusat-pimpinan').textContent = option?.dataset.pimpinan || '-';
+            }
         });
+
+        document.addEventListener('DOMContentLoaded', togglePusatFields);
     </script>
 </body>
 </html>
