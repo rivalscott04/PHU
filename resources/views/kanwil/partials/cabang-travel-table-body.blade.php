@@ -67,6 +67,11 @@
                         <dl class="row small mb-4">
                             <dt class="col-sm-3 text-muted fw-normal">Kantor pusat</dt>
                             <dd class="col-sm-9 mb-2">
+                                @if (! $item->travel_id && $item->dokumen_sk_pusat)
+                                    <span class="badge bg-warning text-dark mb-1">Pusat belum terdata di sistem</span><br>
+                                    <span class="text-muted">No. SK izin:</span> {{ $item->pusat ?: '-' }}.
+                                    Cocokkan dengan berkas SK Pusat di bawah.<br>
+                                @endif
                                 {{ $item->pimpinan_pusat }}<br>
                                 <span class="text-muted">{{ $item->alamat_pusat }}</span>
                             </dd>

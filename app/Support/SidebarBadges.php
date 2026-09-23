@@ -5,8 +5,10 @@ namespace App\Support;
 use App\Enums\BapStatus;
 use App\Enums\FollowupStatus;
 use App\Enums\InspectionStatus;
+use App\Enums\TravelRegistrationStatus;
 use App\Enums\UserRole;
 use App\Models\BAP;
+use App\Models\CabangTravel;
 use App\Models\Followup;
 use App\Models\Inspection;
 use App\Models\User;
@@ -28,6 +30,7 @@ final class SidebarBadges
                 ?: HomeCommandCenter::countBapPendingForScope(self::kabupatenScope($user)),
             'pengaduan_open' => self::countFromQueues($queues, 'pengaduan_open'),
             'registration_pending' => self::countFromQueues($queues, 'registration_pending'),
+            'cabang_pending' => self::cabangPendingCount($user),
             'followup_verify' => self::followupVerifyCount($user, $scope),
             'followup_action' => self::followupActionCount($user),
             'bap_draft' => self::bapDraftCount($user),
@@ -175,6 +178,27 @@ final class SidebarBadges
             ->where('user_id', $user->id)
             ->where('status', BapStatus::Pending->value)
             ->count();
+    }
+
+    /**
+     * Cabang yang menunggu tindakan user ini: Kabupaten/Kota meninjau yang
+     * baru masuk di wilayahnya, Kanwil memutus yang sudah direkomendasikan.
+     */
+    private static function cabangPendingCount(User $user): int
+    {
+        if ($user->role === UserRole::Admin->value) {
+            return CabangTravel::query()->awaitingKanwil()->count();
+        }
+
+        if ($user->role !== UserRole::Kabupaten->value) {
+            return 0;
+        }
+
+        $query = CabangTravel::query()
+            ->where('registration_status', TravelRegistrationStatus::Pending->value);
+        KabupatenScopeFilter::applyOnColumn($query, KabupatenScopeFilter::filtersForUser($user), 'kabupaten');
+
+        return $query->count();
     }
 
     /** Pemeriksaan yang dibuat user ini dan belum ditutup. */

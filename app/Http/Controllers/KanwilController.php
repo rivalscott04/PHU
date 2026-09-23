@@ -632,6 +632,7 @@ class KanwilController extends Controller
             'dokumen_akta',
             'dokumen_ktp_kepala',
             'dokumen_sk_du',
+            'dokumen_sk_pusat',
             'dokumen_rekomendasi',
             'catatan_rekomendasi',
             'recommended_at',

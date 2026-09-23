@@ -416,6 +416,36 @@
             updateWizardProgress(0);
         }
 
+        // Browser hanya menyimpan rujukan ke file di disk, isinya baru dibaca
+        // saat formulir dikirim. Kalau file itu disunting, dipindah, atau masih
+        // disinkronkan (Acrobat, Google Drive, OneDrive) sesudah dipilih, Chrome
+        // membatalkan kiriman dengan ERR_FILE_NOT_FOUND. Salin isinya ke memori
+        // begitu dipilih supaya yang terkirim tidak lagi bergantung pada disk.
+        form.addEventListener('change', async function (event) {
+            const input = event.target;
+            if (input.type !== 'file' || !input.files || input.files.length === 0) {
+                return;
+            }
+
+            const file = input.files[0];
+            if (file.size > MAX_FILE_SIZE) {
+                return;
+            }
+
+            try {
+                const copy = new File([await file.arrayBuffer()], file.name, {
+                    type: file.type,
+                    lastModified: file.lastModified,
+                });
+                const transfer = new DataTransfer();
+                transfer.items.add(copy);
+                input.files = transfer.files;
+            } catch (error) {
+                input.value = '';
+                markFieldInvalid(input, 'File tidak bisa dibaca. Tutup file di aplikasi lain atau salin ke folder lokal, lalu pilih ulang.');
+            }
+        });
+
         document.addEventListener('DOMContentLoaded', function () {
             bindPhoneSanitizer();
             initWizard();

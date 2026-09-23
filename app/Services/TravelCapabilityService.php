@@ -301,6 +301,7 @@ class TravelCapabilityService
                     self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending'),
                     self::subItem('Pengaduan', 'pengaduan', badge: 'pengaduan_open'),
                     self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
+                    self::subItem('Registrasi Cabang', 'cabang.travel', params: ['filter' => 'pending'], badge: 'cabang_pending'),
                 ],
             ],
             [
@@ -361,6 +362,7 @@ class TravelCapabilityService
                     self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
                     self::subItem('Pengaduan', 'pengaduan', badge: 'pengaduan_open'),
                     self::subItem('Registrasi Travel', 'travel', params: ['filter' => 'pending'], badge: 'registration_pending'),
+                    self::subItem('Registrasi Cabang', 'cabang.travel', params: ['filter' => 'menunggu_kanwil'], badge: 'cabang_pending'),
                 ],
             ],
             [
