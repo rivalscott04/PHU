@@ -9,6 +9,19 @@
         ['title' => 'Upload Dokumen', 'fields' => ['dokumen_sk', 'dokumen_akreditasi']],
         ['title' => 'Akun PIC', 'fields' => ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password']],
     ];
+
+    // Setelah gagal di server, buka wizard di langkah yang memuat error pertama.
+    // Error tanpa pasangan langkah (misalnya pilihan jalur pusat) jatuh ke langkah pertama.
+    $errorStep = null;
+    if ($errors->any()) {
+        $errorStep = 0;
+        foreach ($reviewGroups as $index => $group) {
+            if (array_intersect($group['fields'], $errors->keys())) {
+                $errorStep = $index;
+                break;
+            }
+        }
+    }
 @endphp
 
 <script src="{{ asset('libs/jquery-steps/build/jquery.steps.min.js') }}"></script>
@@ -22,6 +35,7 @@
         const MAX_FILE_SIZE = 1572864; // 1.5 MB
 
         const reviewGroups = @json($reviewGroups);
+        const ERROR_STEP = @json($errorStep);
 
         // Review adalah langkah setelah semua langkah isian.
         const REVIEW_STEP_INDEX = reviewGroups.length;
@@ -159,6 +173,7 @@
         }
 
         function resetFieldValidation(field) {
+            field.setCustomValidity('');
             field.classList.remove('is-invalid', 'is-valid');
             const container = fieldContainer(field);
             if (container) {
@@ -171,6 +186,9 @@
         }
 
         function markFieldInvalid(field, message) {
+            // Tanpa ini Bootstrap tetap mewarnai hijau (:valid) karena bagi
+            // browser field wajib itu sudah terisi.
+            field.setCustomValidity(message);
             const fieldContainerEl = fieldContainer(field);
             field.classList.add('is-invalid');
             field.classList.remove('is-valid');
@@ -190,6 +208,7 @@
         }
 
         function markFieldValid(field) {
+            field.setCustomValidity('');
             const fieldContainerEl = fieldContainer(field);
             field.classList.remove('is-invalid');
             field.classList.add('is-valid');
@@ -217,8 +236,17 @@
                     return true;
                 }
 
-                if (field.files[0].size > MAX_FILE_SIZE) {
-                    markFieldInvalid(field, 'Ukuran file maksimal 1,5 MB');
+                const file = field.files[0];
+                if (!/\.(pdf|jpe?g|png)$/i.test(file.name)) {
+                    markFieldInvalid(field, /\.hei[cf]$/i.test(file.name)
+                        ? 'Foto iPhone (HEIC) belum didukung. Ubah ke JPG dulu, atau di iPhone atur Kamera > Format > Paling Kompatibel.'
+                        : 'Format harus PDF, JPG, atau PNG.');
+                    return false;
+                }
+
+                if (file.size > MAX_FILE_SIZE) {
+                    const mb = (file.size / 1048576).toFixed(1).replace('.', ',');
+                    markFieldInvalid(field, 'Ukuran file ' + mb + ' MB, maksimal 1,5 MB. Perkecil dulu, misalnya scan ulang dengan resolusi lebih rendah.');
                     return false;
                 }
 
@@ -356,8 +384,25 @@
                 return;
             }
 
+            // jQuery Steps belum punya setStep ("Not yet implemented"), jadi
+            // mundur satu per satu. Langkah mundur tidak pernah divalidasi.
+            function goToStep(index) {
+                while ($wizard.steps('getCurrentIndex') > index) {
+                    $wizard.steps('previous');
+                }
+                getStepBody(index)?.querySelector('.is-invalid')?.focus();
+            }
+
+            let submitting = false;
+            // Tombol Kembali browser bisa memulihkan halaman dari cache dengan
+            // status "sedang mengirim", jadi kunci dilepas lagi di sini.
+            window.addEventListener('pageshow', function () {
+                submitting = false;
+            });
+
             $wizard.steps({
                 headerTag: 'h3',
+                startIndex: ERROR_STEP || 0,
                 bodyTag: 'section',
                 transitionEffect: 'slide',
                 enableFinishButton: true,
@@ -386,7 +431,7 @@
                         const firstInvalid = validateAllInputSteps();
                         if (firstInvalid !== -1) {
                             setTimeout(function () {
-                                $wizard.steps('setStep', firstInvalid);
+                                goToStep(firstInvalid);
                             }, 0);
                             return false;
                         }
@@ -398,22 +443,34 @@
                 onFinishing: function () {
                     const firstInvalid = validateAllInputSteps();
                     if (firstInvalid !== -1) {
-                        $wizard.steps('setStep', firstInvalid);
+                        setTimeout(function () {
+                            goToStep(firstInvalid);
+                        }, 0);
                         return false;
                     }
 
                     renderReview();
                     return true;
                 },
-                onStepChanged: function (event, currentIndex) {
-                    updateWizardProgress(currentIndex);
+                onStepChanged: function () {
+                    // Saat goToStep mundur beberapa langkah, event dari animasi
+                    // bisa datang tidak berurutan. Baca posisi sebenarnya.
+                    updateWizardProgress($wizard.steps('getCurrentIndex'));
                 },
                 onFinished: function () {
+                    // Klik ganda mengirim dua kali: yang pertama berhasil, yang
+                    // kedua ditolak karena email sudah terpakai, dan halaman
+                    // error itulah yang terlihat pendaftar.
+                    if (submitting) {
+                        return;
+                    }
+                    submitting = true;
+                    $wizard.find('a[href="#finish"]').text('Mengirim...');
                     form.submit();
                 }
             });
 
-            updateWizardProgress(0);
+            updateWizardProgress(ERROR_STEP || 0);
         }
 
         // Browser hanya menyimpan rujukan ke file di disk, isinya baru dibaca
@@ -427,10 +484,13 @@
                 return;
             }
 
-            const file = input.files[0];
-            if (file.size > MAX_FILE_SIZE) {
+            // Periksa saat itu juga, jangan tunggu tombol Lanjut. Kalau baru
+            // ketahuan di server, semua berkas lain harus dipilih ulang.
+            if (!validateField(input)) {
                 return;
             }
+
+            const file = input.files[0];
 
             try {
                 const copy = new File([await file.arrayBuffer()], file.name, {

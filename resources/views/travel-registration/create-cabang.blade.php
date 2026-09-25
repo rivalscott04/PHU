@@ -41,7 +41,7 @@
                         </a>
                         <h4 class="mt-3 mb-1">Registrasi Travel</h4>
                         <p class="text-muted mb-0 mx-auto" style="max-width: 560px">
-                            Untuk kantor cabang dari travel yang izin pusatnya sudah terdaftar.
+                            Untuk kantor cabang di NTB, baik pusatnya sudah terdaftar maupun berkantor di luar NTB.
                             Isi langkah demi langkah, tidak perlu sekaligus.
                         </p>
                     </div>
@@ -56,6 +56,9 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <div class="mt-2 small">
+                                Berkas yang sudah dipilih tidak ikut tersimpan. Pilih ulang semua berkas sebelum mengirim lagi.
+                            </div>
                         </div>
                     @endif
 

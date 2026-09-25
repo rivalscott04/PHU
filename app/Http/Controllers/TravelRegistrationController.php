@@ -49,6 +49,8 @@ class TravelRegistrationController extends Controller
             ValidationHelper::fileMaxMb('dokumen_akreditasi', 1.5),
             [
                 'kab_kota.in' => 'Pilih kabupaten/kota yang ada di NTB.',
+                'dokumen_sk.mimes' => self::PESAN_FORMAT_BERKAS,
+                'dokumen_akreditasi.mimes' => self::PESAN_FORMAT_BERKAS,
             ]
         ));
 
@@ -125,6 +127,13 @@ class TravelRegistrationController extends Controller
 
     public function storeCabang(Request $request)
     {
+        // Email dan HP disamakan formatnya dulu, supaya "Nama@Mail.com" atau
+        // "+62 812..." tidak lolos cek unik lalu gagal saat dipakai login.
+        $request->merge(array_filter([
+            'pic_email' => $request->filled('pic_email') ? strtolower($request->input('pic_email')) : null,
+            'pic_nomor_hp' => $request->filled('pic_nomor_hp') ? User::normalizeNomorHp($request->input('pic_nomor_hp')) : null,
+        ]));
+
         $this->releaseRejectedRegistrationCredentials($request);
 
         $fileMaxKb = ValidationHelper::fileMaxKb(1.5);
@@ -133,7 +142,9 @@ class TravelRegistrationController extends Controller
 
         foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {
             $dokumenRules[$meta['column']] = "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}";
-            $dokumenMessages = array_merge($dokumenMessages, ValidationHelper::fileMaxMb($meta['column'], 1.5));
+            $dokumenMessages = array_merge($dokumenMessages, ValidationHelper::fileMaxMb($meta['column'], 1.5), [
+                "{$meta['column']}.mimes" => self::PESAN_FORMAT_BERKAS,
+            ]);
         }
 
         $validated = ValidationHelper::validate($request, array_merge([
@@ -144,7 +155,7 @@ class TravelRegistrationController extends Controller
             'pusat_terdaftar' => 'required|boolean',
             'travel_id' => ['exclude_unless:pusat_terdaftar,1', 'required', 'integer', Rule::exists('travels', 'id')->where('registration_status', TravelRegistrationStatus::Approved->value)],
             'Penyelenggara' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
-            'pusat' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
+            'pusat' => ['exclude_unless:pusat_terdaftar,0', 'required', 'string', 'max:255', $this->pusatBelumTerdataRule()],
             'pimpinan_pusat' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
             'alamat_pusat' => 'exclude_unless:pusat_terdaftar,0|'.ValidationHelper::textRule(),
             'dokumen_sk_pusat' => "exclude_unless:pusat_terdaftar,0|required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
@@ -159,7 +170,11 @@ class TravelRegistrationController extends Controller
                     ->when(
                         $request->boolean('pusat_terdaftar'),
                         fn ($q) => $q->where('travel_id', $request->input('travel_id')),
-                        fn ($q) => $q->whereNull('travel_id')->where('Penyelenggara', $request->input('Penyelenggara')),
+                        // Pusat manual diketik tangan, jadi "PT. Nur Islami" dan
+                        // "pt nur islami" dianggap sama, begitu juga nomor SK-nya.
+                        fn ($q) => $q->whereNull('travel_id')->where(fn ($same) => $same
+                            ->whereRaw(self::NAMA_RINGKAS_SQL.' = ?', [self::namaRingkas((string) $request->input('Penyelenggara'))])
+                            ->orWhereRaw('LOWER(TRIM(pusat)) = ?', [strtolower(trim((string) $request->input('pusat')))])),
                     )
                     ->whereIn('registration_status', [
                         TravelRegistrationStatus::Pending->value,
@@ -168,7 +183,7 @@ class TravelRegistrationController extends Controller
                     ])),
             ],
             'SK_BA' => 'required|string|max:255',
-            'tanggal' => 'required|date',
+            'tanggal' => 'required|date|before_or_equal:today',
             'pimpinan_cabang' => 'required|string|max:255',
             'alamat_cabang' => ValidationHelper::textRule(),
             'telepon' => ValidationHelper::teleponRules(),
@@ -183,10 +198,12 @@ class TravelRegistrationController extends Controller
             'pusat.required' => 'Isi nomor SK izin PPIU pusat.',
             'pimpinan_pusat.required' => 'Isi nama pimpinan pusat.',
             'dokumen_sk_pusat.required' => 'Unggah SK izin PPIU pusat.',
+            'dokumen_sk_pusat.mimes' => self::PESAN_FORMAT_BERKAS,
             'travel_id.exists' => 'Travel pusat tidak ditemukan atau izinnya belum disetujui.',
             'kabupaten.in' => 'Pilih kabupaten/kota yang ada di NTB.',
             'kabupaten.unique' => 'Cabang travel ini di kabupaten/kota tersebut sudah pernah didaftarkan. Hubungi Kanwil bila statusnya belum juga diproses.',
             'SK_BA.required' => 'Isi nomor SK / berita acara pembukaan cabang.',
+            'tanggal.before_or_equal' => 'Tanggal SK / BA tidak boleh melewati hari ini.',
         ]));
 
         $cabang = DB::transaction(function () use ($request, $validated) {
@@ -252,6 +269,39 @@ class TravelRegistrationController extends Controller
             ->route('travel.registration.success')
             ->with('jenis_pendaftaran', 'cabang')
             ->with('success', 'Pendaftaran cabang berhasil dikirim. Kantor Kemenhaj Kabupaten/Kota akan melakukan peninjauan terlebih dahulu.');
+    }
+
+    private const PESAN_FORMAT_BERKAS = ':attribute harus berformat PDF, JPG, atau PNG. Foto iPhone (HEIC) ubah dulu ke JPG.';
+
+    /** Nama PT tanpa titik, koma, spasi, dan huruf besar, untuk mendeteksi ketikan ganda. */
+    private const NAMA_RINGKAS_SQL = "REPLACE(REPLACE(REPLACE(LOWER(Penyelenggara), '.', ''), ',', ''), ' ', '')";
+
+    private static function namaRingkas(string $nama): string
+    {
+        return str_replace(['.', ',', ' '], '', strtolower($nama));
+    }
+
+    /**
+     * Jalur manual hanya untuk pusat yang belum ada di sistem. Kalau nomor SK
+     * yang diketik ternyata milik pusat terdata, cabang itu harus menempel ke
+     * pusatnya, bukan jadi entri lepas yang tidak terhubung.
+     */
+    private function pusatBelumTerdataRule(): \Closure
+    {
+        return function (string $attribute, mixed $value, \Closure $fail): void {
+            $pusat = TravelCompany::query()
+                ->whereRaw('LOWER(TRIM(Pusat)) = ?', [strtolower(trim((string) $value))])
+                ->where('registration_status', '!=', TravelRegistrationStatus::Rejected->value)
+                ->first(['registration_status']);
+
+            if ($pusat === null) {
+                return;
+            }
+
+            $fail($pusat->registration_status === TravelRegistrationStatus::Approved
+                ? 'Pusat dengan nomor SK ini sudah terdaftar. Pilih "Sudah, pilih dari daftar" lalu cari nama pusatnya.'
+                : 'Pusat dengan nomor SK ini masih diproses Kanwil. Daftarkan cabang setelah pusatnya disetujui.');
+        };
     }
 
     private function releaseRejectedRegistrationCredentials(Request $request): void

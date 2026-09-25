@@ -32,19 +32,22 @@
                         <i class="bx bx-check-shield me-1"></i> Verifikasi
                     </button>
                 @endif
-                <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" class="btn btn-sm btn-warning" title="Edit">
-                    <i class="bx bx-edit"></i>
-                </a>
-                <form id="delete-form-{{ $item->id_cabang }}"
-                    action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
-                    method="POST" style="display: inline;">
-                    @csrf
-                    @method('DELETE')
-                    <button type="button" class="btn btn-sm btn-danger"
-                        onclick="confirmDelete('{{ $item->id_cabang }}', '{{ addslashes($item->pimpinan_cabang) }}', 'cabang travel')" title="Hapus">
-                        <i class="bx bx-trash"></i>
-                    </button>
-                </form>
+                {{-- Dikunci selama ditinjau, lihat KanwilController::tolakJikaSedangDitinjau. --}}
+                @unless ($item->isRegistrationOpen())
+                    <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" class="btn btn-sm btn-warning" title="Edit">
+                        <i class="bx bx-edit"></i>
+                    </a>
+                    <form id="delete-form-{{ $item->id_cabang }}"
+                        action="{{ route('cabang.travel.destroy', $item->id_cabang) }}"
+                        method="POST" style="display: inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="button" class="btn btn-sm btn-danger"
+                            onclick="confirmDelete('{{ $item->id_cabang }}', '{{ addslashes($item->pimpinan_cabang) }}', 'cabang travel')" title="Hapus">
+                            <i class="bx bx-trash"></i>
+                        </button>
+                    </form>
+                @endunless
             </div>
 
             {{-- Modal harus berada di dalam <td>. Ditaruh langsung di bawah <tr>
@@ -124,8 +127,11 @@
                         @endif
 
                         @if ($item->isRegistrationPending())
+                            {{-- Unggahan butuh waktu; tanpa penguncian, klik kedua menampilkan
+                                 "sudah diproses" seolah kiriman pertama gagal. --}}
                             <form method="POST" enctype="multipart/form-data"
-                                action="{{ route('cabang.travel.recommend', $item->id_cabang) }}">
+                                action="{{ route('cabang.travel.recommend', $item->id_cabang) }}"
+                                onsubmit="this.querySelector('button[type=submit]').disabled = true;">
                                 @csrf
                                 <h6>Unggah Rekomendasi / BA Laporan Peninjauan</h6>
                                 <p class="text-muted small">
@@ -166,18 +172,22 @@
                             <hr>
                         @endif
 
-                        <form method="POST" action="{{ route('cabang.travel.reject', $item->id_cabang) }}"
-                            onsubmit="event.preventDefault(); confirmRejectCabang(this, @js($item->Penyelenggara));">
-                            @csrf
-                            <h6>Tolak Pendaftaran</h6>
-                            <div class="mb-3">
-                                <label class="form-label">Alasan Penolakan @include('partials.required-star')</label>
-                                <textarea class="form-control" name="registration_notes" rows="2" maxlength="1000" required></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-danger btn-sm">
-                                <i class="bx bx-x me-1"></i> Tolak
-                            </button>
-                        </form>
+                        {{-- Kabupaten/Kota hanya menolak di tahap peninjauannya. Setelah
+                             diteruskan, keputusan ada di Kanwil. --}}
+                        @if ($isAdmin || $item->isRegistrationPending())
+                            <form method="POST" action="{{ route('cabang.travel.reject', $item->id_cabang) }}"
+                                onsubmit="event.preventDefault(); confirmRejectCabang(this, @js($item->Penyelenggara));">
+                                @csrf
+                                <h6>Tolak Pendaftaran</h6>
+                                <div class="mb-3">
+                                    <label class="form-label">Alasan Penolakan @include('partials.required-star')</label>
+                                    <textarea class="form-control" name="registration_notes" rows="2" maxlength="1000" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-danger btn-sm">
+                                    <i class="bx bx-x me-1"></i> Tolak
+                                </button>
+                            </form>
+                        @endif
                     </div>
                 </div>
             </div>

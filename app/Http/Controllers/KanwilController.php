@@ -325,7 +325,9 @@ class KanwilController extends Controller
             'verified_by' => auth()->id(),
         ]);
 
-        $travel->user?->delete();
+        // Akun PIC sengaja tidak dihapus: saat login, pendaftar melihat
+        // "Pendaftaran Anda ditolak. Alasan: ...". Email/HP-nya dilepas
+        // otomatis kalau ia mendaftar ulang (releaseRejectedRegistrationCredentials).
         // Pendaftaran ditolak harus mendaftar ulang dari awal, jadi berkas
         // lamanya tidak akan dipakai lagi dan tidak perlu menumpuk di storage.
         $travel->deleteRegistrationDocuments();
@@ -385,15 +387,12 @@ class KanwilController extends Controller
     /** @return array<string, mixed> */
     private function cabangFormData(): array
     {
-        $user = auth()->user();
+        // Semua pusat ditampilkan, bukan hanya yang sewilayah: cabang di Lombok
+        // Barat bisa saja berpusat di Kota Mataram. Kalau pusatnya tidak ada di
+        // daftar, form edit menyimpan travel_id kosong dan cabang terputus.
         $travelsQuery = TravelCompany::approved()
             ->select('id', 'Penyelenggara', 'Pusat', 'Pimpinan', 'alamat_kantor_lama', 'alamat_kantor_baru', 'kab_kota')
             ->orderBy('Penyelenggara');
-
-        if ($user->role === 'kabupaten') {
-            $filters = KabupatenScopeFilter::filtersForUser($user);
-            KabupatenScopeFilter::applyOnColumn($travelsQuery, $filters, 'kab_kota');
-        }
 
         return [
             'travels' => $travelsQuery->get(),
@@ -542,6 +541,15 @@ class KanwilController extends Controller
             return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
         }
 
+        // Izin cabang menempel pada pusat. Pusat bisa saja ditolak atau
+        // dicabut setelah cabang ini mendaftar.
+        if ($cabang->travel_id && ! $cabang->travel?->isRegistrationApproved()) {
+            return back()->with(
+                'error',
+                'Travel pusat cabang ini tidak lagi berstatus disetujui. Cabang tidak bisa disetujui sebelum pusatnya aktif.'
+            );
+        }
+
         // Sejalan dengan penjagaan pada pendaftaran pusat: jangan menyetujui
         // berkas yang tercatat ada tetapi filenya sudah hilang dari storage.
         if ($hilang = $cabang->missingRegistrationDocuments()) {
@@ -574,6 +582,12 @@ class KanwilController extends Controller
             return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
         }
 
+        // Setelah rekomendasi terkirim, keputusan ada di Kanwil. Kabupaten/Kota
+        // tidak boleh menimpanya dengan penolakan.
+        if ($user->role !== 'admin' && ! $cabang->isRegistrationPending()) {
+            return back()->with('error', 'Cabang ini sudah diteruskan ke Kanwil. Hubungi Kanwil bila perlu ditolak.');
+        }
+
         ValidationHelper::validate($request, [
             'registration_notes' => 'required|string|max:1000',
         ]);
@@ -585,7 +599,9 @@ class KanwilController extends Controller
             'verified_by' => $user->id,
         ]);
 
-        $cabang->user?->delete();
+        // Akun PIC sengaja tidak dihapus: saat login, pendaftar melihat
+        // "Pendaftaran Anda ditolak. Alasan: ...". Email/HP-nya dilepas
+        // otomatis kalau ia mendaftar ulang (releaseRejectedRegistrationCredentials).
         // Pendaftaran ditolak harus mendaftar ulang dari awal, jadi berkas
         // lamanya tidak akan dipakai lagi dan tidak perlu menumpuk di storage.
         $cabang->deleteRegistrationDocuments();
@@ -708,6 +724,10 @@ class KanwilController extends Controller
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
         KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
 
+        if ($terkunci = $this->tolakJikaSedangDitinjau($cabangTravel)) {
+            return $terkunci;
+        }
+
         return view('kanwil.editCabangTravel', $this->cabangFormData() + compact('cabangTravel'));
     }
 
@@ -715,6 +735,10 @@ class KanwilController extends Controller
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
         KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
+
+        if ($terkunci = $this->tolakJikaSedangDitinjau($cabangTravel)) {
+            return $terkunci;
+        }
 
         // Hanya field tervalidasi yang disimpan. Form edit tidak boleh jadi jalan
         // pintas untuk mengubah registration_status atau kolom verifikasi.
@@ -729,10 +753,33 @@ class KanwilController extends Controller
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil diperbarui.');
     }
 
+    /**
+     * Pendaftaran yang masih ditinjau dikunci untuk semua petugas. Data yang
+     * direkomendasikan Kabupaten/Kota harus sama dengan yang diputus Kanwil
+     * dan dengan yang dikirim pendaftar. Perbaikan lewat Tolak beserta alasan,
+     * lalu pendaftar mengirim ulang. Hapus ikut dikunci karena sama saja
+     * menolak tanpa alasan.
+     */
+    private function tolakJikaSedangDitinjau(CabangTravel $cabang): ?\Illuminate\Http\RedirectResponse
+    {
+        if (! $cabang->isRegistrationOpen()) {
+            return null;
+        }
+
+        return redirect()
+            ->route('cabang.travel')
+            ->with('error', "Pendaftaran {$cabang->Penyelenggara} masih ditinjau dan tidak bisa diubah atau dihapus. Bila datanya perlu diperbaiki, tolak dengan alasan agar pendaftar mengirim ulang.");
+    }
+
     public function destroyCabangTravel($id_cabang)
     {
         $cabangTravel = CabangTravel::findOrFail($id_cabang);
         KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabangTravel);
+
+        if ($terkunci = $this->tolakJikaSedangDitinjau($cabangTravel)) {
+            return $terkunci;
+        }
+
         $cabangTravel->delete();
 
         return redirect()->route('cabang.travel')->with('success', 'Data cabang travel berhasil dihapus.');

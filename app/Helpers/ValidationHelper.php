@@ -30,6 +30,11 @@ class ValidationHelper
         'password_confirmation' => 'Ulangi Password',
         'dokumen_sk' => 'Scan SK / Izin Operasional',
         'dokumen_akreditasi' => 'Scan Sertifikat Akreditasi',
+        'dokumen_sk_pusat' => 'SK Izin PPIU Pusat',
+        'dokumen_oss' => 'OSS Cabang',
+        'dokumen_akta' => 'Akta Notaris / Pembukaan Cabang',
+        'dokumen_ktp_kepala' => 'KTP Kepala Cabang',
+        'dokumen_sk_du' => 'SK Domisili Usaha Kelurahan',
         'nama_pengadu' => 'Nama Pengadu',
         'travels_id' => 'Travel yang Diadukan',
         'hal_aduan' => 'Hal yang Diadukan',
@@ -247,7 +252,7 @@ class ValidationHelper
      */
     public static function fileMaxMb(string $field, float $megabytes): array
     {
-        $label = fmod($megabytes, 1.0) === 0.0 ? (string) (int) $megabytes : (string) $megabytes;
+        $label = fmod($megabytes, 1.0) === 0.0 ? (string) (int) $megabytes : str_replace('.', ',', (string) $megabytes);
 
         return [
             "{$field}.max" => "Ukuran :attribute terlalu besar. Maksimal {$label} MB.",

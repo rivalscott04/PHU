@@ -68,9 +68,20 @@
         sanitizeField(field, max);
     }
 
+    // Nomor yang ditempel dari kontak WhatsApp atau diisi otomatis browser
+    // berbentuk +62 812-..., sementara sistem memakai format 08.
+    function digitsOnly(field, raw, max) {
+        let digits = raw.replace(/\D/g, '');
+        if (resolveKind(field) === 'phone' && /^\s*\+62/.test(raw)) {
+            digits = '0' + digits.slice(2);
+        }
+
+        return digits.slice(0, max);
+    }
+
     function sanitizeField(field, max) {
         max = max || resolveMaxLength(field);
-        const cleaned = field.value.replace(/\D/g, '').slice(0, max);
+        const cleaned = digitsOnly(field, field.value, max);
         const changed = field.value !== cleaned;
         if (changed) {
             field.value = cleaned;
@@ -162,7 +173,7 @@
         event.preventDefault();
         const max = resolveMaxLength(field);
         const pasted = (event.clipboardData || window.clipboardData).getData('text') || '';
-        const cleaned = pasted.replace(/\D/g, '').slice(0, max);
+        const cleaned = digitsOnly(field, pasted, max);
         if (pasted && pasted !== cleaned) {
             showDigitsOnlyHint(field);
         }

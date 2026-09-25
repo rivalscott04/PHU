@@ -142,6 +142,10 @@ class CabangTravel extends Model
             }
         }
 
+        if ($this->dokumen_sk_pusat && ! Storage::disk('public')->exists($this->dokumen_sk_pusat)) {
+            $hilang[] = 'SK Izin PPIU Pusat';
+        }
+
         return $hilang;
     }
 

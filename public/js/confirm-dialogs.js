@@ -125,7 +125,7 @@ function confirmRejectCabang(form, cabangName) {
 
     confirmAction({
         title: `Tolak pendaftaran cabang ${cabangName}?`,
-        html: 'Akun PIC cabang akan <strong>dihapus</strong> dan pendaftar harus mendaftar ulang.',
+        html: 'Alasan penolakan akan tampil saat PIC cabang mencoba login. Pendaftar harus mendaftar ulang.',
         icon: 'warning',
         confirmText: 'Ya, tolak',
         confirmColor: PANTAU_SWAL.danger,

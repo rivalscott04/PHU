@@ -37,6 +37,9 @@
                                     <li>{{ $error }}</li>
                                 @endforeach
                             </ul>
+                            <div class="mt-2 small">
+                                Berkas yang sudah dipilih tidak ikut tersimpan. Pilih ulang semua berkas sebelum mengirim lagi.
+                            </div>
                         </div>
                     @endif
 
