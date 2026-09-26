@@ -33,6 +33,8 @@
         }
 
         const MAX_FILE_SIZE = 1572864; // 1.5 MB
+        // Sisakan ruang untuk isian teks dan batas multipart.
+        const MAX_TOTAL_UPLOAD = @json(max(\App\Helpers\ValidationHelper::postMaxBytes() - 262144, 0));
 
         const reviewGroups = @json($reviewGroups);
         const ERROR_STEP = @json($errorStep);
@@ -102,7 +104,8 @@
                 return field.files[0].name;
             }
 
-            return 'Belum diupload';
+            // Berkas dari percobaan kirim sebelumnya masih dipegang server.
+            return field.dataset.tersimpan || 'Belum diupload';
         }
 
         function getFieldDisplayValue(fieldId) {
@@ -336,6 +339,36 @@
             return true;
         }
 
+        /**
+         * PHP membuang seluruh kiriman yang melebihi post_max_size, sehingga
+         * pendaftar terlempar kembali ke langkah awal dengan semua isian file
+         * kosong dan tanpa pesan. Cegat di sini selagi masih bisa dijelaskan.
+         */
+        function validateTotalUploadSize() {
+            const fileFields = [...form.querySelectorAll('input[type="file"]:not([disabled])')]
+                .filter(function (field) {
+                    return field.files && field.files.length > 0;
+                });
+
+            const total = fileFields.reduce(function (jumlah, field) {
+                return jumlah + field.files[0].size;
+            }, 0);
+
+            if (total <= MAX_TOTAL_UPLOAD) {
+                return true;
+            }
+
+            const mb = function (bytes) {
+                return (bytes / 1048576).toFixed(1).replace('.', ',');
+            };
+
+            markFieldInvalid(fileFields[0], 'Total semua berkas ' + mb(total) + ' MB, sedangkan server hanya menerima '
+                + mb(MAX_TOTAL_UPLOAD) + ' MB sekali kirim. Perkecil berkasnya dulu.');
+            fileFields[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+            return false;
+        }
+
         function validateAllInputSteps() {
             for (let i = 0; i < REVIEW_STEP_INDEX; i++) {
                 if (!validateStep(i)) {
@@ -435,12 +468,20 @@
                             }, 0);
                             return false;
                         }
+                        if (!validateTotalUploadSize()) {
+                            return false;
+                        }
+
                         renderReview();
                     }
 
                     return true;
                 },
                 onFinishing: function () {
+                    if (!validateTotalUploadSize()) {
+                        return false;
+                    }
+
                     const firstInvalid = validateAllInputSteps();
                     if (firstInvalid !== -1) {
                         setTimeout(function () {

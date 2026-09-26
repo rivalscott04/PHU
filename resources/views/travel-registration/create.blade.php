@@ -29,6 +29,12 @@
 
                     @include('travel-registration.partials.jenis-switcher', ['jenis' => 'pusat'])
 
+                    @if (session('error'))
+                        <div class="alert alert-danger col-lg-8 mx-auto">
+                            <i class="bx bx-error-circle me-1"></i>{{ session('error') }}
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="alert alert-danger col-lg-8 mx-auto">
                             <strong>Periksa kembali formulir:</strong>
@@ -38,7 +44,7 @@
                                 @endforeach
                             </ul>
                             <div class="mt-2 small">
-                                Berkas yang sudah dipilih tidak ikut tersimpan. Pilih ulang semua berkas sebelum mengirim lagi.
+                                Berkas yang sudah benar tetap tersimpan, tidak perlu diunggah ulang. Perbaiki isian yang ditandai saja.
                             </div>
                         </div>
                     @endif

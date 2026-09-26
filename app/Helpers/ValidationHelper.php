@@ -259,6 +259,33 @@ class ValidationHelper
         ];
     }
 
+    /**
+     * Batas total satu kiriman menurut PHP (post_max_size). Formulir yang
+     * membawa banyak berkas sekaligus bisa lewat batas ini, dan PHP membuang
+     * seluruh isi kiriman tanpa pesan, jadi batasnya perlu diketahui di muka.
+     *
+     * Nilai 0 atau kosong di PHP berarti tanpa batas.
+     */
+    public static function postMaxBytes(): int
+    {
+        return self::parseByteSize((string) ini_get('post_max_size'));
+    }
+
+    /** Terjemahkan notasi singkat php.ini ("8M", "512K") jadi byte. */
+    public static function parseByteSize(string $setting): int
+    {
+        $setting = trim($setting);
+
+        if ($setting === '' || (float) $setting <= 0) {
+            return PHP_INT_MAX;
+        }
+
+        $pengali = ['k' => 1024, 'm' => 1048576, 'g' => 1073741824];
+        $satuan = strtolower(substr($setting, -1));
+
+        return (int) ((float) $setting * ($pengali[$satuan] ?? 1));
+    }
+
     public static function fileMaxKb(float $megabytes): int
     {
         return (int) round($megabytes * 1024);

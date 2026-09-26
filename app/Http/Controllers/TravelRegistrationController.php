@@ -10,9 +10,9 @@ use App\Models\User;
 use App\Notifications\V2\CabangRegistrationSubmittedNotification;
 use App\Notifications\V2\TravelRegistrationSubmittedNotification;
 use App\Services\NotificationService;
-use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Support\NtbKabupatenMap;
+use App\Support\RegistrationFileStash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -20,18 +20,23 @@ use Illuminate\Validation\Rule;
 
 class TravelRegistrationController extends Controller
 {
-    public function create()
+    public function create(RegistrationFileStash $berkas)
     {
         return view('travel-registration.create', [
             'kabupatens' => NtbKabupatenMap::names(),
+            'berkasTersimpan' => $berkas->names(),
         ]);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, RegistrationFileStash $berkas)
     {
         $this->releaseRejectedRegistrationCredentials($request);
 
         $fileMaxKb = ValidationHelper::fileMaxKb(1.5);
+
+        // Berkas yang sudah benar disimpan dulu, supaya kesalahan di isian lain
+        // tidak memaksa pendaftar mengunggah ulang semuanya.
+        $berkas->capture($request, ['dokumen_sk', 'dokumen_akreditasi'], $fileMaxKb);
 
         $rules = array_merge(ValidationHelper::travelCompanyDataRules(), [
             'pic_nama' => 'required|string|max:255',
@@ -40,7 +45,7 @@ class TravelRegistrationController extends Controller
             'password' => 'required|string|min:8|confirmed',
             // Pusat hanya wajib SK izin. Sertifikat akreditasi opsional, nilainya
             // sendiri sudah diisi sebagai data pada langkah akreditasi.
-            'dokumen_sk' => "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
+            'dokumen_sk' => ($berkas->has('dokumen_sk') ? 'nullable' : 'required')."|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
             'dokumen_akreditasi' => "nullable|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
         ]);
 
@@ -54,7 +59,7 @@ class TravelRegistrationController extends Controller
             ]
         ));
 
-        $travel = DB::transaction(function () use ($request, $validated) {
+        $travel = DB::transaction(function () use ($berkas, $validated) {
             $travelData = collect($validated)->only([
                 'Penyelenggara',
                 'Status',
@@ -72,14 +77,10 @@ class TravelRegistrationController extends Controller
             ])->all();
 
             $travelData['registration_status'] = TravelRegistrationStatus::Pending;
-            $travelData['dokumen_sk'] = StorageHelper::normalizePath(
-                $request->file('dokumen_sk')->store('registrasi-travel/sk', 'public')
-            );
+            $travelData['dokumen_sk'] = $berkas->moveTo('dokumen_sk', 'registrasi-travel/sk');
 
-            if ($request->hasFile('dokumen_akreditasi')) {
-                $travelData['dokumen_akreditasi'] = StorageHelper::normalizePath(
-                    $request->file('dokumen_akreditasi')->store('registrasi-travel/akreditasi', 'public')
-                );
+            if ($berkas->has('dokumen_akreditasi')) {
+                $travelData['dokumen_akreditasi'] = $berkas->moveTo('dokumen_akreditasi', 'registrasi-travel/akreditasi');
             }
 
             $travel = TravelCompany::create($travelData);
@@ -104,6 +105,8 @@ class TravelRegistrationController extends Controller
             return $travel;
         });
 
+        $berkas->clear();
+
         app(NotificationService::class)->notifyReviewers(
             $travel,
             new TravelRegistrationSubmittedNotification($travel)
@@ -114,10 +117,11 @@ class TravelRegistrationController extends Controller
             ->with('success', 'Pendaftaran berhasil dikirim. Tim Kanwil akan memverifikasi data Anda.');
     }
 
-    public function createCabang()
+    public function createCabang(RegistrationFileStash $berkas)
     {
         return view('travel-registration.create-cabang', [
             'kabupatens' => NtbKabupatenMap::names(),
+            'berkasTersimpan' => $berkas->names(),
             'travels' => TravelCompany::approved()
                 ->select('id', 'Penyelenggara', 'Pusat', 'Pimpinan', 'kab_kota')
                 ->orderBy('Penyelenggara')
@@ -125,7 +129,7 @@ class TravelRegistrationController extends Controller
         ]);
     }
 
-    public function storeCabang(Request $request)
+    public function storeCabang(Request $request, RegistrationFileStash $berkas)
     {
         // Email dan HP disamakan formatnya dulu, supaya "Nama@Mail.com" atau
         // "+62 812..." tidak lolos cek unik lalu gagal saat dipakai login.
@@ -140,8 +144,16 @@ class TravelRegistrationController extends Controller
         $dokumenRules = [];
         $dokumenMessages = [];
 
+        // Berkas yang sudah benar disimpan dulu, supaya kesalahan di isian lain
+        // tidak memaksa pendaftar mengunggah ulang semuanya.
+        $berkas->capture($request, array_merge(
+            array_column(CabangTravel::DOKUMEN_PENDAFTARAN, 'column'),
+            ['dokumen_sk_pusat'],
+        ), $fileMaxKb);
+
         foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {
-            $dokumenRules[$meta['column']] = "required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}";
+            $dokumenRules[$meta['column']] = ($berkas->has($meta['column']) ? 'nullable' : 'required')
+                ."|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}";
             $dokumenMessages = array_merge($dokumenMessages, ValidationHelper::fileMaxMb($meta['column'], 1.5), [
                 "{$meta['column']}.mimes" => self::PESAN_FORMAT_BERKAS,
             ]);
@@ -158,7 +170,8 @@ class TravelRegistrationController extends Controller
             'pusat' => ['exclude_unless:pusat_terdaftar,0', 'required', 'string', 'max:255', $this->pusatBelumTerdataRule()],
             'pimpinan_pusat' => 'exclude_unless:pusat_terdaftar,0|required|string|max:255',
             'alamat_pusat' => 'exclude_unless:pusat_terdaftar,0|'.ValidationHelper::textRule(),
-            'dokumen_sk_pusat' => "exclude_unless:pusat_terdaftar,0|required|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
+            'dokumen_sk_pusat' => 'exclude_unless:pusat_terdaftar,0|'.($berkas->has('dokumen_sk_pusat') ? 'nullable' : 'required')
+                ."|file|mimes:pdf,jpg,jpeg,png|max:{$fileMaxKb}",
             // Satu pusat hanya boleh punya satu pendaftaran cabang aktif per
             // wilayah. Tanpa ini kantor yang sama bisa didaftarkan berkali kali
             // asal memakai email PIC berbeda, dan Kabko melihat antrean ganda.
@@ -191,7 +204,7 @@ class TravelRegistrationController extends Controller
             'pic_email' => 'required|email|max:255|unique:users,email',
             'pic_nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:8|confirmed',
-        ], $dokumenRules), array_merge($dokumenMessages, [
+        ], $dokumenRules), array_merge($dokumenMessages, ValidationHelper::fileMaxMb('dokumen_sk_pusat', 1.5), [
             'pusat_terdaftar.required' => 'Pilih apakah travel pusat sudah terdaftar di sistem.',
             'travel_id.required' => 'Pilih travel pusat yang menaungi cabang ini.',
             'Penyelenggara.required' => 'Isi nama travel pusat.',
@@ -206,7 +219,7 @@ class TravelRegistrationController extends Controller
             'tanggal.before_or_equal' => 'Tanggal SK / BA tidak boleh melewati hari ini.',
         ]));
 
-        $cabang = DB::transaction(function () use ($request, $validated) {
+        $cabang = DB::transaction(function () use ($berkas, $validated) {
             $data = collect($validated)->only([
                 'travel_id',
                 'Penyelenggara',
@@ -229,16 +242,12 @@ class TravelRegistrationController extends Controller
                 $data['pimpinan_pusat'] = $pusat->Pimpinan;
                 $data['alamat_pusat'] = $pusat->alamat_kantor_baru ?: $pusat->alamat_kantor_lama;
             } else {
-                $data['dokumen_sk_pusat'] = StorageHelper::normalizePath(
-                    $request->file('dokumen_sk_pusat')->store('registrasi-cabang/sk_pusat', 'public')
-                );
+                $data['dokumen_sk_pusat'] = $berkas->moveTo('dokumen_sk_pusat', 'registrasi-cabang/sk_pusat');
             }
             $data['registration_status'] = TravelRegistrationStatus::Pending;
 
             foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {
-                $data[$meta['column']] = StorageHelper::normalizePath(
-                    $request->file($meta['column'])->store("registrasi-cabang/{$type}", 'public')
-                );
+                $data[$meta['column']] = $berkas->moveTo($meta['column'], "registrasi-cabang/{$type}");
             }
 
             $cabang = CabangTravel::create($data);
@@ -259,6 +268,8 @@ class TravelRegistrationController extends Controller
 
             return $cabang;
         });
+
+        $berkas->clear();
 
         app(NotificationService::class)->notifyReviewersInKabupaten(
             $cabang->kabupaten,

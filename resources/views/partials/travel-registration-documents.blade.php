@@ -9,9 +9,12 @@
             Scan SK / Izin Operasional @include('partials.required-star')
         </label>
         <input type="file" class="form-control @error('dokumen_sk') is-invalid @enderror"
-            id="dokumen_sk" name="dokumen_sk" accept=".pdf,.jpg,.jpeg,.png" required>
+            id="dokumen_sk" name="dokumen_sk" accept=".pdf,.jpg,.jpeg,.png"
+            data-tersimpan="{{ ($berkasTersimpan ?? [])['dokumen_sk'] ?? '' }}"
+            @required(empty(($berkasTersimpan ?? [])['dokumen_sk']))>
         @error('dokumen_sk')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
+        @include('partials.berkas-tersimpan', ['field' => 'dokumen_sk'])
     </div>
 
     <div class="{{ $colClass }} mb-3">
@@ -19,8 +22,10 @@
             Scan Sertifikat Akreditasi <span class="text-muted fw-normal">(opsional)</span>
         </label>
         <input type="file" class="form-control @error('dokumen_akreditasi') is-invalid @enderror"
-            id="dokumen_akreditasi" name="dokumen_akreditasi" accept=".pdf,.jpg,.jpeg,.png">
+            id="dokumen_akreditasi" name="dokumen_akreditasi" accept=".pdf,.jpg,.jpeg,.png"
+            data-tersimpan="{{ ($berkasTersimpan ?? [])['dokumen_akreditasi'] ?? '' }}">
         @error('dokumen_akreditasi')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        @include('partials.berkas-tersimpan', ['field' => 'dokumen_akreditasi'])
         <div class="form-text">
             Boleh menyusul. Nilai akreditasi yang Anda isi sudah cukup untuk verifikasi.
             PDF atau foto (JPG/PNG), maksimal 1,5 MB.

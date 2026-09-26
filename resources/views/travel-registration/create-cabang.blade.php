@@ -48,6 +48,12 @@
 
                     @include('travel-registration.partials.jenis-switcher', ['jenis' => 'cabang'])
 
+                    @if (session('error'))
+                        <div class="alert alert-danger col-lg-8 mx-auto">
+                            <i class="bx bx-error-circle me-1"></i>{{ session('error') }}
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="alert alert-danger col-lg-8 mx-auto">
                             <strong>Periksa kembali formulir:</strong>
@@ -57,7 +63,7 @@
                                 @endforeach
                             </ul>
                             <div class="mt-2 small">
-                                Berkas yang sudah dipilih tidak ikut tersimpan. Pilih ulang semua berkas sebelum mengirim lagi.
+                                Berkas yang sudah benar tetap tersimpan, tidak perlu diunggah ulang. Perbaiki isian yang ditandai saja.
                             </div>
                         </div>
                     @endif
@@ -156,9 +162,12 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="dokumen_sk_pusat" class="form-label">SK Izin PPIU Pusat @include('partials.required-star')</label>
                                                 <input type="file" class="form-control @error('dokumen_sk_pusat') is-invalid @enderror"
-                                                    id="dokumen_sk_pusat" name="dokumen_sk_pusat" accept=".pdf,.jpg,.jpeg,.png" required>
+                                                    id="dokumen_sk_pusat" name="dokumen_sk_pusat" accept=".pdf,.jpg,.jpeg,.png"
+                                                    data-tersimpan="{{ ($berkasTersimpan ?? [])['dokumen_sk_pusat'] ?? '' }}"
+                                                    @required(empty(($berkasTersimpan ?? [])['dokumen_sk_pusat']))>
                                                 @error('dokumen_sk_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                 <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
+                                                @include('partials.berkas-tersimpan', ['field' => 'dokumen_sk_pusat'])
                                             </div>
                                         </div>
                                     </section>
@@ -244,9 +253,12 @@
                                                     </label>
                                                     <input type="file" class="form-control @error($meta['column']) is-invalid @enderror"
                                                         id="{{ $meta['column'] }}" name="{{ $meta['column'] }}"
-                                                        accept=".pdf,.jpg,.jpeg,.png" required>
+                                                        accept=".pdf,.jpg,.jpeg,.png"
+                                                        data-tersimpan="{{ ($berkasTersimpan ?? [])[$meta['column']] ?? '' }}"
+                                                        @required(empty(($berkasTersimpan ?? [])[$meta['column']]))>
                                                     @error($meta['column'])<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                     <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
+                                                    @include('partials.berkas-tersimpan', ['field' => $meta['column']])
                                                 </div>
                                             @endforeach
 
