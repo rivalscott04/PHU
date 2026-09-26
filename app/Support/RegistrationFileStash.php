@@ -22,6 +22,9 @@ class RegistrationFileStash
     private const DIREKTORI = 'registrasi-sementara';
     private const KEDALUWARSA_HARI = 2;
 
+    /** @var array<string, array{0: string, 1: string}> */
+    private array $tertunda = [];
+
     /** Simpan berkas yang baru diunggah, menimpa simpanan sebelumnya. */
     public function capture(Request $request, array $fields, int $maxKb): void
     {
@@ -62,8 +65,17 @@ class RegistrationFileStash
         return $names;
     }
 
-    /** Pindahkan ke lokasi permanen, kembalikan pathnya. */
-    public function moveTo(string $field, string $directory): ?string
+    /**
+     * Tentukan lokasi permanennya dan kembalikan pathnya, tanpa memindahkan apa
+     * pun dulu.
+     *
+     * Pemindahan berkas tidak ikut dibatalkan saat transaksi database gagal.
+     * Kalau dipindahkan di dalam transaksi, kegagalan menyimpan baris akan
+     * menghapus simpanan pendaftar padahal datanya tidak jadi tersimpan, dan
+     * formulir kembali dengan kolom berkas kosong. Jadi pemindahan ditunda
+     * sampai transaksinya benar benar berhasil, lewat commitPendingMoves().
+     */
+    public function planMove(string $field, string $directory): ?string
     {
         $path = $this->path($field);
 
@@ -72,10 +84,20 @@ class RegistrationFileStash
         }
 
         $tujuan = $directory.'/'.basename($path);
-        Storage::disk('public')->move($path, $tujuan);
-        session()->forget(self::SESSION_KEY.'.'.$field);
+        $this->tertunda[$field] = [$path, $tujuan];
 
         return StorageHelper::normalizePath($tujuan);
+    }
+
+    /** Jalankan pemindahan yang sudah direncanakan. Dipanggil setelah commit. */
+    public function commitPendingMoves(): void
+    {
+        foreach ($this->tertunda as $field => [$dari, $ke]) {
+            Storage::disk('public')->move($dari, $ke);
+            session()->forget(self::SESSION_KEY.'.'.$field);
+        }
+
+        $this->tertunda = [];
     }
 
     /** Buang semua simpanan, dipakai setelah pendaftaran berhasil dikirim. */

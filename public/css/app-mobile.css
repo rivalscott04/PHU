@@ -1,0 +1,106 @@
+/*
+    Penyesuaian tata letak untuk layar kecil (ponsel dan tablet kecil).
+
+    Batasnya 991.98px, mengikuti titik potong template: di atas itu sidebar
+    tetap menempel, di bawahnya berubah jadi laci yang ditarik dari kiri.
+*/
+
+/*
+    Laci menu di layar kecil. Kelas penandanya `sidebar-enable` di body, yang
+    sama dengan yang di-toggle tombol #vertical-menu-btn bawaan template, supaya
+    tombol dan tampilan tidak lagi memakai penanda yang berbeda.
+
+    Batasnya 991.98px mengikuti template, bukan 768px, agar tablet kecil ikut
+    memakai laci beroverlay dan bukan sidebar yang menutupi isi halaman.
+*/
+/* Di layar lebar tidak ada laci, jadi lapisan gelapnya tidak perlu ada. */
+.sidebar-overlay {
+    display: none;
+}
+
+@media (max-width: 991.98px) {
+    .vertical-menu {
+        display: block;
+        width: min(300px, 84vw) !important;
+        position: fixed !important;
+        /* Header tetap terlihat, jadi tombol yang membuka laci juga menutupnya. */
+        top: 70px !important;
+        left: 0 !important;
+        z-index: 1005 !important;
+        /* dvh, karena 100vh terpotong bilah alamat Safari iOS */
+        height: calc(100dvh - 70px) !important;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+    }
+
+    body.sidebar-enable .vertical-menu {
+        transform: translateX(0);
+    }
+
+    .sidebar-overlay {
+        display: block;
+        position: fixed;
+        inset: 70px 0 0 0;
+        background: rgba(15, 22, 40, 0.55);
+        z-index: 1004;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+    }
+
+    body.sidebar-enable .sidebar-overlay {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    /* Laci terbuka mengunci halaman di belakangnya. */
+    body.sidebar-enable {
+        overflow: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vertical-menu,
+    .sidebar-overlay {
+        transition: none;
+    }
+}
+
+
+@media (max-width: 991.98px) {
+    /*
+        Di desktop kotak logo duduk di atas sidebar gelap sehingga warnanya
+        menyatu. Di ponsel sidebarnya tidak ada, jadi kotak itu tampil sebagai
+        blok gelap yang menggantung di pojok header.
+    */
+    .navbar-brand-box {
+        background: transparent !important;
+        width: auto !important;
+        display: flex;
+        align-items: center;
+        padding-left: 12px;
+    }
+
+    .navbar-brand-box .logo-sm img {
+        height: 32px;
+    }
+
+    /*
+        Tabel lebar digeser ke samping. Bayangan tipis di tepi kanan memberi
+        tahu masih ada kolom lain, karena tanpa itu isinya terlihat seperti
+        terpotong begitu saja.
+    */
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        background:
+            linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)) left center,
+            linear-gradient(to left, #fff 30%, rgba(255, 255, 255, 0)) right center,
+            radial-gradient(farthest-side at 0 50%, rgba(15, 22, 40, 0.14), rgba(15, 22, 40, 0)) left center,
+            radial-gradient(farthest-side at 100% 50%, rgba(15, 22, 40, 0.14), rgba(15, 22, 40, 0)) right center;
+        background-repeat: no-repeat;
+        background-size: 28px 100%, 28px 100%, 12px 100%, 12px 100%;
+        background-attachment: local, local, scroll, scroll;
+    }
+}

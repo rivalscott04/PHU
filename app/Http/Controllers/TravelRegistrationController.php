@@ -77,10 +77,10 @@ class TravelRegistrationController extends Controller
             ])->all();
 
             $travelData['registration_status'] = TravelRegistrationStatus::Pending;
-            $travelData['dokumen_sk'] = $berkas->moveTo('dokumen_sk', 'registrasi-travel/sk');
+            $travelData['dokumen_sk'] = $berkas->planMove('dokumen_sk', 'registrasi-travel/sk');
 
             if ($berkas->has('dokumen_akreditasi')) {
-                $travelData['dokumen_akreditasi'] = $berkas->moveTo('dokumen_akreditasi', 'registrasi-travel/akreditasi');
+                $travelData['dokumen_akreditasi'] = $berkas->planMove('dokumen_akreditasi', 'registrasi-travel/akreditasi');
             }
 
             $travel = TravelCompany::create($travelData);
@@ -105,6 +105,9 @@ class TravelRegistrationController extends Controller
             return $travel;
         });
 
+        // Berkas baru dipindahkan setelah transaksi berhasil, supaya kegagalan
+        // menyimpan tidak ikut menghapus simpanan pendaftar.
+        $berkas->commitPendingMoves();
         $berkas->clear();
 
         app(NotificationService::class)->notifyReviewers(
@@ -242,12 +245,12 @@ class TravelRegistrationController extends Controller
                 $data['pimpinan_pusat'] = $pusat->Pimpinan;
                 $data['alamat_pusat'] = $pusat->alamat_kantor_baru ?: $pusat->alamat_kantor_lama;
             } else {
-                $data['dokumen_sk_pusat'] = $berkas->moveTo('dokumen_sk_pusat', 'registrasi-cabang/sk_pusat');
+                $data['dokumen_sk_pusat'] = $berkas->planMove('dokumen_sk_pusat', 'registrasi-cabang/sk_pusat');
             }
             $data['registration_status'] = TravelRegistrationStatus::Pending;
 
             foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {
-                $data[$meta['column']] = $berkas->moveTo($meta['column'], "registrasi-cabang/{$type}");
+                $data[$meta['column']] = $berkas->planMove($meta['column'], "registrasi-cabang/{$type}");
             }
 
             $cabang = CabangTravel::create($data);
@@ -269,6 +272,7 @@ class TravelRegistrationController extends Controller
             return $cabang;
         });
 
+        $berkas->commitPendingMoves();
         $berkas->clear();
 
         app(NotificationService::class)->notifyReviewersInKabupaten(

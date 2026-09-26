@@ -50,38 +50,6 @@
 @endphp
 
 <style>
-@media (max-width: 768px) {
-    .vertical-menu {
-        width: 100% !important;
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        z-index: 1000 !important;
-        height: 100vh !important;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-    }
-
-    .vertical-menu.show {
-        transform: translateX(0);
-    }
-
-    .sidebar-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 999;
-    }
-
-    .sidebar-overlay.show {
-        display: block;
-    }
-}
-
 #sidebar-menu .metismenu {
     padding: 0.25rem 0;
 }
@@ -346,31 +314,26 @@ body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a:hover {
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const sidebarToggle = document.querySelector('.navbar-toggle');
-    const sidebar = document.querySelector('.vertical-menu');
-    const overlay = document.getElementById('sidebarOverlay');
+// Membukanya diurus app.js bawaan template lewat tombol #vertical-menu-btn,
+// yang menambah kelas `sidebar-enable` ke body. Di sini hanya jalan menutupnya.
+document.addEventListener('DOMContentLoaded', function () {
+    const tutupLaci = function () {
+        document.body.classList.remove('sidebar-enable');
+    };
 
-    if (sidebarToggle) {
-        sidebarToggle.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-            overlay.classList.toggle('show');
-        });
-    }
+    document.getElementById('sidebarOverlay')?.addEventListener('click', tutupLaci);
 
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            sidebar.classList.remove('show');
-            overlay.classList.remove('show');
-        });
-    }
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            tutupLaci();
+        }
+    });
 
-    const menuItems = document.querySelectorAll('.metismenu a[href^="{{ url("/") }}"]');
-    menuItems.forEach(item => {
-        item.addEventListener('click', function() {
-            if (window.innerWidth <= 768) {
-                sidebar.classList.remove('show');
-                overlay.classList.remove('show');
+    // Menu yang membuka submenu tidak ikut menutup laci, isiannya baru muncul.
+    document.querySelectorAll('#side-menu a:not(.has-arrow)').forEach(function (item) {
+        item.addEventListener('click', function () {
+            if (window.innerWidth < 992) {
+                tutupLaci();
             }
         });
     });
