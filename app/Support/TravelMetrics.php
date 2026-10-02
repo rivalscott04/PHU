@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Enums\TravelRegistrationStatus;
 use App\Models\BAP;
 use App\Models\CabangTravel;
 use App\Models\Inspection;
@@ -145,6 +146,35 @@ class TravelMetrics
         ];
     }
 
+    /**
+     * Pendaftaran yang masih menunggu keputusan, pusat dan cabang digabung.
+     *
+     * Angka ini yang menjawab "cabangnya sudah daftar kok tidak kelihatan":
+     * cabang baru masuk hitungan total setelah Kanwil menyetujuinya.
+     */
+    public static function pendingRegistrationCount(?string $kabupaten = null, ?int $travelId = null): int
+    {
+        $menunggu = [
+            TravelRegistrationStatus::Pending,
+            TravelRegistrationStatus::MenungguKanwil,
+        ];
+
+        $pusat = TravelCompany::query()
+            ->whereIn('registration_status', $menunggu)
+            ->when($kabupaten, fn ($q) => $q->where('kab_kota', $kabupaten))
+            ->when($travelId, fn ($q) => $q->where('id', $travelId))
+            ->count();
+
+        $cabang = Schema::hasTable('travel_cabang')
+            ? CabangTravel::query()
+                ->whereIn('registration_status', $menunggu)
+                ->when($kabupaten, fn ($q) => $q->where('kabupaten', $kabupaten))
+                ->count()
+            : 0;
+
+        return $pusat + $cabang;
+    }
+
     public static function travelScopeBuilder(?string $kabupaten = null, ?int $travelId = null): Builder
     {
         return TravelCompany::query()
@@ -160,7 +190,11 @@ class TravelMetrics
     {
         $travelScope = self::travelScopeBuilder($kabupaten, $travelId);
 
+        // Satu kartu, satu populasi: semua angka di bawah menghitung travel yang
+        // izinnya sudah disetujui. Pendaftaran yang masih berjalan dihitung
+        // terpisah sebagai antrean, bukan dicampur ke totalnya.
         $travelStats = TravelCompany::query()
+            ->approved()
             ->when($kabupaten, fn ($q) => $q->where('kab_kota', $kabupaten))
             ->when($travelId, fn ($q) => $q->where('id', $travelId))
             ->selectRaw('COUNT(*) as total_travel')
@@ -192,6 +226,7 @@ class TravelMetrics
                     ->when($kabupaten, fn ($q) => $q->where('kabupaten', $kabupaten))
                     ->count()
                 : 0,
+            'menunggu_persetujuan' => self::pendingRegistrationCount($kabupaten, $travelId),
             'total_jamaah' => (int) ($jamaahStats->total ?? 0),
             'total_jamaah_haji_khusus' => (int) ($jamaahStats->total_haji_khusus ?? 0),
             'total_pengaduan' => Schema::hasTable('pengaduan')

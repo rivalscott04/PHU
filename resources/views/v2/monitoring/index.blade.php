@@ -109,6 +109,10 @@ document.getElementById('btn-refresh-kpi')?.addEventListener('click', function (
                 el.textContent = formatter.format(value);
             });
         });
+        // Baris antrean hanya muncul kalau memang ada yang menunggu.
+        document.querySelectorAll('[data-kpi-row]').forEach(row => {
+            row.classList.toggle('d-none', !(Number(res.data[row.dataset.kpiRow]) > 0));
+        });
         document.querySelectorAll('[data-kpi-composite]').forEach(el => {
             const parts = (el.dataset.kpiParts || '').split(',').filter(Boolean);
             const total = parts.reduce((sum, key) => sum + (Number(res.data[key]) || 0), 0);

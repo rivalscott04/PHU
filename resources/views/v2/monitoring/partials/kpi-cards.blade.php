@@ -60,6 +60,12 @@
                                             <span data-kpi="total_pihk">{{ number_format($layout['summary']['total_pihk'] ?? 0) }}</span> PIHK ·
                                             <span data-kpi="total_cabang">{{ number_format($layout['summary']['total_cabang'] ?? 0) }}</span> Cabang
                                         </small>
+                                        {{-- Antrean pendaftaran, supaya cabang yang sudah daftar tapi belum disetujui tidak terlihat hilang. --}}
+                                        <small class="text-muted d-block {{ ($layout['summary']['menunggu_persetujuan'] ?? 0) > 0 ? '' : 'd-none' }}"
+                                            data-kpi-row="menunggu_persetujuan">
+                                            <span data-kpi="menunggu_persetujuan">{{ number_format($layout['summary']['menunggu_persetujuan'] ?? 0) }}</span>
+                                            menunggu persetujuan
+                                        </small>
                                     @elseif (($card['key'] ?? '') === 'total_jamaah')
                                         <small class="text-muted d-block mt-1">
                                             <span data-kpi="total_jamaah_haji_khusus">{{ number_format($layout['summary']['total_jamaah_haji_khusus'] ?? 0) }}</span> haji khusus
