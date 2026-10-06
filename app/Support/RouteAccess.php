@@ -62,6 +62,11 @@ final class RouteAccess
     /** @param  array<string, mixed>  $parameters */
     public static function canAccessRoute(User $user, string $routeName, array $parameters = []): bool
     {
+        if (self::matches($routeName, 'registration.revision')) {
+            return $user->role === 'user'
+                && $user->operatingRegistration()?->isNeedsRevision() === true;
+        }
+
         if (self::matches($routeName, 'v2.monitoring.travel.pengaduan')) {
             return self::canAccessTravelPengaduan($user, $parameters);
         }

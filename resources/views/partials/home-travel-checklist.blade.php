@@ -33,29 +33,43 @@
                     </div>
                 @endif
 
-                <div class="list-group list-group-flush">
-                    @foreach ($steps as $step)
-                        @php
-                            $tone = $step['tone'] ?? 'secondary';
-                            $icon = match ($tone) {
-                                'success' => 'bx-check-circle text-success',
-                                'warning' => 'bx-time-five text-warning',
-                                'danger' => 'bx-x-circle text-danger',
-                                default => $step['done'] ?? false ? 'bx-check-circle text-success' : 'bx-circle text-muted',
-                            };
-                        @endphp
-                        <div class="list-group-item px-0 d-flex align-items-start gap-3">
-                            <i class="bx {{ $icon }} fs-5 mt-1"></i>
-                            <div class="flex-grow-1">
-                                <div class="fw-medium">{{ $step['label'] }}</div>
-                                <small class="text-muted">{{ $step['hint'] ?? '' }}</small>
-                            </div>
-                            @if (! empty($step['url']))
-                                <a href="{{ $step['url'] }}" class="btn btn-sm btn-outline-primary">Buka</a>
-                            @endif
+                @if ($registrationStatus?->value === 'perlu_perbaikan')
+                    <div class="alert alert-warning mb-3">
+                        <strong>Perlu perbaikan:</strong>
+                        {{ $checklist['registration_notes'] ?: 'Ada data atau berkas yang perlu diperbaiki.' }}
+                        <div class="mt-2">
+                            <a href="{{ route('registration.revision.edit') }}" class="btn btn-sm btn-warning">
+                                <i class="bx bx-edit me-1"></i> Perbaiki Pendaftaran
+                            </a>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endif
+
+                @if ($steps !== [])
+                    <div class="list-group list-group-flush">
+                        @foreach ($steps as $step)
+                            @php
+                                $tone = $step['tone'] ?? 'secondary';
+                                $icon = match ($tone) {
+                                    'success' => 'bx-check-circle text-success',
+                                    'warning' => 'bx-time-five text-warning',
+                                    'danger' => 'bx-x-circle text-danger',
+                                    default => $step['done'] ?? false ? 'bx-check-circle text-success' : 'bx-circle text-muted',
+                                };
+                            @endphp
+                            <div class="list-group-item px-0 d-flex align-items-start gap-3">
+                                <i class="bx {{ $icon }} fs-5 mt-1"></i>
+                                <div class="flex-grow-1">
+                                    <div class="fw-medium">{{ $step['label'] }}</div>
+                                    <small class="text-muted">{{ $step['hint'] ?? '' }}</small>
+                                </div>
+                                @if (! empty($step['url']))
+                                    <a href="{{ $step['url'] }}" class="btn btn-sm btn-outline-primary">Buka</a>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </div>
     </div>

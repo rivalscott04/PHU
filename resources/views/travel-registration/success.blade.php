@@ -12,14 +12,14 @@
 
     $langkah = $isCabang
         ? [
+            'Anda sudah bisa login sekarang (menu operasional masih terkunci)',
             'Petugas Kabupaten/Kota meninjau kantor cabang Anda',
-            'Hasil peninjauan diteruskan ke Kanwil untuk keputusan akhir',
-            'Setelah disetujui Kanwil, masuk dengan email/HP dan password Anda',
+            'Hasil peninjauan diteruskan ke Kanwil; setelah disetujui, semua menu terbuka',
         ]
         : [
+            'Anda sudah bisa login sekarang (menu operasional masih terkunci)',
             'Tunggu konfirmasi Admin Kanwil (biasanya 1 s.d. 3 hari kerja)',
-            'Setelah disetujui, buka halaman login',
-            'Masuk dengan email/HP dan password Anda',
+            'Setelah disetujui, semua menu operasional terbuka',
         ];
 @endphp
 <!doctype html>

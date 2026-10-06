@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 Route::bind('pengawasan', fn (string $value) => Inspection::findOrFail($value));
 Route::bind('antrian', fn (string $value) => SupervisionWorkQueue::findOrFail($value));
 
-Route::middleware(['auth', 'password.changed', 'throttle:sensitive'])->prefix('v2')->name('v2.')->group(function () {
+Route::middleware(['auth', 'password.changed', 'registration.approved', 'throttle:sensitive'])->prefix('v2')->name('v2.')->group(function () {
     Route::get('/antrian', [WorkQueueController::class, 'index'])->name('antrian.index');
     Route::post('/antrian/{antrian}/start', [WorkQueueController::class, 'start'])->name('antrian.start');
     Route::post('/antrian/{antrian}/resolve', [WorkQueueController::class, 'resolve'])->name('antrian.resolve');

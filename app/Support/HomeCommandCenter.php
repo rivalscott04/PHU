@@ -135,8 +135,8 @@ final class HomeCommandCenter
                 'label' => $cabang ? 'Menunggu peninjauan Kabupaten/Kota' : 'Registrasi menunggu verifikasi Kanwil',
                 'done' => false,
                 'hint' => $cabang
-                    ? 'Petugas Kemenhaj ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda.'
-                    : 'Tim Kanwil sedang memeriksa data dan dokumen Anda.',
+                    ? 'Petugas Kemenhaj ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda. Anda sudah bisa login; menu operasional dibuka setelah disetujui.'
+                    : 'Tim Kanwil sedang memeriksa data dan dokumen Anda. Anda sudah bisa login; menu operasional dibuka setelah disetujui.',
                 'tone' => 'warning',
             ];
         } elseif ($registrationStatus === TravelRegistrationStatus::MenungguKanwil) {
@@ -146,6 +146,8 @@ final class HomeCommandCenter
                 'hint' => 'Rekomendasi dari ' . ($cabang?->kabupaten ?: 'Kabupaten/Kota') . ' sudah dikirim ke Kanwil.',
                 'tone' => 'warning',
             ];
+        } elseif ($registrationStatus === TravelRegistrationStatus::PerluPerbaikan) {
+            // CTA perbaikan cukup lewat banner di view; jangan ulang sebagai langkah.
         } elseif ($registrationStatus === TravelRegistrationStatus::Rejected) {
             $steps[] = [
                 'label' => $cabang ? 'Pendaftaran cabang ditolak' : 'Registrasi ditolak',
@@ -164,55 +166,55 @@ final class HomeCommandCenter
             ];
         }
 
-        $steps[] = [
-            'label' => 'Tambah data jamaah',
-            'done' => $isApproved && $jamaahTotal > 0,
-            'hint' => $jamaahTotal > 0
-                ? "{$jamaahTotal} jamaah terdaftar"
-                : 'Belum ada jamaah. Tambahkan minimal satu jamaah sebelum mengajukan BA.',
-            'url' => $isApproved ? route('jamaah.umrah') : null,
-            'tone' => $jamaahTotal > 0 ? 'success' : 'secondary',
-        ];
+        // Langkah operasional hanya setelah registrasi disetujui.
+        if ($isApproved) {
+            $steps[] = [
+                'label' => 'Tambah data jamaah',
+                'done' => $jamaahTotal > 0,
+                'hint' => $jamaahTotal > 0
+                    ? "{$jamaahTotal} jamaah terdaftar"
+                    : 'Belum ada jamaah. Tambahkan minimal satu jamaah sebelum mengajukan BA.',
+                'url' => route('jamaah.umrah'),
+                'tone' => $jamaahTotal > 0 ? 'success' : 'secondary',
+            ];
 
-        $hasActivePackage = $isApproved
-            && Schema::hasTable('travel_packages')
-            && $travel
-            && \App\Models\TravelPackage::query()
-                ->tap(fn ($q) => OperatorScope::apply($q, $user))
-                ->where('is_active', true)
-                ->exists();
+            $hasActivePackage = Schema::hasTable('travel_packages')
+                && $travel
+                && \App\Models\TravelPackage::query()
+                    ->tap(fn ($q) => OperatorScope::apply($q, $user))
+                    ->where('is_active', true)
+                    ->exists();
 
-        $steps[] = [
-            'label' => 'Atur paket umrah',
-            'done' => $hasActivePackage,
-            'hint' => $hasActivePackage
-                ? 'Paket aktif tersedia untuk pengisian BA otomatis.'
-                : ($isApproved
-                    ? 'Simpan harga standar agar form BA terisi otomatis.'
-                    : 'Tersedia setelah registrasi disetujui.'),
-            'url' => $isApproved ? route('travel.packages') : null,
-            'tone' => $hasActivePackage ? 'success' : 'secondary',
-        ];
+            $steps[] = [
+                'label' => 'Atur paket umrah',
+                'done' => $hasActivePackage,
+                'hint' => $hasActivePackage
+                    ? 'Paket aktif tersedia untuk pengisian BA otomatis.'
+                    : 'Simpan harga standar agar form BA terisi otomatis.',
+                'url' => route('travel.packages'),
+                'tone' => $hasActivePackage ? 'success' : 'secondary',
+            ];
 
-        $steps[] = [
-            'label' => 'Ajukan BA Pemberangkatan',
-            'done' => $bapDiajukan + $bapDiproses + $bapDiterima > 0,
-            'hint' => ($bapDiajukan + $bapDiproses + $bapDiterima) > 0
-                ? "{$bapDiajukan} diajukan, {$bapDiproses} diproses, {$bapDiterima} diterima"
-                : 'Pilih paket atau isi harga per orang, tanggal berangkat, dan maskapai.',
-            'url' => $isApproved ? route('bap') : null,
-            'tone' => $bapDiterima > 0 ? 'success' : (($bapDiajukan + $bapDiproses) > 0 ? 'warning' : 'secondary'),
-        ];
+            $steps[] = [
+                'label' => 'Ajukan BA Pemberangkatan',
+                'done' => $bapDiajukan + $bapDiproses + $bapDiterima > 0,
+                'hint' => ($bapDiajukan + $bapDiproses + $bapDiterima) > 0
+                    ? "{$bapDiajukan} diajukan, {$bapDiproses} diproses, {$bapDiterima} diterima"
+                    : 'Pilih paket atau isi harga per orang, tanggal berangkat, dan maskapai.',
+                'url' => route('bap'),
+                'tone' => $bapDiterima > 0 ? 'success' : (($bapDiajukan + $bapDiproses) > 0 ? 'warning' : 'secondary'),
+            ];
 
-        $steps[] = [
-            'label' => 'Pantau jadwal keberangkatan',
-            'done' => $bapDiterima > 0,
-            'hint' => $bapDiterima > 0
-                ? 'Lihat jadwal yang sudah disetujui'
-                : 'Tersedia setelah BA Pemberangkatan disetujui.',
-            'url' => $isApproved ? route('keberangkatan') : null,
-            'tone' => $bapDiterima > 0 ? 'success' : 'secondary',
-        ];
+            $steps[] = [
+                'label' => 'Pantau jadwal keberangkatan',
+                'done' => $bapDiterima > 0,
+                'hint' => $bapDiterima > 0
+                    ? 'Lihat jadwal yang sudah disetujui'
+                    : 'Tersedia setelah BA Pemberangkatan disetujui.',
+                'url' => route('keberangkatan'),
+                'tone' => $bapDiterima > 0 ? 'success' : 'secondary',
+            ];
+        }
 
         return [
             'travel_name' => $cabang

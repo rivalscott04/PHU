@@ -39,6 +39,7 @@
                             '' => 'Semua',
                             'pending' => 'Menunggu Verifikasi',
                             'menunggu_kanwil' => 'Menunggu Kanwil',
+                            'perlu_perbaikan' => 'Perlu Perbaikan',
                             'approved' => 'Disetujui',
                             'rejected' => 'Ditolak',
                         ] as $value => $label)

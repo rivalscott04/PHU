@@ -39,6 +39,7 @@ class CabangTravel extends Model
         'telepon',
         'registration_status',
         'registration_notes',
+        'revision_return_status',
         'dokumen_oss',
         'dokumen_akta',
         'dokumen_ktp_kepala',

@@ -1,17 +1,24 @@
 @php
     $compact = $compact ?? false;
+    $isRevision = $isRevision ?? false;
     $colClass = $compact ? 'col-12 col-lg-8 mx-auto' : 'col-md-6';
+    $skRequired = empty(($berkasTersimpan ?? [])['dokumen_sk']);
 @endphp
 
 <div class="row">
     <div class="{{ $colClass }} mb-3">
         <label for="dokumen_sk" class="form-label">
-            Scan SK / Izin Operasional @include('partials.required-star')
+            Scan SK / Izin Operasional
+            @if ($skRequired)
+                @include('partials.required-star')
+            @else
+                <span class="text-muted fw-normal">({{ $isRevision ? 'opsional jika tidak diganti' : 'sudah tersimpan' }})</span>
+            @endif
         </label>
         <input type="file" class="form-control @error('dokumen_sk') is-invalid @enderror"
             id="dokumen_sk" name="dokumen_sk" accept=".pdf,.jpg,.jpeg,.png"
             data-tersimpan="{{ ($berkasTersimpan ?? [])['dokumen_sk'] ?? '' }}"
-            @required(empty(($berkasTersimpan ?? [])['dokumen_sk']))>
+            @required($skRequired)>
         @error('dokumen_sk')<div class="invalid-feedback">{{ $message }}</div>@enderror
         <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
         @include('partials.berkas-tersimpan', ['field' => 'dokumen_sk'])

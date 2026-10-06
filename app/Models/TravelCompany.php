@@ -38,6 +38,7 @@ class TravelCompany extends Model
         'license_expiry',
         'registration_status',
         'registration_notes',
+        'revision_return_status',
         'dokumen_sk',
         'dokumen_akreditasi',
         'verified_at',

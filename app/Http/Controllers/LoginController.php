@@ -46,24 +46,16 @@ class LoginController extends Controller
             $user->loadMissing(['travel', 'cabang']);
             $registration = $user->travel ?? $user->cabang;
 
-            if ($user->role === UserRole::User->value && $registration) {
-                $registrationStatus = $registration->registration_status;
+            // Pending / menunggu Kanwil / perlu perbaikan: PIC boleh login
+            // dengan menu terbatas. Hanya penolakan final yang mengunci login.
+            if ($user->role === UserRole::User->value && $registration?->isRegistrationRejected()) {
+                $note = $registration->registration_notes
+                    ? ' Alasan: ' . $registration->registration_notes
+                    : '';
 
-                if (in_array($registrationStatus?->value, ['pending', 'menunggu_kanwil'], true)) {
-                    return redirect()->back()->withErrors([
-                        'email_or_phone' => 'Pendaftaran Anda masih diproses (' . $registrationStatus->label() . '). Silakan coba lagi setelah disetujui.',
-                    ]);
-                }
-
-                if ($registrationStatus?->value === 'rejected') {
-                    $note = $registration->registration_notes
-                        ? ' Alasan: ' . $registration->registration_notes
-                        : '';
-
-                    return redirect()->back()->withErrors([
-                        'email_or_phone' => 'Pendaftaran Anda ditolak.' . $note,
-                    ]);
-                }
+                return redirect()->back()->withErrors([
+                    'email_or_phone' => 'Pendaftaran Anda ditolak.' . $note,
+                ]);
             }
 
             Auth::login($user);

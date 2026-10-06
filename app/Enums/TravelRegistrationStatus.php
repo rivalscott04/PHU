@@ -11,6 +11,7 @@ enum TravelRegistrationStatus: string
     // Kabupaten sudah unggah rekomendasi/BA peninjauan dan meneruskan ke Kanwil.
     // Hanya dipakai alur cabang; pusat langsung pending -> approved oleh Kanwil.
     case MenungguKanwil = 'menunggu_kanwil';
+    case PerluPerbaikan = 'perlu_perbaikan';
     case Approved = 'approved';
     case Rejected = 'rejected';
 
@@ -19,6 +20,7 @@ enum TravelRegistrationStatus: string
         return match ($this) {
             self::Pending => 'Menunggu Verifikasi',
             self::MenungguKanwil => 'Menunggu Kanwil',
+            self::PerluPerbaikan => 'Perlu Perbaikan',
             self::Approved => 'Disetujui',
             self::Rejected => 'Ditolak',
         };
@@ -29,6 +31,7 @@ enum TravelRegistrationStatus: string
         return match ($this) {
             self::Pending => 'bg-warning text-dark',
             self::MenungguKanwil => 'bg-info',
+            self::PerluPerbaikan => 'bg-warning text-dark',
             self::Approved => 'bg-success',
             self::Rejected => 'bg-danger',
         };
@@ -39,6 +42,7 @@ enum TravelRegistrationStatus: string
         return match ($this) {
             self::Pending => 'warning',
             self::MenungguKanwil => 'info',
+            self::PerluPerbaikan => 'warning',
             self::Approved => 'success',
             self::Rejected => 'danger',
         };

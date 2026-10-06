@@ -1,6 +1,8 @@
 @php
     $activeBap = $activeBap ?? [];
     $upcomingDepartures = $upcomingDepartures ?? [];
+    $canOperate = auth()->user()
+        && \App\Support\RouteAccess::canAccessRoute(auth()->user(), 'bap');
 @endphp
 
 <div class="row mb-4">
@@ -11,7 +13,9 @@
                     <h5 class="mb-0">BA Pemberangkatan Aktif</h5>
                     <small class="text-muted">Pengajuan terbaru dan statusnya</small>
                 </div>
-                <a href="{{ route('bap') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                @if ($canOperate)
+                    <a href="{{ route('bap') }}" class="btn btn-sm btn-outline-primary">Lihat Semua</a>
+                @endif
             </div>
             <div class="card-body p-0">
                 @if (! empty($activeBap))
@@ -38,9 +42,11 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-3">
-                                            <a href="{{ $item['url'] }}" class="btn btn-sm btn-light">
-                                                Detail
-                                            </a>
+                                            @if ($canOperate)
+                                                <a href="{{ $item['url'] }}" class="btn btn-sm btn-light">
+                                                    Detail
+                                                </a>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach
@@ -50,10 +56,16 @@
                 @else
                     <div class="text-center py-5 px-3">
                         <i class="bx bx-file text-muted fs-1 d-block mb-2"></i>
-                        <p class="text-muted mb-3">Belum ada pengajuan BA Pemberangkatan.</p>
-                        <a href="{{ route('form.bap') }}" class="btn btn-sm btn-primary">
-                            <i class="bx bx-plus me-1"></i> Buat Pengajuan
-                        </a>
+                        @if ($canOperate)
+                            <p class="text-muted mb-3">Belum ada pengajuan BA Pemberangkatan.</p>
+                            <a href="{{ route('form.bap') }}" class="btn btn-sm btn-primary">
+                                <i class="bx bx-plus me-1"></i> Buat Pengajuan
+                            </a>
+                        @else
+                            <p class="text-muted mb-0">
+                                Menu BA dibuka setelah pendaftaran disetujui.
+                            </p>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -67,10 +79,12 @@
                     <h5 class="mb-0">Keberangkatan Terdekat</h5>
                     <small class="text-muted">Jadwal yang sudah disetujui</small>
                 </div>
-                <a href="{{ route('keberangkatan') }}" class="btn btn-sm btn-outline-primary">Kalender</a>
+                @if ($canOperate)
+                    <a href="{{ route('keberangkatan') }}" class="btn btn-sm btn-outline-primary">Kalender</a>
+                @endif
             </div>
             <div class="card-body">
-                @if (! empty($upcomingDepartures))
+                @if (! empty($upcomingDepartures) && $canOperate)
                     <div class="list-group list-group-flush">
                         @foreach ($upcomingDepartures as $departure)
                             <a href="{{ $departure['url'] }}"
@@ -96,8 +110,12 @@
                     <div class="text-center py-4">
                         <i class="bx bx-calendar-event text-muted fs-1 d-block mb-2"></i>
                         <p class="text-muted mb-0 small">
-                            Belum ada jadwal keberangkatan mendatang.
-                            Jadwal muncul setelah BA Pemberangkatan disetujui.
+                            @if ($canOperate)
+                                Belum ada jadwal keberangkatan mendatang.
+                                Jadwal muncul setelah BA Pemberangkatan disetujui.
+                            @else
+                                Jadwal keberangkatan tersedia setelah pendaftaran disetujui.
+                            @endif
                         </p>
                     </div>
                 @endif

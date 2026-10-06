@@ -75,7 +75,7 @@ Route::middleware(['guest', 'throttle:5,1'])->group(function () {
     Route::post('/set-password', [PasswordResetController::class, 'update'])->name('password.update');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('home')->middleware('auth', 'password.changed', 'registration.approved');
 
 Route::get('/test', function () {
     return 'Middleware test';
@@ -96,7 +96,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/change-password', [AuthController::class, 'changePassword'])->name('user.updatePassword');
 });
 
-Route::group(['middleware' => ['auth', 'password.changed']], function () {
+Route::group(['middleware' => ['auth', 'password.changed', 'registration.approved']], function () {
     // User Profile routes
     Route::get('/profile', [UserProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile', [UserProfileController::class, 'update'])->name('profile.update');
@@ -193,10 +193,13 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     // Update travel status route - using POST method to avoid method override issues
     Route::post('/travel/{id}/status', [KanwilController::class, 'updateStatus'])
         ->name('travel.update-status')
-        ->middleware('auth', 'password.changed');
+        ->middleware('auth', 'password.changed', 'registration.approved');
 
     Route::post('/travel/{id}/approve-registration', [KanwilController::class, 'approveRegistration'])
         ->name('travel.registration.approve')
+        ->whereNumber('id');
+    Route::post('/travel/{id}/request-revision', [KanwilController::class, 'requestRevision'])
+        ->name('travel.registration.revision')
         ->whereNumber('id');
     Route::post('/travel/{id}/reject-registration', [KanwilController::class, 'rejectRegistration'])
         ->name('travel.registration.reject')
@@ -210,6 +213,11 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
     Route::post('/cabang-travel/{id}/setujui', [KanwilController::class, 'approveCabang'])
         ->name('cabang.travel.approve')
         ->whereNumber('id');
+
+    Route::get('/pendaftaran/perbaikan', [TravelRegistrationController::class, 'editRevision'])
+        ->name('registration.revision.edit');
+    Route::put('/pendaftaran/perbaikan', [TravelRegistrationController::class, 'updateRevision'])
+        ->name('registration.revision.update');
 
     // Sertifikat routes
     Route::resource('sertifikat', SertifikatController::class)->except(['show', 'edit', 'update']);
@@ -239,6 +247,7 @@ Route::group(['middleware' => ['auth', 'password.changed']], function () {
         Route::delete('/cabang-travel/{id}', [KanwilController::class, 'destroyCabangTravel'])->name('cabang.travel.destroy');
         // Alur verifikasi cabang: Kabko unggah rekomendasi -> Kanwil putuskan.
         Route::post('/cabang-travel/{id}/rekomendasi', [KanwilController::class, 'recommendCabang'])->name('cabang.travel.recommend');
+        Route::post('/cabang-travel/{id}/minta-perbaikan', [KanwilController::class, 'requestCabangRevision'])->name('cabang.travel.revision');
         Route::post('/cabang-travel/{id}/tolak', [KanwilController::class, 'rejectCabang'])->name('cabang.travel.reject');
         Route::get('/cabang-travel/{id}/dokumen/{type}', [KanwilController::class, 'showCabangDocument'])
             ->name('cabang.travel.document')

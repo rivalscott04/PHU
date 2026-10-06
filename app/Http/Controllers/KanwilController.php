@@ -8,6 +8,7 @@ use App\Helpers\ValidationHelper;
 use App\Models\CabangTravel;
 use App\Enums\TravelRegistrationStatus;
 use App\Notifications\V2\CabangRecommendedNotification;
+use App\Notifications\V2\RegistrationRevisionRequestedNotification;
 use App\Services\NotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -256,6 +257,8 @@ class KanwilController extends Controller
 
         if ($filter === 'pending') {
             $query->pendingRegistration();
+        } elseif ($filter === 'perlu_perbaikan') {
+            $query->where('registration_status', TravelRegistrationStatus::PerluPerbaikan);
         } elseif ($filter === 'approved') {
             $query->approved();
         } elseif ($filter === 'rejected') {
@@ -295,13 +298,51 @@ class KanwilController extends Controller
         $travel->update([
             'registration_status' => TravelRegistrationStatus::Approved,
             'registration_notes' => null,
+            'revision_return_status' => null,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
         ]);
 
         return redirect()
             ->route('travel', ['filter' => 'pending'])
-            ->with('success', "Pendaftaran {$travel->Penyelenggara} berhasil disetujui. PIC travel sudah bisa login.");
+            ->with('success', "Pendaftaran {$travel->Penyelenggara} berhasil disetujui. PIC travel sudah bisa memakai semua menu.");
+    }
+
+    public function requestRevision(Request $request, $id)
+    {
+        abort_unless(auth()->user()?->role === 'admin', 403);
+
+        ValidationHelper::validate($request, [
+            'registration_notes' => 'required|string|max:1000',
+        ]);
+
+        $travel = TravelCompany::with('user')->findOrFail($id);
+
+        if (! $travel->isRegistrationPending()) {
+            return redirect()->route('travel')->with('error', 'Pendaftaran ini sudah diproses sebelumnya.');
+        }
+
+        $travel->update([
+            'registration_status' => TravelRegistrationStatus::PerluPerbaikan,
+            'registration_notes' => $request->registration_notes,
+            'revision_return_status' => TravelRegistrationStatus::Pending->value,
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        if ($travel->user) {
+            app(NotificationService::class)->safeNotify(
+                $travel->user,
+                new RegistrationRevisionRequestedNotification(
+                    $travel->Penyelenggara,
+                    $request->registration_notes,
+                )
+            );
+        }
+
+        return redirect()
+            ->route('travel', ['filter' => 'perlu_perbaikan'])
+            ->with('success', "Permintaan perbaikan dikirim ke PIC {$travel->Penyelenggara}.");
     }
 
     public function rejectRegistration(Request $request, $id)
@@ -485,6 +526,7 @@ class KanwilController extends Controller
         return [
             'pending' => $hitung(TravelRegistrationStatus::Pending->value),
             'menunggu_kanwil' => $hitung(TravelRegistrationStatus::MenungguKanwil->value),
+            'perlu_perbaikan' => $hitung(TravelRegistrationStatus::PerluPerbaikan->value),
         ];
     }
 
@@ -563,6 +605,7 @@ class KanwilController extends Controller
         $cabang->update([
             'registration_status' => TravelRegistrationStatus::Approved,
             'registration_notes' => null,
+            'revision_return_status' => null,
             'verified_at' => now(),
             'verified_by' => auth()->id(),
         ]);
@@ -570,6 +613,53 @@ class KanwilController extends Controller
         return redirect()
             ->route('cabang.travel', ['filter' => 'approved'])
             ->with('success', "Pendaftaran cabang {$cabang->Penyelenggara} selesai dan disetujui.");
+    }
+
+    public function requestCabangRevision(Request $request, $id_cabang)
+    {
+        $user = auth()->user();
+        $cabang = CabangTravel::with('user')->findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang($user, $cabang);
+
+        if (! $cabang->isRegistrationOpen()) {
+            return back()->with('error', 'Cabang ini sudah diproses sebelumnya.');
+        }
+
+        // Setelah rekomendasi terkirim, hanya Kanwil yang boleh minta perbaikan.
+        if ($user->role !== 'admin' && ! $cabang->isRegistrationPending()) {
+            return back()->with('error', 'Cabang ini sudah diteruskan ke Kanwil. Hubungi Kanwil bila perlu perbaikan.');
+        }
+
+        ValidationHelper::validate($request, [
+            'registration_notes' => 'required|string|max:1000',
+        ]);
+
+        $returnStatus = $cabang->isAwaitingKanwil()
+            ? TravelRegistrationStatus::MenungguKanwil->value
+            : TravelRegistrationStatus::Pending->value;
+
+        $cabang->update([
+            'registration_status' => TravelRegistrationStatus::PerluPerbaikan,
+            'registration_notes' => $request->registration_notes,
+            'revision_return_status' => $returnStatus,
+            'verified_at' => null,
+            'verified_by' => null,
+        ]);
+
+        if ($cabang->user) {
+            app(NotificationService::class)->safeNotify(
+                $cabang->user,
+                new RegistrationRevisionRequestedNotification(
+                    $cabang->Penyelenggara,
+                    $request->registration_notes,
+                    true,
+                )
+            );
+        }
+
+        return redirect()
+            ->route('cabang.travel', ['filter' => 'perlu_perbaikan'])
+            ->with('success', "Permintaan perbaikan dikirim ke PIC cabang {$cabang->Penyelenggara}.");
     }
 
     public function rejectCabang(Request $request, $id_cabang)
@@ -664,7 +754,7 @@ class KanwilController extends Controller
 
         $filter = $request->get('filter');
 
-        if (in_array($filter, ['pending', 'menunggu_kanwil', 'approved', 'rejected'], true)) {
+        if (in_array($filter, ['pending', 'menunggu_kanwil', 'perlu_perbaikan', 'approved', 'rejected'], true)) {
             $query->where('registration_status', $filter);
         }
 
@@ -762,13 +852,17 @@ class KanwilController extends Controller
      */
     private function tolakJikaSedangDitinjau(CabangTravel $cabang): ?\Illuminate\Http\RedirectResponse
     {
-        if (! $cabang->isRegistrationOpen()) {
+        if (! $cabang->isRegistrationOpen() && ! $cabang->isNeedsRevision()) {
             return null;
         }
 
+        $pesan = $cabang->isNeedsRevision()
+            ? "Pendaftaran {$cabang->Penyelenggara} sedang diperbaiki oleh PIC dan tidak bisa diubah atau dihapus."
+            : "Pendaftaran {$cabang->Penyelenggara} masih ditinjau dan tidak bisa diubah atau dihapus. Bila datanya perlu diperbaiki, minta perbaikan atau tolak dengan alasan.";
+
         return redirect()
             ->route('cabang.travel')
-            ->with('error', "Pendaftaran {$cabang->Penyelenggara} masih ditinjau dan tidak bisa diubah atau dihapus. Bila datanya perlu diperbaiki, tolak dengan alasan agar pendaftar mengirim ulang.");
+            ->with('error', $pesan);
     }
 
     public function destroyCabangTravel($id_cabang)

@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="utf-8" />
-    <title>Registrasi Travel | {{ config('app.name') }}</title>
+    <title>{{ ($isRevision ?? false) ? 'Perbaikan Pendaftaran' : 'Registrasi Travel' }} | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Daftar sebagai PPIU/PIHK di PANTAU Kanwil NTB" name="description" />
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
@@ -13,21 +13,34 @@
     @include('travel-registration.partials.wizard-styles')
 </head>
 <body>
+    @php($isRevision = $isRevision ?? false)
     <div class="account-pages my-4 pt-sm-5">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-xl-9 col-lg-10">
                     <div class="text-center mb-4">
-                        <a href="{{ route('login') }}">
+                        <a href="{{ $isRevision ? route('home') : route('login') }}">
                             <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="40">
                         </a>
-                        <h4 class="mt-3 mb-1">Registrasi Travel</h4>
+                        <h4 class="mt-3 mb-1">{{ $isRevision ? 'Perbaikan Pendaftaran Travel' : 'Registrasi Travel' }}</h4>
                         <p class="text-muted mb-0 mx-auto" style="max-width: 520px">
-                            Isi formulir langkah demi langkah. Setiap halaman hanya beberapa pertanyaan. Tidak perlu diisi sekaligus.
+                            @if ($isRevision)
+                                Perbaiki bagian yang diminta, lalu kirim ulang. Berkas yang sudah benar tidak perlu diunggah lagi.
+                            @else
+                                Isi formulir langkah demi langkah. Setiap halaman hanya beberapa pertanyaan. Tidak perlu diisi sekaligus.
+                            @endif
                         </p>
                     </div>
 
-                    @include('travel-registration.partials.jenis-switcher', ['jenis' => 'pusat'])
+                    @unless ($isRevision)
+                        @include('travel-registration.partials.jenis-switcher', ['jenis' => 'pusat'])
+                    @endunless
+
+                    @if ($isRevision && ! empty($revisionNotes))
+                        <div class="alert alert-warning col-lg-8 mx-auto">
+                            <strong>Catatan petugas:</strong> {{ $revisionNotes }}
+                        </div>
+                    @endif
 
                     @if (session('error'))
                         <div class="alert alert-danger col-lg-8 mx-auto">
@@ -51,8 +64,13 @@
 
                     <div class="card mb-5">
                         <div class="card-body p-4 p-md-5">
-                            <form id="travel-registration-form" method="POST" action="{{ route('travel.registration.store') }}" enctype="multipart/form-data">
+                            <form id="travel-registration-form" method="POST"
+                                action="{{ $isRevision ? route('registration.revision.update') : route('travel.registration.store') }}"
+                                enctype="multipart/form-data">
                                 @csrf
+                                @if ($isRevision)
+                                    @method('PUT')
+                                @endif
 
                                 @include('travel-registration.partials.wizard-progress')
 
@@ -68,6 +86,7 @@
                                             'kabupatens' => $kabupatens,
                                             'section' => 'profil',
                                             'compact' => true,
+                                            'travel' => $travel ?? null,
                                         ])
                                     </section>
 
@@ -82,6 +101,7 @@
                                             'kabupatens' => $kabupatens,
                                             'section' => 'izin',
                                             'compact' => true,
+                                            'travel' => $travel ?? null,
                                         ])
                                     </section>
 
@@ -96,6 +116,7 @@
                                             'kabupatens' => $kabupatens,
                                             'section' => 'akreditasi',
                                             'compact' => true,
+                                            'travel' => $travel ?? null,
                                         ])
                                     </section>
 
@@ -110,6 +131,7 @@
                                             'kabupatens' => $kabupatens,
                                             'section' => 'alamat',
                                             'compact' => true,
+                                            'travel' => $travel ?? null,
                                         ])
                                     </section>
 
@@ -118,9 +140,14 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-cloud-upload',
                                             'title' => 'Upload Dokumen',
-                                            'description' => 'Unggah scan dokumen resmi. Admin Kanwil akan memeriksa saat verifikasi.',
+                                            'description' => $isRevision
+                                                ? 'Unggah ulang hanya berkas yang diminta diperbaiki. Berkas lama tetap dipakai jika tidak diganti.'
+                                                : 'Unggah scan dokumen resmi. Admin Kanwil akan memeriksa saat verifikasi.',
                                         ])
-                                        @include('partials.travel-registration-documents', ['compact' => true])
+                                        @include('partials.travel-registration-documents', [
+                                            'compact' => true,
+                                            'isRevision' => $isRevision,
+                                        ])
                                     </section>
 
                                     <h3>Akun</h3>
@@ -128,9 +155,14 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-user-circle',
                                             'title' => 'Akun PIC',
-                                            'description' => 'Buat akun login untuk Penanggung Jawab (PIC). Aktif setelah pendaftaran disetujui.',
+                                            'description' => $isRevision
+                                                ? 'Perbarui data akun bila perlu. Password boleh dikosongkan jika tidak diganti.'
+                                                : 'Buat akun login untuk Penanggung Jawab (PIC).',
                                         ])
-                                        @include('travel-registration.partials.pic-fields')
+                                        @include('travel-registration.partials.pic-fields', [
+                                            'isRevision' => $isRevision,
+                                            'pic' => $pic ?? null,
+                                        ])
                                     </section>
 
                                     <h3>Review</h3>
@@ -141,8 +173,12 @@
                                         </div>
                                         <div class="alert alert-info mb-4 col-lg-8 mx-auto">
                                             <i class="bx bx-time-five me-1"></i>
-                                            Setelah dikirim, status Anda <strong>Menunggu Verifikasi</strong>.
-                                            Login baru bisa dilakukan setelah Admin Kanwil menyetujui.
+                                            @if ($isRevision)
+                                                Setelah dikirim, status kembali <strong>Menunggu Verifikasi</strong>.
+                                            @else
+                                                Setelah dikirim, status Anda <strong>Menunggu Verifikasi</strong>.
+                                                Anda bisa login, tetapi menu operasional dibuka setelah disetujui.
+                                            @endif
                                         </div>
                                         <div id="travel-registration-review" class="col-lg-10 mx-auto"></div>
                                     </section>
@@ -152,8 +188,8 @@
                     </div>
 
                     <div class="text-center mb-4">
-                        <a href="{{ route('login') }}" class="btn btn-light btn-sm">
-                            <i class="bx bx-arrow-back me-1"></i> Kembali ke Login
+                        <a href="{{ $isRevision ? route('home') : route('login') }}" class="btn btn-light btn-sm">
+                            <i class="bx bx-arrow-back me-1"></i> {{ $isRevision ? 'Kembali ke Beranda' : 'Kembali ke Login' }}
                         </a>
                     </div>
                 </div>

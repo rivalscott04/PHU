@@ -1,4 +1,8 @@
 @php
+    $isRevision = $isRevision ?? false;
+    $cabang = $cabang ?? null;
+    $pic = $pic ?? null;
+
     $wizardSteps = [
         ['label' => 'Pusat', 'full' => 'Travel Pusat'],
         ['label' => 'Cabang', 'full' => 'Data Cabang'],
@@ -14,13 +18,13 @@
         ['title' => 'Akun PIC', 'fields' => ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password']],
     ];
 
-    $pusatTerdaftar = old('pusat_terdaftar', '1') === '1';
+    $pusatTerdaftar = old('pusat_terdaftar', $cabang?->travel_id ? '1' : ($cabang ? '0' : '1')) === '1';
 @endphp
 <!doctype html>
 <html lang="id">
 <head>
     <meta charset="utf-8" />
-    <title>Registrasi Cabang Travel | {{ config('app.name') }}</title>
+    <title>{{ $isRevision ? 'Perbaikan Pendaftaran Cabang' : 'Registrasi Cabang Travel' }} | {{ config('app.name') }}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Daftarkan kantor cabang travel di PANTAU Kanwil NTB" name="description" />
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
@@ -36,17 +40,29 @@
             <div class="row justify-content-center">
                 <div class="col-xl-9 col-lg-10">
                     <div class="text-center mb-4">
-                        <a href="{{ route('login') }}">
+                        <a href="{{ $isRevision ? route('home') : route('login') }}">
                             <img src="{{ asset('images/logo_web.png') }}" alt="{{ config('app.name') }}" height="40">
                         </a>
-                        <h4 class="mt-3 mb-1">Registrasi Travel</h4>
+                        <h4 class="mt-3 mb-1">{{ $isRevision ? 'Perbaikan Pendaftaran Cabang' : 'Registrasi Travel' }}</h4>
                         <p class="text-muted mb-0 mx-auto" style="max-width: 560px">
-                            Untuk kantor cabang di NTB, baik pusatnya sudah terdaftar maupun berkantor di luar NTB.
-                            Isi langkah demi langkah, tidak perlu sekaligus.
+                            @if ($isRevision)
+                                Perbaiki bagian yang diminta, lalu kirim ulang. Berkas yang sudah benar tidak perlu diunggah lagi.
+                            @else
+                                Untuk kantor cabang di NTB, baik pusatnya sudah terdaftar maupun berkantor di luar NTB.
+                                Isi langkah demi langkah, tidak perlu sekaligus.
+                            @endif
                         </p>
                     </div>
 
-                    @include('travel-registration.partials.jenis-switcher', ['jenis' => 'cabang'])
+                    @unless ($isRevision)
+                        @include('travel-registration.partials.jenis-switcher', ['jenis' => 'cabang'])
+                    @endunless
+
+                    @if ($isRevision && ! empty($revisionNotes))
+                        <div class="alert alert-warning col-lg-8 mx-auto">
+                            <strong>Catatan petugas:</strong> {{ $revisionNotes }}
+                        </div>
+                    @endif
 
                     @if (session('error'))
                         <div class="alert alert-danger col-lg-8 mx-auto">
@@ -70,8 +86,13 @@
 
                     <div class="card mb-5">
                         <div class="card-body p-4 p-md-5">
-                            <form id="travel-registration-form" method="POST" action="{{ route('cabang.registration.store') }}" enctype="multipart/form-data">
+                            <form id="travel-registration-form" method="POST"
+                                action="{{ $isRevision ? route('registration.revision.update') : route('cabang.registration.store') }}"
+                                enctype="multipart/form-data">
                                 @csrf
+                                @if ($isRevision)
+                                    @method('PUT')
+                                @endif
 
                                 @include('travel-registration.partials.wizard-progress', ['wizardSteps' => $wizardSteps])
 
@@ -81,34 +102,50 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-buildings',
                                             'title' => 'Travel Pusat',
-                                            'description' => 'Pusat yang sudah terdaftar cukup dipilih. Pusat di luar NTB yang belum terdaftar diisi manual beserta SK izinnya.',
+                                            'description' => $isRevision
+                                                ? 'Data pusat dari pendaftaran sebelumnya. Ubah hanya jika petugas meminta.'
+                                                : 'Pusat yang sudah terdaftar cukup dipilih. Pusat di luar NTB yang belum terdaftar diisi manual beserta SK izinnya.',
                                         ])
 
-                                        <div class="row">
+                                        @if ($isRevision)
+                                            <input type="hidden" name="pusat_terdaftar" value="{{ $pusatTerdaftar ? '1' : '0' }}">
+                                            @if ($pusatTerdaftar)
+                                                <input type="hidden" name="travel_id" value="{{ old('travel_id', $cabang?->travel_id) }}">
+                                                <div class="alert alert-light border col-lg-8 mx-auto">
+                                                    <div class="small text-muted mb-1">Travel pusat</div>
+                                                    <strong>{{ $cabang?->Penyelenggara }}</strong><br>
+                                                    <span class="text-muted">No. SK: {{ $cabang?->pusat }}</span>
+                                                </div>
+                                            @endif
+                                        @endif
+
+                                        <div class="row {{ $isRevision ? 'd-none' : '' }}">
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <div class="form-label">Travel pusat sudah terdaftar di sistem? @include('partials.required-star')</div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_ya" value="1" @checked($pusatTerdaftar)>
+                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_ya" value="1" @checked($pusatTerdaftar) @disabled($isRevision)>
                                                     <label class="form-check-label" for="pusat_terdaftar_ya">Sudah, pilih dari daftar</label>
                                                 </div>
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_tidak" value="0" @checked(! $pusatTerdaftar)>
+                                                    <input class="form-check-input" type="radio" name="pusat_terdaftar" id="pusat_terdaftar_tidak" value="0" @checked(! $pusatTerdaftar) @disabled($isRevision)>
                                                     <label class="form-check-label" for="pusat_terdaftar_tidak">Belum, pusat berada di luar NTB</label>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <div class="row" id="pusat-terdaftar-fields">
+                                        <div class="row {{ $isRevision && $pusatTerdaftar ? 'd-none' : '' }}" id="pusat-terdaftar-fields">
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="travel_id" class="form-label">Travel Pusat @include('partials.required-star')</label>
                                                 <select class="form-select form-select-lg @error('travel_id') is-invalid @enderror"
-                                                    id="travel_id" name="travel_id" required>
+                                                    id="travel_id"
+                                                    @unless($isRevision && $pusatTerdaftar) name="travel_id" @endunless
+                                                    @required(! $isRevision)>
                                                     <option value="">Pilih travel pusat</option>
                                                     @foreach ($travels as $travel)
                                                         <option value="{{ $travel->id }}"
                                                             data-sk="{{ $travel->Pusat }}"
                                                             data-pimpinan="{{ $travel->Pimpinan }}"
-                                                            @selected(old('travel_id') == $travel->id)>
+                                                            @selected(old('travel_id', $cabang?->travel_id) == $travel->id)>
                                                             {{ $travel->Penyelenggara }} ({{ $travel->kab_kota }})
                                                         </option>
                                                     @endforeach
@@ -129,11 +166,11 @@
                                             </div>
                                         </div>
 
-                                        <div class="row" id="pusat-manual-fields">
+                                        <div class="row {{ $isRevision && $pusatTerdaftar ? 'd-none' : '' }}" id="pusat-manual-fields">
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="Penyelenggara" class="form-label">Nama Travel Pusat @include('partials.required-star')</label>
                                                 <input type="text" class="form-control form-control-lg @error('Penyelenggara') is-invalid @enderror"
-                                                    id="Penyelenggara" name="Penyelenggara" value="{{ old('Penyelenggara') }}"
+                                                    id="Penyelenggara" name="Penyelenggara" value="{{ old('Penyelenggara', $cabang?->Penyelenggara) }}"
                                                     placeholder="Nama PT sesuai izin PPIU" required>
                                                 @error('Penyelenggara')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
@@ -141,26 +178,33 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="pusat" class="form-label">No. SK Izin PPIU Pusat @include('partials.required-star')</label>
                                                 <input type="text" class="form-control form-control-lg @error('pusat') is-invalid @enderror"
-                                                    id="pusat" name="pusat" value="{{ old('pusat') }}" required>
+                                                    id="pusat" name="pusat" value="{{ old('pusat', $cabang?->pusat) }}" required>
                                                 @error('pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
 
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="pimpinan_pusat" class="form-label">Nama Pimpinan Pusat @include('partials.required-star')</label>
                                                 <input type="text" class="form-control form-control-lg @error('pimpinan_pusat') is-invalid @enderror"
-                                                    id="pimpinan_pusat" name="pimpinan_pusat" value="{{ old('pimpinan_pusat') }}" required>
+                                                    id="pimpinan_pusat" name="pimpinan_pusat" value="{{ old('pimpinan_pusat', $cabang?->pimpinan_pusat) }}" required>
                                                 @error('pimpinan_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
 
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="alamat_pusat" class="form-label">Alamat Kantor Pusat @include('partials.required-star')</label>
                                                 <textarea class="form-control @error('alamat_pusat') is-invalid @enderror"
-                                                    id="alamat_pusat" name="alamat_pusat" rows="3" required>{{ old('alamat_pusat') }}</textarea>
+                                                    id="alamat_pusat" name="alamat_pusat" rows="3" required>{{ old('alamat_pusat', $cabang?->alamat_pusat) }}</textarea>
                                                 @error('alamat_pusat')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
 
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
-                                                <label for="dokumen_sk_pusat" class="form-label">SK Izin PPIU Pusat @include('partials.required-star')</label>
+                                                <label for="dokumen_sk_pusat" class="form-label">
+                                                    SK Izin PPIU Pusat
+                                                    @if (empty(($berkasTersimpan ?? [])['dokumen_sk_pusat']))
+                                                        @include('partials.required-star')
+                                                    @else
+                                                        <span class="text-muted fw-normal">(opsional jika tidak diganti)</span>
+                                                    @endif
+                                                </label>
                                                 <input type="file" class="form-control @error('dokumen_sk_pusat') is-invalid @enderror"
                                                     id="dokumen_sk_pusat" name="dokumen_sk_pusat" accept=".pdf,.jpg,.jpeg,.png"
                                                     data-tersimpan="{{ ($berkasTersimpan ?? [])['dokumen_sk_pusat'] ?? '' }}"
@@ -187,7 +231,7 @@
                                                     id="kabupaten" name="kabupaten" required>
                                                     <option value="">Pilih kabupaten/kota</option>
                                                     @foreach ($kabupatens as $kabupaten)
-                                                        <option value="{{ $kabupaten }}" @selected(old('kabupaten') === $kabupaten)>{{ $kabupaten }}</option>
+                                                        <option value="{{ $kabupaten }}" @selected(old('kabupaten', $cabang?->kabupaten) === $kabupaten)>{{ $kabupaten }}</option>
                                                     @endforeach
                                                 </select>
                                                 @error('kabupaten')<div class="invalid-feedback">{{ $message }}</div>@enderror
@@ -196,7 +240,7 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="pimpinan_cabang" class="form-label">Nama Kepala Cabang @include('partials.required-star')</label>
                                                 <input type="text" class="form-control form-control-lg @error('pimpinan_cabang') is-invalid @enderror"
-                                                    id="pimpinan_cabang" name="pimpinan_cabang" value="{{ old('pimpinan_cabang') }}"
+                                                    id="pimpinan_cabang" name="pimpinan_cabang" value="{{ old('pimpinan_cabang', $cabang?->pimpinan_cabang) }}"
                                                     placeholder="Nama penanggung jawab kantor cabang" required>
                                                 @error('pimpinan_cabang')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
@@ -204,7 +248,7 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="SK_BA" class="form-label">No. SK / BA Pembukaan Cabang @include('partials.required-star')</label>
                                                 <input type="text" class="form-control form-control-lg @error('SK_BA') is-invalid @enderror"
-                                                    id="SK_BA" name="SK_BA" value="{{ old('SK_BA') }}" required>
+                                                    id="SK_BA" name="SK_BA" value="{{ old('SK_BA', $cabang?->SK_BA) }}" required>
                                                 @error('SK_BA')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                 <div class="form-text">Nomor pada surat keputusan atau berita acara pembukaan cabang</div>
                                             </div>
@@ -212,7 +256,7 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="tanggal" class="form-label">Tanggal SK / BA @include('partials.required-star')</label>
                                                 <input type="date" class="form-control form-control-lg @error('tanggal') is-invalid @enderror"
-                                                    id="tanggal" name="tanggal" value="{{ old('tanggal') }}" required>
+                                                    id="tanggal" name="tanggal" value="{{ old('tanggal', optional($cabang?->tanggal)->format('Y-m-d')) }}" required>
                                                 @error('tanggal')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                 <div class="alert alert-light border small py-2 mb-0 mt-2">
                                                     <i class="bx bx-info-circle text-primary me-1"></i>
@@ -223,7 +267,7 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="telepon" class="form-label">Telepon Cabang @include('partials.required-star')</label>
                                                 <input type="tel" class="form-control form-control-lg @error('telepon') is-invalid @enderror"
-                                                    id="telepon" name="telepon" value="{{ old('telepon') }}"
+                                                    id="telepon" name="telepon" value="{{ old('telepon', $cabang?->telepon) }}"
                                                     inputmode="numeric" maxlength="16" required>
                                                 @error('telepon')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
@@ -231,7 +275,7 @@
                                             <div class="col-12 col-lg-8 mx-auto mb-4">
                                                 <label for="alamat_cabang" class="form-label">Alamat Kantor Cabang @include('partials.required-star')</label>
                                                 <textarea class="form-control @error('alamat_cabang') is-invalid @enderror"
-                                                    id="alamat_cabang" name="alamat_cabang" rows="3" required>{{ old('alamat_cabang') }}</textarea>
+                                                    id="alamat_cabang" name="alamat_cabang" rows="3" required>{{ old('alamat_cabang', $cabang?->alamat_cabang) }}</textarea>
                                                 @error('alamat_cabang')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                             </div>
                                         </div>
@@ -247,15 +291,21 @@
 
                                         <div class="row">
                                             @foreach (\App\Models\CabangTravel::DOKUMEN_PENDAFTARAN as $meta)
+                                                @php($hasExisting = ! empty(($berkasTersimpan ?? [])[$meta['column']]))
                                                 <div class="col-12 col-lg-8 mx-auto mb-4">
                                                     <label for="{{ $meta['column'] }}" class="form-label">
-                                                        {{ $meta['label'] }} @include('partials.required-star')
+                                                        {{ $meta['label'] }}
+                                                        @if ($hasExisting)
+                                                            <span class="text-muted fw-normal">(opsional jika tidak diganti)</span>
+                                                        @else
+                                                            @include('partials.required-star')
+                                                        @endif
                                                     </label>
                                                     <input type="file" class="form-control @error($meta['column']) is-invalid @enderror"
                                                         id="{{ $meta['column'] }}" name="{{ $meta['column'] }}"
                                                         accept=".pdf,.jpg,.jpeg,.png"
                                                         data-tersimpan="{{ ($berkasTersimpan ?? [])[$meta['column']] ?? '' }}"
-                                                        @required(empty(($berkasTersimpan ?? [])[$meta['column']]))>
+                                                        @required(! $hasExisting)>
                                                     @error($meta['column'])<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                     <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
                                                     @include('partials.berkas-tersimpan', ['field' => $meta['column']])
@@ -276,9 +326,14 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-user-circle',
                                             'title' => 'Akun PIC Cabang',
-                                            'description' => 'Buat akun login untuk penanggung jawab cabang. Aktif setelah pendaftaran disetujui.',
+                                            'description' => $isRevision
+                                                ? 'Perbarui data akun bila perlu. Password boleh dikosongkan jika tidak diganti.'
+                                                : 'Buat akun login untuk penanggung jawab cabang.',
                                         ])
-                                        @include('travel-registration.partials.pic-fields')
+                                        @include('travel-registration.partials.pic-fields', [
+                                            'isRevision' => $isRevision,
+                                            'pic' => $pic,
+                                        ])
                                     </section>
 
                                     <h3>Review</h3>
@@ -289,9 +344,13 @@
                                         </div>
                                         <div class="alert alert-info mb-4 col-lg-8 mx-auto">
                                             <i class="bx bx-time-five me-1"></i>
-                                            Alur: <strong>Menunggu Verifikasi</strong> (peninjauan Kabupaten/Kota) →
-                                            <strong>Menunggu Kanwil</strong> → <strong>Disetujui</strong>.
-                                            Login baru bisa dilakukan setelah disetujui Kanwil.
+                                            @if ($isRevision)
+                                                Setelah dikirim, status kembali ke antrean verifikasi sesuai tahap sebelumnya.
+                                            @else
+                                                Alur: <strong>Menunggu Verifikasi</strong> (peninjauan Kabupaten/Kota) →
+                                                <strong>Menunggu Kanwil</strong> → <strong>Disetujui</strong>.
+                                                Anda bisa login, tetapi menu operasional dibuka setelah disetujui.
+                                            @endif
                                         </div>
                                         <div id="travel-registration-review" class="col-lg-10 mx-auto"></div>
                                     </section>
@@ -301,8 +360,8 @@
                     </div>
 
                     <div class="text-center mb-4">
-                        <a href="{{ route('login') }}" class="btn btn-light btn-sm">
-                            <i class="bx bx-arrow-back me-1"></i> Kembali ke Login
+                        <a href="{{ $isRevision ? route('home') : route('login') }}" class="btn btn-light btn-sm">
+                            <i class="bx bx-arrow-back me-1"></i> {{ $isRevision ? 'Kembali ke Beranda' : 'Kembali ke Login' }}
                         </a>
                     </div>
                 </div>

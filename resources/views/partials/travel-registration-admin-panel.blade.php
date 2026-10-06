@@ -1,19 +1,22 @@
 @if ($travelCompany->registration_status && ! $travelCompany->isRegistrationApproved())
-    <div class="alert alert-{{ $travelCompany->isRegistrationPending() ? 'warning' : 'danger' }} mb-4">
+    <div class="alert alert-{{ $travelCompany->isRegistrationRejected() ? 'danger' : 'warning' }} mb-4">
         <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
             <div>
                 <h6 class="alert-heading mb-2">
-                    <i class="bx bx-{{ $travelCompany->isRegistrationPending() ? 'time-five' : 'x-circle' }} me-1"></i>
+                    <i class="bx bx-{{ $travelCompany->isRegistrationRejected() ? 'x-circle' : 'time-five' }} me-1"></i>
                     Status Registrasi
                 </h6>
                 <span class="badge {{ $travelCompany->registration_status->badgeClass() }}">
                     {{ $travelCompany->registration_status->label() }}
                 </span>
-                @if ($travelCompany->isRegistrationRejected() && $travelCompany->registration_notes)
-                    <p class="mb-0 mt-2 small">Alasan penolakan: {{ $travelCompany->registration_notes }}</p>
+                @if (($travelCompany->isRegistrationRejected() || $travelCompany->isNeedsRevision()) && $travelCompany->registration_notes)
+                    <p class="mb-0 mt-2 small">
+                        {{ $travelCompany->isNeedsRevision() ? 'Catatan perbaikan' : 'Alasan penolakan' }}:
+                        {{ $travelCompany->registration_notes }}
+                    </p>
                 @endif
             </div>
-            @if ($travelCompany->isRegistrationPending())
+            @if ($travelCompany->isRegistrationPending() || $travelCompany->isNeedsRevision())
                 <div class="d-flex flex-wrap gap-2">
                     @if ($travelCompany->hasRegistrationDocument('sk'))
                         <a href="{{ route('travel.registration.document', ['id' => $travelCompany->id, 'type' => 'sk']) }}"
@@ -29,7 +32,7 @@
                             <i class="bx bx-file me-1"></i> Akreditasi
                         </a>
                     @else
-                        <span class="badge bg-danger align-self-center">Akreditasi belum ada</span>
+                        <span class="badge bg-secondary align-self-center">Akreditasi belum ada</span>
                     @endif
                 </div>
             @endif

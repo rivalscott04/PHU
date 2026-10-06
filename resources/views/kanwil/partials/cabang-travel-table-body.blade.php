@@ -9,7 +9,7 @@
                 <span class="badge {{ $item->registration_status->badgeClass() }}">
                     {{ $item->registration_status->label() }}
                 </span>
-                @if ($item->isRegistrationRejected() && $item->registration_notes)
+                @if (($item->isRegistrationRejected() || $item->isNeedsRevision()) && $item->registration_notes)
                     <div class="small text-muted mt-1">{{ $item->registration_notes }}</div>
                 @endif
             @else
@@ -32,8 +32,8 @@
                         <i class="bx bx-check-shield me-1"></i> Verifikasi
                     </button>
                 @endif
-                {{-- Dikunci selama ditinjau, lihat KanwilController::tolakJikaSedangDitinjau. --}}
-                @unless ($item->isRegistrationOpen())
+                {{-- Dikunci selama ditinjau atau sedang diperbaiki PIC. --}}
+                @unless ($item->isRegistrationOpen() || $item->isNeedsRevision())
                     <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" class="btn btn-sm btn-warning" title="Edit">
                         <i class="bx bx-edit"></i>
                     </a>
@@ -172,9 +172,25 @@
                             <hr>
                         @endif
 
-                        {{-- Kabupaten/Kota hanya menolak di tahap peninjauannya. Setelah
+                        {{-- Kabupaten/Kota hanya menolak / minta perbaikan di tahap peninjauannya. Setelah
                              diteruskan, keputusan ada di Kanwil. --}}
                         @if ($isAdmin || $item->isRegistrationPending())
+                            <form method="POST" action="{{ route('cabang.travel.revision', $item->id_cabang) }}" class="mb-3">
+                                @csrf
+                                <h6>Minta Perbaikan</h6>
+                                <p class="text-muted small mb-2">
+                                    PIC bisa login dan memperbaiki data. Berbeda dengan tolak yang mengharuskan daftar ulang.
+                                </p>
+                                <div class="mb-3">
+                                    <label class="form-label">Yang Perlu Diperbaiki @include('partials.required-star')</label>
+                                    <textarea class="form-control" name="registration_notes" rows="2" maxlength="1000" required
+                                        placeholder="Contoh: KTP kepala cabang buram, unggah ulang."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="bx bx-edit me-1"></i> Minta Perbaikan
+                                </button>
+                            </form>
+                            <hr>
                             <form method="POST" action="{{ route('cabang.travel.reject', $item->id_cabang) }}"
                                 onsubmit="event.preventDefault(); confirmRejectCabang(this, @js($item->Penyelenggara));">
                                 @csrf

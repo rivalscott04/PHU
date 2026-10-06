@@ -74,16 +74,18 @@ class TravelCapabilityService
                 'sertifikat' => false,
             ];
         } elseif ($user->role === UserRole::User->value) {
-            $travel = $user->travel;
+            $travel = $user->travel ?? $user->operatingTravel();
+            $registration = $user->operatingRegistration();
+            $isApproved = ! $registration || $registration->isRegistrationApproved();
 
             $menus = [
                 'dashboard' => true,
-                'jamaah_umrah' => $travel ? $travel->canHandleUmrah() : false,
-                'jamaah_haji_khusus' => $travel ? $travel->canHandleHajiKhusus() : false,
-                'bap' => true,
-                'travel_packages' => true,
+                'jamaah_umrah' => $isApproved && $travel && $travel->canHandleUmrah(),
+                'jamaah_haji_khusus' => $isApproved && $travel && $travel->canHandleHajiKhusus(),
+                'bap' => $isApproved,
+                'travel_packages' => $isApproved,
                 'pengaduan' => false,
-                'keberangkatan' => true,
+                'keberangkatan' => $isApproved,
                 'pengunduran' => false, // sengaja nonaktif: menunggu mekanisme resmi (proses & form). Jangan dihapus.
                 'travel_management' => false,
                 'cabang_travel' => false,
@@ -235,7 +237,18 @@ class TravelCapabilityService
             self::link('Beranda', 'home', 'bx bx-home-circle'),
         ];
 
-        $travel = $user->travel;
+        $registration = $user->operatingRegistration();
+        $isApproved = ! $registration || $registration->isRegistrationApproved();
+
+        if (! $isApproved) {
+            if ($registration?->isNeedsRevision()) {
+                $menus[] = self::link('Perbaikan Pendaftaran', 'registration.revision.edit', 'bx bx-edit');
+            }
+
+            return $menus;
+        }
+
+        $travel = $user->travel ?? $user->operatingTravel();
         $jamaahItems = [];
         if ($travel?->canHandleUmrah()) {
             $jamaahItems[] = self::subItem('Jamaah Umrah', 'jamaah.umrah');

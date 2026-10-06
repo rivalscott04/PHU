@@ -30,6 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'kabupaten' => \App\Http\Middleware\KabupatenMiddleware::class,
             'kabupaten.access' => \App\Http\Middleware\KabupatenAccessMiddleware::class,
             'password.changed' => \App\Http\Middleware\CheckPasswordChanged::class,
+            'registration.approved' => \App\Http\Middleware\EnsureRegistrationApproved::class,
         ]);
 
         $middleware->web(append: [

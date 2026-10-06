@@ -31,6 +31,11 @@ trait HasRegistrationStatus
         return $this->registration_status === TravelRegistrationStatus::MenungguKanwil;
     }
 
+    public function isNeedsRevision(): bool
+    {
+        return $this->registration_status === TravelRegistrationStatus::PerluPerbaikan;
+    }
+
     public function isRegistrationApproved(): bool
     {
         return $this->registration_status === TravelRegistrationStatus::Approved;
@@ -45,5 +50,13 @@ trait HasRegistrationStatus
     public function isRegistrationOpen(): bool
     {
         return $this->isRegistrationPending() || $this->isAwaitingKanwil();
+    }
+
+    /** PIC boleh login dengan menu terbatas sebelum disetujui. */
+    public function canLoginWhileUnverified(): bool
+    {
+        return $this->isRegistrationPending()
+            || $this->isAwaitingKanwil()
+            || $this->isNeedsRevision();
     }
 }

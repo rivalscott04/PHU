@@ -499,7 +499,12 @@ class ValidationHelper
     public static function uniquePenyelenggaraRule(?int $ignoreTravelId = null): \Illuminate\Validation\Rules\Unique
     {
         $rule = Rule::unique('travels', 'Penyelenggara')
-            ->where(fn ($query) => $query->whereIn('registration_status', ['pending', 'approved']));
+            ->where(fn ($query) => $query->whereIn('registration_status', [
+                'pending',
+                'menunggu_kanwil',
+                'perlu_perbaikan',
+                'approved',
+            ]));
 
         if ($ignoreTravelId !== null) {
             $rule->ignore($ignoreTravelId);

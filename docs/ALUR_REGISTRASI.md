@@ -14,11 +14,15 @@ Pilihan itu menentukan formulir dan jalur verifikasinya.
 ### Pusat
 
 ```
-Travel mendaftar  ->  Menunggu Verifikasi  ->  Kanwil setujui  ->  Disetujui
-                                            \-> Kanwil tolak   ->  Ditolak
+Travel mendaftar  ->  Menunggu Verifikasi  ->  Kanwil setujui        ->  Disetujui
+                                            \-> Kanwil minta perbaikan ->  Perlu Perbaikan  -> PIC perbaiki -> Menunggu Verifikasi
+                                            \-> Kanwil tolak           ->  Ditolak (daftar ulang)
 ```
 
 Kabupaten/kota tidak terlibat. Keputusan sepenuhnya di Kanwil.
+
+Setelah mendaftar, PIC **bisa login** dengan menu terbatas (Beranda saja).
+Menu operasional dibuka setelah status Disetujui.
 
 ### Cabang
 
@@ -27,16 +31,23 @@ Cabang mendaftar  ->  Menunggu Verifikasi  ->  Kabko unggah rekomendasi
                                                         |
                                                         v
                                               Menunggu Kanwil  ->  Kanwil setujui  ->  Disetujui
-                                                                \-> Kanwil tolak   ->  Ditolak
+                                                                \-> Kanwil / Kabko minta perbaikan -> Perlu Perbaikan
+                                                                \-> Kanwil / Kabko tolak           -> Ditolak
 ```
+
+Kabko boleh minta perbaikan atau tolak saat status masih Menunggu Verifikasi.
+Setelah diteruskan ke Kanwil, hanya Kanwil yang boleh minta perbaikan atau tolak.
 
 Yang berhak meninjau adalah kantor Kemenhaj di kabupaten/kota yang dipilih cabang,
 bukan kabupaten pusatnya. Kanwil tetap bisa menyetujui langsung tanpa menunggu
 rekomendasi, misalnya untuk kasus mendesak, dan dialog konfirmasinya menyebut
 eksplisit bahwa tahap peninjauan sedang dilewati.
 
-Penolakan bisa dilakukan Kabko maupun Kanwil, dan wajib disertai alasan. Menolak
-akan menghapus akun PIC, jadi pendaftar harus mendaftar ulang.
+**Minta Perbaikan** vs **Tolak**:
+- Minta Perbaikan: PIC login, buka menu Perbaikan Pendaftaran, edit form yang sama
+  (prefilled), kirim ulang. Berkas lama tetap dipakai jika tidak diganti.
+- Tolak: penolakan final. PIC tidak bisa login. Harus daftar ulang dari awal.
+  Berkas lama dihapus. Alasan penolakan wajib diisi.
 
 ---
 
@@ -98,22 +109,27 @@ Ia tidak ikut terhapus saat pendaftaran disetujui, karena merupakan jejak audit.
 
 ## 3. Status pendaftaran
 
-Empat status dipakai bersama oleh pusat dan cabang, tersimpan di kolom
+Lima status dipakai bersama oleh pusat dan cabang, tersimpan di kolom
 `registration_status`.
 
 | Nilai | Label di layar | Arti |
 |-------|----------------|------|
-| `pending` | Menunggu Verifikasi | Baru masuk. Pusat menunggu Kanwil, cabang menunggu Kabko |
+| `pending` | Menunggu Verifikasi | Baru masuk atau baru dikirim ulang setelah perbaikan. Pusat menunggu Kanwil, cabang menunggu Kabko |
 | `menunggu_kanwil` | Menunggu Kanwil | Khusus cabang. Rekomendasi sudah diunggah Kabko |
-| `approved` | Disetujui | Selesai. PIC bisa login |
-| `rejected` | Ditolak | Akun PIC dihapus, harus daftar ulang |
+| `perlu_perbaikan` | Perlu Perbaikan | Petugas minta perbaikan. PIC login dan perbaiki lewat menu Perbaikan Pendaftaran |
+| `approved` | Disetujui | Selesai. Semua menu operasional dibuka |
+| `rejected` | Ditolak | Penolakan final. Tidak bisa login, harus daftar ulang |
+
+Kolom `revision_return_status` mengingat status antrean tujuan setelah PIC
+mengirim perbaikan (`pending` atau `menunggu_kanwil`).
 
 Data lama otomatis berstatus `approved`, jadi cabang yang sudah tercatat sebelum
 fitur ini tidak ikut masuk antrean verifikasi.
 
-Selama status belum `approved`, PIC tidak bisa login dan pesan errornya menyebut
-status terkini. Cabang yang belum disetujui juga tidak muncul di direktori
-publik, halaman depan, dropdown sertifikat, maupun hitungan dashboard.
+PIC bisa login saat `pending`, `menunggu_kanwil`, atau `perlu_perbaikan`, tetapi
+menu operasional terkunci sampai `approved`. Hanya `rejected` yang mengunci login.
+Cabang yang belum disetujui juga tidak muncul di direktori publik, halaman depan,
+dropdown sertifikat, maupun hitungan dashboard.
 
 ---
 
@@ -122,11 +138,14 @@ publik, halaman depan, dropdown sertifikat, maupun hitungan dashboard.
 | Aksi | Super Admin (Kanwil) | Admin Kabupaten | Pendaftar |
 |------|----------------------|-----------------|-----------|
 | Mendaftar pusat atau cabang | ya | ya | ya |
+| Login saat menunggu verifikasi | - | - | ya (menu terbatas) |
+| Perbaiki pendaftaran (status Perlu Perbaikan) | tidak | tidak | ya (form prefilled) |
 | Melihat cabang di wilayahnya | seluruh NTB | wilayahnya saja | tidak |
 | Unggah rekomendasi peninjauan | ya | wilayahnya saja | tidak |
+| Minta perbaikan cabang | ya | hanya saat pending | tidak |
 | Setujui pendaftaran cabang | ya | tidak | tidak |
-| Tolak pendaftaran cabang | ya | wilayahnya saja | tidak |
-| Setujui atau tolak pendaftaran pusat | ya | tidak | tidak |
+| Tolak pendaftaran cabang | ya | hanya saat pending | tidak |
+| Setujui, minta perbaikan, atau tolak pendaftaran pusat | ya | tidak | tidak |
 
 Membuka data cabang di luar wilayah dibalas 404, bukan 403, supaya keberadaan
 datanya tidak bocor.

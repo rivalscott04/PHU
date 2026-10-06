@@ -1,19 +1,6 @@
 @extends('layouts.app')
 
 @section('content')
-    @if (session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    @endif
-
     @if($guide = \App\Support\RoleWorkflowGuide::for('travel_master'))
         @include('partials.workflow-guide', ['guide' => $guide])
     @endif
@@ -57,6 +44,10 @@
                                     <span class="badge bg-danger ms-1">{{ $pendingCount }}</span>
                                 @endif
                             </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link {{ ($filter ?? '') === 'perlu_perbaikan' ? 'active' : '' }}"
+                               href="{{ route('travel', ['filter' => 'perlu_perbaikan']) }}" role="tab">Perlu Perbaikan</a>
                         </li>
                         <li class="nav-item" role="presentation">
                             <a class="nav-link {{ ($filter ?? '') === 'approved' ? 'active' : '' }}"
@@ -143,13 +134,41 @@
                         <div class="mb-3">
                             <label for="registration_notes" class="form-label">Alasan Penolakan <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="registration_notes" name="registration_notes" rows="4"
-                                placeholder="Contoh: Dokumen SK belum lengkap, silakan daftar ulang." required></textarea>
-                            <small class="text-muted">Alasan ini akan tersimpan di sistem.</small>
+                                placeholder="Contoh: Data tidak valid / dugaan pemalsuan dokumen." required></textarea>
+                            <small class="text-muted">Penolakan final. PIC tidak bisa login dan harus daftar ulang.</small>
                         </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
                         <button type="submit" class="btn btn-danger">Tolak Pendaftaran</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Revision Modal -->
+    <div class="modal fade" id="revisionModal" tabindex="-1" aria-labelledby="revisionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="revisionForm" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="revisionModalLabel">Minta Perbaikan Pendaftaran</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-3">Travel: <strong id="revisionTravelName"></strong></p>
+                        <div class="mb-3">
+                            <label for="revision_notes" class="form-label">Yang Perlu Diperbaiki <span class="text-danger">*</span></label>
+                            <textarea class="form-control" id="revision_notes" name="registration_notes" rows="4"
+                                placeholder="Contoh: Scan SK buram, unggah ulang. Nomor telepon tidak aktif." required></textarea>
+                            <small class="text-muted">PIC bisa login dan memperbaiki data lewat menu Perbaikan Pendaftaran.</small>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-warning">Kirim Permintaan Perbaikan</button>
                     </div>
                 </form>
             </div>
@@ -565,6 +584,13 @@
         document.getElementById('rejectForm').action = `/travel/${travelId}/reject-registration`;
         document.getElementById('registration_notes').value = '';
         new bootstrap.Modal(document.getElementById('rejectModal')).show();
+    }
+
+    function openRevisionModal(travelId, travelName) {
+        document.getElementById('revisionTravelName').textContent = travelName;
+        document.getElementById('revisionForm').action = `/travel/${travelId}/request-revision`;
+        document.getElementById('revision_notes').value = '';
+        new bootstrap.Modal(document.getElementById('revisionModal')).show();
     }
 
     // confirmApproveRegistration() provided globally by js/confirm-dialogs.js

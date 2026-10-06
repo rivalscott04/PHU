@@ -48,7 +48,7 @@
                     </div>
                 @endif
             @endif
-            @if ($regStatus === \App\Enums\TravelRegistrationStatus::Rejected && $item->registration_notes)
+            @if (in_array($regStatus, [\App\Enums\TravelRegistrationStatus::Rejected, \App\Enums\TravelRegistrationStatus::PerluPerbaikan], true) && $item->registration_notes)
                 <small class="text-danger d-block mt-1">{{ Str::limit($item->registration_notes, 60) }}</small>
             @endif
         </td>
@@ -62,6 +62,10 @@
                             <i class="bx bx-check me-1"></i> Setujui
                         </button>
                     </form>
+                    <button type="button" class="btn btn-warning btn-sm"
+                        onclick='openRevisionModal({{ $item->id }}, @json($item->Penyelenggara))' title="Minta Perbaikan">
+                        <i class="bx bx-edit me-1"></i> Perbaikan
+                    </button>
                     <button type="button" class="btn btn-danger btn-sm"
                         onclick='openRejectModal({{ $item->id }}, @json($item->Penyelenggara))' title="Tolak">
                         <i class="bx bx-x me-1"></i> Tolak
