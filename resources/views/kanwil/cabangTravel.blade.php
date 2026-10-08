@@ -13,9 +13,11 @@
                     <p class="text-muted mb-0 small">Kelola data cabang travel di wilayah Anda</p>
                 </div>
                 <div class="d-flex gap-2 flex-wrap">
-                    <a href="{{ route('cabang.travel.export') }}" class="btn btn-sm btn-outline-info">
-                        <i class="bx bx-download me-1"></i> Export Excel
-                    </a>
+                    @include('partials.excel-scope-menu', [
+                        'exportRoute' => 'cabang.travel.export',
+                        'buttonClass' => 'btn-outline-info',
+                        'menuId' => 'cabangTravelExportMenu',
+                    ])
                     <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#uploadModal">
                         <i class="bx bx-upload me-1"></i> Import Data
                     </button>
@@ -162,6 +164,41 @@
             }
 
             let searchTimeout;
+            let currentPage = new URLSearchParams(window.location.search).get('page') || '1';
+            const exportRoot = document.getElementById('cabangTravelExportMenu');
+            const exportBase = @json(route('cabang.travel.export'));
+
+            function syncExportLinks() {
+                if (!exportRoot) {
+                    return;
+                }
+
+                const params = new URLSearchParams(window.location.search);
+                const keyword = searchInput.value.trim();
+
+                if (keyword) {
+                    params.set('search', keyword);
+                } else {
+                    params.delete('search');
+                }
+
+                if (perPageFilter && perPageFilter.value) {
+                    params.set('per_page', perPageFilter.value);
+                }
+
+                exportRoot.querySelectorAll('[data-excel-scope]').forEach(function (link) {
+                    const next = new URLSearchParams(params);
+                    next.set('scope', link.dataset.excelScope);
+
+                    if (link.dataset.excelScope === 'page') {
+                        next.set('page', currentPage);
+                    } else {
+                        next.delete('page');
+                    }
+
+                    link.href = `${exportBase}?${next.toString()}`;
+                });
+            }
 
             function updateResultsInfo(data) {
                 const info = data.pagination_info;
@@ -172,7 +209,10 @@
             }
 
             function fetchListing(params = {}) {
-                const queryParams = new URLSearchParams();
+                const queryParams = new URLSearchParams(window.location.search);
+                queryParams.delete('page');
+                queryParams.delete('search');
+                queryParams.delete('per_page');
                 if (searchInput.value.trim()) {
                     queryParams.append('search', searchInput.value.trim());
                 }
@@ -198,8 +238,12 @@
 
                         document.getElementById('cabangTravelTableBody').innerHTML = data.tableBody;
                         document.getElementById('cabangTravelPaginationContainer').innerHTML = data.pagination;
+                        if (data.pagination_info && data.pagination_info.current_page) {
+                            currentPage = String(data.pagination_info.current_page);
+                        }
                         updateResultsInfo(data);
                         bindPaginationLinks();
+                        syncExportLinks();
                     });
             }
 
@@ -210,6 +254,8 @@
                         const url = new URL(this.href);
                         const page = url.searchParams.get('page');
                         if (page) {
+                            currentPage = page;
+                            syncExportLinks();
                             fetchListing({ page });
                         }
                     });
@@ -218,14 +264,21 @@
 
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
+                currentPage = '1';
+                syncExportLinks();
                 searchTimeout = setTimeout(fetchListing, 350);
             });
 
             if (perPageFilter) {
-                perPageFilter.addEventListener('change', fetchListing);
+                perPageFilter.addEventListener('change', function () {
+                    currentPage = '1';
+                    syncExportLinks();
+                    fetchListing();
+                });
             }
 
             bindPaginationLinks();
+            syncExportLinks();
         }
 
         document.addEventListener('DOMContentLoaded', initCabangTravelListing);

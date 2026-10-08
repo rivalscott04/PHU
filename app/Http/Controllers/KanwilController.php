@@ -893,22 +893,39 @@ class KanwilController extends Controller
     /**
      * Export Travel Pusat to Excel
      */
-    public function exportTravelPusat()
+    public function exportTravelPusat(Request $request)
     {
         $user = auth()->user();
+        $query = $this->buildTravelListingQuery($request, $user)->orderByDesc('created_at');
+        $rows = $request->get('scope') === 'page'
+            ? $this->sliceExportPage($query, $request)
+            : $query->get();
         $filename = 'Data_Travel_Pusat_' . date('Y-m-d_H-i-s') . '.xlsx';
-        
-        return Excel::download(new TravelPusatExport($user), $filename);
+
+        return Excel::download(new TravelPusatExport($rows), $filename);
     }
 
     /**
      * Export Travel Cabang to Excel
      */
-    public function exportTravelCabang()
+    public function exportTravelCabang(Request $request)
     {
         $user = auth()->user();
+        $query = $this->buildCabangTravelListingQuery($request, $user)->orderByDesc('id_cabang');
+        $rows = $request->get('scope') === 'page'
+            ? $this->sliceExportPage($query, $request)
+            : $query->get();
         $filename = 'Data_Travel_Cabang_' . date('Y-m-d_H-i-s') . '.xlsx';
-        
-        return Excel::download(new TravelCabangExport($user), $filename);
+
+        return Excel::download(new TravelCabangExport($rows), $filename);
+    }
+
+    private function sliceExportPage($query, Request $request)
+    {
+        $perPage = (int) $request->get('per_page', 15);
+        $perPage = in_array($perPage, [10, 15, 25, 50], true) ? $perPage : 15;
+        $page = max(1, (int) $request->get('page', 1));
+
+        return $query->paginate($perPage, ['*'], 'page', $page)->getCollection();
     }
 }

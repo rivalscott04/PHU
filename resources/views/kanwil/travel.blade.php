@@ -16,9 +16,11 @@
                     <a href="{{ route('form.travel') }}" class="btn btn-primary btn-sm">
                         <i class="bx bx-plus me-1"></i> Tambah
                     </a>
-                    <a href="{{ route('travel.export') }}" class="btn btn-outline-primary btn-sm">
-                        <i class="bx bx-download me-1"></i> Export Excel
-                    </a>
+                    @include('partials.excel-scope-menu', [
+                        'exportRoute' => 'travel.export',
+                        'buttonClass' => 'btn-outline-primary',
+                        'menuId' => 'travelExportMenu',
+                    ])
                     <button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModal">
                         <i class="bx bx-upload me-1"></i> Upload Excel
                     </button>
@@ -281,6 +283,42 @@
             }
 
             let searchTimeout;
+            let currentPage = new URLSearchParams(window.location.search).get('page') || '1';
+            const exportRoot = document.getElementById('travelExportMenu');
+            const exportBase = @json(route('travel.export'));
+
+            function syncExportLinks() {
+                if (!exportRoot) {
+                    return;
+                }
+
+                const params = new URLSearchParams();
+
+                if (currentFilter && currentFilter !== 'all') {
+                    params.set('filter', currentFilter);
+                }
+
+                const keyword = searchInput.value.trim();
+
+                if (keyword) {
+                    params.set('search', keyword);
+                }
+
+                if (perPageFilter && perPageFilter.value) {
+                    params.set('per_page', perPageFilter.value);
+                }
+
+                exportRoot.querySelectorAll('[data-excel-scope]').forEach(function (link) {
+                    const next = new URLSearchParams(params);
+                    next.set('scope', link.dataset.excelScope);
+
+                    if (link.dataset.excelScope === 'page') {
+                        next.set('page', currentPage);
+                    }
+
+                    link.href = `${exportBase}?${next.toString()}`;
+                });
+            }
 
             function updateResultsInfo(data) {
                 const info = data.pagination_info;
@@ -320,8 +358,12 @@
 
                         document.getElementById('travelTableBody').innerHTML = data.tableBody;
                         document.getElementById('travelPaginationContainer').innerHTML = data.pagination;
+                        if (data.pagination_info && data.pagination_info.current_page) {
+                            currentPage = String(data.pagination_info.current_page);
+                        }
                         updateResultsInfo(data);
                         bindPaginationLinks();
+                        syncExportLinks();
                     });
             }
 
@@ -332,6 +374,8 @@
                         const url = new URL(this.href);
                         const page = url.searchParams.get('page');
                         if (page) {
+                            currentPage = page;
+                            syncExportLinks();
                             fetchListing({ page });
                         }
                     });
@@ -340,14 +384,21 @@
 
             searchInput.addEventListener('input', function() {
                 clearTimeout(searchTimeout);
+                currentPage = '1';
+                syncExportLinks();
                 searchTimeout = setTimeout(fetchListing, 350);
             });
 
             if (perPageFilter) {
-                perPageFilter.addEventListener('change', fetchListing);
+                perPageFilter.addEventListener('change', function () {
+                    currentPage = '1';
+                    syncExportLinks();
+                    fetchListing();
+                });
             }
 
             bindPaginationLinks();
+            syncExportLinks();
         }
 
         document.addEventListener('DOMContentLoaded', initTravelListing);

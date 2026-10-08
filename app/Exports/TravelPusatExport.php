@@ -2,34 +2,30 @@
 
 namespace App\Exports;
 
-use App\Models\TravelCompany;
+use App\Exports\Concerns\ExportsTravelSheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting
+class TravelPusatExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting, WithCustomValueBinder
 {
-    protected $user;
+    use ExportsTravelSheet;
 
-    public function __construct($user = null)
+    public function __construct(private readonly Collection $rows)
     {
-        $this->user = $user;
     }
 
     public function collection()
     {
-        $query = TravelCompany::approved()->orderBy('Penyelenggara');
-
-        if ($this->user && $this->user->role === 'kabupaten') {
-            $query->where('kab_kota', $this->user->kabupaten);
-        }
-
-        return $query->get();
+        return $this->rows;
     }
 
     public function headings(): array
@@ -37,55 +33,52 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
         return [
             'No',
             'Penyelenggara',
-            'Pusat',
-            'Tanggal',
+            'No. SK / NIB',
+            'Tanggal SK',
             'Nilai Akreditasi',
             'Tanggal Akreditasi',
             'Lembaga Akreditasi',
+            'Masa Berlaku',
             'Pimpinan',
             'Alamat Kantor Lama',
             'Alamat Kantor Baru',
             'Telepon',
-            'Status',
+            'Jenis Izin',
             'Kab/Kota',
-            'Capabilities',
-            'Can Haji',
-            'Can Umrah',
-            'Description',
-            'License Number',
-            'License Expiry'
+            'Status Registrasi',
         ];
     }
 
     public function map($travel): array
     {
         return [
-            "'" . $travel->id, // Add single quote to force text format
-            $travel->Penyelenggara,
-            $travel->Pusat,
-            $travel->Tanggal ? $travel->Tanggal->format('d/m/Y') : '',
-            $travel->nilai_akreditasi,
-            $travel->tanggal_akreditasi ? $travel->tanggal_akreditasi->format('d/m/Y') : '',
-            $travel->lembaga_akreditasi,
-            $travel->Pimpinan,
-            $travel->alamat_kantor_lama,
-            $travel->alamat_kantor_baru,
-            "'" . $travel->Telepon, // Add single quote to force text format
-            $travel->Status,
-            $travel->kab_kota,
-            $travel->capabilities ? implode(', ', $travel->capabilities) : '',
-            $travel->can_haji ? 'Ya' : 'Tidak',
-            $travel->can_umrah ? 'Ya' : 'Tidak',
-            $travel->description,
-            "'" . $travel->license_number, // Add single quote to force text format
-            $travel->license_expiry ? $travel->license_expiry->format('d/m/Y') : ''
+            $this->nextRowNumber(),
+            $this->teks($travel->Penyelenggara),
+            $this->teks($travel->Pusat),
+            $this->tanggal($travel->Tanggal),
+            $this->teks($travel->nilai_akreditasi),
+            $this->tanggal($travel->tanggal_akreditasi),
+            $this->teks($travel->lembaga_akreditasi),
+            $this->tanggal($travel->license_expiry),
+            $this->teks($travel->Pimpinan),
+            $this->teks($travel->alamat_kantor_lama),
+            $this->teks($travel->alamat_kantor_baru),
+            $this->teks($travel->Telepon),
+            $this->teks($travel->Status),
+            $this->teks($travel->kab_kota),
+            $travel->registration_status?->label() ?? '-',
         ];
+    }
+
+    /** @return list<string> */
+    protected function textColumns(): array
+    {
+        return ['C', 'L'];
     }
 
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style the first row as bold text
             1 => ['font' => ['bold' => true]],
         ];
     }
@@ -93,35 +86,29 @@ class TravelPusatExport implements FromCollection, WithHeadings, WithMapping, Wi
     public function columnWidths(): array
     {
         return [
-            'A' => 5,   // No
-            'B' => 25,  // Penyelenggara
-            'C' => 15,  // Pusat
-            'D' => 12,  // Tanggal
-            'E' => 15,  // Nilai Akreditasi
-            'F' => 15,  // Tanggal Akreditasi
-            'G' => 20,  // Lembaga Akreditasi
-            'H' => 20,  // Pimpinan
-            'I' => 30,  // Alamat Kantor Lama
-            'J' => 30,  // Alamat Kantor Baru
-            'K' => 15,  // Telepon
-            'L' => 10,  // Status
-            'M' => 15,  // Kab/Kota
-            'N' => 20,  // Capabilities
-            'O' => 10,  // Can Haji
-            'P' => 10,  // Can Umrah
-            'Q' => 30,  // Description
-            'R' => 20,  // License Number
-            'S' => 15,  // License Expiry
+            'A' => 6,
+            'B' => 28,
+            'C' => 24,
+            'D' => 14,
+            'E' => 18,
+            'F' => 18,
+            'G' => 28,
+            'H' => 16,
+            'I' => 22,
+            'J' => 32,
+            'K' => 32,
+            'L' => 18,
+            'M' => 14,
+            'N' => 18,
+            'O' => 22,
         ];
     }
 
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_TEXT, // No - ID
-            'K' => NumberFormat::FORMAT_TEXT, // Telepon
-            'R' => NumberFormat::FORMAT_TEXT, // License Number
+            'C' => NumberFormat::FORMAT_TEXT,
+            'L' => NumberFormat::FORMAT_TEXT,
         ];
     }
 }
-

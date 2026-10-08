@@ -2,34 +2,30 @@
 
 namespace App\Exports;
 
-use App\Models\CabangTravel;
+use App\Exports\Concerns\ExportsTravelSheet;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Cell\DefaultValueBinder;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting
+class TravelCabangExport extends DefaultValueBinder implements FromCollection, WithHeadings, WithMapping, WithStyles, WithColumnWidths, WithColumnFormatting, WithCustomValueBinder
 {
-    protected $user;
+    use ExportsTravelSheet;
 
-    public function __construct($user = null)
+    public function __construct(private readonly Collection $rows)
     {
-        $this->user = $user;
     }
 
     public function collection()
     {
-        if ($this->user && $this->user->role === 'kabupaten') {
-            // Kabupaten users can only see cabang travel in their area
-            return CabangTravel::where('kabupaten', $this->user->kabupaten)->get();
-        } else {
-            // Admin can see all cabang travel
-            return CabangTravel::all();
-        }
+        return $this->rows;
     }
 
     public function headings(): array
@@ -38,38 +34,45 @@ class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, W
             'No',
             'Penyelenggara',
             'Kabupaten',
-            'Pusat',
+            'No. SK Pusat',
             'Pimpinan Pusat',
             'Alamat Pusat',
-            'SK/BA',
+            'No. SK / BA',
             'Tanggal',
             'Pimpinan Cabang',
             'Alamat Cabang',
-            'Telepon'
+            'Telepon',
+            'Status Registrasi',
         ];
     }
 
     public function map($cabang): array
     {
         return [
-            "'" . $cabang->id_cabang, // Add single quote to force text format
-            $cabang->Penyelenggara,
-            $cabang->kabupaten,
-            $cabang->pusat,
-            $cabang->pimpinan_pusat,
-            $cabang->alamat_pusat,
-            $cabang->SK_BA,
-            $cabang->tanggal ? $cabang->tanggal->format('d/m/Y') : '',
-            $cabang->pimpinan_cabang,
-            $cabang->alamat_cabang,
-            "'" . $cabang->telepon // Add single quote to force text format
+            $this->nextRowNumber(),
+            $this->teks($cabang->Penyelenggara),
+            $this->teks($cabang->kabupaten),
+            $this->teks($cabang->pusat),
+            $this->teks($cabang->pimpinan_pusat),
+            $this->teks($cabang->alamat_pusat),
+            $this->teks($cabang->SK_BA),
+            $this->tanggal($cabang->tanggal),
+            $this->teks($cabang->pimpinan_cabang),
+            $this->teks($cabang->alamat_cabang),
+            $this->teks($cabang->telepon),
+            $cabang->registration_status?->label() ?? '-',
         ];
+    }
+
+    /** @return list<string> */
+    protected function textColumns(): array
+    {
+        return ['D', 'G', 'K'];
     }
 
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style the first row as bold text
             1 => ['font' => ['bold' => true]],
         ];
     }
@@ -77,26 +80,27 @@ class TravelCabangExport implements FromCollection, WithHeadings, WithMapping, W
     public function columnWidths(): array
     {
         return [
-            'A' => 5,   // No
-            'B' => 25,  // Penyelenggara
-            'C' => 15,  // Kabupaten
-            'D' => 15,  // Pusat
-            'E' => 20,  // Pimpinan Pusat
-            'F' => 30,  // Alamat Pusat
-            'G' => 15,  // SK/BA
-            'H' => 12,  // Tanggal
-            'I' => 20,  // Pimpinan Cabang
-            'J' => 30,  // Alamat Cabang
-            'K' => 15,  // Telepon
+            'A' => 6,
+            'B' => 28,
+            'C' => 18,
+            'D' => 24,
+            'E' => 22,
+            'F' => 32,
+            'G' => 24,
+            'H' => 14,
+            'I' => 22,
+            'J' => 32,
+            'K' => 18,
+            'L' => 22,
         ];
     }
 
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_TEXT, // No - ID Cabang
-            'K' => NumberFormat::FORMAT_TEXT, // Telepon
+            'D' => NumberFormat::FORMAT_TEXT,
+            'G' => NumberFormat::FORMAT_TEXT,
+            'K' => NumberFormat::FORMAT_TEXT,
         ];
     }
 }
-
