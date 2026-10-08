@@ -232,7 +232,7 @@
                                 <i class="fas fa-user"></i>
                                 <span><strong>Pimpinan:</strong> {{ $isTravelPusat ? $travel->Pimpinan : $travel->pimpinan_cabang }}</span>
                             </div>
-                            @if($isTravelPusat && $travel->nilai_akreditasi)
+                            @if($isTravelPusat && $travel->memilikiAkreditasi())
                             <div class="info-item">
                                 <i class="fas fa-certificate"></i>
                                 <span><strong>Akreditasi:</strong> {{ $travel->nilai_akreditasi }}</span>

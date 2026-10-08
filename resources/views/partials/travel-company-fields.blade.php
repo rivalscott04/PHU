@@ -103,8 +103,14 @@
                 @foreach (['A', 'B', 'C'] as $grade)
                     <option value="{{ $grade }}" @selected($old('nilai_akreditasi') === $grade)>Nilai {{ $grade }}</option>
                 @endforeach
+                <option value="-" @selected($old('nilai_akreditasi') === '-')>-</option>
             </select>
             @error('nilai_akreditasi')<div class="invalid-feedback">{{ $message }}</div>@enderror
+            @if ($compact)
+                <div class="form-text">Pilih - jika PPIU baru belum memiliki akreditasi. Tanggal dan lembaga tidak perlu diisi.</div>
+            @else
+                <small class="text-muted">Pilih - jika PPIU baru belum memiliki akreditasi. Tanggal dan lembaga tidak perlu diisi.</small>
+            @endif
         </div>
 
         <div class="{{ $colAkreditasi }} {{ $fieldSpacing }}">
@@ -121,6 +127,57 @@
                 value="{{ $old('lembaga_akreditasi', 'Kementerian Haji dan Umroh') }}" required>
             @error('lembaga_akreditasi')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
+        <script>
+            (function () {
+                const nilai = document.getElementById('nilai_akreditasi');
+                const tanggal = document.getElementById('tanggal_akreditasi');
+                const lembaga = document.getElementById('lembaga_akreditasi');
+                if (!nilai || !tanggal || !lembaga) {
+                    return;
+                }
+
+                const defaultLembaga = @json('Kementerian Haji dan Umroh');
+
+                function bersihkanValidasi(field) {
+                    field.setCustomValidity('');
+                    field.classList.remove('is-invalid', 'is-valid');
+                    const wadah = field.closest('.mb-3, .mb-4');
+                    if (!wadah) {
+                        return;
+                    }
+                    wadah.classList.remove('validation-error');
+                    wadah.querySelectorAll('.validation-error-message').forEach(function (pesan) {
+                        pesan.remove();
+                    });
+                }
+
+                function sesuaikanAkreditasi() {
+                    const belumAda = nilai.value === '-';
+                    tanggal.required = !belumAda;
+                    lembaga.required = !belumAda;
+
+                    document.querySelectorAll('label[for="tanggal_akreditasi"] .text-danger, label[for="lembaga_akreditasi"] .text-danger')
+                        .forEach(function (bintang) {
+                            bintang.hidden = belumAda;
+                        });
+
+                    if (belumAda) {
+                        tanggal.value = '';
+                        lembaga.value = '';
+                        bersihkanValidasi(tanggal);
+                        bersihkanValidasi(lembaga);
+                        return;
+                    }
+
+                    if (!lembaga.value.trim()) {
+                        lembaga.value = defaultLembaga;
+                    }
+                }
+
+                nilai.addEventListener('change', sesuaikanAkreditasi);
+                sesuaikanAkreditasi();
+            })();
+        </script>
     @endif
 
     @if ($show('alamat'))

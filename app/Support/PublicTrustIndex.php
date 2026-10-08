@@ -75,7 +75,7 @@ class PublicTrustIndex
             ];
         }
 
-        if ($travel->nilai_akreditasi) {
+        if ($travel->memilikiAkreditasi()) {
             $signals[] = [
                 'icon' => 'fa-award',
                 'title' => 'Memiliki Akreditasi',

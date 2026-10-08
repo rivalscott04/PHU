@@ -33,7 +33,7 @@
                     <div class="travel-meta-bar">
                         <span class="info-pill"><i class="fas fa-map-marker-alt"></i> {{ $travel->kab_kota }}</span>
                         <span class="info-pill"><i class="fas fa-building"></i> {{ $travel->Status }}</span>
-                        @if($travel->nilai_akreditasi)
+                        @if($travel->memilikiAkreditasi())
                             <span class="info-pill"><i class="fas fa-award"></i> Akreditasi {{ $travel->nilai_akreditasi }}</span>
                         @endif
                     </div>

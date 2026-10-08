@@ -110,7 +110,7 @@
                                         @include('travel-registration.partials.step-intro', [
                                             'icon' => 'bx-certification',
                                             'title' => 'Data Akreditasi',
-                                            'description' => 'Informasi sertifikat akreditasi travel Anda.',
+                                            'description' => 'Informasi sertifikat akreditasi travel Anda. PPIU baru yang belum diakreditasi dapat memilih -.',
                                         ])
                                         @include('partials.travel-company-fields', [
                                             'kabupatens' => $kabupatens,

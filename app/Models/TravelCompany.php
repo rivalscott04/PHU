@@ -63,6 +63,22 @@ class TravelCompany extends Model
                 $travel->public_uuid = (string) Str::uuid();
             }
         });
+
+        static::saving(function (TravelCompany $travel): void {
+            if ($travel->nilai_akreditasi !== '-') {
+                return;
+            }
+
+            $travel->tanggal_akreditasi = null;
+            $travel->lembaga_akreditasi = null;
+        });
+    }
+
+    public function memilikiAkreditasi(): bool
+    {
+        $nilai = trim((string) $this->nilai_akreditasi);
+
+        return $nilai !== '' && $nilai !== '-';
     }
 
     public function publicProfileUrl(): string

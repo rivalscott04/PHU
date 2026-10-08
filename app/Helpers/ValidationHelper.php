@@ -484,9 +484,10 @@ class ValidationHelper
             'Tanggal' => 'required|date',
             // Opsional: tanggal terakhir akreditasi (boleh dikosongkan).
             'license_expiry' => 'nullable|date|after:Tanggal',
-            'nilai_akreditasi' => 'required|string|max:255',
-            'tanggal_akreditasi' => 'required|date',
-            'lembaga_akreditasi' => 'required|string|max:255',
+            // "-" untuk PPIU baru yang belum memiliki sertifikat akreditasi.
+            'nilai_akreditasi' => ['required', Rule::in(['A', 'B', 'C', '-'])],
+            'tanggal_akreditasi' => ['nullable', 'date', 'required_unless:nilai_akreditasi,-'],
+            'lembaga_akreditasi' => ['nullable', 'string', 'max:255', 'required_unless:nilai_akreditasi,-'],
             'Pimpinan' => 'required|string|max:255',
             'alamat_kantor_lama' => self::textRule(),
             'alamat_kantor_baru' => self::textRule(),
@@ -534,6 +535,7 @@ class ValidationHelper
     {
         return [
             "{$field}.required" => 'Mohon isi :attribute.',
+            "{$field}.required_unless" => 'Mohon isi :attribute.',
             "{$field}.string" => ':attribute harus berupa teks.',
             "{$field}.email" => 'Format email tidak valid. Contoh: nama@perusahaan.com',
             "{$field}.date" => 'Mohon pilih tanggal yang valid pada :attribute.',
