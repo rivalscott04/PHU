@@ -37,6 +37,7 @@ use App\Http\Controllers\ApiController;
 use App\Http\Controllers\SertifikatController;
 use App\Http\Controllers\UserManagementController;
 use App\Http\Controllers\SystemSettingController;
+use App\Http\Controllers\AdminMenuController;
 use App\Http\Controllers\PublicTravelController;
 use App\Http\Controllers\TravelRegistrationController;
 use App\Http\Controllers\TravelPackageController;
@@ -252,7 +253,13 @@ Route::group(['middleware' => ['auth', 'password.changed', 'registration.approve
         Route::get('/cabang-travel/{id}/dokumen/{type}', [KanwilController::class, 'showCabangDocument'])
             ->name('cabang.travel.document')
             ->whereNumber('id')
-            ->whereIn('type', ['oss', 'akta', 'ktp_kepala', 'sk_du', 'rekomendasi', 'sk_pusat']);
+            ->whereIn('type', ['oss', 'akta', 'ktp_kepala', 'npwp_kepala', 'sk_du', 'rekomendasi', 'sk_pusat']);
+        Route::get('/cabang-travel/{id}/berita-acara', [KanwilController::class, 'showCabangBeritaAcara'])
+            ->name('cabang.travel.berita-acara')
+            ->whereNumber('id');
+        Route::get('/cabang-travel/{id}/berita-acara/unduh', [KanwilController::class, 'downloadCabangBeritaAcara'])
+            ->name('cabang.travel.berita-acara.download')
+            ->whereNumber('id');
         Route::post('/import-cabang-travel', [KanwilController::class, 'import'])->name('import.cabang_travel');
         Route::get('/download-template-cabang-travel', [KanwilController::class, 'downloadTemplateCabang'])->name('download.template.cabang_travel');
         Route::get('/cabang-travel/export', [KanwilController::class, 'exportTravelCabang'])->name('cabang.travel.export');
@@ -275,6 +282,9 @@ Route::group(['middleware' => ['auth', 'password.changed', 'registration.approve
 
     // User Management routes - Admin only
     Route::middleware(['admin', 'throttle:sensitive'])->group(function () {
+        Route::get('/pengawasan', [AdminMenuController::class, 'pengawasan'])->name('admin.pengawasan');
+        Route::get('/pengaturan', [AdminMenuController::class, 'pengaturan'])->name('admin.pengaturan');
+
         Route::get('/users', [UserManagementController::class, 'index'])->name('users.index');
         Route::get('/users/create', [UserManagementController::class, 'create'])->name('users.create');
         Route::post('/users', [UserManagementController::class, 'store'])->name('users.store');
@@ -321,6 +331,7 @@ Route::middleware('throttle:public')->group(function () {
 
 // Public verification routes (no authentication required)
 Route::middleware('throttle:public')->group(function () {
+    Route::get('/verifikasi-ba-cabang/{token}', [KanwilController::class, 'verifikasiCabangBeritaAcara'])->name('cabang.berita-acara.verifikasi')->where('token', '[A-Za-z0-9]{32}');
     Route::get('/verifikasi-sertifikat/{uuid}', [SertifikatController::class, 'verifikasi'])->name('sertifikat.verifikasi')->whereUuid('uuid');
     Route::post('/bap/verify-qr', [BAPController::class, 'verifyQRCode'])->name('bap.verify-qr');
     Route::get('/verify-e-sign', [BAPController::class, 'showVerifyQR'])->name('verify-e-sign');

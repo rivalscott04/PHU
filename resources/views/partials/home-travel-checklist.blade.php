@@ -27,6 +27,10 @@
                     @endif
                 </div>
 
+                @if (! empty($checklist['registration_steps']))
+                    @include('partials.registration-stepper', ['steps' => $checklist['registration_steps']])
+                @endif
+
                 @if ($registrationStatus?->value === 'rejected' && ! empty($checklist['registration_notes']))
                     <div class="alert alert-danger mb-3">
                         <strong>Registrasi ditolak:</strong> {{ $checklist['registration_notes'] }}

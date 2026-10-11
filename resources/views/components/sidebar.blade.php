@@ -155,6 +155,25 @@
     color: #fff;
 }
 
+#sidebar-menu .sidebar-gap {
+    height: 0.65rem;
+    margin: 0.35rem 1.1rem 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    list-style: none;
+}
+
+#sidebar-menu .sidebar-section {
+    padding: 0.75rem 1.1rem 0.15rem;
+    margin: 0.15rem 0.5rem 0;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+    pointer-events: none;
+    user-select: none;
+}
+
 #sidebar-menu .metismenu .sub-menu .menu-heading {
     padding: 0.45rem 1rem 0.15rem 2rem;
     font-size: 0.6875rem;
@@ -233,7 +252,11 @@ body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a:hover {
 
             <ul class="metismenu list-unstyled" id="side-menu">
                 @foreach($menus as $menu)
-                    @if(isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
+                    @if($menu['divider'] ?? false)
+                        <li class="sidebar-gap"></li>
+                    @elseif($menu['heading'] ?? false)
+                        <li class="sidebar-section">{{ $menu['name'] }}</li>
+                    @elseif(isset($menu['hasSubmenu']) && $menu['hasSubmenu'])
                         @php
                             $visibleItems = [];
                             if (isset($menu['groups'])) {
@@ -298,7 +321,7 @@ body[data-sidebar=dark] #sidebar-menu .metismenu .sub-menu li a:hover {
                         @endif
                     @elseif($canShowItem($menu))
                         <li>
-                            <a href="{{ $itemUrl($menu) }}" class="waves-effect">
+                            <a href="{{ $itemUrl($menu) }}" class="waves-effect {{ request()->routeIs($menu['route']) ? 'active' : '' }}">
                                 <i class="{{ $menu['icon'] }}"></i>
                                 <span class="sidebar-menu-text">{{ $menu['name'] }}</span>
                                 {!! $renderBadge($menu['badge'] ?? null) !!}

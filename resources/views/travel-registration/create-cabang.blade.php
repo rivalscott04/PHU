@@ -14,7 +14,8 @@
     $reviewGroups = [
         ['title' => 'Travel Pusat', 'fields' => ['travel_id', 'Penyelenggara', 'pusat', 'pimpinan_pusat', 'alamat_pusat', 'dokumen_sk_pusat']],
         ['title' => 'Data Cabang', 'fields' => ['kabupaten', 'pimpinan_cabang', 'SK_BA', 'tanggal', 'telepon', 'alamat_cabang']],
-        ['title' => 'Dokumen Cabang', 'fields' => array_column(\App\Models\CabangTravel::DOKUMEN_PENDAFTARAN, 'column')],
+        ['title' => 'Dokumen Cabang', 'fields' => collect(\App\Models\CabangTravel::DOKUMEN_PENDAFTARAN)
+            ->flatMap(fn ($meta) => [$meta['column'], ...array_keys($meta['fields'])])->all()],
         ['title' => 'Akun PIC', 'fields' => ['pic_nama', 'pic_email', 'pic_nomor_hp', 'password']],
     ];
 
@@ -309,6 +310,19 @@
                                                     @error($meta['column'])<div class="invalid-feedback">{{ $message }}</div>@enderror
                                                     <div class="form-text">Unggah PDF atau foto (JPG/PNG), maksimal 1,5 MB</div>
                                                     @include('partials.berkas-tersimpan', ['field' => $meta['column']])
+                                                    {{-- Nomor dan tanggal dari berkas ini, dipakai di berita acara cabang. --}}
+                                                    <div class="row g-2 mt-1">
+                                                        @foreach ($meta['fields'] as $name => $field)
+                                                            <div class="col-12 {{ count($meta['fields']) > 1 ? 'col-md-6' : '' }}">
+                                                                <label for="{{ $name }}" class="form-label small mb-1">{{ $field['label'] }} @include('partials.required-star')</label>
+                                                                <input type="{{ $field['type'] }}" class="form-control @error($name) is-invalid @enderror"
+                                                                    id="{{ $name }}" name="{{ $name }}" required
+                                                                    value="{{ old($name, $field['type'] === 'date' ? optional($cabang?->{$name})->format('Y-m-d') : $cabang?->{$name}) }}"
+                                                                    @if ($name === 'nik_kepala') inputmode="numeric" maxlength="16" pattern="\d{16}" @endif>
+                                                                @error($name)<div class="invalid-feedback">{{ $message }}</div>@enderror
+                                                            </div>
+                                                        @endforeach
+                                                    </div>
                                                 </div>
                                             @endforeach
 

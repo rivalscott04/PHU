@@ -132,18 +132,18 @@ final class HomeCommandCenter
 
         if ($registrationStatus === TravelRegistrationStatus::Pending) {
             $steps[] = [
-                'label' => $cabang ? 'Menunggu peninjauan Kabupaten/Kota' : 'Registrasi menunggu verifikasi Kanwil',
+                'label' => $cabang ? 'Menunggu verifikasi Kabupaten/Kota' : 'Menunggu verifikasi Kanwil',
                 'done' => false,
                 'hint' => $cabang
-                    ? 'Petugas Kemenhaj ' . $cabang->kabupaten . ' akan meninjau kantor cabang Anda. Anda sudah bisa login; menu operasional dibuka setelah disetujui.'
-                    : 'Tim Kanwil sedang memeriksa data dan dokumen Anda. Anda sudah bisa login; menu operasional dibuka setelah disetujui.',
+                    ? 'Kantor Kemenhaj Kabupaten/Kota sedang memverifikasi data dan kantor cabang Anda. Menu operasional dapat digunakan setelah pendaftaran disetujui.'
+                    : 'Kanwil sedang memverifikasi data dan dokumen Anda. Menu operasional dapat digunakan setelah pendaftaran disetujui.',
                 'tone' => 'warning',
             ];
         } elseif ($registrationStatus === TravelRegistrationStatus::MenungguKanwil) {
             $steps[] = [
-                'label' => 'Menunggu keputusan Kanwil',
+                'label' => 'Menunggu persetujuan Kanwil',
                 'done' => false,
-                'hint' => 'Rekomendasi dari ' . ($cabang?->kabupaten ?: 'Kabupaten/Kota') . ' sudah dikirim ke Kanwil.',
+                'hint' => 'Verifikasi Kabupaten/Kota telah selesai dan diteruskan ke Kanwil untuk persetujuan akhir.',
                 'tone' => 'warning',
             ];
         } elseif ($registrationStatus === TravelRegistrationStatus::PerluPerbaikan) {
@@ -222,6 +222,7 @@ final class HomeCommandCenter
                 : $travel?->Penyelenggara,
             'registration_status' => $registrationStatus,
             'registration_notes' => $registration?->registration_notes,
+            'registration_steps' => $isApproved ? [] : self::registrationSteps($registration, (bool) $cabang),
             'steps' => $steps,
             'stats' => [
                 'bap_diajukan' => $bapDiajukan,
@@ -230,6 +231,49 @@ final class HomeCommandCenter
                 'jamaah_total' => $jamaahTotal,
             ],
         ];
+    }
+
+    /**
+     * Posisi pendaftaran PPIU yang belum disetujui, untuk stepper di Beranda.
+     * Cabang ditinjau dua tahap (Kabupaten/Kota lalu Kanwil), pusat langsung Kanwil.
+     *
+     * state: done, current, warning (perlu perbaikan), danger (ditolak), upcoming.
+     *
+     * @return list<array{label: string, hint: string, state: string}>
+     */
+    private static function registrationSteps($registration, bool $isCabang): array
+    {
+        $status = $registration->registration_status;
+        $tanggal = fn ($waktu) => $waktu?->translatedFormat('j M Y') ?? '';
+
+        $steps = [['label' => 'Pendaftaran Dikirim', 'hint' => 'Dikirim ' . $tanggal($registration->created_at), 'state' => 'done']];
+        if ($isCabang) {
+            $steps[] = ['label' => 'Verifikasi Kabupaten/Kota', 'hint' => '', 'state' => 'upcoming'];
+        }
+        $steps[] = ['label' => $isCabang ? 'Persetujuan Kanwil' : 'Verifikasi Kanwil', 'hint' => '', 'state' => 'upcoming'];
+        $steps[] = ['label' => 'Pendaftaran Disetujui', 'hint' => 'Seluruh menu dapat digunakan', 'state' => 'upcoming'];
+
+        // Tahap yang sedang berjalan. Saat perlu perbaikan atau ditolak, tahapnya
+        // adalah tahap peninjau yang memutuskan.
+        $diKanwil = $status === TravelRegistrationStatus::MenungguKanwil
+            || ($status === TravelRegistrationStatus::PerluPerbaikan && $registration->revision_return_status === TravelRegistrationStatus::MenungguKanwil->value)
+            || ($status === TravelRegistrationStatus::Rejected && $registration->recommended_at);
+        $aktif = ($isCabang && ! $diKanwil) ? 1 : count($steps) - 2;
+
+        if ($isCabang && $diKanwil) {
+            $steps[1]['state'] = 'done';
+            $steps[1]['hint'] = 'Selesai ' . $tanggal($registration->recommended_at);
+        }
+
+        [$state, $hint] = match ($status) {
+            TravelRegistrationStatus::PerluPerbaikan => ['warning', 'Menunggu perbaikan data'],
+            TravelRegistrationStatus::Rejected => ['danger', 'Pendaftaran ditolak'],
+            default => ['current', 'Dalam proses verifikasi'],
+        };
+        $steps[$aktif]['state'] = $state;
+        $steps[$aktif]['hint'] = $hint;
+
+        return $steps;
     }
 
     /**

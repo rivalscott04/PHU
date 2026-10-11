@@ -5,20 +5,8 @@
         <div class="col-12">
             <div class="page-title-box d-sm-flex align-items-center justify-content-between">
                 <div>
-                    <h4 class="mb-sm-0">Pusat Kendali Kanwil</h4>
-                    <p class="text-muted mb-0 small">Antrian operasional dan prioritas tindakan NTB</p>
-                </div>
-                <div class="d-flex gap-2 flex-wrap">
-                    @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.dashboard'))
-                        <a href="{{ route('v2.dashboard') }}" class="btn btn-sm btn-outline-primary">
-                            <i class="bx bx-bar-chart-alt-2 me-1"></i> Dashboard Pengawasan
-                        </a>
-                    @endif
-                    @if(\App\Support\RouteAccess::canAccessRoute(auth()->user(), 'v2.antrian.index'))
-                        <a href="{{ route('v2.antrian.index') }}" class="btn btn-sm btn-primary">
-                            <i class="bx bx-list-check me-1"></i> Antrian Kerja
-                        </a>
-                    @endif
+                    <h4 class="mb-sm-0">Hari Ini</h4>
+                    <p class="text-muted mb-0 small">Yang perlu dikerjakan. Klik kartu untuk membuka daftarnya.</p>
                 </div>
             </div>
         </div>
@@ -36,7 +24,7 @@
     @include('partials.home-queue-cards', [
         'queues' => $queues,
         'status' => $queueStatus,
-        'title' => 'Antrian Kerja Hari Ini',
+        'title' => 'Yang menunggu',
     ])
 
     @include('partials.home-travel-alerts', ['alerts' => $alerts])

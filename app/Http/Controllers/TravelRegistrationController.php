@@ -208,7 +208,7 @@ class TravelRegistrationController extends Controller
             'pic_email' => 'required|email|max:255|unique:users,email',
             'pic_nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true),
             'password' => 'required|string|min:8|confirmed',
-        ], $dokumenRules), array_merge($dokumenMessages, ValidationHelper::fileMaxMb('dokumen_sk_pusat', 1.5), [
+        ], $dokumenRules, CabangTravel::detailDokumenRules(true)), array_merge($dokumenMessages, ValidationHelper::fileMaxMb('dokumen_sk_pusat', 1.5), [
             'pusat_terdaftar.required' => 'Pilih apakah travel pusat sudah terdaftar di sistem.',
             'travel_id.required' => 'Pilih travel pusat yang menaungi cabang ini.',
             'Penyelenggara.required' => 'Isi nama travel pusat.',
@@ -236,6 +236,7 @@ class TravelRegistrationController extends Controller
                 'pimpinan_cabang',
                 'alamat_cabang',
                 'telepon',
+                ...array_keys(CabangTravel::detailDokumen()),
             ])->all();
 
             if (isset($validated['travel_id'])) {
@@ -554,7 +555,7 @@ class TravelRegistrationController extends Controller
             'pic_email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'pic_nomor_hp' => ValidationHelper::nomorHpRules(uniqueInUsers: true, ignoreUserId: $user->id),
             'password' => 'nullable|string|min:8|confirmed',
-        ], $dokumenRules);
+        ], $dokumenRules, CabangTravel::detailDokumenRules(true));
 
         if (! $cabang->travel_id) {
             $hasSkPusat = $berkas->has('dokumen_sk_pusat') || filled($cabang->dokumen_sk_pusat);
@@ -595,6 +596,7 @@ class TravelRegistrationController extends Controller
                 'pusat',
                 'pimpinan_pusat',
                 'alamat_pusat',
+                ...array_keys(CabangTravel::detailDokumen()),
             ])->all();
 
             foreach (CabangTravel::DOKUMEN_PENDAFTARAN as $type => $meta) {

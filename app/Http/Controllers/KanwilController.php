@@ -6,6 +6,7 @@ use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
 use App\Models\CabangTravel;
+use App\Models\SertifikatSetting;
 use App\Enums\TravelRegistrationStatus;
 use App\Notifications\V2\CabangRecommendedNotification;
 use App\Notifications\V2\RegistrationRevisionRequestedNotification;
@@ -17,6 +18,7 @@ use App\Imports\CabangTravelImport;
 use App\Exports\TravelPusatExport;
 use App\Exports\TravelCabangExport;
 use Illuminate\Support\Facades\Storage;
+use App\Support\BeritaAcaraCabang;
 use App\Support\NtbKabupatenMap;
 use App\Support\KabupatenResourceGuard;
 use App\Support\KabupatenScopeFilter;
@@ -458,6 +460,7 @@ class KanwilController extends Controller
             'pimpinan_cabang' => 'required|string|max:255',
             'alamat_cabang' => ValidationHelper::textRule(),
             'telepon' => ValidationHelper::teleponRules(),
+            ...CabangTravel::detailDokumenRules(false),
         ];
     }
 
@@ -609,6 +612,7 @@ class KanwilController extends Controller
             'verified_at' => now(),
             'verified_by' => auth()->id(),
         ]);
+        $cabang->pastikanNomorBeritaAcara();
 
         return redirect()
             ->route('cabang.travel', ['filter' => 'approved'])
@@ -716,6 +720,48 @@ class KanwilController extends Controller
         return response()->file(Storage::disk('public')->path($path));
     }
 
+    /** Pratinjau berita acara cabang yang sudah disetujui. */
+    public function showCabangBeritaAcara($id_cabang)
+    {
+        $cabang = $this->approvedCabangFor($id_cabang);
+
+        return view('kanwil.cabang-berita-acara', [
+            'cabang' => $cabang,
+            'v' => BeritaAcaraCabang::values($cabang),
+            'qr' => BeritaAcaraCabang::qr($cabang),
+        ]);
+    }
+
+    public function downloadCabangBeritaAcara($id_cabang)
+    {
+        $cabang = $this->approvedCabangFor($id_cabang);
+
+        return response()
+            ->download(BeritaAcaraCabang::generate($cabang), BeritaAcaraCabang::filename($cabang))
+            ->deleteFileAfterSend();
+    }
+
+    /** Halaman publik dari QR tanda tangan berita acara. */
+    public function verifikasiCabangBeritaAcara(string $token)
+    {
+        $cabang = CabangTravel::with('verifiedByUser:id,nama')->where('ba_token', $token)->firstOrFail();
+
+        return view('kanwil.cabang-berita-acara-verifikasi', [
+            'cabang' => $cabang,
+            'berlaku' => $cabang->isRegistrationApproved(),
+            'penandatangan' => SertifikatSetting::signatory(),
+        ]);
+    }
+
+    private function approvedCabangFor($id_cabang): CabangTravel
+    {
+        $cabang = CabangTravel::with('travel:id,Penyelenggara,Pusat,Tanggal')->findOrFail($id_cabang);
+        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabang);
+        abort_unless($cabang->isRegistrationApproved(), 404);
+
+        return $cabang;
+    }
+
     private function buildCabangTravelListingQuery(Request $request, $user)
     {
         // dokumen_sk pusat dipakai tombol pratinjau "SK Pusat" di modal verifikasi.
@@ -738,11 +784,13 @@ class KanwilController extends Controller
             'dokumen_akta',
             'dokumen_ktp_kepala',
             'dokumen_sk_du',
+            'dokumen_npwp_kepala',
             'dokumen_sk_pusat',
             'dokumen_rekomendasi',
             'catatan_rekomendasi',
             'recommended_at',
             'verified_at',
+            ...array_keys(CabangTravel::detailDokumen()),
         );
 
         if ($user && $user->role === 'kabupaten') {

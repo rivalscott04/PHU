@@ -110,6 +110,7 @@
                                 @enderror
                             </div>
                         </div>
+                        @include('kanwil.partials.cabang-dokumen-fields', ['cabang' => $cabangTravel])
                         <div class="mt-3">
                             <button type="submit" class="btn btn-primary">
                                 <i class="bx bx-save"></i> Update Data

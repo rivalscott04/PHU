@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-10-11T09:40:30.949Z",
+        "reason": "Same as above, lowercase match in the @import URL"
+      }
+    ]
+  }
+}

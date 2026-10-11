@@ -99,6 +99,7 @@
                                 <input type="text" class="form-control @error('telepon') is-invalid @enderror" id="telepon" name="telepon" maxlength="16" inputmode="numeric" required>
                             </div>
                         </div>
+                        @include('kanwil.partials.cabang-dokumen-fields', ['cabang' => null])
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ route('cabang.travel') }}" class="btn btn-sm btn-secondary">Batal</a>
                             <button type="submit" class="btn btn-sm btn-primary">Simpan</button>

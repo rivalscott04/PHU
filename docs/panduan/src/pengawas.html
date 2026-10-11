@@ -1,0 +1,133 @@
+<!--{"peran": "Pengawas", "berkas": "Pengawas", "edisi": "Oktober 2026", "lead": "Cara mengelola antrean kerja, melakukan pemeriksaan kantor travel, mencatat temuan, memverifikasi tindak lanjut, dan membaca skor risiko serta profil kepatuhan."}-->
+
+<section class="chapter">
+  <span class="badge">Bab 1</span>
+  <h2>Mengenal PANTAU</h2>
+  <p class="lead">PANTAU adalah aplikasi pengawasan penyelenggaraan haji khusus dan umrah milik Kanwil Kementerian Haji dan Umrah Provinsi NTB.</p>
+
+  <p>Pengawas bekerja di wilayah kerja yang ditetapkan Kanwil. Nama wilayah tampil di atas menu kiri. Alur kerja pengawas:</p>
+  <ol class="steps">
+    <li><strong>Antrian Kerja</strong> memberi tahu tugas yang perlu ditangani.</li>
+    <li><strong>Pemeriksaan</strong> dijadwalkan dan diisi saat kunjungan ke kantor travel.</li>
+    <li><strong>Temuan</strong> dicatat beserta saran perbaikan dan batas waktunya.</li>
+    <li><strong>Tindak lanjut</strong> dari travel diverifikasi sampai temuan selesai.</li>
+  </ol>
+  <div class="note"><strong>Dua jenis berita acara</strong>BA Pemeriksaan adalah hasil pemeriksaan pengawasan. BA Pemberangkatan adalah pelaporan keberangkatan jamaah oleh travel. Keduanya terpisah; pengawas mengurus BA Pemeriksaan.</div>
+
+  <h3>Menu yang Anda lihat</h3>
+  <table>
+    <tr><th style="width:32%">Menu</th><th>Fungsi</th></tr>
+    <tr><td><strong>Antrian Kerja</strong></td><td>Tugas prioritas di wilayah Anda.</td></tr>
+    <tr><td><strong>Monitoring Wilayah</strong></td><td>Kondisi travel: pemeriksaan, pengaduan, BA, dan risiko.</td></tr>
+    <tr><td><strong>Pemeriksaan</strong></td><td>Daftar Pemeriksaan, Buat Pemeriksaan, dan Tindak Lanjut Temuan.</td></tr>
+    <tr><td><strong>Analisis</strong></td><td>Skor Risiko dan Profil Kepatuhan.</td></tr>
+    <tr><td><strong>Log Aktivitas</strong></td><td>Jejak perubahan data.</td></tr>
+  </table>
+</section>
+
+<!-- sisip: _masuk.html -->
+
+<section class="chapter">
+  <span class="badge">Bab 3</span>
+  <h2>Antrian Kerja</h2>
+  <p class="lead">Halaman pertama setelah masuk. Berisi tugas yang dibuat otomatis oleh sistem.</p>
+  <figure><img src="../img/pengawas-antrian.png" alt=""><figcaption>Antrian Kerja</figcaption></figure>
+  <table>
+    <tr><th style="width:32%">Jenis tugas</th><th>Muncul saat</th></tr>
+    <tr><td>Pengaduan Baru</td><td>Masyarakat mengadukan travel di wilayah Anda.</td></tr>
+    <tr><td>Skor Risiko Tinggi</td><td>Skor risiko travel naik ke Tinggi atau Kritis.</td></tr>
+    <tr><td>Deadline Temuan</td><td>Batas waktu perbaikan temuan sudah dekat atau terlewati.</td></tr>
+    <tr><td>Verifikasi Tindak Lanjut</td><td>Travel mengirim bukti perbaikan.</td></tr>
+  </table>
+  <ol class="steps">
+    <li>Klik <span class="kbd">Proses</span> untuk mengambil tugas, supaya rekan lain tahu tugas itu sedang Anda kerjakan.</li>
+    <li>Klik <span class="kbd">Buka</span> untuk mengerjakannya di halaman terkait.</li>
+    <li>Klik <span class="kbd">Selesai</span> setelah tugas ditindaklanjuti.</li>
+  </ol>
+</section>
+
+<section class="chapter">
+  <span class="badge">Bab 4</span>
+  <h2>Melakukan Pemeriksaan</h2>
+  <p class="lead">Pemeriksaan dilakukan dalam tiga langkah: info kunjungan, isi pemeriksaan, lalu temuan.</p>
+
+  <figure><img src="../img/pengawas-pemeriksaan.png" alt=""><figcaption>Daftar pemeriksaan</figcaption></figure>
+
+  <h3>Membuat pemeriksaan</h3>
+  <ol class="steps">
+    <li>Klik <span class="kbd">Buat Pemeriksaan</span>.</li>
+    <li>Isi tanggal kunjungan, pilih travel, pilih tipe pemeriksaan (Rutin, Pemeriksaan Mendadak, Berdasarkan Pengaduan, atau Khusus), dan tambahkan catatan bila perlu.</li>
+    <li>Simpan. Nomor pemeriksaan terbit otomatis.</li>
+  </ol>
+  <figure><img src="../img/pengawas-buat.png" alt=""><figcaption>Formulir buat pemeriksaan</figcaption></figure>
+
+  <h3>Mengisi pemeriksaan</h3>
+  <figure><img src="../img/pengawas-detail.png" alt=""><figcaption>Langkah 2 dari 3: isi pemeriksaan</figcaption></figure>
+  <ol class="steps">
+    <li><strong>Info Kunjungan</strong>: periksa ringkasan. Gunakan <span class="kbd">Ubah Jadwal</span> jika tanggal berubah.</li>
+    <li><strong>Isi Pemeriksaan</strong>: jawab setiap pertanyaan checklist sesuai kondisi kantor saat kunjungan. Skor kepatuhan dihitung otomatis setelah disimpan.</li>
+    <li><strong>Temuan</strong>: untuk setiap masalah, isi kategori, tingkat masalah, ringkasan, kondisi yang ditemukan, saran perbaikan, dan batas waktu perbaikan, lalu klik <span class="kbd">Simpan Masalah</span>.</li>
+    <li>Klik <span class="kbd">Selesaikan Pemeriksaan</span> jika semua temuan sudah dicatat, atau jika kondisi travel sudah baik.</li>
+  </ol>
+  <div class="note"><strong>Checklist kosong?</strong>Jika muncul pesan belum ada daftar periksa, minta Super Admin mengaktifkan master checklist di menu Pengaturan.</div>
+
+  <h3>Tingkat masalah</h3>
+  <table>
+    <tr><th style="width:24%">Tingkat</th><th>Contoh</th></tr>
+    <tr><td><span class="status s-merah">Berat</span></td><td>Dana jamaah tertahan, dokumen jamaah tidak lengkap saat berangkat.</td></tr>
+    <tr><td><span class="status s-kuning">Sedang</span></td><td>Informasi perubahan hotel terlambat disampaikan.</td></tr>
+    <tr><td><span class="status s-biru">Ringan</span></td><td>Nomor layanan pelanggan tidak aktif, arsip belum rapi.</td></tr>
+  </table>
+  <p>Daftar pemeriksaan dapat diunduh lewat tombol <span class="kbd">Unduh PDF</span>.</p>
+</section>
+
+<section class="chapter">
+  <span class="badge">Bab 5</span>
+  <h2>Verifikasi Tindak Lanjut</h2>
+  <p class="lead">Travel mengirim bukti perbaikan atas setiap temuan. Anda memeriksa bukti itu.</p>
+  <figure><img src="../img/pengawas-tindak-lanjut.png" alt=""><figcaption>Tindak Lanjut Temuan</figcaption></figure>
+  <ol class="steps">
+    <li>Cari baris berstatus Diajukan atau Menunggu.</li>
+    <li>Klik <span class="kbd">Detail</span> untuk membaca keterangan dan membuka lampiran.</li>
+    <li>Klik <span class="kbd">Setujui</span> jika bukti sesuai, atau <span class="kbd">Minta Revisi</span> dengan catatan jika belum.</li>
+    <li>Setelah semua temuan selesai, tutup pemeriksaannya.</li>
+  </ol>
+</section>
+
+<section class="chapter">
+  <span class="badge">Bab 6</span>
+  <h2>Analisis dan Monitoring</h2>
+
+  <h3>Skor risiko</h3>
+  <p>Dihitung otomatis dari temuan, pengaduan, status izin, dan riwayat pemeriksaan. Skor tidak bisa diubah manual. Gunakan untuk menentukan travel yang diperiksa lebih dulu.</p>
+  <figure><img src="../img/pengawas-risiko.png" alt=""><figcaption>Peringkat skor risiko</figcaption></figure>
+  <table>
+    <tr><th style="width:24%">Level</th><th>Tindakan yang disarankan</th></tr>
+    <tr><td><span class="status s-merah">Kritis</span>, <span class="status s-merah">Tinggi</span></td><td>Jadwalkan pemeriksaan segera. Tugasnya juga muncul di Antrian Kerja.</td></tr>
+    <tr><td><span class="status s-kuning">Sedang</span></td><td>Pantau lebih rapat dan pastikan temuan ditindaklanjuti.</td></tr>
+    <tr><td><span class="status s-hijau">Rendah</span></td><td>Pemeriksaan rutin.</td></tr>
+  </table>
+
+  <h3>Profil kepatuhan</h3>
+  <p>Gambaran lengkap satu travel: skor risiko, status izin, jumlah pemeriksaan, temuan aktif, pengaduan, jamaah, BA, sertifikat, riwayat pemeriksaan, dan rekomendasi tindakan.</p>
+  <figure><img src="../img/pengawas-kepatuhan.png" alt=""><figcaption>Profil kepatuhan satu travel</figcaption></figure>
+
+  <h3>Monitoring wilayah</h3>
+  <p>Kartu angka dan tabel <strong>Data Travel Terbaru</strong>. Angka biru di kolom pengaduan bisa diklik untuk melihat rinciannya.</p>
+  <figure><img src="../img/pengawas-monitoring.png" alt=""><figcaption>Monitoring wilayah</figcaption></figure>
+
+  <h3>Log aktivitas</h3>
+  <p>Jejak setiap perubahan. Saring berdasarkan modul atau cari nama travel dan nomor pemeriksaan.</p>
+  <figure><img src="../img/pengawas-log.png" alt=""><figcaption>Log aktivitas</figcaption></figure>
+</section>
+
+<section class="chapter">
+  <span class="badge">Bab 7</span>
+  <h2>Pertanyaan yang Sering Muncul</h2>
+  <h4>Travel di kabupaten lain tidak muncul.</h4>
+  <p>Data mengikuti wilayah kerja Anda. Hubungi Super Admin jika wilayah kerja perlu diubah.</p>
+  <h4>Skor risiko tidak berubah setelah temuan selesai.</h4>
+  <p>Sistem menghitung ulang skor seluruh travel setiap hari pukul 00.30. Skor terbaru tampil keesokan harinya.</p>
+  <h4>Tugas di Antrian Kerja sudah ditangani rekan lain.</h4>
+  <p>Tugas yang sudah diambil rekan berstatus Diproses. Ambil tugas yang masih Menunggu.</p>
+</section>

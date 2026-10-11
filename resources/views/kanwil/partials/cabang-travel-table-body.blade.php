@@ -32,6 +32,11 @@
                         <i class="bx bx-check-shield me-1"></i> Verifikasi
                     </button>
                 @endif
+                @if ($item->isRegistrationApproved())
+                    <a href="{{ route('cabang.travel.berita-acara', $item->id_cabang) }}" class="btn btn-sm btn-success text-nowrap">
+                        <i class="bx bx-file me-1"></i> Berita Acara
+                    </a>
+                @endif
                 {{-- Dikunci selama ditinjau atau sedang diperbaiki PIC. --}}
                 @unless ($item->isRegistrationOpen() || $item->isNeedsRevision())
                     <a href="{{ route('cabang.travel.edit', $item->id_cabang) }}" class="btn btn-sm btn-warning" title="Edit">
@@ -113,6 +118,15 @@
                                 ])
                             @endif
                         </div>
+
+                        {{-- Isian dari pendaftar, dicocokkan dengan berkasnya. --}}
+                        <dl class="row small mb-4">
+                            @foreach (\App\Models\CabangTravel::detailDokumen() as $name => $field)
+                                @php($nilai = $item->{$name})
+                                <dt class="col-sm-4 text-muted fw-normal">{{ $field['label'] }}</dt>
+                                <dd class="col-sm-8 mb-1">{{ $nilai instanceof \Carbon\CarbonInterface ? $nilai->translatedFormat('j F Y') : ($nilai ?: '-') }}</dd>
+                            @endforeach
+                        </dl>
 
                         @if ($item->catatan_rekomendasi)
                             <div class="alert alert-light border mb-4">

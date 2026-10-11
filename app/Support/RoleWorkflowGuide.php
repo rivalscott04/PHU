@@ -107,18 +107,18 @@ class RoleWorkflowGuide
     private static function homeAdmin(): array
     {
         return [
-            'title' => 'Pusat Kendali Super Admin',
-            'hint' => 'Anda mengelola seluruh NTB: keberangkatan jamaah, pengaduan publik, dan modul pengawasan digital.',
+            'title' => 'Cara memakai menu',
+            'hint' => 'Nama di kiri adalah pekerjaan itu sendiri. Mulai dari kartu di bawah.',
             'steps' => [
-                'Cek Antrian Kerja untuk tugas pengawasan yang perlu ditindaklanjuti',
-                'Proses pengaduan baru di menu Pengaduan',
-                'Pantau risiko & kepatuhan travel lewat modul Pengawasan Digital',
-                'Kelola master data travel dan pengguna bila diperlukan',
+                'Kerjakan kartu yang angkanya belum nol',
+                'PPIU pusat dan PPIU cabang ada langsung di menu kiri',
+                'Jamaah, keberangkatan, pengaduan, dan sertifikat juga ada di menu kiri',
+                'Pemeriksaan ada di Pengawasan. Akun dan checklist ada di Pengaturan',
             ],
             'actions' => [
-                ['label' => 'Antrian Kerja', 'url' => route('v2.antrian.index'), 'style' => 'primary', 'icon' => 'bx-list-check'],
+                ['label' => 'PPIU Pusat', 'url' => route('travel'), 'style' => 'primary', 'icon' => 'bx-buildings'],
+                ['label' => 'PPIU Cabang', 'url' => route('cabang.travel'), 'style' => 'outline-primary', 'icon' => 'bx-store'],
                 ['label' => 'Pengaduan', 'url' => route('pengaduan'), 'style' => 'outline-danger', 'icon' => 'bx-message-square-dots'],
-                ['label' => 'Dashboard Pengawasan', 'url' => route('v2.dashboard'), 'style' => 'outline-primary', 'icon' => 'bx-bar-chart-alt-2'],
                 ['label' => 'BA Pemberangkatan', 'url' => route('bap'), 'style' => 'outline-secondary', 'icon' => 'bx-file'],
             ],
         ];

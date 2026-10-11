@@ -354,6 +354,11 @@ final class RouteAccess
             return TravelCapabilityService::canAccess('sertifikat');
         }
 
+        if (self::matches($routeName, 'admin.pengawasan')
+            || self::matches($routeName, 'admin.pengaturan')) {
+            return $user->role === 'admin';
+        }
+
         if (self::matches($routeName, 'users')) {
             return $user->role === 'admin';
         }

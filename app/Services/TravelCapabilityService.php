@@ -344,57 +344,37 @@ class TravelCapabilityService
     private static function adminSidebarMenus(): array
     {
         return [
-            self::link('Beranda', 'home', 'bx bx-home-circle', badge: 'home_queues'),
-            self::link('Antrian Kerja', 'v2.antrian.index', 'bx bx-list-check', badge: 'antrian'),
-            self::link('Dashboard Pengawasan', 'v2.dashboard', 'bx bx-bar-chart-alt-2'),
-            self::link('Monitoring PPIU', 'v2.monitoring.index', 'bx bx-radar'),
-            [
-                'name' => 'Pemeriksaan',
-                'icon' => 'bx bx-search-alt',
-                'hasSubmenu' => true,
-                'items' => [
-                    self::subItem('BA Pemeriksaan', 'v2.pengawasan.index', badge: 'inspeksi_active'),
-                    self::subItem('Tindak Lanjut Temuan', 'v2.followup.index', badge: 'followup_verify'),
-                ],
-            ],
-            [
-                'name' => 'Analisis',
-                'icon' => 'bx bx-line-chart',
-                'hasSubmenu' => true,
-                'items' => [
-                    self::subItem('Skor Risiko', 'v2.risk.index'),
-                    self::subItem('Profil Kepatuhan PPIU', 'v2.compliance.index'),
-                ],
-            ],
-            [
-                'name' => 'Operasional',
-                'icon' => 'bx bx-calendar-event',
-                'hasSubmenu' => true,
-                'items' => [
-                    self::subItem('BA Pemberangkatan', 'bap', badge: 'bap_pending'),
-                    self::subItem('Jadwal Keberangkatan', 'keberangkatan'),
-                    self::subItem('Pengaduan', 'pengaduan', badge: 'pengaduan_open'),
-                    self::subItem('Registrasi Travel', 'travel', params: ['filter' => 'pending'], badge: 'registration_pending'),
-                    self::subItem('Registrasi Cabang', 'cabang.travel', params: ['filter' => 'menunggu_kanwil'], badge: 'cabang_pending'),
-                ],
-            ],
-            [
-                'name' => 'Data & Master',
-                'icon' => 'bx bx-data',
-                'hasSubmenu' => true,
-                'items' => [
-                    self::subItem('PPIU Pusat', 'travel'),
-                    self::subItem('PPIU Cabang', 'cabang.travel'),
-                    self::subItem('Jamaah Umrah', 'jamaah.umrah'),
-                    self::subItem('Jamaah Haji Khusus', 'jamaah.haji-khusus.index'),
-                    self::subItem('Sertifikat PPIU', 'sertifikat.index'),
-                    self::subItem('Kelola Pengguna', 'users.index'),
-                    self::subItem('Kontak Support', 'settings.support.edit'),
-                    self::subItem('Atur Checklist', 'v2.checklist.index'),
-                ],
-            ],
-            self::link('Log Aktivitas', 'v2.audit-log.index', 'bx bx-history'),
+            self::link('Hari Ini', 'home', 'bx bx-home-circle', badge: 'home_queues'),
+            self::link('Pengaduan', 'pengaduan', 'bx bx-message-square-dots', badge: 'pengaduan_open'),
+            self::heading('PPIU'),
+            self::link('PPIU Pusat', 'travel', 'bx bx-buildings', badge: 'registration_pending'),
+            self::link('PPIU Cabang', 'cabang.travel', 'bx bx-store', badge: 'cabang_pending'),
+            self::link('Sertifikat', 'sertifikat.index', 'bx bx-award'),
+            self::heading('Jamaah'),
+            self::link('Jamaah Umrah', 'jamaah.umrah', 'bx bx-user'),
+            self::link('Jamaah Haji Khusus', 'jamaah.haji-khusus.index', 'bx bx-user-pin'),
+            self::heading('Keberangkatan'),
+            self::link('BA Pemberangkatan', 'bap', 'bx bx-file', badge: 'bap_pending'),
+            self::link('Jadwal Keberangkatan', 'keberangkatan', 'bx bx-calendar'),
+            self::divider(),
+            self::link('Pengawasan', 'admin.pengawasan', 'bx bx-shield-quarter', badge: 'antrian'),
+            self::link('Pengaturan', 'admin.pengaturan', 'bx bx-cog'),
         ];
+    }
+
+    /** @return array{name: string, heading: true} */
+    private static function heading(string $name): array
+    {
+        return [
+            'name' => $name,
+            'heading' => true,
+        ];
+    }
+
+    /** @return array{divider: true} */
+    private static function divider(): array
+    {
+        return ['divider' => true];
     }
 
     /** @param  array<string, mixed>  $params */

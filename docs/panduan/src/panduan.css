@@ -1,0 +1,82 @@
+/* Buku panduan PANTAU. Dicetak ke PDF A4 lewat Chrome (scripts/build-buku-panduan.py). */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --gold: #c9a961;
+  --gold-2: #b8941e;
+  --gold-deep: #8a6d1f;
+  --gold-wash: #f8f1e1;
+  --ink: #1f1a14;
+  --ink-2: #4a4237;
+  --ink-3: #7a705f;
+  --line: #e8e0cf;
+  --navy: #2a3042;
+}
+
+@page { size: A4; margin: 16mm 16mm 18mm; }
+@page :first { margin: 0; }
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { margin: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.6; }
+
+/* Sampul */
+.cover { width: 210mm; height: 297mm; padding: 14mm; break-after: page; }
+.cover-card { height: 100%; border-radius: 9mm; padding: 22mm 18mm 18mm; color: var(--ink);
+  background: linear-gradient(160deg, #d9b45a 0%, var(--gold) 45%, #b08e3a 100%);
+  display: flex; flex-direction: column; }
+.cover-logo { width: 30mm; height: 30mm; border-radius: 6mm; background: #111; display: grid; place-items: center; }
+.cover-logo img { width: 25mm; }
+.cover-kicker { margin: 14mm 0 3mm; font-size: 9.5pt; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #3b3020; }
+.cover h1 { margin: 0; font-size: 27pt; line-height: 1.12; font-weight: 800; letter-spacing: -.01em; }
+.cover h1 span { display: block; }
+.cover-role { display: inline-block; margin-top: 6mm; padding: 2mm 5mm; border-radius: 99px; background: #1f1a14; color: #f3dfaa; font-weight: 700; font-size: 11pt; }
+.cover-lead { margin: 7mm 0 0; max-width: 140mm; font-size: 12pt; line-height: 1.55; color: #2e261a; }
+.cover-foot { margin-top: auto; font-size: 9.5pt; color: #3b3020; line-height: 1.5; }
+
+/* Bab */
+.chapter { break-before: page; }
+.chapter:first-of-type { break-before: auto; }
+.badge { display: inline-block; padding: 1mm 3.5mm; border-radius: 99px; background: var(--gold); color: var(--ink); font-size: 8.5pt; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+h2 { margin: 3mm 0 1mm; font-size: 20pt; line-height: 1.2; font-weight: 800; letter-spacing: -.01em; }
+.lead { margin: 0 0 6mm; font-size: 11.5pt; color: var(--ink-2); }
+h3 { margin: 7mm 0 2mm; font-size: 13pt; font-weight: 700; break-after: avoid; }
+h4 { margin: 4mm 0 1mm; font-size: 11pt; font-weight: 700; break-after: avoid; }
+p { margin: 0 0 3mm; }
+ol, ul { margin: 0 0 3mm; padding-left: 6mm; }
+li { margin-bottom: 1.2mm; }
+strong { font-weight: 700; }
+
+/* Gambar layar */
+figure { margin: 3mm 0 5mm; break-inside: avoid; }
+figure img { display: block; width: auto; max-width: 100%; max-height: 118mm; margin: 0 auto; border: 1px solid var(--line); border-radius: 3mm; break-inside: avoid; }
+figcaption { margin-top: 1.5mm; font-size: 8.5pt; color: var(--ink-3); text-align: center; }
+figure.half { width: 78%; margin-left: auto; margin-right: auto; }
+
+/* Tabel */
+table { width: 100%; border-collapse: collapse; margin: 2mm 0 5mm; font-size: 9.5pt; break-inside: auto; }
+th { text-align: left; background: var(--gold-wash); font-weight: 700; padding: 2.2mm 3mm; border: 1px solid var(--line); }
+td { padding: 2.2mm 3mm; border: 1px solid var(--line); vertical-align: top; }
+tr { break-inside: avoid; }
+
+/* Kotak catatan */
+.note { margin: 3mm 0 5mm; padding: 3.5mm 5mm; border-radius: 3mm; background: var(--gold-wash); border-left: 1.2mm solid var(--gold-2); break-inside: avoid; }
+.note strong:first-child { display: block; margin-bottom: .5mm; }
+.note.warn { background: #fdf0ec; border-left-color: #c8553d; }
+
+/* Langkah bernomor besar */
+.steps { list-style: none; padding: 0; counter-reset: s; }
+.steps > li { position: relative; padding-left: 10mm; margin-bottom: 2.5mm; counter-increment: s; }
+.steps > li::before { content: counter(s); position: absolute; left: 0; top: .2mm; width: 6.5mm; height: 6.5mm; border-radius: 50%; background: var(--ink); color: #f3dfaa; font-size: 8.5pt; font-weight: 700; display: grid; place-items: center; }
+
+/* Daftar isi */
+.toc { list-style: none; padding: 0; counter-reset: t; }
+.toc li { counter-increment: t; padding: 1.6mm 0; border-bottom: 1px dashed var(--line); }
+.toc li::before { content: counter(t) ". "; font-weight: 700; color: var(--gold-deep); }
+
+.kbd { display: inline-block; padding: 0 1.6mm; border: 1px solid var(--line); border-radius: 1.2mm; background: #fff; font-weight: 600; font-size: 9pt; }
+.status { display: inline-block; padding: 0 2mm; border-radius: 99px; font-size: 8.5pt; font-weight: 700; }
+.s-biru { background: #e3e8fb; color: #3446b8; }
+.s-kuning { background: #fcf0d6; color: #8a5a00; }
+.s-hijau { background: #dcf5ea; color: #19744d; }
+.s-merah { background: #fde2e2; color: #b42318; }
