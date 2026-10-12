@@ -47,9 +47,9 @@
 
 <body>
     <nav class="toolbar">
-        <a href="{{ route('cabang.travel', ['filter' => 'approved']) }}">Kembali</a>
+        <a href="{{ $kembali }}">Kembali</a>
         <button type="button" onclick="window.print()">Cetak</button>
-        <a class="primary" href="{{ route('cabang.travel.berita-acara.download', $cabang->id_cabang) }}">Unduh Word</a>
+        <a class="primary" href="{{ $unduh }}">Unduh Word</a>
     </nav>
 
     <section class="sheet">

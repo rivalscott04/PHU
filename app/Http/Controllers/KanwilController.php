@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserRole;
 use App\Helpers\ExceptionMessageHelper;
 use App\Helpers\StorageHelper;
 use App\Helpers\ValidationHelper;
@@ -729,7 +730,35 @@ class KanwilController extends Controller
             'cabang' => $cabang,
             'v' => BeritaAcaraCabang::values($cabang),
             'qr' => BeritaAcaraCabang::qr($cabang),
+            'kembali' => route('cabang.travel', ['filter' => 'approved']),
+            'unduh' => route('cabang.travel.berita-acara.download', $cabang->id_cabang),
         ]);
+    }
+
+    public function showOwnCabangBeritaAcara()
+    {
+        $cabang = $this->approvedCabangFor($this->ownCabangId());
+
+        return view('kanwil.cabang-berita-acara', [
+            'cabang' => $cabang,
+            'v' => BeritaAcaraCabang::values($cabang),
+            'qr' => BeritaAcaraCabang::qr($cabang),
+            'kembali' => route('home'),
+            'unduh' => route('cabang.saya.berita-acara.download'),
+        ]);
+    }
+
+    public function downloadOwnCabangBeritaAcara()
+    {
+        return $this->downloadCabangBeritaAcara($this->ownCabangId());
+    }
+
+    private function ownCabangId(): int
+    {
+        $user = auth()->user();
+        abort_unless($user->role === UserRole::User->value && $user->cabang_id, 404);
+
+        return (int) $user->cabang_id;
     }
 
     public function downloadCabangBeritaAcara($id_cabang)
@@ -756,7 +785,11 @@ class KanwilController extends Controller
     private function approvedCabangFor($id_cabang): CabangTravel
     {
         $cabang = CabangTravel::with('travel:id,Penyelenggara,Pusat,Tanggal')->findOrFail($id_cabang);
-        KabupatenResourceGuard::authorizeCabang(auth()->user(), $cabang);
+        $user = auth()->user();
+        // PIC cabang hanya lewat rute cabang.saya.*, yang mengambil id dari akunnya sendiri.
+        if (! ($user->role === UserRole::User->value && (int) $user->cabang_id === (int) $cabang->id_cabang)) {
+            KabupatenResourceGuard::authorizeCabang($user, $cabang);
+        }
         abort_unless($cabang->isRegistrationApproved(), 404);
 
         return $cabang;

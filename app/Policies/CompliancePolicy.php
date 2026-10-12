@@ -10,7 +10,9 @@ class CompliancePolicy
 {
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pengawas', 'user', 'kabupaten'], true);
+        // PIC cabang tidak punya travel_id, jadi tidak punya profil kepatuhan sendiri.
+        return in_array($user->role, ['admin', 'pengawas', 'kabupaten'], true)
+            || ($user->role === 'user' && $user->travel_id);
     }
 
     public function view(User $user, TravelCompany $travel): bool

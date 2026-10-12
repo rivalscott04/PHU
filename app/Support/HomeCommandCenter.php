@@ -160,8 +160,9 @@ final class HomeCommandCenter
                 'label' => $cabang ? 'Cabang terdaftar resmi' : 'Akun travel aktif',
                 'done' => true,
                 'hint' => $cabang
-                    ? $cabang->Penyelenggara . ' cabang ' . $cabang->kabupaten
+                    ? $cabang->Penyelenggara . ' cabang ' . $cabang->kabupaten . '. Berita acara pembukaan cabang dapat dilihat dan diunduh.'
                     : ($travel?->Penyelenggara ?: 'Registrasi disetujui'),
+                'url' => $cabang ? route('cabang.saya.berita-acara') : null,
                 'tone' => 'success',
             ];
         }

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\V2;
 
+use App\Enums\FindingStatus;
+use App\Enums\InspectionStatus;
 use App\Helpers\ValidationHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\V2\Concerns\RespondsWithJson;
@@ -42,7 +44,17 @@ class FollowupController extends Controller
             ]);
         }
 
-        return view('v2.followup.index', compact('followups', 'cards', 'filters'));
+        $openFindings = $request->user()->role === 'user'
+            ? InspectionFinding::query()
+                ->whereHas('inspection', fn ($q) => $q->where('travel_id', $request->user()->travel_id)
+                    ->whereIn('status', [InspectionStatus::WaitingFollowup, InspectionStatus::FollowupUploaded]))
+                ->whereIn('status', [FindingStatus::WaitingResponse, FindingStatus::RevisionRequired])
+                ->with(['inspection:id,inspection_no', 'followups' => fn ($q) => $q->latest('id')->limit(1)])
+                ->orderBy('deadline')
+                ->get()
+            : collect();
+
+        return view('v2.followup.index', compact('followups', 'cards', 'filters', 'openFindings'));
     }
 
     public function show(Request $request, Followup $followup)

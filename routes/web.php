@@ -107,6 +107,10 @@ Route::group(['middleware' => ['auth', 'password.changed', 'registration.approve
     Route::get('/impersonate/{id}', [ImpersonateController::class, 'impersonate'])->name('impersonate.take');
     Route::get('/impersonate-leave', [ImpersonateController::class, 'leave'])->name('impersonate.leave');
 
+    // Berita acara pembukaan cabang milik akun PIC cabang sendiri.
+    Route::get('/berita-acara-cabang', [KanwilController::class, 'showOwnCabangBeritaAcara'])->name('cabang.saya.berita-acara');
+    Route::get('/berita-acara-cabang/unduh', [KanwilController::class, 'downloadOwnCabangBeritaAcara'])->name('cabang.saya.berita-acara.download');
+
     Route::get('/jamaah/haji', [JamaahController::class, 'indexHaji'])->name('jamaah.haji');
     Route::get('/jamaah/haji/create', [JamaahController::class, 'createHaji'])->name('jamaah.haji.create');
     Route::post('/jamaah/haji', [JamaahController::class, 'storeHaji'])->name('jamaah.haji.store');

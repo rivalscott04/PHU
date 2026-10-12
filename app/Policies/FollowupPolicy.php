@@ -8,9 +8,11 @@ use App\Models\User;
 
 class FollowupPolicy
 {
+    // Pengawasan menyasar pemegang izin (pusat). PIC cabang tidak punya travel_id.
     public function viewAny(User $user): bool
     {
-        return in_array($user->role, ['admin', 'pengawas', 'user'], true);
+        return in_array($user->role, ['admin', 'pengawas'], true)
+            || ($user->role === 'user' && $user->travel_id);
     }
 
     public function view(User $user, Followup $followup): bool
@@ -30,7 +32,7 @@ class FollowupPolicy
 
     public function create(User $user): bool
     {
-        return $user->role === 'user';
+        return $user->role === 'user' && $user->travel_id;
     }
 
     public function update(User $user, Followup $followup): bool
